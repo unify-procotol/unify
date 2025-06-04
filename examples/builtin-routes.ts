@@ -7,7 +7,8 @@ const users = [
 ];
 
 // 示例1：使用默认内置路由
-const sourceWithDefaults = createSource({
+const sourceWithDefaults = createSource();
+sourceWithDefaults.register({
   id: "api",
   entities: {
     user: {
@@ -27,35 +28,31 @@ const sourceWithDefaults = createSource({
 });
 
 // 示例2：自定义根路径信息
-const sourceWithCustomMessage = createSource(
-  {
-    id: "custom",
-    entities: {
-      user: {
-        findMany: async () => users,
-      },
+const sourceWithCustomMessage = createSource({
+  enableBuiltinRoutes: true,
+  rootMessage: "My Custom API Server",
+});
+sourceWithCustomMessage.register({
+  id: "custom",
+  entities: {
+    user: {
+      findMany: async () => users,
     },
   },
-  {
-    enableBuiltinRoutes: true,
-    rootMessage: "My Custom API Server",
-  }
-);
+});
 
 // 示例3：禁用内置路由
-const sourceWithoutBuiltins = createSource(
-  {
-    id: "minimal",
-    entities: {
-      user: {
-        findMany: async () => users,
-      },
+const sourceWithoutBuiltins = createSource({
+  enableBuiltinRoutes: false,
+});
+sourceWithoutBuiltins.register({
+  id: "minimal",
+  entities: {
+    user: {
+      findMany: async () => users,
     },
   },
-  {
-    enableBuiltinRoutes: false,
-  }
-);
+});
 
 // 使用默认配置的应用
 console.log("=== 默认配置示例 ===");

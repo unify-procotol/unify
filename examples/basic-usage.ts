@@ -22,7 +22,8 @@ const posts = [
 ];
 
 // 创建源配置
-const source = createSource({
+const source = createSource();
+source.register({
   id: "github",
   entities: {
     user: {

@@ -15,7 +15,15 @@
       "id": 2,
       "created_at": "2025-06-04T11:07:45.366Z",
       "updated_at": "2025-06-04T11:07:45.366Z"
+    },
+    {
+      "name": "李四",
+      "email": "lisi@example.com",
+      "age": 25,
+      "id": 3,
+      "created_at": "2025-06-04T23:39:46.835Z",
+      "updated_at": "2025-06-04T23:39:46.835Z"
     }
   ],
-  "autoIncrement": 3
+  "autoIncrement": 4
 }
