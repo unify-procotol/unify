@@ -1,0 +1,43 @@
+{
+  "name": "unify-server",
+  "version": "1.0.0",
+  "description": "A Hono-based SDK that maps entity configurations to REST API endpoints",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "unify-server": "dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "bun test",
+    "prepublishOnly": "bun run build"
+  },
+  "keywords": [
+    "hono",
+    "rest",
+    "api",
+    "cli"
+  ],
+  "author": "osdodo",
+  "license": "MIT",
+  "dependencies": {
+    "commander": "^12.1.0",
+    "hono": "^4.7.11"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.0"
+  },
+  "optionalDependencies": {
+    "ts-node": "^10.9.0"
+  },
+  "peerDependencies": {
+    "hono": "^4.7.11"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ]
+} 

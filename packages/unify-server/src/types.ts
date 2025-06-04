@@ -1,0 +1,116 @@
+import { Context } from "hono";
+
+// 基础查询参数类型
+export interface QueryArgs {
+  limit?: number;
+  offset?: number;
+  select?: string[];
+  where?: Record<string, any>;
+  order_by?: Record<string, "asc" | "desc">;
+  // 支持任意额外字段（如路径参数和请求体参数）
+  [key: string]: any;
+}
+
+// 数据库字段类型
+export type DatabaseColumnType =
+  | "varchar"
+  | "text"
+  | "char"
+  | "int"
+  | "integer"
+  | "bigint"
+  | "smallint"
+  | "tinyint"
+  | "decimal"
+  | "numeric"
+  | "float"
+  | "double"
+  | "real"
+  | "boolean"
+  | "bool"
+  | "date"
+  | "datetime"
+  | "timestamp"
+  | "time"
+  | "year"
+  | "json"
+  | "jsonb"
+  | "uuid"
+  | "binary"
+  | "varbinary"
+  | "blob"
+  | "longblob"
+  | "mediumblob"
+  | "tinyblob"
+  | "enum"
+  | "set";
+
+// 实体方法类型
+export interface EntityMethod {
+  (args?: QueryArgs, context?: any): Promise<any> | any;
+}
+
+// 支持的实体方法名类型
+export type EntityMethodName =
+  | "findMany"
+  | "findOne"
+  | "create"
+  | "update"
+  | "delete";
+
+// 实体配置类型
+export interface EntityConfig
+  extends Partial<Record<EntityMethodName, EntityMethod>> {
+  table?: {
+    name: string;
+    schema: string;
+    columns: {
+      [key: string]: {
+        type: DatabaseColumnType;
+        nullable?: boolean;
+        unique?: boolean;
+        default?: any;
+      };
+    };
+  };
+}
+
+// 源配置类型
+export interface SourceConfig {
+  id: string;
+  entities: {
+    [entityName: string]: EntityConfig;
+  };
+  middleware?: Array<(c: any, next: () => Promise<void>) => Promise<void>>;
+}
+
+// RestMapper 配置选项
+export interface RestMapperOptions {
+  /** 是否启用内置路由（根路径和API文档），默认为 true */
+  enableBuiltinRoutes?: boolean;
+  /** 自定义根路径响应信息 */
+  rootMessage?: string;
+  /** 数据存储目录，默认为 './data' */
+  dataDir?: string;
+}
+
+// REST API 映射配置
+export interface RestMethodMapping {
+  method: "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
+  path: string;
+  handler: EntityMethod;
+}
+
+// HTTP 方法到实体方法的默认映射
+export const DEFAULT_METHOD_MAPPING: Record<
+  string,
+  { method: string; pathSuffix?: string }
+> = {
+  findMany: { method: "GET" },
+  findOne: { method: "GET", pathSuffix: "/:id" },
+  create: { method: "POST" },
+  update: { method: "PUT", pathSuffix: "/:id" },
+  patch: { method: "PATCH", pathSuffix: "/:id" },
+  delete: { method: "DELETE", pathSuffix: "/:id" },
+  remove: { method: "DELETE", pathSuffix: "/:id" },
+};
