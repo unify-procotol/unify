@@ -1,5 +1,5 @@
 import { PGStorage } from "./pg-storage";
-import { SourceConfig } from "./types";
+import { DatabaseDefaultValue, SourceConfig } from "./types";
 
 // 创建数据库迁移脚本
 export async function createPgTablesFromConfig(
@@ -43,15 +43,15 @@ export async function createPgTablesFromConfig(
         if (entityConfig.table) {
           const tableName = entityConfig.table.name;
           const fullTableName = `${config.id}_${tableName}`;
-          
+
           // 检查表是否已存在
           const tableExists = await pgStorage.tableExists(config.id, tableName);
-          
+
           if (tableExists) {
             console.log(`⚠️  Table already exists, skipping: ${fullTableName}`);
             continue;
           }
-          
+
           console.log(`Creating table for entity: ${entityName}`);
 
           // 提取列配置，包含所有在SourceConfig中定义的字段
@@ -61,29 +61,30 @@ export async function createPgTablesFromConfig(
               type: string;
               nullable?: boolean;
               unique?: boolean;
-              default?: any;
+              default?: DatabaseDefaultValue;
             }
           > = {};
 
           Object.entries(entityConfig.table.columns).forEach(
             ([colName, colConfig]) => {
-              const col = colConfig as any; // Type assertion to access all properties
-
-              // 处理默认值，特别是 auto_increment 转换为 PostgreSQL 兼容格式
-              let defaultValue = col.default;
-              if (col.default === "auto_increment") {
-                // PostgreSQL 不支持 auto_increment，需要使用 SERIAL 类型或 IDENTITY
+              // 处理默认值，特别是 AUTO_INCREMENT 转换为 PostgreSQL 兼容格式
+              let defaultValue = colConfig.default;
+              if (colConfig.default === "AUTO_INCREMENT") {
+                // PostgreSQL 不支持 AUTO_INCREMENT，需要使用 SERIAL 类型或 IDENTITY
                 // 这里设为 undefined，让 SERIAL 类型处理自增
                 defaultValue = undefined;
-              } else if (col.default === "now()") {
-                // PostgreSQL 中使用 CURRENT_TIMESTAMP 或保持 now()
+              } else if (colConfig.default === "NOW()") {
+                // PostgreSQL 中使用 CURRENT_TIMESTAMP 或保持 NOW()
                 defaultValue = "CURRENT_TIMESTAMP";
               }
 
               columns[colName] = {
-                type: mapColumnType(col.type, col.default === "auto_increment"),
-                nullable: col.nullable !== false,
-                unique: col.unique ?? false,
+                type: mapColumnType(
+                  colConfig.type,
+                  colConfig.default === "AUTO_INCREMENT"
+                ),
+                nullable: colConfig.nullable !== false,
+                unique: colConfig.unique ?? false,
                 default: defaultValue,
               };
             }
@@ -101,8 +102,13 @@ export async function createPgTablesFromConfig(
             );
           } catch (createError: any) {
             // 处理序列已存在的错误
-            if (createError.message && createError.message.includes('already exists')) {
-              console.log(`⚠️  Table or related objects already exist, skipping: ${fullTableName}`);
+            if (
+              createError.message &&
+              createError.message.includes("already exists")
+            ) {
+              console.log(
+                `⚠️  Table or related objects already exist, skipping: ${fullTableName}`
+              );
             } else {
               throw createError;
             }

@@ -52,7 +52,7 @@ source.register({
         return user;
       },
       create: async (args: any) => {
-        return { id: Date.now(), ...args };
+        return { id: Date.NOW(), ...args };
       },
     },
   },

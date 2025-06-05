@@ -34,7 +34,7 @@ export const config = {
             type: "integer" as const,
             nullable: false,
             unique: true,
-            default: "auto_increment",
+            default: "AUTO_INCREMENT",
           },
           name: {
             type: "varchar" as const,
@@ -48,7 +48,7 @@ export const config = {
           created_at: {
             type: "timestamp" as const,
             nullable: false,
-            default: "now()",
+            default: "NOW()",
           },
         },
       },
@@ -62,7 +62,7 @@ export const config = {
             type: "integer" as const,
             nullable: false,
             unique: true,
-            default: "auto_increment",
+            default: "AUTO_INCREMENT",
           },
           title: {
             type: "varchar" as const,
@@ -84,7 +84,7 @@ export const config = {
           created_at: {
             type: "timestamp" as const,
             nullable: false,
-            default: "now()",
+            default: "NOW()",
           },
         },
       },
@@ -127,7 +127,7 @@ export default config;
             "type": "integer",
             "nullable": false,
             "unique": true,
-            "default": "auto_increment"
+            "default": "AUTO_INCREMENT"
           },
           "name": {
             "type": "varchar",

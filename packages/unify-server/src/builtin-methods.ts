@@ -98,14 +98,17 @@ export class BuiltinMethods {
     Object.entries(entityConfig.table.columns).forEach(
       ([fieldName, fieldConfig]) => {
         if (
+          typeof fieldConfig.default === "string" &&
           [
-            "auto_increment",
-            "now()",
             "CURRENT_TIMESTAMP",
             "CURRENT_DATE",
             "CURRENT_TIME",
             "LOCALTIMESTAMP",
             "LOCALTIME",
+            "UUID()",
+            "AUTO_INCREMENT",
+            "SERIAL",
+            "NOW()",
           ].includes(fieldConfig.default)
         ) {
           systemFields.push(fieldName);

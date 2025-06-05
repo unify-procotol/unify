@@ -6,7 +6,9 @@
  * bun run unify-server/dist/cli.js setup blog-config.ts
  */
 
-const blogConfig = {
+import { SourceConfig } from "unify-server";
+
+const blogConfig: SourceConfig = {
   id: "blog",
   entities: {
     // 用户实体
@@ -19,7 +21,7 @@ const blogConfig = {
             type: "integer" as const,
             nullable: false,
             unique: true,
-            default: "auto_increment",
+            default: "AUTO_INCREMENT",
           },
           name: {
             type: "varchar" as const,
@@ -37,12 +39,12 @@ const blogConfig = {
           created_at: {
             type: "timestamp" as const,
             nullable: false,
-            default: "now()",
+            default: "NOW()",
           },
           updated_at: {
             type: "timestamp" as const,
             nullable: false,
-            default: "now()",
+            default: "NOW()",
           },
         },
       },
@@ -58,7 +60,7 @@ const blogConfig = {
             type: "integer" as const,
             nullable: false,
             unique: true,
-            default: "auto_increment",
+            default: "AUTO_INCREMENT",
           },
           title: {
             type: "varchar" as const,
@@ -84,12 +86,12 @@ const blogConfig = {
           created_at: {
             type: "timestamp" as const,
             nullable: false,
-            default: "now()",
+            default: "NOW()",
           },
           updated_at: {
             type: "timestamp" as const,
             nullable: false,
-            default: "now()",
+            default: "NOW()",
           },
         },
       },
@@ -105,7 +107,7 @@ const blogConfig = {
             type: "integer" as const,
             nullable: false,
             unique: true,
-            default: "auto_increment",
+            default: "AUTO_INCREMENT",
           },
           post_id: {
             type: "integer" as const,
@@ -131,7 +133,7 @@ const blogConfig = {
           created_at: {
             type: "timestamp" as const,
             nullable: false,
-            default: "now()",
+            default: "NOW()",
           },
         },
       },
@@ -147,7 +149,7 @@ const blogConfig = {
             type: "integer" as const,
             nullable: false,
             unique: true,
-            default: "auto_increment",
+            default: "AUTO_INCREMENT",
           },
           name: {
             type: "varchar" as const,
@@ -166,7 +168,7 @@ const blogConfig = {
           created_at: {
             type: "timestamp" as const,
             nullable: false,
-            default: "now()",
+            default: "NOW()",
           },
         },
       },
@@ -182,7 +184,7 @@ const blogConfig = {
             type: "integer" as const,
             nullable: false,
             unique: true,
-            default: "auto_increment",
+            default: "AUTO_INCREMENT",
           },
           post_id: {
             type: "integer" as const,
@@ -195,7 +197,7 @@ const blogConfig = {
           created_at: {
             type: "timestamp" as const,
             nullable: false,
-            default: "now()",
+            default: "NOW()",
           },
         },
       },

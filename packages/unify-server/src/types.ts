@@ -1,5 +1,3 @@
-import { Context } from "hono";
-import { Storage } from "./storage-interface";
 import { PGStorageConfig } from "./pg-storage";
 
 // 基础查询参数类型
@@ -47,6 +45,24 @@ export type DatabaseColumnType =
   | "enum"
   | "set";
 
+// 数据库字段默认值类型
+export type DatabaseDefaultValue =
+  | string // 字符串类型默认值，如 'default_value'
+  | number // 数字类型默认值，如 0, 3.14
+  | boolean // 布尔类型默认值，如 true, false
+  | object // JSON 类型默认值，如 {}, []
+  | null // NULL 默认值
+  | "CURRENT_TIMESTAMP" // SQL 函数
+  | "CURRENT_DATE" // SQL 函数
+  | "CURRENT_TIME" // SQL 函数
+  | "LOCALTIMESTAMP" // SQL 函数
+  | "LOCALTIME" // SQL 函数
+  | "UUID()" // UUID 生成函数
+  | "AUTO_INCREMENT" // 自增
+  | "SERIAL" // PostgreSQL 序列
+  | "BIGSERIAL" // PostgreSQL 序列
+  | "NOW()"; // SQL 函数
+
 // 实体方法类型
 export interface EntityMethod {
   (args?: QueryArgs, context?: any): Promise<any> | any;
@@ -71,7 +87,7 @@ export interface EntityConfig
         type: DatabaseColumnType;
         nullable?: boolean;
         unique?: boolean;
-        default?: any;
+        default?: DatabaseDefaultValue;
       };
     };
   };
