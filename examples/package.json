@@ -7,11 +7,8 @@
   "scripts": {
     "basic-usage": "bun run --watch basic-usage.ts",
     "builtin-routes": "bun run --watch builtin-routes.ts",
-    "validate-config": "bun run ../packages/unify-server/dist/cli.js validate-config blog-config.ts",
-    "init-tables": "bun run ../packages/unify-server/dist/cli.js init-tables blog-config.ts",
-    "generate-types": "bun run ../packages/unify-server/dist/cli.js generate-types blog-config.ts",
-    "generate-methods": "bun run ../packages/unify-server/dist/cli.js generate-methods blog-config.ts",
     "setup": "bun run ../packages/unify-server/dist/cli.js setup blog-config.ts",
+    "generate-migrations": "bun run generate-migrations.ts",
     "blog-server": "bun run --watch blog-server.ts"
   },
   "dependencies": {

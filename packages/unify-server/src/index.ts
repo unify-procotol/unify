@@ -14,8 +14,11 @@ export {
   normalizeResponse,
   handleError,
 } from "./utils";
+export { Storage } from "./storage-interface";
 export { FileStorage } from "./file-storage";
+export { PGStorage, PGStorageConfig } from "./pg-storage";
 export { BuiltinMethods } from "./builtin-methods";
+export { createPgTablesFromConfig } from "./migrations";
 
 import { RestMapper } from "./rest-mapper";
 import { RestMapperOptions } from "./types";

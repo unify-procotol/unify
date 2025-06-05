@@ -11,8 +11,10 @@ import {
   normalizeResponse,
   handleError,
 } from "./utils";
+import { Storage } from "./storage-interface";
 import { FileStorage } from "./file-storage";
 import { BuiltinMethods } from "./builtin-methods";
+import { PGStorage } from "./pg-storage";
 
 /**
  * REST API 映射器类
@@ -21,7 +23,7 @@ export class RestMapper {
   private app: any;
   private sources: Map<string, SourceConfig> = new Map();
   private options: RestMapperOptions;
-  private storage: FileStorage;
+  private storage: Storage;
   private builtinMethods: BuiltinMethods;
 
   constructor(app?: any, options: RestMapperOptions = {}) {
@@ -31,8 +33,17 @@ export class RestMapper {
       ...options,
     };
 
-    // 初始化文件存储和内置方法
-    this.storage = new FileStorage(options.dataDir || "./data");
+    // 初始化存储实例
+    switch (options.storageOptions?.type) {
+      case "pg":
+        this.storage = new PGStorage(options.storageOptions.config);
+        break;
+      default:
+        this.storage = new FileStorage(
+          options.storageOptions?.dataDir || "./data"
+        );
+    }
+
     this.builtinMethods = new BuiltinMethods(this.storage);
 
     // 使用动态导入避免编译时的 hono 依赖问题
@@ -69,6 +80,13 @@ export class RestMapper {
    */
   getApp(): any {
     return this.app;
+  }
+
+  /**
+   * 获取存储实例
+   */
+  getStorage(): Storage {
+    return this.storage;
   }
 
   /**

@@ -1,5 +1,6 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 import { join } from "path";
+import { Storage } from "./storage-interface";
 import { QueryArgs } from "./types";
 
 export interface TableData {
@@ -7,7 +8,7 @@ export interface TableData {
   autoIncrement: number;
 }
 
-export class FileStorage {
+export class FileStorage implements Storage {
   private dataDir: string;
 
   constructor(dataDir: string = "./data") {
@@ -50,11 +51,11 @@ export class FileStorage {
   }
 
   // 创建记录
-  create(
+  async create(
     sourceId: string,
     tableName: string,
     record: Record<string, any>
-  ): Record<string, any> {
+  ): Promise<Record<string, any>> {
     const tableData = this.loadTable(sourceId, tableName);
 
     // 添加自增ID（如果没有提供id）
@@ -73,11 +74,11 @@ export class FileStorage {
   }
 
   // 查找多条记录
-  findMany(
+  async findMany(
     sourceId: string,
     tableName: string,
     args: QueryArgs = {}
-  ): Record<string, any>[] {
+  ): Promise<Record<string, any>[]> {
     const tableData = this.loadTable(sourceId, tableName);
     let records = [...tableData.records];
 
@@ -128,23 +129,23 @@ export class FileStorage {
   }
 
   // 查找单条记录
-  findOne(
+  async findOne(
     sourceId: string,
     tableName: string,
     id: string | number
-  ): Record<string, any> | null {
+  ): Promise<Record<string, any> | null> {
     const tableData = this.loadTable(sourceId, tableName);
     const record = tableData.records.find((r) => r.id == id);
     return record || null;
   }
 
   // 更新记录
-  update(
+  async update(
     sourceId: string,
     tableName: string,
     id: string | number,
     updates: Record<string, any>
-  ): Record<string, any> | null {
+  ): Promise<Record<string, any> | null> {
     const tableData = this.loadTable(sourceId, tableName);
     const recordIndex = tableData.records.findIndex((r) => r.id == id);
 
@@ -162,7 +163,7 @@ export class FileStorage {
   }
 
   // 删除记录
-  delete(sourceId: string, tableName: string, id: string | number): boolean {
+  async delete(sourceId: string, tableName: string, id: string | number): Promise<boolean> {
     const tableData = this.loadTable(sourceId, tableName);
     const recordIndex = tableData.records.findIndex((r) => r.id == id);
 
@@ -176,12 +177,12 @@ export class FileStorage {
   }
 
   // 清空表
-  truncate(sourceId: string, tableName: string): void {
+  async truncate(sourceId: string, tableName: string): Promise<void> {
     this.saveTable(sourceId, tableName, { records: [], autoIncrement: 1 });
   }
 
   // 检查表是否存在
-  tableExists(sourceId: string, tableName: string): boolean {
+  async tableExists(sourceId: string, tableName: string): Promise<boolean> {
     return existsSync(this.getTablePath(sourceId, tableName));
   }
 }

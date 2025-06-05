@@ -11,7 +11,14 @@ const requireAuth = async (c: any, next: () => Promise<void>) => {
   await next();
 };
 
-const source = createSource();
+const source = createSource({
+  storageOptions: {
+    type: "pg",
+    config: {
+      connectionString: process.env.DATABASE_URL!,
+    },
+  },
+});
 
 // 创建源配置，使用表配置和内置CRUD方法
 source.register({
@@ -31,11 +38,11 @@ source.register({
         ];
       },
       findOne: async (args: any) => {
-        const userId = parseInt(args?.id as string);
+        const userId = args?.id;
         const user = [
           { id: 1, name: "Alice" },
           { id: 2, name: "Bob" },
-        ].find((u) => u.id === userId);
+        ].find((u) => u.id.toString() === userId);
         if (!user) {
           throw { status: 404, message: "User not found" };
         }

@@ -1,10 +1,10 @@
-import { FileStorage } from "./file-storage";
+import { Storage } from "./storage-interface";
 import { QueryArgs, EntityMethod, EntityConfig } from "./types";
 
 export class BuiltinMethods {
-  private storage: FileStorage;
+  private storage: Storage;
 
-  constructor(storage: FileStorage) {
+  constructor(storage: Storage) {
     this.storage = storage;
   }
 
@@ -59,7 +59,7 @@ export class BuiltinMethods {
     tableName: string
   ): EntityMethod {
     return async (args?: QueryArgs) => {
-      return this.storage.findMany(sourceId, tableName, args);
+      return await this.storage.findMany(sourceId, tableName, args);
     };
   }
 
@@ -76,13 +76,66 @@ export class BuiltinMethods {
         throw { status: 400, message: "ID is required" };
       }
 
-      const record = this.storage.findOne(sourceId, tableName, id);
+      const record = await this.storage.findOne(sourceId, tableName, id);
       if (!record) {
         throw { status: 404, message: `Record with id ${id} not found` };
       }
 
       return record;
     };
+  }
+
+  /**
+   * 获取系统字段列表（自动管理的字段）
+   */
+  private getSystemFields(entityConfig: EntityConfig): string[] {
+    const systemFields: string[] = [];
+
+    if (!entityConfig.table?.columns) {
+      return [];
+    }
+
+    Object.entries(entityConfig.table.columns).forEach(
+      ([fieldName, fieldConfig]) => {
+        if (
+          [
+            "auto_increment",
+            "now()",
+            "CURRENT_TIMESTAMP",
+            "CURRENT_DATE",
+            "CURRENT_TIME",
+            "LOCALTIMESTAMP",
+            "LOCALTIME",
+          ].includes(fieldConfig.default)
+        ) {
+          systemFields.push(fieldName);
+        }
+      }
+    );
+
+    return systemFields;
+  }
+
+  /**
+   * 过滤系统字段
+   */
+  private filterSystemFields(
+    data: Record<string, any>,
+    entityConfig: EntityConfig,
+    includeId: boolean = false
+  ): Record<string, any> {
+    const systemFields = this.getSystemFields(entityConfig);
+    const filteredData = { ...data };
+
+    systemFields.forEach((field) => {
+      // 如果includeId为true且当前字段是id，则保留
+      if (includeId && field === "id") {
+        return;
+      }
+      delete filteredData[field];
+    });
+
+    return filteredData;
   }
 
   /**
@@ -100,13 +153,18 @@ export class BuiltinMethods {
 
       // 验证必填字段
       if (entityConfig.table?.columns) {
-        this.validateRequiredFields(args, entityConfig.table.columns, "create");
+        this.validateRequiredFields(
+          args,
+          entityConfig.table.columns,
+          "create",
+          entityConfig
+        );
       }
 
       // 过滤掉系统字段
-      const { id, created_at, updated_at, ...recordData } = args;
+      const recordData = this.filterSystemFields(args, entityConfig);
 
-      return this.storage.create(sourceId, tableName, recordData);
+      return await this.storage.create(sourceId, tableName, recordData);
     };
   }
 
@@ -128,14 +186,16 @@ export class BuiltinMethods {
         throw { status: 400, message: "Request body is required" };
       }
 
-      // 过滤掉系统字段和ID
-      const { id: _, created_at, updated_at, ...updateData } = args;
+      // 过滤掉系统字段（但保留ID用于查询，然后从更新数据中移除）
+      const updateData = this.filterSystemFields(args, entityConfig);
+      // 确保ID不在更新数据中
+      delete updateData.id;
 
       if (Object.keys(updateData).length === 0) {
         throw { status: 400, message: "No fields to update" };
       }
 
-      const updatedRecord = this.storage.update(
+      const updatedRecord = await this.storage.update(
         sourceId,
         tableName,
         id,
@@ -162,7 +222,7 @@ export class BuiltinMethods {
         throw { status: 400, message: "ID is required" };
       }
 
-      const deleted = this.storage.delete(sourceId, tableName, id);
+      const deleted = await this.storage.delete(sourceId, tableName, id);
       if (!deleted) {
         throw { status: 404, message: `Record with id ${id} not found` };
       }
@@ -180,13 +240,15 @@ export class BuiltinMethods {
   private validateRequiredFields(
     data: Record<string, any>,
     columns: Record<string, any>,
-    operation: "create" | "update"
+    operation: "create" | "update",
+    entityConfig: EntityConfig
   ): void {
     const errors: string[] = [];
+    const systemFields = this.getSystemFields(entityConfig);
 
     Object.entries(columns).forEach(([fieldName, fieldConfig]) => {
       // 跳过系统字段
-      if (["id", "created_at", "updated_at"].includes(fieldName)) {
+      if (systemFields.includes(fieldName)) {
         return;
       }
 
@@ -208,11 +270,11 @@ export class BuiltinMethods {
   /**
    * 初始化表结构（如果配置了table schema）
    */
-  initializeTable(
+  async initializeTable(
     sourceId: string,
     entityName: string,
     entityConfig: EntityConfig
-  ): void {
+  ): Promise<void> {
     if (!entityConfig.table) {
       return;
     }
@@ -220,7 +282,8 @@ export class BuiltinMethods {
     const tableName = entityConfig.table.name || entityName;
 
     // 如果表不存在，创建空表
-    if (!this.storage.tableExists(sourceId, tableName)) {
+    const exists = await this.storage.tableExists(sourceId, tableName);
+    if (!exists) {
       // 表会在第一次操作时自动创建，这里不需要特殊处理
       console.log(
         `Table ${sourceId}.${tableName} will be created on first use`

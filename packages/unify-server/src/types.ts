@@ -1,4 +1,6 @@
 import { Context } from "hono";
+import { Storage } from "./storage-interface";
+import { PGStorageConfig } from "./pg-storage";
 
 // 基础查询参数类型
 export interface QueryArgs {
@@ -90,8 +92,16 @@ export interface RestMapperOptions {
   enableBuiltinRoutes?: boolean;
   /** 自定义根路径响应信息 */
   rootMessage?: string;
-  /** 数据存储目录，默认为 './data' */
-  dataDir?: string;
+  /** 自定义存储配置 */
+  storageOptions?:
+    | {
+        type: "file";
+        dataDir?: string;
+      }
+    | {
+        type: "pg";
+        config: PGStorageConfig;
+      };
 }
 
 // REST API 映射配置
