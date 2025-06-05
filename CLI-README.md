@@ -53,8 +53,54 @@ export const config = {
         },
       },
     },
+    post: {
+      table: {
+        name: "posts",
+        schema: "public",
+        columns: {
+          id: {
+            type: "integer" as const,
+            nullable: false,
+            unique: true,
+            default: "auto_increment",
+          },
+          title: {
+            type: "varchar" as const,
+            nullable: false,
+          },
+          content: {
+            type: "text" as const,
+            nullable: true,
+          },
+          author_id: {
+            type: "integer" as const,
+            nullable: false,
+          },
+          status: {
+            type: "varchar" as const,
+            nullable: false,
+            default: "draft",
+          },
+          created_at: {
+            type: "timestamp" as const,
+            nullable: false,
+            default: "now()",
+          },
+        },
+      },
+      // 自定义业务逻辑
+      findMany: async (args: any) => {
+        // 只返回已发布的文章
+        return storage.findMany("blog", "posts", {
+          ...args,
+          where: { ...args?.where, status: "published" }
+        });
+      },
+    },
   },
 };
+
+export default config;
 ```
 
 **TypeScript 配置文件要求：**
@@ -140,6 +186,15 @@ export interface post {
   title: string;
   content?: string;
   author_id: number;
+  status?: string;
+  created_at?: Date | string;
+}
+
+export interface comment {
+  id?: number;
+  content: string;
+  post_id: number;
+  author_id: number;
   created_at?: Date | string;
 }
 ```
@@ -183,69 +238,126 @@ unify-server setup blog-config.ts \
   --types-output ./types/api-types.ts
 ```
 
-## 预初始化模式
+## 与 createSource 集成
 
-使用 CLI 预初始化后，可以在运行时跳过初始化步骤：
+使用 CLI 预初始化的配置文件可以直接在 `createSource` 中使用：
+
+### 基本集成
 
 ```typescript
-import { RestMapper } from 'unify-server';
-import { config } from './blog-config';
+import { createSource } from "unify-server";
+import blogConfig from "./blog-config.ts";
 
-// 使用预初始化模式
-const mapper = new RestMapper(undefined, {
-  skipRuntimeInit: true, // 跳过运行时初始化
-  dataDir: './data'
+const source = createSource();
+
+// 直接使用CLI预初始化的配置
+source.register(blogConfig);
+
+const app = source.getApp();
+
+export default {
+  port: 3000,
+  fetch: app.fetch,
+};
+```
+
+### 带中间件的集成
+
+```typescript
+import { createSource } from "unify-server";
+import blogConfig from "./blog-config.ts";
+
+// 认证中间件
+const requireAuth = async (c: any, next: () => Promise<void>) => {
+  const token = c.req.header("Authorization");
+  if (!token) {
+    return c.json({ error: "Unauthorized" }, 401);
+  }
+  await next();
+};
+
+const source = createSource();
+
+// 注册配置时添加中间件
+source.register({
+  ...blogConfig,
+  middleware: [requireAuth],
 });
 
-mapper.register(config);
+const app = source.getApp();
+
+console.log("🚀 Blog API Server is starting on port 3000...");
+console.log("Available endpoints:");
+console.log("- GET /blog/user (list users)");
+console.log("- GET /blog/user/:id (get user by id)");
+console.log("- POST /blog/user (create user - requires auth)");
+console.log("- PUT /blog/user/:id (update user - requires auth)");
+console.log("- DELETE /blog/user/:id (delete user - requires auth)");
+console.log("- GET /blog/post (list published posts)");
+console.log("- GET /blog/post/:id (get post by id)");
+console.log("- POST /blog/post (create post - requires auth)");
+console.log("- PUT /blog/post/:id (update post - requires auth)");
+console.log("- DELETE /blog/post/:id (delete post - requires auth)");
+
+export default {
+  port: 3000,
+  fetch: app.fetch,
+};
 ```
 
-## 故障排除
+## 实际项目工作流
 
-### TypeScript 配置文件问题
+### 1. 开发阶段
 
-**问题**: `Cannot find module 'unify-server'`
-
-**解决方案**: 
-1. 不要在配置文件中导入 `unify-server` 模块
-2. 使用本地类型定义或 `as const` 断言
-
-**问题**: `ts-node is not available`
-
-**解决方案**:
 ```bash
-npm install -D ts-node
+# 1. 创建配置文件
+# 编辑 blog-config.ts
+
+# 2. 验证配置
+unify-server validate-config blog-config.ts
+
+# 3. 初始化开发环境
+unify-server setup blog-config.ts
+
+# 4. 生成类型文件（可选，用于开发时的类型提示）
+unify-server generate-types blog-config.ts -o ./types/blog.ts
 ```
 
-或者编译 TypeScript 文件为 JavaScript：
-```bash
-tsc blog-config.ts
-unify-server setup blog-config.js
-```
-
-### 配置导出问题
-
-**问题**: `Could not find config object in TypeScript file`
-
-**解决方案**: 确保正确导出配置对象：
+### 2. 在服务器中使用
 
 ```typescript
-// ✅ 正确
-export const config = { id: "blog", entities: {...} };
+// blog-server.ts
+import { createSource } from "unify-server";
+import blogConfig from "./blog-config.ts";
 
-// ✅ 正确
-export default { id: "blog", entities: {...} };
+const source = createSource();
+source.register(blogConfig);
 
-// ❌ 错误 - 没有导出配置
-const config = { id: "blog", entities: {...} };
+// 运行服务器
+export default {
+  port: 3000,
+  fetch: source.getApp().fetch,
+};
 ```
 
-## 示例配置文件
+### 3. 部署阶段
 
-项目中提供了完整的示例配置文件：
+```bash
+# 预构建优化（可选）
+unify-server setup blog-config.ts --data-dir ./production-data
 
-- `examples/blog-config.ts` - 简洁的 TypeScript 配置示例
-- `examples/table-config-example.ts` - 包含自定义方法的完整示例
+# 部署应用
+npm start
+```
+
+## 完整示例参考
+
+查看 `examples/blog-server.ts` 了解如何将 CLI 工具生成的配置文件与 `createSource` 完整集成，包括：
+
+- 表配置和内置CRUD方法
+- 认证中间件集成
+- 多数据源支持
+- API端点列表展示
 
 ## 性能优化
 
