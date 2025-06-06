@@ -9,7 +9,7 @@ const users = [
 // 示例1：使用默认内置路由
 const sourceWithDefaults = createSource();
 sourceWithDefaults.register({
-  id: "api",
+  id: "builtin-routes",
   entities: {
     user: {
       findMany: async (args?: QueryArgs) => {
@@ -33,7 +33,7 @@ const sourceWithCustomMessage = createSource({
   rootMessage: "My Custom API Server",
 });
 sourceWithCustomMessage.register({
-  id: "custom",
+  id: "builtin-routes-custom",
   entities: {
     user: {
       findMany: async () => users,
@@ -46,7 +46,7 @@ const sourceWithoutBuiltins = createSource({
   enableBuiltinRoutes: false,
 });
 sourceWithoutBuiltins.register({
-  id: "minimal",
+  id: "builtin-routes-minimal",
   entities: {
     user: {
       findMany: async () => users,

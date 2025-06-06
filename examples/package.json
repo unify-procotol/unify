@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "unify-server": "workspace:*",
-    "unify-entities": "workspace:*",
+    "unify-plugin": "workspace:*",
     "hono": "^4.7.11",
     "@solana/web3.js": "^1.87.6",
     "ethers": "^6.8.0"

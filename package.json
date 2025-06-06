@@ -11,10 +11,10 @@
     "build-server": "cd packages/unify-server && bun run build",
     "dev-server": "cd packages/unify-server && bun run dev",
     "test-server": "cd packages/unify-server && bun test",
-    "build-entities": "cd packages/unify-entities && bun run build",
-    "dev-entities": "cd packages/unify-entities && bun run dev",
-    "test-entities": "cd packages/unify-entities && bun run test",
-    "build-all": "bun run build-server && bun run build-entities"
+    "build-plugin": "cd packages/unify-plugin && bun run build",
+    "dev-plugin": "cd packages/unify-plugin && bun run dev",
+    "test-plugin": "cd packages/unify-plugin && bun run test",
+    "build-all": "bun run build-server && bun run build-plugin"
   },
   "author": "osdodo",
   "license": "MIT"

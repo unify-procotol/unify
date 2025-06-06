@@ -11,24 +11,12 @@
         "@solana/web3.js": "^1.87.6",
         "ethers": "^6.8.0",
         "hono": "^4.7.11",
-        "unify-entities": "workspace:*",
         "unify-server": "workspace:*",
+        "unify-plugin": "workspace:*",
       },
       "devDependencies": {
         "@types/node": "^20.10.0",
         "ts-node": "^10.9.2",
-        "typescript": "^5.3.0",
-      },
-    },
-    "packages/unify-entities": {
-      "name": "unify-entities",
-      "version": "1.0.0",
-      "dependencies": {
-        "@solana/web3.js": "^1.87.6",
-        "ethers": "^6.8.1",
-      },
-      "devDependencies": {
-        "@types/node": "^20.10.0",
         "typescript": "^5.3.0",
       },
     },
@@ -54,6 +42,17 @@
       },
       "peerDependencies": {
         "hono": "^4.7.11",
+      },
+    },
+    "packages/unify-plugin": {
+      "name": "unify-plugin",
+      "version": "1.0.0",
+      "dependencies": {
+        "@solana/web3.js": "^1.95.2",
+        "ethers": "^6.13.2",
+      },
+      "devDependencies": {
+        "typescript": "^5.6.2",
       },
     },
   },
@@ -218,11 +217,11 @@
 
     "undici-types": ["undici-types@6.19.8", "", {}, "sha512-ve2KP6f/JnbPBFyobGHuerC9g1FYGn/F8n1LWTwNxCEzd6IfqTwUQcNXgEtmmQ6DlRrC1hrSrBnCZPokRrDHjw=="],
 
-    "unify-entities": ["unify-entities@workspace:packages/unify-entities"],
-
     "unify-server": ["unify-server@workspace:packages/unify-server"],
 
     "unify-server-examples": ["unify-server-examples@workspace:examples"],
+
+    "unify-plugin": ["unify-plugin@workspace:packages/unify-plugin"],
 
     "utf-8-validate": ["utf-8-validate@5.0.10", "", { "dependencies": { "node-gyp-build": "^4.3.0" } }, "sha512-Z6czzLq4u8fPOyx7TU6X3dvUZVvoJmxSQ+IcrlmagKhilxlhZgxPK6C5Jqbkw1IDUmFTM+cz9QDnnLTwDz/2gQ=="],
 

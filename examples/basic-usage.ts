@@ -24,7 +24,7 @@ const posts = [
 // 创建源配置
 const source = createSource();
 source.register({
-  id: "github",
+  id: "basic-usage",
   entities: {
     user: {
       // GET /github/user

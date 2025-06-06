@@ -76,7 +76,7 @@ export function buildRestPath(
   entityName: string,
   pathSuffix?: string
 ): string {
-  const basePath = `/${sourceId}/${entityName}`;
+  const basePath = `/${entityName}`;
   return pathSuffix ? basePath + pathSuffix : basePath;
 }
 

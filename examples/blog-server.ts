@@ -28,7 +28,7 @@ source.register({
 });
 
 source.register({
-  id: "api",
+  id: "test-api",
   entities: {
     user: {
       findMany: async () => {
