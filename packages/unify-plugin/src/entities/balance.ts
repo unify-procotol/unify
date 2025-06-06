@@ -19,13 +19,6 @@ export class BalanceEntity implements Entity {
       };
     }
 
-    if (!network) {
-      throw {
-        status: 400,
-        message: "Network is required",
-      };
-    }
-
     try {
       // 获取余额
       const balance = await this.networkHandler.getBalance(address);
