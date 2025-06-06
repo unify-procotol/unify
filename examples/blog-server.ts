@@ -28,7 +28,7 @@ source.register({
 });
 
 source.register({
-  id: "github",
+  id: "api",
   entities: {
     user: {
       findMany: async () => {
@@ -73,9 +73,9 @@ console.log("- GET /blog/comment (list comments)");
 console.log("- POST /blog/comment (create comment)");
 console.log("- ... (other comment endpoints)");
 
-console.log("- GET /github/user (list users)");
-console.log("- GET /github/user/:id (get user by id)");
-console.log("- POST /github/user (create user)");
+console.log("- GET /api/user (list users)");
+console.log("- GET /api/user/:id (get user by id)");
+console.log("- POST /api/user (create user)");
 
 export default {
   port: 3000,
