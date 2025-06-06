@@ -8,9 +8,13 @@
     "examples"
   ],
   "scripts": {
-    "build": "cd packages/unify-server && bun run build",
-    "dev": "cd packages/unify-server && bun run dev",
-    "test": "cd packages/unify-server && bun test"
+    "build-server": "cd packages/unify-server && bun run build",
+    "dev-server": "cd packages/unify-server && bun run dev",
+    "test-server": "cd packages/unify-server && bun test",
+    "build-entities": "cd packages/unify-entities && bun run build",
+    "dev-entities": "cd packages/unify-entities && bun run dev",
+    "test-entities": "cd packages/unify-entities && bun run test",
+    "build-all": "bun run build-server && bun run build-entities"
   },
   "author": "osdodo",
   "license": "MIT"

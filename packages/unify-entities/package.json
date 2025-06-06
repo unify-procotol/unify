@@ -1,0 +1,33 @@
+{
+  "name": "unify-entities",
+  "version": "1.0.0",
+  "description": "Pre-built entities for unify-server framework",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "bun test",
+    "prepublishOnly": "bun run build"
+  },
+  "keywords": [
+    "unify",
+    "entities",
+    "blockchain",
+    "balance"
+  ],
+  "author": "osdodo",
+  "license": "MIT",
+  "dependencies": {
+    "@solana/web3.js": "^1.87.6",
+    "ethers": "^6.8.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.0"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ]
+} 

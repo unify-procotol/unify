@@ -15,9 +15,15 @@ export class BuiltinMethods {
     sourceId: string,
     entityName: string,
     entityConfig: EntityConfig
-  ): Record<string, EntityMethod> {
+  ): Record<string, EntityMethod<any>> {
+    const methods: Record<string, EntityMethod<any>> = {};
+
+    // 只有在配置了 table 时才生成内置方法
+    if (!entityConfig.table) {
+      return methods;
+    }
+
     const tableName = entityConfig.table?.name || entityName;
-    const methods: Record<string, EntityMethod> = {};
 
     // 只有在用户没有定义对应方法时才添加内置方法
     if (!entityConfig.findMany) {
@@ -57,7 +63,7 @@ export class BuiltinMethods {
   private createFindManyMethod(
     sourceId: string,
     tableName: string
-  ): EntityMethod {
+  ): EntityMethod<QueryArgs> {
     return async (args?: QueryArgs) => {
       return await this.storage.findMany(sourceId, tableName, args);
     };
@@ -69,7 +75,7 @@ export class BuiltinMethods {
   private createFindOneMethod(
     sourceId: string,
     tableName: string
-  ): EntityMethod {
+  ): EntityMethod<QueryArgs> {
     return async (args?: QueryArgs) => {
       const id = args?.id;
       if (!id) {
@@ -148,7 +154,7 @@ export class BuiltinMethods {
     sourceId: string,
     tableName: string,
     entityConfig: EntityConfig
-  ): EntityMethod {
+  ): EntityMethod<QueryArgs> {
     return async (args?: QueryArgs) => {
       if (!args) {
         throw { status: 400, message: "Request body is required" };
@@ -178,7 +184,7 @@ export class BuiltinMethods {
     sourceId: string,
     tableName: string,
     entityConfig: EntityConfig
-  ): EntityMethod {
+  ): EntityMethod<QueryArgs> {
     return async (args?: QueryArgs) => {
       const id = args?.id;
       if (!id) {
@@ -218,7 +224,7 @@ export class BuiltinMethods {
   private createDeleteMethod(
     sourceId: string,
     tableName: string
-  ): EntityMethod {
+  ): EntityMethod<QueryArgs> {
     return async (args?: QueryArgs) => {
       const id = args?.id;
       if (!id) {

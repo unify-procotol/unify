@@ -13,7 +13,10 @@
   },
   "dependencies": {
     "unify-server": "workspace:*",
-    "hono": "^4.7.11"
+    "unify-entities": "workspace:*",
+    "hono": "^4.7.11",
+    "@solana/web3.js": "^1.87.6",
+    "ethers": "^6.8.0"
   },
   "devDependencies": {
     "@types/node": "^20.10.0",

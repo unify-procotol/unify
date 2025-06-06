@@ -63,9 +63,9 @@ export type DatabaseDefaultValue =
   | "BIGSERIAL" // PostgreSQL 序列
   | "NOW()"; // SQL 函数
 
-// 实体方法类型
-export interface EntityMethod {
-  (args?: QueryArgs, context?: any): Promise<any> | any;
+// 实体方法类型 - 基础接口
+export interface EntityMethod<TArgs = QueryArgs> {
+  (args?: TArgs, context?: any): Promise<any> | any;
 }
 
 // 支持的实体方法名类型
@@ -76,9 +76,15 @@ export type EntityMethodName =
   | "update"
   | "delete";
 
-// 实体配置类型
-export interface EntityConfig
-  extends Partial<Record<EntityMethodName, EntityMethod>> {
+// 实体配置类型 - 使用更灵活的方法定义
+export interface EntityConfig {
+  findMany?: EntityMethod<QueryArgs>;
+  findOne?: EntityMethod<any>; // 允许任意参数类型
+  create?: EntityMethod<any>;
+  update?: EntityMethod<any>;
+  delete?: EntityMethod<any>;
+  // 支持其他自定义方法
+  [key: string]: EntityMethod<any> | any;
   table?: {
     name: string;
     schema: string;
@@ -124,7 +130,7 @@ export interface RestMapperOptions {
 export interface RestMethodMapping {
   method: "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
   path: string;
-  handler: EntityMethod;
+  handler: EntityMethod<any>;
 }
 
 // HTTP 方法到实体方法的默认映射
