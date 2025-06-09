@@ -71,11 +71,14 @@ export async function parseRequestArgs(c: any): Promise<QueryArgs> {
 /**
  * 构建 REST API 路径
  */
-export function buildRestPath(
-  sourceId: string,
-  entityName: string,
-  pathSuffix?: string
-): string {
+export function buildRestPath({
+  entityName,
+  pathSuffix,
+}: {
+  sourceId?: string;
+  entityName: string;
+  pathSuffix?: string;
+}): string {
   const basePath = `/${entityName}`;
   return pathSuffix ? basePath + pathSuffix : basePath;
 }

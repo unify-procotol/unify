@@ -290,13 +290,9 @@ export class BuiltinMethods {
 
     const tableName = entityConfig.table.name || entityName;
 
-    // 如果表不存在，创建空表
     const exists = await this.storage.tableExists(sourceId, tableName);
     if (!exists) {
-      // 表会在第一次操作时自动创建，这里不需要特殊处理
-      console.log(
-        `Table ${sourceId}.${tableName} will be created on first use`
-      );
+      console.error(`Table ${sourceId}.${tableName} not exists`);
     }
   }
 }

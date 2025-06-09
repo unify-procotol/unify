@@ -3,8 +3,9 @@ import { SolanaPlugin, EVMPlugin } from "@unify-api/plugins/web3";
 
 const source = createSource();
 
-source.register(EVMPlugin);
-source.register(SolanaPlugin);
+// source.register(EVMPlugin);
+// source.register(SolanaPlugin);
+source.register([EVMPlugin, SolanaPlugin]);
 
 const app = source.getApp();
 
