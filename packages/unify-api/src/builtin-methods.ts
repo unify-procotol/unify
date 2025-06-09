@@ -160,6 +160,8 @@ export class BuiltinMethods {
         throw { status: 400, message: "Request body is required" };
       }
 
+      delete args.sourceId;
+
       // 验证必填字段
       if (entityConfig.table?.columns) {
         this.validateRequiredFields(
@@ -194,6 +196,8 @@ export class BuiltinMethods {
       if (!args) {
         throw { status: 400, message: "Request body is required" };
       }
+
+      delete args.sourceId;
 
       // 过滤掉系统字段（但保留ID用于查询，然后从更新数据中移除）
       const updateData = this.filterSystemFields(args, entityConfig);
