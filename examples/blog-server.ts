@@ -1,4 +1,4 @@
-import { createSource } from "unify-server";
+import { createSource } from "unify-api";
 import blogConfig from "./blog-config.ts";
 
 // 模拟的认证中间件

@@ -1,6 +1,6 @@
 # Unify Server Examples
 
-本目录包含了 unify-server 的使用示例，展示了如何使用不同功能构建REST API服务器。
+本目录包含了 unify-api 的使用示例，展示了如何使用不同功能构建REST API服务器。
 
 ## 安装
 
@@ -49,7 +49,7 @@ bun install
 ### 基础示例
 
 #### `basic-usage.ts` - 基本使用示例
-展示unify-server的基本使用方法，包括：
+展示unify-api的基本使用方法，包括：
 - 创建简单的REST API
 - 基本的CRUD操作
 - 自定义方法实现
@@ -186,7 +186,7 @@ source.register({
 
 ## 注意事项
 
-- 确保已经安装了 unify-server 包
+- 确保已经安装了 unify-api 包
 - TypeScript 示例需要 Bun 或 ts-node 支持
 - 示例中的认证是模拟的，生产环境需要实现真实的认证逻辑
 - 数据存储使用JSON文件，重启服务器后数据会重置 

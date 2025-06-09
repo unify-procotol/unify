@@ -2,17 +2,18 @@
   "lockfileVersion": 1,
   "workspaces": {
     "": {
-      "name": "unify-server",
+      "name": "unify-api-monorepo",
     },
     "examples": {
-      "name": "unify-server-examples",
+      "name": "unify-api-examples",
       "version": "1.0.0",
       "dependencies": {
         "@solana/web3.js": "^1.87.6",
+        "@unify-api/cli": "workspace:*",
+        "@unify-api/plugins": "workspace:*",
         "ethers": "^6.8.0",
         "hono": "^4.7.11",
-        "unify-server": "workspace:*",
-        "unify-plugin": "workspace:*",
+        "unify-api": "workspace:*",
       },
       "devDependencies": {
         "@types/node": "^20.10.0",
@@ -20,14 +21,41 @@
         "typescript": "^5.3.0",
       },
     },
-    "packages/unify-server": {
-      "name": "unify-server",
+    "packages/cli": {
+      "name": "@unify-api/cli",
       "version": "1.0.0",
       "bin": {
-        "unify-server": "dist/cli.js"
+        "@unify-api/cli": "dist/index.js"
       },
       "dependencies": {
         "commander": "^12.1.0",
+        "unify-api": "workspace:*",
+      },
+      "devDependencies": {
+        "@types/node": "^20.10.0",
+        "ts-node": "^10.9.2",
+        "typescript": "^5.3.0",
+      },
+      "optionalDependencies": {
+        "ts-node": "^10.9.0",
+      },
+    },
+    "packages/plugins": {
+      "name": "@unify-api/plugins",
+      "version": "1.0.0",
+      "dependencies": {
+        "@solana/web3.js": "^1.95.2",
+        "ethers": "^6.13.2",
+        "unify-api": "workspace:*",
+      },
+      "devDependencies": {
+        "typescript": "^5.6.2",
+      },
+    },
+    "packages/unify-api": {
+      "name": "unify-api",
+      "version": "1.0.0",
+      "dependencies": {
         "hono": "^4.7.11",
       },
       "devDependencies": {
@@ -42,17 +70,6 @@
       },
       "peerDependencies": {
         "hono": "^4.7.11",
-      },
-    },
-    "packages/unify-plugin": {
-      "name": "unify-plugin",
-      "version": "1.0.0",
-      "dependencies": {
-        "@solana/web3.js": "^1.95.2",
-        "ethers": "^6.13.2",
-      },
-      "devDependencies": {
-        "typescript": "^5.6.2",
       },
     },
   },
@@ -95,7 +112,7 @@
 
     "@types/connect": ["@types/connect@3.4.38", "", { "dependencies": { "@types/node": "*" } }, "sha512-K6uROf1LD88uDQqJCktA4yzL1YYAK6NgfsI0v/mTgyPKWsX1CnJ0XPSDhViejru1GcRkLWb8RlzFYJRqGUbaug=="],
 
-    "@types/node": ["@types/node@20.17.57", "", { "dependencies": { "undici-types": "~6.19.2" } }, "sha512-f3T4y6VU4fVQDKVqJV4Uppy8c1p/sVvS3peyqxyWnzkqXFJLRU7Y1Bl7rMS1Qe9z0v4M6McY0Fp9yBsgHJUsWQ=="],
+    "@types/node": ["@types/node@20.19.0", "", { "dependencies": { "undici-types": "~6.21.0" } }, "sha512-hfrc+1tud1xcdVTABC2JiomZJEklMcXYNTVtZLAeqTVWD+qL5jkHKT+1lOtqDdGxt+mB53DTtiz673vfjU8D1Q=="],
 
     "@types/pg": ["@types/pg@8.15.4", "", { "dependencies": { "@types/node": "*", "pg-protocol": "*", "pg-types": "^2.2.0" } }, "sha512-I6UNVBAoYbvuWkkU3oosC8yxqH21f4/Jc4DK71JLG3dT2mdlGe1z+ep/LQGXaKaOgcvUrsQoPRqfgtMcvZiJhg=="],
 
@@ -103,7 +120,11 @@
 
     "@types/ws": ["@types/ws@7.4.7", "", { "dependencies": { "@types/node": "*" } }, "sha512-JQbbmxZTZehdc2iszGKs5oC3NFnjeay7mtAWrdt7qNtAVK0g19muApzAy4bm9byz79xa2ZnO/BOBC2R8RC5Lww=="],
 
-    "acorn": ["acorn@8.14.1", "", { "bin": { "acorn": "bin/acorn" } }, "sha512-OvQ/2pUDKmgfCg++xsTX1wGxfTaszcHVcTctW4UJB4hibJx2HXxxO5UmVgyjMa+ZDsiaf5wWLXYpRWMmBI0QHg=="],
+    "@unify-api/cli": ["@unify-api/cli@workspace:packages/cli"],
+
+    "@unify-api/plugins": ["@unify-api/plugins@workspace:packages/plugins"],
+
+    "acorn": ["acorn@8.15.0", "", { "bin": { "acorn": "bin/acorn" } }, "sha512-NZyJarBfL7nWwIq+FDL6Zp/yHEhePMNnnJ0y3qfieCrmNvYct8uvtiV41UvlSe6apAfk0fY1FbWx+NwfmpvtTg=="],
 
     "acorn-walk": ["acorn-walk@8.3.4", "", { "dependencies": { "acorn": "^8.11.0" } }, "sha512-ueEepnujpqee2o5aIYnvHU6C0A42MNdsIDeqy5BydrkuC5R1ZuUFnm27EeFJGoEHJQgn3uleRvmTXaJgfXbt4g=="],
 
@@ -215,13 +236,11 @@
 
     "typescript": ["typescript@5.8.3", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-p1diW6TqL9L07nNxvRMM7hMMw4c5XOo/1ibL4aAIGmSAt9slTE1Xgw5KWuof2uTOvCg9BY7ZRi+GaF+7sfgPeQ=="],
 
-    "undici-types": ["undici-types@6.19.8", "", {}, "sha512-ve2KP6f/JnbPBFyobGHuerC9g1FYGn/F8n1LWTwNxCEzd6IfqTwUQcNXgEtmmQ6DlRrC1hrSrBnCZPokRrDHjw=="],
+    "undici-types": ["undici-types@6.21.0", "", {}, "sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ=="],
 
-    "unify-server": ["unify-server@workspace:packages/unify-server"],
+    "unify-api": ["unify-api@workspace:packages/unify-api"],
 
-    "unify-server-examples": ["unify-server-examples@workspace:examples"],
-
-    "unify-plugin": ["unify-plugin@workspace:packages/unify-plugin"],
+    "unify-api-examples": ["unify-api-examples@workspace:examples"],
 
     "utf-8-validate": ["utf-8-validate@5.0.10", "", { "dependencies": { "node-gyp-build": "^4.3.0" } }, "sha512-Z6czzLq4u8fPOyx7TU6X3dvUZVvoJmxSQ+IcrlmagKhilxlhZgxPK6C5Jqbkw1IDUmFTM+cz9QDnnLTwDz/2gQ=="],
 
@@ -261,6 +280,14 @@
 
     "rpc-websockets/@types/ws": ["@types/ws@8.18.1", "", { "dependencies": { "@types/node": "*" } }, "sha512-ThVF6DCVhA8kUGy+aazFQ4kXQ7E1Ty7A3ypFOe0IcJV8O/M511G99AW24irKrW56Wt44yG9+ij8FaqoBGkuBXg=="],
 
+    "@types/connect/@types/node/undici-types": ["undici-types@6.19.8", "", {}, "sha512-ve2KP6f/JnbPBFyobGHuerC9g1FYGn/F8n1LWTwNxCEzd6IfqTwUQcNXgEtmmQ6DlRrC1hrSrBnCZPokRrDHjw=="],
+
+    "@types/ws/@types/node/undici-types": ["undici-types@6.19.8", "", {}, "sha512-ve2KP6f/JnbPBFyobGHuerC9g1FYGn/F8n1LWTwNxCEzd6IfqTwUQcNXgEtmmQ6DlRrC1hrSrBnCZPokRrDHjw=="],
+
+    "ethers/@types/node/undici-types": ["undici-types@6.19.8", "", {}, "sha512-ve2KP6f/JnbPBFyobGHuerC9g1FYGn/F8n1LWTwNxCEzd6IfqTwUQcNXgEtmmQ6DlRrC1hrSrBnCZPokRrDHjw=="],
+
     "rpc-websockets/@types/ws/@types/node": ["@types/node@22.7.5", "", { "dependencies": { "undici-types": "~6.19.2" } }, "sha512-jML7s2NAzMWc//QSJ1a3prpk78cOPchGvXJsC3C6R6PSMoooztvRVQEz89gmBTBY1SPMaqo5teB4uNHPdetShQ=="],
+
+    "rpc-websockets/@types/ws/@types/node/undici-types": ["undici-types@6.19.8", "", {}, "sha512-ve2KP6f/JnbPBFyobGHuerC9g1FYGn/F8n1LWTwNxCEzd6IfqTwUQcNXgEtmmQ6DlRrC1hrSrBnCZPokRrDHjw=="],
   }
 }

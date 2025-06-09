@@ -6,6 +6,7 @@ export {
   QueryArgs,
   RestMethodMapping,
   RestMapperOptions,
+  DatabaseDefaultValue,
   DEFAULT_METHOD_MAPPING,
 } from "./types";
 export {
@@ -14,11 +15,10 @@ export {
   normalizeResponse,
   handleError,
 } from "./utils";
-export { Storage } from "./storage-interface";
-export { FileStorage } from "./file-storage";
-export { PGStorage, PGStorageConfig } from "./pg-storage";
+export { Storage } from "./storage/interface";
+export { FileStorage } from "./storage/file";
+export { PGStorage, PGStorageConfig } from "./storage/pg";
 export { BuiltinMethods } from "./builtin-methods";
-export { createPgTablesFromConfig } from "./migrations";
 
 import { RestMapper } from "./rest-mapper";
 import { RestMapperOptions } from "./types";

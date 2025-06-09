@@ -1,12 +1,12 @@
 /**
  * Blog API 配置文件
- * 用于 unify-server CLI 工具
+ * 用于 unify-api CLI 工具
  *
  * 使用方法:
- * bun run unify-server/dist/cli.js setup blog-config.ts
+ * bun run unify-api/dist/cli.js setup blog-config.ts
  */
 
-import { SourceConfig } from "unify-server";
+import { SourceConfig } from "unify-api";
 
 const blogConfig: SourceConfig = {
   id: "blog",

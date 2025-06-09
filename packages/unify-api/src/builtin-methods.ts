@@ -1,4 +1,4 @@
-import { Storage } from "./storage-interface";
+import { Storage } from "./storage/interface";
 import { QueryArgs, EntityMethod, EntityConfig } from "./types";
 
 export class BuiltinMethods {

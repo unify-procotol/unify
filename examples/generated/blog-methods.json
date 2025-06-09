@@ -1,0 +1,239 @@
+{
+  "user": {
+    "sourceId": "blog",
+    "entityName": "user",
+    "methods": [
+      "findMany",
+      "findOne",
+      "create",
+      "update",
+      "delete"
+    ],
+    "config": {
+      "table": {
+        "name": "users",
+        "schema": "public",
+        "columns": {
+          "id": {
+            "type": "integer",
+            "nullable": false,
+            "unique": true,
+            "default": "AUTO_INCREMENT"
+          },
+          "name": {
+            "type": "varchar",
+            "nullable": false
+          },
+          "email": {
+            "type": "varchar",
+            "nullable": false,
+            "unique": true
+          },
+          "age": {
+            "type": "integer",
+            "nullable": true
+          },
+          "created_at": {
+            "type": "timestamp",
+            "nullable": false,
+            "default": "NOW()"
+          },
+          "updated_at": {
+            "type": "timestamp",
+            "nullable": false,
+            "default": "NOW()"
+          }
+        }
+      }
+    }
+  },
+  "post": {
+    "sourceId": "blog",
+    "entityName": "post",
+    "methods": [
+      "findMany",
+      "findOne",
+      "create",
+      "update",
+      "delete"
+    ],
+    "config": {
+      "table": {
+        "name": "posts",
+        "schema": "public",
+        "columns": {
+          "id": {
+            "type": "integer",
+            "nullable": false,
+            "unique": true,
+            "default": "AUTO_INCREMENT"
+          },
+          "title": {
+            "type": "varchar",
+            "nullable": false
+          },
+          "content": {
+            "type": "text",
+            "nullable": true
+          },
+          "author_id": {
+            "type": "integer",
+            "nullable": false
+          },
+          "status": {
+            "type": "varchar",
+            "nullable": false,
+            "default": "draft"
+          },
+          "published_at": {
+            "type": "timestamp",
+            "nullable": true
+          },
+          "created_at": {
+            "type": "timestamp",
+            "nullable": false,
+            "default": "NOW()"
+          },
+          "updated_at": {
+            "type": "timestamp",
+            "nullable": false,
+            "default": "NOW()"
+          }
+        }
+      }
+    }
+  },
+  "comment": {
+    "sourceId": "blog",
+    "entityName": "comment",
+    "methods": [
+      "findMany",
+      "findOne",
+      "create",
+      "update",
+      "delete"
+    ],
+    "config": {
+      "table": {
+        "name": "comments",
+        "schema": "public",
+        "columns": {
+          "id": {
+            "type": "integer",
+            "nullable": false,
+            "unique": true,
+            "default": "AUTO_INCREMENT"
+          },
+          "post_id": {
+            "type": "integer",
+            "nullable": false
+          },
+          "author_name": {
+            "type": "varchar",
+            "nullable": false
+          },
+          "author_email": {
+            "type": "varchar",
+            "nullable": true
+          },
+          "content": {
+            "type": "text",
+            "nullable": false
+          },
+          "status": {
+            "type": "varchar",
+            "nullable": false,
+            "default": "pending"
+          },
+          "created_at": {
+            "type": "timestamp",
+            "nullable": false,
+            "default": "NOW()"
+          }
+        }
+      }
+    }
+  },
+  "tag": {
+    "sourceId": "blog",
+    "entityName": "tag",
+    "methods": [
+      "findMany",
+      "findOne",
+      "create",
+      "update",
+      "delete"
+    ],
+    "config": {
+      "table": {
+        "name": "tags",
+        "schema": "public",
+        "columns": {
+          "id": {
+            "type": "integer",
+            "nullable": false,
+            "unique": true,
+            "default": "AUTO_INCREMENT"
+          },
+          "name": {
+            "type": "varchar",
+            "nullable": false,
+            "unique": true
+          },
+          "slug": {
+            "type": "varchar",
+            "nullable": false,
+            "unique": true
+          },
+          "description": {
+            "type": "text",
+            "nullable": true
+          },
+          "created_at": {
+            "type": "timestamp",
+            "nullable": false,
+            "default": "NOW()"
+          }
+        }
+      }
+    }
+  },
+  "post_tag": {
+    "sourceId": "blog",
+    "entityName": "post_tag",
+    "methods": [
+      "findMany",
+      "findOne",
+      "create",
+      "update",
+      "delete"
+    ],
+    "config": {
+      "table": {
+        "name": "post_tags",
+        "schema": "public",
+        "columns": {
+          "id": {
+            "type": "integer",
+            "nullable": false,
+            "unique": true,
+            "default": "AUTO_INCREMENT"
+          },
+          "post_id": {
+            "type": "integer",
+            "nullable": false
+          },
+          "tag_id": {
+            "type": "integer",
+            "nullable": false
+          },
+          "created_at": {
+            "type": "timestamp",
+            "nullable": false,
+            "default": "NOW()"
+          }
+        }
+      }
+    }
+  }
+}

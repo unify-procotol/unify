@@ -1,4 +1,4 @@
-import { PGStorageConfig } from "./pg-storage";
+import { PGStorageConfig } from "./storage/pg";
 
 // 基础查询参数类型
 export interface QueryArgs {

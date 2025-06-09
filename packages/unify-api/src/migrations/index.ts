@@ -1,5 +1,5 @@
-import { PGStorage } from "./pg-storage";
-import { DatabaseDefaultValue, SourceConfig } from "./types";
+import { PGStorage } from "../storage/pg";
+import { DatabaseDefaultValue, SourceConfig } from "../types";
 
 // 创建数据库迁移脚本
 export async function createPgTablesFromConfig(

@@ -1,5 +1,5 @@
-import { createSource } from "unify-server";
-import { SolanaPlugin, EVMPlugin } from "unify-plugin";
+import { createSource } from "unify-api";
+import { SolanaPlugin, EVMPlugin } from "@unify-api/plugins/web3";
 
 const source = createSource();
 

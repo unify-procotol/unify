@@ -1,11 +1,20 @@
 {
-  "name": "unify-server",
+  "name": "unify-api",
   "version": "1.0.0",
   "description": "A Hono-based SDK that maps entity configurations to REST API endpoints",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "bin": {
-    "unify-server": "dist/cli.js"
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.js"
+    },
+    "./migrations": {
+      "types": "./dist/migrations/index.d.ts",
+      "import": "./dist/migrations/index.js",
+      "require": "./dist/migrations/index.js"
+    }
   },
   "scripts": {
     "build": "tsc",
@@ -22,7 +31,6 @@
   "author": "osdodo",
   "license": "MIT",
   "dependencies": {
-    "commander": "^12.1.0",
     "hono": "^4.7.11"
   },
   "devDependencies": {
@@ -42,4 +50,4 @@
     "dist",
     "README.md"
   ]
-} 
+}

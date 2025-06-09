@@ -3,9 +3,10 @@
 import { program } from "commander";
 import * as fs from "fs";
 import * as path from "path";
-import { SourceConfig, EntityConfig } from "./types";
-import { FileStorage } from "./file-storage";
-import { BuiltinMethods } from "./builtin-methods";
+import { spawn } from "child_process";
+import { SourceConfig } from "unify-api";
+import { FileStorage } from "unify-api";
+import { BuiltinMethods } from "unify-api";
 
 /**
  * CLI工具 - 用于预先初始化表结构和生成内置方法
@@ -27,19 +28,23 @@ class UnifyServerCLI {
     const ext = path.extname(configPath).toLowerCase();
 
     try {
-      if (ext === '.json') {
+      if (ext === ".json") {
         // JSON配置文件
         const configContent = fs.readFileSync(absolutePath, "utf-8");
         return JSON.parse(configContent);
-      } else if (ext === '.ts' || ext === '.js') {
+      } else if (ext === ".ts" || ext === ".js") {
         // TypeScript/JavaScript配置文件
         return await this.loadTSConfig(absolutePath);
       } else {
-        throw new Error(`Unsupported config file format: ${ext}. Supported formats: .json, .ts, .js`);
+        throw new Error(
+          `Unsupported config file format: ${ext}. Supported formats: .json, .ts, .js`
+        );
       }
     } catch (error) {
       if (error instanceof Error) {
-        throw new Error(`Failed to load config from ${configPath}: ${error.message}`);
+        throw new Error(
+          `Failed to load config from ${configPath}: ${error.message}`
+        );
       }
       throw error;
     }
@@ -52,37 +57,31 @@ class UnifyServerCLI {
     try {
       // 检查是否是已编译的JS文件或者可以直接导入的文件
       let moduleToImport = absolutePath;
-      
+
       // 如果是.ts文件，尝试查找对应的.js文件
-      if (absolutePath.endsWith('.ts')) {
-        const jsPath = absolutePath.replace('.ts', '.js');
+      if (absolutePath.endsWith(".ts")) {
+        const jsPath = absolutePath.replace(".ts", ".js");
         if (fs.existsSync(jsPath)) {
           moduleToImport = jsPath;
           console.log(`Using compiled JS file: ${jsPath}`);
         } else {
           // 检查是否在ES模块环境中
           const packageJsonPath = this.findNearestPackageJson(absolutePath);
-          const isESModule = packageJsonPath && this.isESModulePackage(packageJsonPath);
-          
+          const isESModule =
+            packageJsonPath && this.isESModulePackage(packageJsonPath);
+
           if (isESModule) {
             // 在ES模块环境中，使用Bun来执行TypeScript文件
-            console.log('Detected ES module environment, using Bun to evaluate TypeScript config');
+            console.log(
+              "Detected ES module environment, using Bun to evaluate TypeScript config"
+            );
             const config = await this.loadConfigWithBun(absolutePath);
             return config;
           } else {
-            // 传统的CommonJS环境
-            try {
-              require('ts-node/register');
-              console.log('Using ts-node to load TypeScript config');
-            } catch (tsNodeError) {
-              throw new Error(
-                `TypeScript config file found but ts-node is not available. ` +
-                `Please either:\n` +
-                `1. Install ts-node: npm install -D ts-node\n` +
-                `2. Compile your TypeScript config to JavaScript first\n` +
-                `3. Use a JSON config file instead`
-              );
-            }
+            // 传统的CommonJS环境 - 使用Bun作为fallback
+            console.log("Using Bun to evaluate TypeScript config");
+            const config = await this.loadConfigWithBun(absolutePath);
+            return config;
           }
         }
       }
@@ -90,23 +89,26 @@ class UnifyServerCLI {
       // 动态导入模块 - 使用file:// URL以确保正确处理ES模块
       const fileUrl = `file://${moduleToImport}`;
       const configModule = await import(fileUrl);
-      
+
       // 尝试从不同的导出方式获取配置
       let config: SourceConfig | undefined;
-      
+
       // 方式1: 检查是否有导出的config对象
       if (configModule.config) {
         config = configModule.config;
       }
       // 方式2: 检查默认导出
-      else if (configModule.default && typeof configModule.default === 'object') {
+      else if (
+        configModule.default &&
+        typeof configModule.default === "object"
+      ) {
         // 如果默认导出有fetch属性，说明这是一个Bun/Node服务器配置
         // 我们需要从createSource调用中提取配置
         if (configModule.default.fetch) {
           throw new Error(
-            'Cannot extract config from server export. ' +
-            'Please export the config object directly:\n' +
-            'export const config = { id: "...", entities: {...} };'
+            "Cannot extract config from server export. " +
+              "Please export the config object directly:\n" +
+              'export const config = { id: "...", entities: {...} };'
           );
         } else {
           config = configModule.default;
@@ -115,15 +117,15 @@ class UnifyServerCLI {
       // 方式3: 检查命名导出
       else if (configModule.sourceConfig) {
         config = configModule.sourceConfig;
-      }
-      else {
+      } else {
         // 尝试查找任何看起来像配置的导出
         const exports = Object.keys(configModule);
-        const configExport = exports.find(key => 
-          key.toLowerCase().includes('config') || 
-          key.toLowerCase().includes('source')
+        const configExport = exports.find(
+          (key) =>
+            key.toLowerCase().includes("config") ||
+            key.toLowerCase().includes("source")
         );
-        
+
         if (configExport) {
           config = configModule[configExport];
         }
@@ -131,17 +133,19 @@ class UnifyServerCLI {
 
       if (!config) {
         throw new Error(
-          'Could not find config object in TypeScript file. ' +
-          'Please export your config as one of:\n' +
-          '- export const config = { id: "...", entities: {...} };\n' +
-          '- export const sourceConfig = { id: "...", entities: {...} };\n' +
-          '- export default { id: "...", entities: {...} };'
+          "Could not find config object in TypeScript file. " +
+            "Please export your config as one of:\n" +
+            '- export const config = { id: "...", entities: {...} };\n' +
+            '- export const sourceConfig = { id: "...", entities: {...} };\n' +
+            '- export default { id: "...", entities: {...} };'
         );
       }
 
       // 验证配置格式
       if (!config.id || !config.entities) {
-        throw new Error('Invalid config format. Config must have "id" and "entities" properties.');
+        throw new Error(
+          'Invalid config format. Config must have "id" and "entities" properties.'
+        );
       }
 
       return config;
@@ -157,33 +161,32 @@ class UnifyServerCLI {
    * 使用Bun加载TypeScript配置文件
    */
   private async loadConfigWithBun(tsPath: string): Promise<SourceConfig> {
-    const { spawn } = require('child_process');
-    
+
     return new Promise((resolve, reject) => {
       // 创建一个临时脚本来加载和输出配置
       const tempScript = `
         import config from '${tsPath}';
         console.log(JSON.stringify(config));
       `;
-      
+
       // 使用Bun执行脚本
-      const bun = spawn('bun', ['--eval', tempScript], {
-        stdio: 'pipe',
-        cwd: path.dirname(tsPath)
+      const bun = spawn("bun", ["--eval", tempScript], {
+        stdio: "pipe",
+        cwd: path.dirname(tsPath),
       });
-      
-      let stdout = '';
-      let stderr = '';
-      
-      bun.stdout.on('data', (data: Buffer) => {
+
+      let stdout = "";
+      let stderr = "";
+
+      bun.stdout.on("data", (data: Buffer) => {
         stdout += data.toString();
       });
-      
-      bun.stderr.on('data', (data: Buffer) => {
+
+      bun.stderr.on("data", (data: Buffer) => {
         stderr += data.toString();
       });
-      
-      bun.on('close', (code: number) => {
+
+      bun.on("close", (code: number) => {
         if (code === 0) {
           try {
             const config = JSON.parse(stdout.trim());
@@ -195,8 +198,8 @@ class UnifyServerCLI {
           reject(new Error(`Bun execution failed: ${stderr}`));
         }
       });
-      
-      bun.on('error', (error: Error) => {
+
+      bun.on("error", (error: Error) => {
         reject(new Error(`Failed to run Bun: ${error.message}`));
       });
     });
@@ -207,15 +210,15 @@ class UnifyServerCLI {
    */
   private findNearestPackageJson(startPath: string): string | null {
     let currentDir = path.dirname(startPath);
-    
+
     while (currentDir !== path.dirname(currentDir)) {
-      const packageJsonPath = path.join(currentDir, 'package.json');
+      const packageJsonPath = path.join(currentDir, "package.json");
       if (fs.existsSync(packageJsonPath)) {
         return packageJsonPath;
       }
       currentDir = path.dirname(currentDir);
     }
-    
+
     return null;
   }
 
@@ -224,8 +227,8 @@ class UnifyServerCLI {
    */
   private isESModulePackage(packageJsonPath: string): boolean {
     try {
-      const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
-      return packageJson.type === 'module';
+      const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf-8"));
+      return packageJson.type === "module";
     } catch {
       return false;
     }
@@ -418,7 +421,7 @@ class UnifyServerCLI {
 
 // 设置CLI命令
 program
-  .name("unify-server")
+  .name("unify-api")
   .description("CLI tool for Unify Server")
   .version("1.0.0");
 
@@ -500,7 +503,7 @@ program
   );
 
 // 如果直接运行此文件
-if (require.main === module) {
+if (import.meta.url === `file://${process.argv[1]}`) {
   program.parse();
 }
 

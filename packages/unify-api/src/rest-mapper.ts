@@ -11,10 +11,10 @@ import {
   normalizeResponse,
   handleError,
 } from "./utils";
-import { Storage } from "./storage-interface";
-import { FileStorage } from "./file-storage";
+import { Storage } from "./storage/interface";
+import { FileStorage } from "./storage/file";
 import { BuiltinMethods } from "./builtin-methods";
-import { PGStorage } from "./pg-storage";
+import { PGStorage } from "./storage/pg";
 
 /**
  * REST API 映射器类
@@ -250,19 +250,28 @@ export class RestMapper {
 
         // 合并用户自定义方法和内置方法
         const allMethods = { ...builtinMethods };
-        
+
         // 如果entityConfig是实体实例，提取其方法
-        if (typeof entityConfig === 'object' && entityConfig !== null) {
-          Object.getOwnPropertyNames(Object.getPrototypeOf(entityConfig)).forEach(methodName => {
-            if (methodName !== 'constructor' && typeof (entityConfig as any)[methodName] === 'function') {
-              allMethods[methodName] = (entityConfig as any)[methodName].bind(entityConfig);
+        if (typeof entityConfig === "object" && entityConfig !== null) {
+          Object.getOwnPropertyNames(
+            Object.getPrototypeOf(entityConfig)
+          ).forEach((methodName) => {
+            if (
+              methodName !== "constructor" &&
+              typeof (entityConfig as any)[methodName] === "function"
+            ) {
+              allMethods[methodName] = (entityConfig as any)[methodName].bind(
+                entityConfig
+              );
             }
           });
-          
+
           // 也检查实例自身的方法
-          Object.getOwnPropertyNames(entityConfig).forEach(methodName => {
-            if (typeof (entityConfig as any)[methodName] === 'function') {
-              allMethods[methodName] = (entityConfig as any)[methodName].bind(entityConfig);
+          Object.getOwnPropertyNames(entityConfig).forEach((methodName) => {
+            if (typeof (entityConfig as any)[methodName] === "function") {
+              allMethods[methodName] = (entityConfig as any)[methodName].bind(
+                entityConfig
+              );
             }
           });
         } else {
@@ -397,19 +406,28 @@ export class RestMapper {
 
         // 合并用户自定义方法和内置方法
         const allMethods = { ...builtinMethods };
-        
+
         // 如果entityConfig是实体实例，提取其方法
-        if (typeof entityConfig === 'object' && entityConfig !== null) {
-          Object.getOwnPropertyNames(Object.getPrototypeOf(entityConfig)).forEach(methodName => {
-            if (methodName !== 'constructor' && typeof (entityConfig as any)[methodName] === 'function') {
-              allMethods[methodName] = (entityConfig as any)[methodName].bind(entityConfig);
+        if (typeof entityConfig === "object" && entityConfig !== null) {
+          Object.getOwnPropertyNames(
+            Object.getPrototypeOf(entityConfig)
+          ).forEach((methodName) => {
+            if (
+              methodName !== "constructor" &&
+              typeof (entityConfig as any)[methodName] === "function"
+            ) {
+              allMethods[methodName] = (entityConfig as any)[methodName].bind(
+                entityConfig
+              );
             }
           });
-          
+
           // 也检查实例自身的方法
-          Object.getOwnPropertyNames(entityConfig).forEach(methodName => {
-            if (typeof (entityConfig as any)[methodName] === 'function') {
-              allMethods[methodName] = (entityConfig as any)[methodName].bind(entityConfig);
+          Object.getOwnPropertyNames(entityConfig).forEach((methodName) => {
+            if (typeof (entityConfig as any)[methodName] === "function") {
+              allMethods[methodName] = (entityConfig as any)[methodName].bind(
+                entityConfig
+              );
             }
           });
         } else {
@@ -515,19 +533,28 @@ export class RestMapper {
 
         // 合并用户自定义方法和内置方法
         const allMethods = { ...builtinMethods };
-        
+
         // 如果entityConfig是实体实例，提取其方法
-        if (typeof entityConfig === 'object' && entityConfig !== null) {
-          Object.getOwnPropertyNames(Object.getPrototypeOf(entityConfig)).forEach(methodName => {
-            if (methodName !== 'constructor' && typeof (entityConfig as any)[methodName] === 'function') {
-              allMethods[methodName] = (entityConfig as any)[methodName].bind(entityConfig);
+        if (typeof entityConfig === "object" && entityConfig !== null) {
+          Object.getOwnPropertyNames(
+            Object.getPrototypeOf(entityConfig)
+          ).forEach((methodName) => {
+            if (
+              methodName !== "constructor" &&
+              typeof (entityConfig as any)[methodName] === "function"
+            ) {
+              allMethods[methodName] = (entityConfig as any)[methodName].bind(
+                entityConfig
+              );
             }
           });
-          
+
           // 也检查实例自身的方法
-          Object.getOwnPropertyNames(entityConfig).forEach(methodName => {
-            if (typeof (entityConfig as any)[methodName] === 'function') {
-              allMethods[methodName] = (entityConfig as any)[methodName].bind(entityConfig);
+          Object.getOwnPropertyNames(entityConfig).forEach((methodName) => {
+            if (typeof (entityConfig as any)[methodName] === "function") {
+              allMethods[methodName] = (entityConfig as any)[methodName].bind(
+                entityConfig
+              );
             }
           });
         } else {

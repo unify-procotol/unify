@@ -16,7 +16,7 @@ A Hono-based SDK that maps entity configurations to REST API endpoints
 ## 安装
 
 ```bash
-npm install unify-server
+npm install unify-api
 ```
 
 ## 快速开始
@@ -24,7 +24,7 @@ npm install unify-server
 ### 基本使用示例
 
 ```typescript
-import { createSource } from 'unify-server';
+import { createSource } from 'unify-api';
 
 // 创建数据源
 const source = createSource();
@@ -71,7 +71,7 @@ export default {
 ### 使用表配置和中间件的完整示例
 
 ```typescript
-import { createSource } from "unify-server";
+import { createSource } from "unify-api";
 import blogConfig from "./blog-config.ts";
 
 // 模拟的认证中间件
@@ -124,25 +124,10 @@ source.register({
 
 const app = source.getApp();
 
-console.log("🚀 Blog API Server is starting on port 3000...");
-console.log("Available endpoints:");
-console.log("- GET /blog/user (list users)");
-console.log("- GET /blog/user/:id (get user by id)");
-console.log("- POST /blog/user (create user)");
-console.log("- PUT /blog/user/:id (update user)");
-console.log("- DELETE /blog/user/:id (delete user)");
-console.log("- GET /blog/post (list published posts)");
-console.log("- GET /blog/post/:id (get post by id)");
-console.log("- POST /blog/post (create post)");
-console.log("- PUT /blog/post/:id (update post)");
-console.log("- DELETE /blog/post/:id (delete post)");
-console.log("- GET /blog/comment (list comments)");
-console.log("- POST /blog/comment (create comment)");
-console.log("- ... (other comment endpoints)");
-
-console.log("- GET /github/user (list users)");
-console.log("- GET /github/user/:id (get user by id)");
-console.log("- POST /github/user (create user)");
+console.log("🚀 Server is starting on port 3000...");
+console.log(
+  app.routes.map((route) => `- ${route.method} ${route.path}`).join("\n")
+);
 
 export default {
   port: 3000,
@@ -289,7 +274,7 @@ sourceWithoutBuiltins.register( {
 
 ## CLI 工具
 
-unify-server 提供了 CLI 工具用于预先初始化表结构和生成内置方法，提高运行时性能。
+unify-api 提供了 CLI 工具用于预先初始化表结构和生成内置方法，提高运行时性能。
 
 详细的 CLI 使用说明请参考 [CLI-README.md](./CLI-README.md)。
 

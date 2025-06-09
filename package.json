@@ -1,5 +1,5 @@
 {
-  "name": "unify-server-monorepo",
+  "name": "unify-api-monorepo",
   "version": "1.0.0",
   "description": "A Hono-based SDK that maps entity configurations to REST API endpoints",
   "private": true,
@@ -8,13 +8,12 @@
     "examples"
   ],
   "scripts": {
-    "build-server": "cd packages/unify-server && bun run build",
-    "dev-server": "cd packages/unify-server && bun run dev",
-    "test-server": "cd packages/unify-server && bun test",
-    "build-plugin": "cd packages/unify-plugin && bun run build",
-    "dev-plugin": "cd packages/unify-plugin && bun run dev",
-    "test-plugin": "cd packages/unify-plugin && bun run test",
-    "build-all": "bun run build-server && bun run build-plugin"
+    "build:api": "cd packages/unify-api && bun run build",
+    "dev:api": "cd packages/unify-api && bun run dev",
+    "build:cli": "cd packages/cli && bun run build",
+    "dev:cli": "cd packages/cli && bun run dev",
+    "build:plugin": "cd packages/plugins && bun run build",
+    "dev:plugin": "cd packages/plugins && bun run dev"
   },
   "author": "osdodo",
   "license": "MIT"

@@ -1,19 +1,18 @@
 {
-  "name": "unify-server-examples",
+  "name": "unify-api-examples",
   "version": "1.0.0",
-  "description": "Examples for unify-server",
+  "description": "Examples for unify-api",
   "private": true,
   "type": "module",
   "scripts": {
-    "basic-usage": "bun run --watch basic-usage.ts",
-    "builtin-routes": "bun run --watch builtin-routes.ts",
-    "setup": "bun run ../packages/unify-server/dist/cli.js setup blog-config.ts",
     "generate-migrations": "bun run generate-migrations.ts",
-    "blog-server": "bun run --watch blog-server.ts"
+    "blog-server": "bun run --watch blog-server.ts",
+    "uniweb3-server": "bun run --watch uniweb3.ts"
   },
   "dependencies": {
-    "unify-server": "workspace:*",
-    "unify-plugin": "workspace:*",
+    "unify-api": "workspace:*",
+    "@unify-api/cli": "workspace:*",
+    "@unify-api/plugins": "workspace:*",
     "hono": "^4.7.11",
     "@solana/web3.js": "^1.87.6",
     "ethers": "^6.8.0"

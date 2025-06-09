@@ -12,10 +12,10 @@ npm install unify-plugin
 
 ### Basic Usage
 
-Import and register the plugins with your unify-server:
+Import and register the plugins with your unify-api:
 
 ```typescript
-import { createSource } from "unify-server";
+import { createSource } from "unify-api";
 import { SolanaPlugin, EVMPlugin } from "unify-plugin";
 
 const source = createSource();

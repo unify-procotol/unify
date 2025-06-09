@@ -1,4 +1,4 @@
-import { QueryArgs } from "./types";
+import { QueryArgs } from "../types";
 
 export interface Storage {
   /**

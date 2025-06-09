@@ -1,4 +1,4 @@
-import { createPgTablesFromConfig } from "unify-server";
+import { createPgTablesFromConfig } from "unify-api/migrations";
 import blogConfig from "./blog-config";
 
 // 运行迁移

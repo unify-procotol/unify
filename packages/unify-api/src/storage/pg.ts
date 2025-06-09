@@ -1,6 +1,6 @@
 import { Pool, PoolConfig, QueryResult } from "pg";
-import { Storage } from "./storage-interface";
-import { QueryArgs } from "./types";
+import { Storage } from "./interface";
+import { QueryArgs } from "../types";
 
 export interface PGStorageConfig extends PoolConfig {}
 

@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 import { join } from "path";
-import { Storage } from "./storage-interface";
-import { QueryArgs } from "./types";
+import { Storage } from "./interface";
+import { QueryArgs } from "../types";
 
 export interface TableData {
   records: Record<string, any>[];

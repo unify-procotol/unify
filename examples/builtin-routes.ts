@@ -1,4 +1,4 @@
-import { createSource, QueryArgs } from "unify-server";
+import { createSource, QueryArgs } from "unify-api";
 
 // 简单的数据
 const users = [
