@@ -10,10 +10,12 @@
   "scripts": {
     "build:api": "cd packages/unify-api && bun run build",
     "dev:api": "cd packages/unify-api && bun run dev",
-    "build:cli": "cd packages/cli && bun run build",
-    "dev:cli": "cd packages/cli && bun run dev",
     "build:plugin": "cd packages/plugins && bun run build",
-    "dev:plugin": "cd packages/plugins && bun run dev"
+    "dev:plugin": "cd packages/plugins && bun run dev",
+    "build:client": "cd packages/client && bun run build",
+    "dev:client": "cd packages/client && bun run dev",
+    "build:cli": "cd packages/cli && bun run build",
+    "dev:cli": "cd packages/cli && bun run dev"
   },
   "author": "osdodo",
   "license": "MIT"

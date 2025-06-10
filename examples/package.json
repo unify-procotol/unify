@@ -8,12 +8,14 @@
     "generate-migrations": "bun run generate-migrations.ts",
     "blog-server": "bun run --watch blog-server.ts",
     "uniweb3-server": "bun run --watch uniweb3.ts",
-    "orpc-demo": "bun run --watch orpc-demo.ts"
+    "orpc-server": "bun run --watch orpc/server.ts",
+    "orpc-client": "bun run --watch orpc/client.ts"
   },
   "dependencies": {
     "@orpc/server": "^1.4.5",
     "@unify-api/cli": "workspace:*",
     "@unify-api/plugins": "workspace:*",
+    "@unify-api/client": "workspace:*",
     "hono": "^4.7.11",
     "unify-api": "workspace:*",
     "zod": "^3.25.57"

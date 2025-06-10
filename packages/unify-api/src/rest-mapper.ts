@@ -237,9 +237,9 @@ export class RestMapper {
   private getAllORPCProcedures(entityConfig: EntityConfig) {
     const procedures: Record<string, ORPCProcedure> = {};
     Object.getOwnPropertyNames(entityConfig).forEach((methodName) => {
-      const method = entityConfig[methodName as keyof EntityConfig];
-      if (this.isORPCProcedure(method)) {
-        procedures[methodName] = method as ORPCProcedure;
+      const entityProcedure = entityConfig[methodName as keyof EntityConfig];
+      if (this.isORPCProcedure(entityProcedure)) {
+        procedures[methodName] = entityProcedure as ORPCProcedure;
       }
     });
     return procedures;
@@ -282,7 +282,7 @@ export class RestMapper {
         });
 
         const orpcProcedures = this.getAllORPCProcedures(entityConfig);
-        Object.entries(orpcProcedures).forEach(([methodName, handler]) => {
+        Object.keys(orpcProcedures).forEach((methodName) => {
           entityMethods.get(entityName)!.add(methodName);
         });
       });
