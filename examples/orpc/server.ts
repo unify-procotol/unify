@@ -1,9 +1,9 @@
 import { createSource } from "unify-api";
-import { sourceConfig } from "./config";
+import { ORPC_DEMO_SOURCE_CONFIG } from "./config";
 
 const source = createSource();
 
-source.register(sourceConfig);
+source.register(ORPC_DEMO_SOURCE_CONFIG);
 
 const app = source.getApp();
 

@@ -1,7 +1,7 @@
 import { os } from "@orpc/server";
 import { z } from "zod";
 
-export const sourceConfig = {
+export const ORPC_DEMO_SOURCE_CONFIG = {
   id: "orpc-demo",
   entities: {
     user: {
@@ -12,6 +12,12 @@ export const sourceConfig = {
             name: z.string(),
           })
         )
+        .output(
+          z.object({
+            id: z.number(),
+            name: z.string(),
+          })
+        )
         .handler(({ input }) => {
           return {
             id: input.id,
@@ -19,22 +25,22 @@ export const sourceConfig = {
           };
         }),
     },
-    // user2: {
-    //   table: {
-    //     name: "users",
-    //     schema: "public",
-    //     columns: {
-    //       id: {
-    //         type: "integer" as const,
-    //         nullable: false,
-    //         unique: true,
-    //       },
-    //       name: {
-    //         type: "varchar" as const,
-    //         nullable: false,
-    //       },
-    //     },
-    //   },
-    // },
+    user2: {
+      table: {
+        name: "users",
+        schema: "public",
+        columns: {
+          id: {
+            type: "integer" as const,
+            nullable: false,
+            unique: true,
+          },
+          name: {
+            type: "varchar" as const,
+            nullable: false,
+          },
+        },
+      },
+    },
   },
-};
+} as const;
