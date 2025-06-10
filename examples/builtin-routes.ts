@@ -59,7 +59,7 @@ console.log("=== 默认配置示例 ===");
 const app1 = sourceWithDefaults.getApp();
 console.log(
   "可用路由:",
-  sourceWithDefaults.getRoutes().map((r) => `${r.method} ${r.path}`)
+  app1.routes.map((r) => `${r.method} ${r.path}`)
 );
 
 // 使用自定义配置的应用

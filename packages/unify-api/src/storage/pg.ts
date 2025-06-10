@@ -86,7 +86,7 @@ export class PGStorage implements Storage {
   async findMany(
     sourceId: string,
     tableName: string,
-    args: QueryArgs = {}
+    args: QueryArgs
   ): Promise<Record<string, any>[]> {
     const fullTableName = this.getFullTableName(sourceId, tableName);
     const client = await this.pool.connect();

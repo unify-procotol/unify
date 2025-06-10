@@ -1,5 +1,5 @@
 import { Storage } from "./storage/interface";
-import { QueryArgs, EntityMethod, EntityConfig } from "./types";
+import { QueryArgs, EntityFunction, EntityConfig } from "./types";
 
 export class BuiltinMethods {
   private storage: Storage;
@@ -12,11 +12,11 @@ export class BuiltinMethods {
    * 为实体生成内置CRUD方法
    */
   generateBuiltinMethods(
-    sourceId: string,
+    source_id: string,
     entityName: string,
     entityConfig: EntityConfig
-  ): Record<string, EntityMethod<any>> {
-    const methods: Record<string, EntityMethod<any>> = {};
+  ): Record<string, EntityFunction<any>> {
+    const methods: Record<string, EntityFunction<any>> = {};
 
     // 只有在配置了 table 时才生成内置方法
     if (!entityConfig.table) {
@@ -27,16 +27,16 @@ export class BuiltinMethods {
 
     // 只有在用户没有定义对应方法时才添加内置方法
     if (!entityConfig.findMany) {
-      methods.findMany = this.createFindManyMethod(sourceId, tableName);
+      methods.findMany = this.createFindManyMethod(source_id, tableName);
     }
 
     if (!entityConfig.findOne) {
-      methods.findOne = this.createFindOneMethod(sourceId, tableName);
+      methods.findOne = this.createFindOneMethod(source_id, tableName);
     }
 
     if (!entityConfig.create) {
       methods.create = this.createCreateMethod(
-        sourceId,
+        source_id,
         tableName,
         entityConfig
       );
@@ -44,14 +44,14 @@ export class BuiltinMethods {
 
     if (!entityConfig.update) {
       methods.update = this.createUpdateMethod(
-        sourceId,
+        source_id,
         tableName,
         entityConfig
       );
     }
 
     if (!entityConfig.delete) {
-      methods.delete = this.createDeleteMethod(sourceId, tableName);
+      methods.delete = this.createDeleteMethod(source_id, tableName);
     }
 
     return methods;
@@ -61,11 +61,11 @@ export class BuiltinMethods {
    * 创建findMany方法
    */
   private createFindManyMethod(
-    sourceId: string,
+    source_id: string,
     tableName: string
-  ): EntityMethod<QueryArgs> {
+  ): EntityFunction<QueryArgs> {
     return async (args?: QueryArgs) => {
-      return await this.storage.findMany(sourceId, tableName, args);
+      return await this.storage.findMany(source_id, tableName, args);
     };
   }
 
@@ -73,16 +73,16 @@ export class BuiltinMethods {
    * 创建findOne方法
    */
   private createFindOneMethod(
-    sourceId: string,
+    source_id: string,
     tableName: string
-  ): EntityMethod<QueryArgs> {
+  ): EntityFunction<QueryArgs> {
     return async (args?: QueryArgs) => {
       const id = args?.id;
       if (!id) {
         throw { status: 400, message: "ID is required" };
       }
 
-      const record = await this.storage.findOne(sourceId, tableName, id);
+      const record = await this.storage.findOne(source_id, tableName, id);
       if (!record) {
         throw { status: 404, message: `Record with id ${id} not found` };
       }
@@ -151,21 +151,21 @@ export class BuiltinMethods {
    * 创建create方法
    */
   private createCreateMethod(
-    sourceId: string,
+    source_id: string,
     tableName: string,
     entityConfig: EntityConfig
-  ): EntityMethod<QueryArgs> {
+  ): EntityFunction<QueryArgs> {
     return async (args?: QueryArgs) => {
       if (!args) {
         throw { status: 400, message: "Request body is required" };
       }
 
-      delete args.sourceId;
+      const { source_id, ...restArgs } = args;
 
       // 验证必填字段
       if (entityConfig.table?.columns) {
         this.validateRequiredFields(
-          args,
+          restArgs,
           entityConfig.table.columns,
           "create",
           entityConfig
@@ -175,7 +175,7 @@ export class BuiltinMethods {
       // 过滤掉系统字段
       const recordData = this.filterSystemFields(args, entityConfig);
 
-      return await this.storage.create(sourceId, tableName, recordData);
+      return await this.storage.create(source_id, tableName, recordData);
     };
   }
 
@@ -186,7 +186,7 @@ export class BuiltinMethods {
     sourceId: string,
     tableName: string,
     entityConfig: EntityConfig
-  ): EntityMethod<QueryArgs> {
+  ): EntityFunction<QueryArgs> {
     return async (args?: QueryArgs) => {
       const id = args?.id;
       if (!id) {
@@ -197,10 +197,10 @@ export class BuiltinMethods {
         throw { status: 400, message: "Request body is required" };
       }
 
-      delete args.sourceId;
+      const { source_id, ...restArgs } = args;
 
       // 过滤掉系统字段（但保留ID用于查询，然后从更新数据中移除）
-      const updateData = this.filterSystemFields(args, entityConfig);
+      const updateData = this.filterSystemFields(restArgs, entityConfig);
       // 确保ID不在更新数据中
       delete updateData.id;
 
@@ -209,7 +209,7 @@ export class BuiltinMethods {
       }
 
       const updatedRecord = await this.storage.update(
-        sourceId,
+        source_id,
         tableName,
         id,
         updateData
@@ -228,7 +228,7 @@ export class BuiltinMethods {
   private createDeleteMethod(
     sourceId: string,
     tableName: string
-  ): EntityMethod<QueryArgs> {
+  ): EntityFunction<QueryArgs> {
     return async (args?: QueryArgs) => {
       const id = args?.id;
       if (!id) {
@@ -284,7 +284,7 @@ export class BuiltinMethods {
    * 初始化表结构（如果配置了table schema）
    */
   async initializeTable(
-    sourceId: string,
+    source_id: string,
     entityName: string,
     entityConfig: EntityConfig
   ): Promise<void> {
@@ -294,9 +294,9 @@ export class BuiltinMethods {
 
     const tableName = entityConfig.table.name || entityName;
 
-    const exists = await this.storage.tableExists(sourceId, tableName);
+    const exists = await this.storage.tableExists(source_id, tableName);
     if (!exists) {
-      console.error(`Table ${sourceId}.${tableName} not exists`);
+      console.error(`Table ${source_id}.${tableName} not exists`);
     }
   }
 }

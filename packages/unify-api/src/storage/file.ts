@@ -77,7 +77,7 @@ export class FileStorage implements Storage {
   async findMany(
     sourceId: string,
     tableName: string,
-    args: QueryArgs = {}
+    args: QueryArgs
   ): Promise<Record<string, any>[]> {
     const tableData = this.loadTable(sourceId, tableName);
     let records = [...tableData.records];
@@ -163,7 +163,11 @@ export class FileStorage implements Storage {
   }
 
   // 删除记录
-  async delete(sourceId: string, tableName: string, id: string | number): Promise<boolean> {
+  async delete(
+    sourceId: string,
+    tableName: string,
+    id: string | number
+  ): Promise<boolean> {
     const tableData = this.loadTable(sourceId, tableName);
     const recordIndex = tableData.records.findIndex((r) => r.id == id);
 

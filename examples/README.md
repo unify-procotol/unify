@@ -30,21 +30,21 @@ bun install
 - 完整的API端点列表输出
 
 **可用端点：**
-- `GET /user?sourceId=blog` - 获取用户列表
-- `GET /user/:id?sourceId=blog` - 获取指定用户
-- `POST /user?sourceId=blog` - 创建用户（需要认证）
-- `PUT /user/:id?sourceId=blog` - 更新用户（需要认证）
-- `DELETE /user/:id?sourceId=blog` - 删除用户（需要认证）
-- `GET /post?sourceId=blog` - 获取发布的文章列表
-- `GET /post/:id?sourceId=blog` - 获取指定文章
-- `POST /post?sourceId=blog` - 创建文章（需要认证）
-- `PUT /post/:id?sourceId=blog` - 更新文章（需要认证）
-- `DELETE /post/:id?sourceId=blog` - 删除文章（需要认证）
-- `GET /comment?sourceId=blog` - 获取评论列表
-- `POST /comment?sourceId=blog` - 创建评论（需要认证）
-- `GET /user?sourceId=test-api` - 获取test-api的用户列表
-- `GET /user/:id?sourceId=test-api` - 获取指定test-api的用户
-- `POST /user?sourceId=test-api` - 创建test-api的用户
+- `GET /user?source_id=blog` - 获取用户列表
+- `GET /user/:id?source_id=blog` - 获取指定用户
+- `POST /user?source_id=blog` - 创建用户（需要认证）
+- `PUT /user/:id?source_id=blog` - 更新用户（需要认证）
+- `DELETE /user/:id?source_id=blog` - 删除用户（需要认证）
+- `GET /post?source_id=blog` - 获取发布的文章列表
+- `GET /post/:id?source_id=blog` - 获取指定文章
+- `POST /post?source_id=blog` - 创建文章（需要认证）
+- `PUT /post/:id?source_id=blog` - 更新文章（需要认证）
+- `DELETE /post/:id?source_id=blog` - 删除文章（需要认证）
+- `GET /comment?source_id=blog` - 获取评论列表
+- `POST /comment?source_id=blog` - 创建评论（需要认证）
+- `GET /user?source_id=test-api` - 获取test-api的用户列表
+- `GET /user/:id?source_id=test-api` - 获取指定test-api的用户
+- `POST /user?source_id=test-api` - 创建test-api的用户
 
 ### 基础示例
 

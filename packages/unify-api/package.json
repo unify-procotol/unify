@@ -31,7 +31,11 @@
   "author": "osdodo",
   "license": "MIT",
   "dependencies": {
-    "hono": "^4.7.11"
+    "@orpc/client": "^1.4.5",
+    "@orpc/server": "^1.4.5",
+    "@orpc/zod": "^1.4.5",
+    "hono": "^4.7.11",
+    "zod": "^3.25.57"
   },
   "devDependencies": {
     "@types/node": "^20.10.0",

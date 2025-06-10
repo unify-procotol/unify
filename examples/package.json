@@ -7,15 +7,16 @@
   "scripts": {
     "generate-migrations": "bun run generate-migrations.ts",
     "blog-server": "bun run --watch blog-server.ts",
-    "uniweb3-server": "bun run --watch uniweb3.ts"
+    "uniweb3-server": "bun run --watch uniweb3.ts",
+    "orpc-demo": "bun run --watch orpc-demo.ts"
   },
   "dependencies": {
-    "unify-api": "workspace:*",
+    "@orpc/server": "^1.4.5",
     "@unify-api/cli": "workspace:*",
     "@unify-api/plugins": "workspace:*",
     "hono": "^4.7.11",
-    "@solana/web3.js": "^1.87.6",
-    "ethers": "^6.8.0"
+    "unify-api": "workspace:*",
+    "zod": "^3.25.57"
   },
   "devDependencies": {
     "@types/node": "^20.10.0",

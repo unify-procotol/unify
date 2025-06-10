@@ -282,7 +282,7 @@ class UnifyServerCLI {
         );
 
         generatedMethods[entityName] = {
-          sourceId: config.id,
+          source_id: config.id,
           entityName,
           methods: Object.keys(methods),
           config: entityConfig,

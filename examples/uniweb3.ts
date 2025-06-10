@@ -19,5 +19,5 @@ export default {
   fetch: app.fetch,
 };
 
-// curl -X GET 'http://localhost:3000/balance/0x4f00D43b5aF0a0aAd62E9075D1bFa86a89CDb9aB?network=iotex&sourceId=evm_plugin'
-// curl -X GET 'http://localhost:3000/balance/11111111111111111111111111111112?sourceId=solana_plugin'
+// curl -X GET 'http://localhost:3000/balance/0x4f00D43b5aF0a0aAd62E9075D1bFa86a89CDb9aB?network=iotex&source_id=evm_plugin'
+// curl -X GET 'http://localhost:3000/balance/11111111111111111111111111111112?source_id=solana_plugin'

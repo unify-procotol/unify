@@ -6,10 +6,9 @@ import { QueryArgs } from "./types";
  */
 export async function parseRequestArgs(c: any): Promise<QueryArgs> {
   const query = c.req.query();
-  const args: QueryArgs = {};
-
-  // 首先添加所有查询参数
-  Object.assign(args, query);
+  const args: QueryArgs = {
+    ...query,
+  };
 
   // 解析 limit
   if (query.limit) {

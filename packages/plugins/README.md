@@ -33,22 +33,22 @@ Once registered, the plugins provide the following endpoints:
 
 #### Solana Balance
 ```bash
-curl -X GET 'http://localhost:3000/balance/11111111111111111111111111111112?network=solana&sourceId=solana_plugin'
+curl -X GET 'http://localhost:3000/balance/11111111111111111111111111111112?network=solana&source_id=solana_plugin'
 ```
 
 #### EVM Network Balances
 ```bash
 # Ethereum
-curl -X GET 'http://localhost:3000/balance/0x4f00D43b5aF0a0aAd62E9075D1bFa86a89CDb9aB?network=ethereum&sourceId=evm_plugin'
+curl -X GET 'http://localhost:3000/balance/0x4f00D43b5aF0a0aAd62E9075D1bFa86a89CDb9aB?network=ethereum&source_id=evm_plugin'
 
 # IoTeX
-curl -X GET 'http://localhost:3000/balance/0x4f00D43b5aF0a0aAd62E9075D1bFa86a89CDb9aB?network=iotex&sourceId=evm_plugin'
+curl -X GET 'http://localhost:3000/balance/0x4f00D43b5aF0a0aAd62E9075D1bFa86a89CDb9aB?network=iotex&source_id=evm_plugin'
 
 # Polygon
-curl -X GET 'http://localhost:3000/balance/0x4f00D43b5aF0a0aAd62E9075D1bFa86a89CDb9aB?network=polygon&sourceId=evm_plugin'
+curl -X GET 'http://localhost:3000/balance/0x4f00D43b5aF0a0aAd62E9075D1bFa86a89CDb9aB?network=polygon&source_id=evm_plugin'
 
 # BSC
-curl -X GET 'http://localhost:3000/balance/0x4f00D43b5aF0a0aAd62E9075D1bFa86a89CDb9aB?network=bsc&sourceId=evm_plugin'
+curl -X GET 'http://localhost:3000/balance/0x4f00D43b5aF0a0aAd62E9075D1bFa86a89CDb9aB?network=bsc&source_id=evm_plugin'
 ```
 
 ## Supported Networks

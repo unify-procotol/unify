@@ -1,8 +1,11 @@
 import {
   SourceConfig,
-  RestMethodMapping,
   DEFAULT_METHOD_MAPPING,
   RestMapperOptions,
+  App,
+  EntityConfig,
+  ORPCProcedure,
+  EntityFunction,
 } from "./types";
 import {
   parseRequestArgs,
@@ -15,18 +18,20 @@ import { FileStorage } from "./storage/file";
 import { BuiltinMethods } from "./builtin-methods";
 import { PGStorage } from "./storage/pg";
 
+import type { Context } from "hono";
+
 interface RouteCache {
   sourceConfig: SourceConfig;
-  entityConfig: any;
-  handler: Function;
-  middleware: Array<(c: any, next: () => Promise<void>) => Promise<void>>;
+  entityConfig: EntityConfig;
+  handler: EntityFunction;
+  middleware: Array<(c: Context, next: () => Promise<void>) => Promise<void>>;
 }
 
 /**
  * REST API 映射器类
  */
 export class RestMapper {
-  private app: any;
+  private app: App;
   private sources: Map<string, SourceConfig> = new Map();
   private options: RestMapperOptions;
   private storage: Storage;
@@ -34,7 +39,7 @@ export class RestMapper {
   private setupEntityPaths: Set<string> = new Set();
   private routeCache: Map<string, Map<string, RouteCache>> = new Map();
 
-  constructor(app?: any, options: RestMapperOptions = {}) {
+  constructor(app?: App, options: RestMapperOptions = {}) {
     this.options = {
       enableBuiltinRoutes: true,
       rootMessage: "REST API Server",
@@ -112,32 +117,47 @@ export class RestMapper {
     const sourceCache = new Map<string, RouteCache>();
 
     Object.entries(config.entities).forEach(([entityName, entityConfig]) => {
-      // 获取所有方法
       const allMethods = this.getAllEntityMethods(
         config.id,
         entityName,
         entityConfig
       );
-
       Object.entries(allMethods).forEach(([methodName, handler]) => {
-        // 跳过table配置
-        if (methodName === "table") {
-          return;
-        }
+        const methodKey = `${entityName}:${methodName}`;
+        sourceCache.set(methodKey, {
+          sourceConfig: config,
+          entityConfig,
+          handler: handler,
+          middleware: config.middleware || [],
+        });
+      });
 
-        if (typeof handler === "function") {
-          const methodKey = `${entityName}:${methodName}`;
-          sourceCache.set(methodKey, {
-            sourceConfig: config,
-            entityConfig,
-            handler,
-            middleware: config.middleware || [],
-          });
-        }
+      const orpcProcedures = this.getAllORPCProcedures(entityConfig);
+      Object.entries(orpcProcedures).forEach(([methodName, procedure]) => {
+        const methodKey = `${entityName}:${methodName}`;
+        sourceCache.set(methodKey, {
+          sourceConfig: config,
+          entityConfig,
+          handler: procedure.callable(),
+          middleware: config.middleware || [],
+        });
       });
     });
 
     this.routeCache.set(config.id, sourceCache);
+  }
+
+  /**
+   * 检查是否是ORPC procedure
+   */
+  private isORPCProcedure(handler: any): boolean {
+    return (
+      handler &&
+      typeof handler === "object" &&
+      handler.constructor?.name === "DecoratedProcedure" &&
+      "~orpc" in handler &&
+      typeof handler["~orpc"]?.handler === "function"
+    );
   }
 
   /**
@@ -157,7 +177,7 @@ export class RestMapper {
   /**
    * 获取 Hono 应用实例
    */
-  getApp(): any {
+  getApp() {
     return this.app;
   }
 
@@ -183,8 +203,8 @@ export class RestMapper {
   private getAllEntityMethods(
     sourceId: string,
     entityName: string,
-    entityConfig: any
-  ): Record<string, Function> {
+    entityConfig: EntityConfig
+  ) {
     // 生成内置方法
     const builtinMethods = this.builtinMethods.generateBuiltinMethods(
       sourceId,
@@ -195,27 +215,15 @@ export class RestMapper {
     // 合并用户自定义方法和内置方法
     const allMethods = { ...builtinMethods };
 
-    // 如果entityConfig是实体实例，提取其方法
     if (typeof entityConfig === "object" && entityConfig !== null) {
-      Object.getOwnPropertyNames(Object.getPrototypeOf(entityConfig)).forEach(
-        (methodName) => {
-          if (
-            methodName !== "constructor" &&
-            typeof (entityConfig as any)[methodName] === "function"
-          ) {
-            allMethods[methodName] = (entityConfig as any)[methodName].bind(
-              entityConfig
-            );
-          }
-        }
-      );
-
-      // 也检查实例自身的方法
       Object.getOwnPropertyNames(entityConfig).forEach((methodName) => {
-        if (typeof (entityConfig as any)[methodName] === "function") {
-          allMethods[methodName] = (entityConfig as any)[methodName].bind(
-            entityConfig
-          );
+        if (
+          methodName !== "constructor" &&
+          typeof entityConfig[methodName as keyof EntityConfig] === "function"
+        ) {
+          allMethods[methodName] =
+            // @ts-ignore
+            entityConfig[methodName].bind(entityConfig);
         }
       });
     }
@@ -224,90 +232,17 @@ export class RestMapper {
   }
 
   /**
-   * 获取所有注册的路由信息
+   * 获取实体的所有 oRPC procedures
    */
-  getRoutes(): RestMethodMapping[] {
-    const routes: RestMethodMapping[] = [];
-    const addedRoutes = new Set<string>();
-
-    this.sources.forEach((config, sourceId) => {
-      Object.entries(config.entities).forEach(([entityName, entityConfig]) => {
-        // 获取所有方法
-        const allMethods = this.getAllEntityMethods(
-          sourceId,
-          entityName,
-          entityConfig
-        );
-
-        Object.entries(allMethods).forEach(([methodName, handler]) => {
-          // 跳过table配置
-          if (methodName === "table") {
-            return;
-          }
-
-          const mapping = this.getMethodMapping(methodName);
-          if (mapping && typeof handler === "function") {
-            const path = buildRestPath({
-              entityName,
-              pathSuffix: mapping.pathSuffix,
-            });
-            const routeKey = `${mapping.method}:${path}`;
-
-            // 避免重复添加相同的路由
-            if (!addedRoutes.has(routeKey)) {
-              routes.push({
-                method: mapping.method as any,
-                path,
-                handler: handler as any,
-              });
-              addedRoutes.add(routeKey);
-            }
-          }
-        });
-      });
-    });
-
-    return routes;
-  }
-
-  /**
-   * 获取 API 文档
-   */
-  getApiDoc(): any {
-    const routes = this.getRoutes();
-    const apiDoc = {
-      openapi: "3.0.0",
-      info: {
-        title: "REST API",
-        version: "1.0.0",
-        description: "Auto-generated REST API from entity configurations",
-      },
-      paths: {} as any,
-    };
-
-    routes.forEach((route) => {
-      if (!apiDoc.paths[route.path]) {
-        apiDoc.paths[route.path] = {};
+  private getAllORPCProcedures(entityConfig: EntityConfig) {
+    const procedures: Record<string, ORPCProcedure> = {};
+    Object.getOwnPropertyNames(entityConfig).forEach((methodName) => {
+      const method = entityConfig[methodName as keyof EntityConfig];
+      if (this.isORPCProcedure(method)) {
+        procedures[methodName] = method as ORPCProcedure;
       }
-
-      apiDoc.paths[route.path][route.method.toLowerCase()] = {
-        summary: `${route.method} ${route.path}`,
-        responses: {
-          "200": {
-            description: "Success",
-            content: {
-              "application/json": {
-                schema: {
-                  type: "object",
-                },
-              },
-            },
-          },
-        },
-      };
     });
-
-    return apiDoc;
+    return procedures;
   }
 
   /**
@@ -318,19 +253,13 @@ export class RestMapper {
     this.app.get("/", (c: any) => {
       return c.json({
         message: this.options.rootMessage,
-        routes: this.getRoutes().map((r) => `${r.method} ${r.path}`),
-        apiDoc: "/api-doc",
+        routes: this.app.routes.map((r) => `${r.method} ${r.path}`),
       });
-    });
-
-    // API文档端点
-    this.app.get("/api-doc", (c: any) => {
-      return c.json(this.getApiDoc());
     });
   }
 
   /**
-   * 设置统一路由，支持通过sourceId参数路由到不同的source
+   * 设置统一路由，支持通过source_id参数路由到不同的source
    */
   private setupUnifiedRoutes(): void {
     // 收集所有实体和方法的组合
@@ -341,21 +270,20 @@ export class RestMapper {
         if (!entityMethods.has(entityName)) {
           entityMethods.set(entityName, new Set());
         }
-
-        // 获取所有方法
         const allMethods = this.getAllEntityMethods(
           config.id,
           entityName,
           entityConfig
         );
-
         Object.keys(allMethods).forEach((methodName) => {
-          if (
-            methodName !== "table" &&
-            typeof allMethods[methodName] === "function"
-          ) {
+          if (typeof allMethods[methodName] === "function") {
             entityMethods.get(entityName)!.add(methodName);
           }
+        });
+
+        const orpcProcedures = this.getAllORPCProcedures(entityConfig);
+        Object.entries(orpcProcedures).forEach(([methodName, handler]) => {
+          entityMethods.get(entityName)!.add(methodName);
         });
       });
     });
@@ -409,19 +337,16 @@ export class RestMapper {
         const pathParams = c.req.param();
         Object.assign(args, pathParams);
 
-        // 检查sourceId参数
-        const requestedSourceId = args.sourceId || c.req.query("sourceId");
-        if (!requestedSourceId) {
-          return c.json({ error: "sourceId parameter is required" }, 400);
+        // 检查source_id参数
+        const sourceId = args.source_id || c.req.query("source_id");
+        if (!sourceId) {
+          return c.json({ error: "source_id parameter is required" }, 400);
         }
 
         // 从缓存中获取路由信息
-        const sourceCache = this.routeCache.get(requestedSourceId);
+        const sourceCache = this.routeCache.get(sourceId);
         if (!sourceCache) {
-          return c.json(
-            { error: `Source '${requestedSourceId}' not found` },
-            404
-          );
+          return c.json({ error: `Source '${sourceId}' not found` }, 404);
         }
 
         const methodKey = `${entityName}:${methodName}`;
@@ -429,7 +354,7 @@ export class RestMapper {
         if (!routeCache) {
           return c.json(
             {
-              error: `Method '${methodName}' not found for entity '${entityName}' in source '${requestedSourceId}'`,
+              error: `Method '${methodName}' not found for entity '${entityName}' in source '${sourceId}'`,
             },
             404
           );

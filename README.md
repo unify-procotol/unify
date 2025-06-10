@@ -141,12 +141,12 @@ SDK 会自动将实体方法映射为 REST API 端点：
 
 | 方法名 | HTTP 方法 | 路径 | 描述 |
 |--------|-----------|------|------|
-| `findMany` | GET | `/{sourceId}/{entity}` | 查找多个记录 |
-| `findOne` | GET | `/{sourceId}/{entity}/:id` | 查找单个记录 |
-| `create` | POST | `/{sourceId}/{entity}` | 创建新记录 |
-| `update` | PUT | `/{sourceId}/{entity}/:id` | 更新记录 |
-| `patch` | PATCH | `/{sourceId}/{entity}/:id` | 部分更新记录 |
-| `delete` | DELETE | `/{sourceId}/{entity}/:id` | 删除记录 |
+| `findMany` | GET | `/{source_id}/{entity}` | 查找多个记录 |
+| `findOne` | GET | `/{source_id}/{entity}/:id` | 查找单个记录 |
+| `create` | POST | `/{source_id}/{entity}` | 创建新记录 |
+| `update` | PUT | `/{source_id}/{entity}/:id` | 更新记录 |
+| `patch` | PATCH | `/{source_id}/{entity}/:id` | 部分更新记录 |
+| `delete` | DELETE | `/{source_id}/{entity}/:id` | 删除记录 |
 
 ## 查询参数
 

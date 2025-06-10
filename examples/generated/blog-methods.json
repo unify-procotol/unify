@@ -1,6 +1,6 @@
 {
   "user": {
-    "sourceId": "blog",
+    "source_id": "blog",
     "entityName": "user",
     "methods": [
       "findMany",
@@ -48,7 +48,7 @@
     }
   },
   "post": {
-    "sourceId": "blog",
+    "source_id": "blog",
     "entityName": "post",
     "methods": [
       "findMany",
@@ -104,7 +104,7 @@
     }
   },
   "comment": {
-    "sourceId": "blog",
+    "source_id": "blog",
     "entityName": "comment",
     "methods": [
       "findMany",
@@ -155,7 +155,7 @@
     }
   },
   "tag": {
-    "sourceId": "blog",
+    "source_id": "blog",
     "entityName": "tag",
     "methods": [
       "findMany",
@@ -199,7 +199,7 @@
     }
   },
   "post_tag": {
-    "sourceId": "blog",
+    "source_id": "blog",
     "entityName": "post_tag",
     "methods": [
       "findMany",

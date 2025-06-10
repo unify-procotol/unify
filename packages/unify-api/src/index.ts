@@ -2,10 +2,13 @@ export { RestMapper } from "./rest-mapper";
 export {
   SourceConfig,
   EntityConfig,
-  EntityMethod,
+  EntityFunction,
+  EntityProcedure,
+  ORPCProcedure,
   QueryArgs,
   RestMethodMapping,
   RestMapperOptions,
+  App,
   DatabaseDefaultValue,
   DEFAULT_METHOD_MAPPING,
 } from "./types";

@@ -1,14 +1,18 @@
+import { BlankEnv, BlankSchema } from "hono/types";
 import { PGStorageConfig } from "./storage/pg";
+import type { Hono } from "hono";
+
+type BaseArgs = {
+  source_id: string;
+} & Record<string, any>;
 
 // 基础查询参数类型
-export interface QueryArgs {
+export interface QueryArgs extends BaseArgs {
   limit?: number;
   offset?: number;
   select?: string[];
   where?: Record<string, any>;
   order_by?: Record<string, "asc" | "desc">;
-  // 支持任意额外字段（如路径参数和请求体参数）
-  [key: string]: any;
 }
 
 // 数据库字段类型
@@ -64,12 +68,23 @@ export type DatabaseDefaultValue =
   | "NOW()"; // SQL 函数
 
 // 实体方法类型 - 基础接口
-export interface EntityMethod<TArgs = QueryArgs> {
+export interface EntityFunction<TArgs = QueryArgs> {
   (args?: TArgs, context?: any): Promise<any> | any;
 }
 
+// oRPC Procedure 类型定义
+export interface ORPCProcedure {
+  "~orpc": {
+    handler: Function;
+  };
+  [key: string]: any;
+}
+
+// 支持的实体处理器类型 - 支持普通函数和 oRPC procedures
+export type EntityProcedure<TArgs = any> = EntityFunction<TArgs> | ORPCProcedure;
+
 // 支持的实体方法名类型
-export type EntityMethodName =
+export type EntityFunctionName =
   | "findMany"
   | "findOne"
   | "create"
@@ -78,13 +93,11 @@ export type EntityMethodName =
 
 // 实体配置类型 - 使用更灵活的方法定义
 export interface EntityConfig {
-  findMany?: EntityMethod<QueryArgs>;
-  findOne?: EntityMethod<any>; // 允许任意参数类型
-  create?: EntityMethod<any>;
-  update?: EntityMethod<any>;
-  delete?: EntityMethod<any>;
-  // 支持其他自定义方法
-  [key: string]: EntityMethod<any> | any;
+  findMany?: EntityProcedure<QueryArgs>;
+  findOne?: EntityProcedure<BaseArgs>; // 允许任意参数类型
+  create?: EntityProcedure<BaseArgs>;
+  update?: EntityProcedure<BaseArgs>;
+  delete?: EntityProcedure<BaseArgs>;
   table?: {
     name: string;
     schema: string;
@@ -126,11 +139,14 @@ export interface RestMapperOptions {
       };
 }
 
+// getApp 方法返回的应用对象类型
+export interface App extends Hono<BlankEnv, BlankSchema, "/"> {}
+
 // REST API 映射配置
 export interface RestMethodMapping {
   method: "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
   path: string;
-  handler: EntityMethod<any>;
+  handler: EntityFunction<any>;
 }
 
 // HTTP 方法到实体方法的默认映射
