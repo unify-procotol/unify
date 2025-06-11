@@ -1,5 +1,5 @@
 import { os } from "@orpc/server";
-import { EVMBalanceInputSchema, BalanceOutputSchema } from "../schema/balance";
+import { BalanceInputSchema, BalanceOutputSchema } from "../schema/balance";
 import { createEVMHandler } from "../handlers/evm";
 
 const evmNetworkHandlers = {
@@ -14,11 +14,12 @@ export const EVMPlugin = {
   entities: {
     balance: {
       findOne: os
-        .input(EVMBalanceInputSchema)
+        .input(BalanceInputSchema)
         .output(BalanceOutputSchema)
         .handler(async ({ input }) => {
           const { where } = input;
-          const network = where.network as keyof typeof evmNetworkHandlers;
+          const network =
+            (where.network as keyof typeof evmNetworkHandlers) || "ethereum";
           const handler = evmNetworkHandlers[network];
           if (!handler) {
             throw {

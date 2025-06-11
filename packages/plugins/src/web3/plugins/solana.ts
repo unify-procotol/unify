@@ -1,6 +1,6 @@
 import { os } from "@orpc/server";
 import {
-  SolanaBalanceInputSchema,
+  BalanceInputSchema,
   BalanceOutputSchema,
 } from "../schema/balance";
 import { SolanaHandler } from "../handlers/solana";
@@ -10,7 +10,7 @@ export const SolanaPlugin = {
   entities: {
     balance: {
       findOne: os
-        .input(SolanaBalanceInputSchema)
+        .input(BalanceInputSchema)
         .output(BalanceOutputSchema)
         .handler(async ({ input }) => {
           const { where } = input;

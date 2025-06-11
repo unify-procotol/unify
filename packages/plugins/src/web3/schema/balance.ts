@@ -1,15 +1,9 @@
 import { z } from "zod";
 
-export const EVMBalanceInputSchema = z.object({
+export const BalanceInputSchema = z.object({
   where: z.object({
     address: z.string(),
-    network: z.string(),
-  }),
-});
-
-export const SolanaBalanceInputSchema = z.object({
-  where: z.object({
-    address: z.string(),
+    network: z.string().optional(),
   }),
 });
 
