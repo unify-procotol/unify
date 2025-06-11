@@ -1,9 +1,5 @@
-import { SourceConfig } from "unify-api";
 import { os } from "@orpc/server";
-import {
-  EVMBalanceInputSchema,
-  BalanceOutputSchema,
-} from "../schema/balance";
+import { EVMBalanceInputSchema, BalanceOutputSchema } from "../schema/balance";
 import { createEVMHandler } from "../handlers/evm";
 
 const evmNetworkHandlers = {
@@ -13,7 +9,7 @@ const evmNetworkHandlers = {
   bsc: createEVMHandler("bsc"),
 };
 
-export const EVMPlugin: SourceConfig = {
+export const EVMPlugin = {
   id: "evm_plugin",
   entities: {
     balance: {

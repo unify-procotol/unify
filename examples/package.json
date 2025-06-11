@@ -8,6 +8,7 @@
     "generate-migrations": "bun run basic-usage/generate-migrations.ts",
     "basic-usage": "bun run --watch basic-usage/server.ts",
     "uniweb3": "bun run --watch plugins-usage/uniweb3.ts",
+    "uniweb3-client": "bun run --watch plugins-usage/client.ts",
     "orpc-server": "bun run --watch orpc-usage/server.ts",
     "orpc-client": "bun run --watch orpc-usage/client.ts"
   },

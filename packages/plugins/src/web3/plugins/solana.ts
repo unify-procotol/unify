@@ -1,4 +1,3 @@
-import { SourceConfig } from "unify-api";
 import { os } from "@orpc/server";
 import {
   SolanaBalanceInputSchema,
@@ -6,7 +5,7 @@ import {
 } from "../schema/balance";
 import { SolanaHandler } from "../handlers/solana";
 
-export const SolanaPlugin: SourceConfig = {
+export const SolanaPlugin = {
   id: "solana_plugin",
   entities: {
     balance: {
