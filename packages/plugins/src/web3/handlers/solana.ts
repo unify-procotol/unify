@@ -1,5 +1,5 @@
 import { Connection, PublicKey, LAMPORTS_PER_SOL } from "@solana/web3.js";
-import { NetworkHandler } from "../types";
+import { NetworkHandler } from "./base";
 
 export class SolanaHandler implements NetworkHandler {
   public symbol = "SOL";

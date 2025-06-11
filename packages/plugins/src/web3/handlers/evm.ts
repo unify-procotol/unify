@@ -1,5 +1,5 @@
 import { ethers } from "ethers";
-import { NetworkHandler, SupportedNetwork } from "../types";
+import { NetworkHandler } from "./base";
 
 export class EVMHandler implements NetworkHandler {
   public symbol: string;
