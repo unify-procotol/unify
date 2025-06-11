@@ -1,12 +1,9 @@
 import { createClientFromSource } from "@unify-api/client";
 import { ORPC_DEMO_SOURCE_CONFIG } from "./config";
 
-const client = createClientFromSource<typeof ORPC_DEMO_SOURCE_CONFIG>(
-  ORPC_DEMO_SOURCE_CONFIG,
-  {
-    baseURL: "http://localhost:3000",
-  }
-);
+const client = createClientFromSource(ORPC_DEMO_SOURCE_CONFIG, {
+  baseURL: "http://localhost:3000",
+});
 
 async function demo() {
   console.log("🎯 类型化SDK演示\n");
@@ -31,6 +28,11 @@ async function demo() {
     console.log("响应数据:", response.data);
     // console.log("响应状态:", response.status);
     // console.log("响应头:", response.headers);
+
+    // await client.user2.create({
+    //   id: 789,
+    //   name: "test",
+    // });
 
     // 演示类型安全和运行时错误处理：
     // console.log("\n🔍 测试错误处理:");

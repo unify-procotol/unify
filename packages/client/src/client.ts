@@ -46,7 +46,7 @@ class HttpClient {
     let fullUrl = `${this.baseURL}${url}`;
 
     // 处理查询参数
-    if (method === "GET" && Object.keys(params).length > 0) {
+    if (Object.keys(params).length > 0) {
       const searchParams = new URLSearchParams();
       Object.entries(params).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
