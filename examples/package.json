@@ -5,11 +5,11 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "generate-migrations": "bun run generate-migrations.ts",
-    "blog-server": "bun run --watch blog-server.ts",
-    "uniweb3-server": "bun run --watch uniweb3.ts",
-    "orpc-server": "bun run --watch orpc/server.ts",
-    "orpc-client": "bun run --watch orpc/client.ts"
+    "generate-migrations": "bun run basic-usage/generate-migrations.ts",
+    "basic-usage": "bun run --watch basic-usage/server.ts",
+    "uniweb3": "bun run --watch uniweb3.ts",
+    "orpc-server": "bun run --watch orpc-usage/server.ts",
+    "orpc-client": "bun run --watch orpc-usage/client.ts"
   },
   "dependencies": {
     "@orpc/server": "^1.4.5",

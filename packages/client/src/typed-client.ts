@@ -1,6 +1,13 @@
-import { SourceConfig, EntityConfig, QueryArgs } from "unify-api";
+import {
+  SourceConfig,
+  EntityConfig,
+  FindManyArgs,
+  FindOneArgs,
+  CreateArgs,
+  UpdateArgs,
+  DeleteArgs,
+} from "unify-api";
 import { UnifyApiClient, ClientOptions, ApiResponse } from "./client";
-import type { z } from "zod";
 
 // 从实体配置推断实体类型
 type InferEntityType<T extends EntityConfig> = T extends {
@@ -14,7 +21,7 @@ type InferEntityType<T extends EntityConfig> = T extends {
         [K in keyof C]: C[K] extends { type: infer T; nullable: true }
           ? MapColumnType<T> | null
           : C[K] extends { type: infer T; default: any }
-          ? MapColumnType<T> | undefined
+          ? MapColumnType<T>
           : C[K] extends { type: infer T }
           ? MapColumnType<T>
           : any;
@@ -77,23 +84,22 @@ type HasORPCProcedures<T extends EntityConfig> = (
   : false;
 
 // 实体方法接口 - 标准类型推断
-interface TypedEntityMethods<TEntity> {
+interface TypedEntityMethods<TEntity extends EntityConfig> {
   findMany(
-    args?: Omit<QueryArgs, "source_id">
-  ): Promise<ApiResponse<TEntity[]>>;
+    args?: Omit<FindManyArgs<TEntity>, "source_id">
+  ): Promise<ApiResponse<Partial<TEntity>[]>>;
   findOne(
-    args: { id: string | number } & Record<string, any>
-  ): Promise<ApiResponse<TEntity>>;
-  create(data: Partial<TEntity>): Promise<ApiResponse<TEntity>>;
+    args?: Omit<FindOneArgs<TEntity>, "source_id">
+  ): Promise<ApiResponse<Partial<TEntity>>>;
+  create(
+    args?: Omit<CreateArgs<TEntity>, "source_id">
+  ): Promise<ApiResponse<Partial<TEntity>>>;
   update(
-    id: string | number,
-    data: Partial<TEntity>
-  ): Promise<ApiResponse<TEntity>>;
-  patch(
-    id: string | number,
-    data: Partial<TEntity>
-  ): Promise<ApiResponse<TEntity>>;
-  delete(id: string | number): Promise<ApiResponse<void>>;
+    args?: Omit<UpdateArgs<TEntity>, "source_id">
+  ): Promise<ApiResponse<Partial<TEntity>>>;
+  delete(
+    args?: Omit<DeleteArgs<TEntity>, "source_id">
+  ): Promise<ApiResponse<{ success: boolean; message: string }>>;
 }
 
 // 针对 oRPC 配置的特殊类型推断
@@ -101,7 +107,7 @@ type TypedEntityMethodsForORPC<TEntityConfig extends EntityConfig> = {
   findMany(
     args?: TEntityConfig extends { findMany?: infer F }
       ? ExtractORPCInputType<F>
-      : Omit<QueryArgs, "source_id">
+      : any
   ): Promise<
     ApiResponse<
       TEntityConfig extends { findMany?: infer F }
@@ -190,7 +196,6 @@ export function createTypedClient<TConfig extends SourceConfig>(
           findOne: entityClient.findOne.bind(entityClient),
           create: entityClient.create.bind(entityClient),
           update: entityClient.update.bind(entityClient),
-          patch: entityClient.patch.bind(entityClient),
           delete: entityClient.delete.bind(entityClient),
         };
       }

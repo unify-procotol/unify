@@ -1,7 +1,13 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 import { join } from "path";
 import { Storage } from "./interface";
-import { QueryArgs } from "../types";
+import {
+  CreateArgs,
+  DeleteArgs,
+  FindManyArgs,
+  FindOneArgs,
+  UpdateArgs,
+} from "../types";
 
 export interface TableData {
   records: Record<string, any>[];
@@ -54,30 +60,30 @@ export class FileStorage implements Storage {
   async create(
     sourceId: string,
     tableName: string,
-    record: Record<string, any>
+    args: CreateArgs
   ): Promise<Record<string, any>> {
     const tableData = this.loadTable(sourceId, tableName);
-
+    const { data } = args;
     // 添加自增ID（如果没有提供id）
-    if (!record.id) {
-      record.id = tableData.autoIncrement++;
+    if (!data.id) {
+      data.id = tableData.autoIncrement++;
     }
 
     // 添加时间戳
-    record.created_at = new Date().toISOString();
-    record.updated_at = record.created_at;
+    data.created_at = new Date().toISOString();
+    data.updated_at = data.created_at;
 
-    tableData.records.push(record);
+    tableData.records.push(data);
     this.saveTable(sourceId, tableName, tableData);
 
-    return record;
+    return data;
   }
 
   // 查找多条记录
   async findMany(
     sourceId: string,
     tableName: string,
-    args: QueryArgs
+    args: FindManyArgs
   ): Promise<Record<string, any>[]> {
     const tableData = this.loadTable(sourceId, tableName);
     let records = [...tableData.records];
@@ -132,30 +138,45 @@ export class FileStorage implements Storage {
   async findOne(
     sourceId: string,
     tableName: string,
-    id: string | number
+    args: FindOneArgs
   ): Promise<Record<string, any> | null> {
     const tableData = this.loadTable(sourceId, tableName);
-    const record = tableData.records.find((r) => r.id == id);
-    return record || null;
+    const { where, select } = args;
+    const records = tableData.records.filter((r) => {
+      return Object.entries(where).every(([key, value]) => r[key] === value);
+    });
+    if (select) {
+      return records.map((r) => {
+        const selected: Record<string, any> = {};
+        select.forEach((field) => {
+          if (r.hasOwnProperty(field)) {
+            selected[field] = r[field];
+          }
+        });
+        return selected;
+      });
+    }
+    return records[0] || null;
   }
 
   // 更新记录
   async update(
     sourceId: string,
     tableName: string,
-    id: string | number,
-    updates: Record<string, any>
+    args: UpdateArgs
   ): Promise<Record<string, any> | null> {
     const tableData = this.loadTable(sourceId, tableName);
-    const recordIndex = tableData.records.findIndex((r) => r.id == id);
+    const { where, data } = args;
 
+    const recordIndex = tableData.records.findIndex((r) =>
+      Object.entries(where).every(([key, value]) => r[key] === value)
+    );
     if (recordIndex === -1) {
       return null;
     }
 
-    // 更新记录
     const record = tableData.records[recordIndex];
-    Object.assign(record, updates);
+    Object.assign(record, data);
     record.updated_at = new Date().toISOString();
 
     this.saveTable(sourceId, tableName, tableData);
@@ -166,11 +187,14 @@ export class FileStorage implements Storage {
   async delete(
     sourceId: string,
     tableName: string,
-    id: string | number
+    args: DeleteArgs
   ): Promise<boolean> {
     const tableData = this.loadTable(sourceId, tableName);
-    const recordIndex = tableData.records.findIndex((r) => r.id == id);
 
+    const { where } = args;
+    const recordIndex = tableData.records.findIndex((r) =>
+      Object.entries(where).every(([key, value]) => r[key] === value)
+    );
     if (recordIndex === -1) {
       return false;
     }

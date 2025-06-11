@@ -1,64 +1,112 @@
 import { Context } from "hono";
-import { QueryArgs } from "./types";
+import { EntityFunctionName } from "./types";
+import { ContentfulStatusCode } from "hono/utils/http-status";
 
-/**
- * 从 URL 查询参数和请求体中解析参数
- */
-export async function parseRequestArgs(c: any): Promise<QueryArgs> {
-  const query = c.req.query();
-  const args: QueryArgs = {
-    ...query,
-  };
-
-  // 解析 limit
-  if (query.limit) {
-    const limit = parseInt(query.limit, 10);
-    if (!isNaN(limit)) {
-      args.limit = limit;
-    }
+// 解析 JSON 或返回默认值
+function parseJsonOrDefault(value: string, defaultValue: any = undefined): any {
+  try {
+    return JSON.parse(value);
+  } catch {
+    return defaultValue;
   }
+}
 
-  // 解析 offset
-  if (query.offset) {
-    const offset = parseInt(query.offset, 10);
-    if (!isNaN(offset)) {
-      args.offset = offset;
-    }
+// 解析整数参数
+function parseIntParam(value: string): number | undefined {
+  const parsed = parseInt(value, 10);
+  return isNaN(parsed) ? undefined : parsed;
+}
+
+// 解析 where 条件
+function parseWhereCondition(whereStr: string): any {
+  const parsed = parseJsonOrDefault(whereStr);
+  if (parsed !== undefined) return parsed;
+
+  // 如果不是 JSON，暂时返回 undefined
+  // 原始代码的简单键值对处理逻辑不完整
+  return undefined;
+}
+
+// 解析排序条件
+function parseOrderBy(orderStr: string): any {
+  const parsed = parseJsonOrDefault(orderStr);
+  if (parsed !== undefined) return parsed;
+
+  // 简单格式：field:asc 或 field:desc
+  const [field, direction] = orderStr.split(":");
+  if (field && (direction === "asc" || direction === "desc")) {
+    return { [field]: direction };
   }
+  return undefined;
+}
 
-  // 解析 select 字段
-  if (query.select) {
-    args.select = query.select.split(",").map((s: string) => s.trim());
-  }
+export async function parseRequestArgs(
+  c: Context,
+  entityFunction: EntityFunctionName
+) {
+  const method = c.req.method;
+  const args: Record<string, any> = {};
 
-  // 解析 where 条件
-  if (query.where) {
-    try {
-      args.where = JSON.parse(query.where);
-    } catch {
-      // 如果不是 JSON，则作为简单的键值对处理
-      args.where = { [query.where]: query[query.where] };
-    }
-  }
+  if (method === "GET") {
+    const query = c.req.query();
+    args.source_id = query.source_id;
 
-  // 解析 order_by
-  if (query.order_by) {
-    try {
-      args.order_by = JSON.parse(query.order_by);
-    } catch {
-      // 简单格式：field:asc 或 field:desc
-      const [field, direction] = query.order_by.split(":");
-      if (field && (direction === "asc" || direction === "desc")) {
-        args.order_by = { [field]: direction };
+    // 通用查询参数解析（findMany 和 findOne 都支持）
+    if (["findMany", "findOne"].includes(entityFunction)) {
+      if (query.where) {
+        const where = parseWhereCondition(query.where);
+        if (where !== undefined) {
+          args.where = where;
+        }
+      }
+
+      if (query.select) {
+        const select = parseJsonOrDefault(query.select);
+        if (select !== undefined) {
+          args.select = select;
+        }
       }
     }
-  }
 
-  // 对于 POST/PUT/PATCH 请求，合并请求体
-  if (["POST", "PUT", "PATCH"].includes(c.req.method)) {
+    // findMany 特有参数
+    if (entityFunction === "findMany") {
+      if (query.limit) {
+        const limit = parseIntParam(query.limit);
+        if (limit !== undefined) {
+          args.limit = limit;
+        }
+      }
+
+      if (query.offset) {
+        const offset = parseIntParam(query.offset);
+        if (offset !== undefined) {
+          args.offset = offset;
+        }
+      }
+
+      if (query.order_by) {
+        const orderBy = parseOrderBy(query.order_by);
+        if (orderBy !== undefined) {
+          args.order_by = orderBy;
+        }
+      }
+    }
+  } else if (["POST", "PATCH", "DELETE"].includes(method)) {
     try {
       const body = await c.req.json();
-      Object.assign(args, body);
+      args.source_id = body.source_id;
+      switch (entityFunction) {
+        case "create":
+          args.data = body.data;
+          break;
+        case "update":
+          args.where = body.where;
+          args.data = body.data;
+          break;
+        case "delete":
+          args.where = body.where;
+          break;
+      }
     } catch {
       // 忽略解析错误
     }
@@ -98,7 +146,7 @@ export function normalizeResponse(data: any): any {
 export function handleError(error: any): {
   error: string;
   message: string;
-  status: number;
+  status: ContentfulStatusCode;
 } {
   if (error.status && error.message) {
     return {

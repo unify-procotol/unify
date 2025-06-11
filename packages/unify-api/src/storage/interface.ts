@@ -1,4 +1,10 @@
-import { QueryArgs } from "../types";
+import {
+  CreateArgs,
+  DeleteArgs,
+  FindOneArgs,
+  QueryArgs,
+  UpdateArgs,
+} from "../types";
 
 export interface Storage {
   /**
@@ -7,7 +13,7 @@ export interface Storage {
   create(
     sourceId: string,
     tableName: string,
-    record: Record<string, any>
+    args: CreateArgs
   ): Promise<Record<string, any>>;
 
   /**
@@ -25,7 +31,7 @@ export interface Storage {
   findOne(
     sourceId: string,
     tableName: string,
-    id: string | number
+    args: FindOneArgs
   ): Promise<Record<string, any> | null>;
 
   /**
@@ -34,8 +40,7 @@ export interface Storage {
   update(
     sourceId: string,
     tableName: string,
-    id: string | number,
-    updates: Record<string, any>
+    args: UpdateArgs
   ): Promise<Record<string, any> | null>;
 
   /**
@@ -44,7 +49,7 @@ export interface Storage {
   delete(
     sourceId: string,
     tableName: string,
-    id: string | number
+    args: DeleteArgs
   ): Promise<boolean>;
 
   /**

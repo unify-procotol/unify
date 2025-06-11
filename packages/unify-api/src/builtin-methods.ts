@@ -1,5 +1,13 @@
 import { Storage } from "./storage/interface";
-import { QueryArgs, EntityFunction, EntityConfig } from "./types";
+import {
+  EntityFunction,
+  EntityConfig,
+  FindManyArgs,
+  FindOneArgs,
+  UpdateArgs,
+  CreateArgs,
+  DeleteArgs,
+} from "./types";
 
 export class BuiltinMethods {
   private storage: Storage;
@@ -63,8 +71,8 @@ export class BuiltinMethods {
   private createFindManyMethod(
     source_id: string,
     tableName: string
-  ): EntityFunction<QueryArgs> {
-    return async (args?: QueryArgs) => {
+  ): EntityFunction<FindManyArgs> {
+    return async (args?: FindManyArgs) => {
       return await this.storage.findMany(source_id, tableName, args);
     };
   }
@@ -75,16 +83,19 @@ export class BuiltinMethods {
   private createFindOneMethod(
     source_id: string,
     tableName: string
-  ): EntityFunction<QueryArgs> {
-    return async (args?: QueryArgs) => {
-      const id = args?.id;
-      if (!id) {
-        throw { status: 400, message: "ID is required" };
+  ): EntityFunction<FindOneArgs> {
+    return async (args?: FindOneArgs) => {
+      if (!args || !("where" in args) || !args.where) {
+        throw { status: 400, message: "Where condition is required" };
       }
 
-      const record = await this.storage.findOne(source_id, tableName, id);
+      const record = await this.storage.findOne(source_id, tableName, {
+        source_id,
+        where: args.where,
+        select: "select" in args ? args.select : undefined,
+      });
       if (!record) {
-        throw { status: 404, message: `Record with id ${id} not found` };
+        throw { status: 404, message: "Record not found" };
       }
 
       return record;
@@ -130,20 +141,13 @@ export class BuiltinMethods {
    */
   private filterSystemFields(
     data: Record<string, any>,
-    entityConfig: EntityConfig,
-    includeId: boolean = false
+    entityConfig: EntityConfig
   ): Record<string, any> {
     const systemFields = this.getSystemFields(entityConfig);
     const filteredData = { ...data };
-
     systemFields.forEach((field) => {
-      // 如果includeId为true且当前字段是id，则保留
-      if (includeId && field === "id") {
-        return;
-      }
       delete filteredData[field];
     });
-
     return filteredData;
   }
 
@@ -154,18 +158,16 @@ export class BuiltinMethods {
     source_id: string,
     tableName: string,
     entityConfig: EntityConfig
-  ): EntityFunction<QueryArgs> {
-    return async (args?: QueryArgs) => {
-      if (!args) {
-        throw { status: 400, message: "Request body is required" };
+  ): EntityFunction<CreateArgs> {
+    return async (args?: CreateArgs) => {
+      if (!args || !("data" in args) || !args.data) {
+        throw { status: 400, message: "Data is required" };
       }
-
-      const { source_id, ...restArgs } = args;
 
       // 验证必填字段
       if (entityConfig.table?.columns) {
         this.validateRequiredFields(
-          restArgs,
+          args.data,
           entityConfig.table.columns,
           "create",
           entityConfig
@@ -173,9 +175,12 @@ export class BuiltinMethods {
       }
 
       // 过滤掉系统字段
-      const recordData = this.filterSystemFields(args, entityConfig);
+      const recordData = this.filterSystemFields(args.data, entityConfig);
 
-      return await this.storage.create(source_id, tableName, recordData);
+      return await this.storage.create(source_id, tableName, {
+        source_id,
+        data: recordData,
+      });
     };
   }
 
@@ -186,36 +191,29 @@ export class BuiltinMethods {
     sourceId: string,
     tableName: string,
     entityConfig: EntityConfig
-  ): EntityFunction<QueryArgs> {
-    return async (args?: QueryArgs) => {
-      const id = args?.id;
-      if (!id) {
-        throw { status: 400, message: "ID is required" };
+  ): EntityFunction<UpdateArgs> {
+    return async (args?: UpdateArgs) => {
+      if (!args || !("where" in args) || !args.where) {
+        throw { status: 400, message: "Where condition is required" };
       }
 
-      if (!args) {
-        throw { status: 400, message: "Request body is required" };
+      if (!("data" in args) || !args.data) {
+        throw { status: 400, message: "Data is required" };
       }
 
-      const { source_id, ...restArgs } = args;
-
-      // 过滤掉系统字段（但保留ID用于查询，然后从更新数据中移除）
-      const updateData = this.filterSystemFields(restArgs, entityConfig);
-      // 确保ID不在更新数据中
-      delete updateData.id;
-
+      // 过滤掉系统字段
+      const updateData = this.filterSystemFields(args.data, entityConfig);
       if (Object.keys(updateData).length === 0) {
         throw { status: 400, message: "No fields to update" };
       }
 
-      const updatedRecord = await this.storage.update(
-        source_id,
-        tableName,
-        id,
-        updateData
-      );
+      const updatedRecord = await this.storage.update(sourceId, tableName, {
+        source_id: sourceId,
+        where: args.where,
+        data: updateData,
+      });
       if (!updatedRecord) {
-        throw { status: 404, message: `Record with id ${id} not found` };
+        throw { status: 404, message: "Record not found" };
       }
 
       return updatedRecord;
@@ -228,21 +226,21 @@ export class BuiltinMethods {
   private createDeleteMethod(
     sourceId: string,
     tableName: string
-  ): EntityFunction<QueryArgs> {
-    return async (args?: QueryArgs) => {
-      const id = args?.id;
-      if (!id) {
-        throw { status: 400, message: "ID is required" };
+  ): EntityFunction<DeleteArgs> {
+    return async (args?: DeleteArgs) => {
+      if (!args || !("where" in args) || !args.where) {
+        throw { status: 400, message: "Where condition is required" };
       }
-
-      const deleted = await this.storage.delete(sourceId, tableName, id);
+      const deleted = await this.storage.delete(sourceId, tableName, {
+        source_id: sourceId,
+        where: args.where,
+      });
       if (!deleted) {
-        throw { status: 404, message: `Record with id ${id} not found` };
+        throw { status: 404, message: "Record not found" };
       }
-
       return {
         success: true,
-        message: `Record with id ${id} deleted successfully`,
+        message: "Record deleted successfully",
       };
     };
   }

@@ -165,7 +165,7 @@ SDK 会自动将实体方法映射为 REST API 端点：
 GET /github/user?limit=10
 
 # 获取指定字段
-GET /github/user?select=id,name,email
+GET /github/user?select=["id","name","email"]
 
 # 按条件查询
 GET /github/user?where={"status":"active"}

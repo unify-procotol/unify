@@ -1,16 +1,20 @@
-import { SourceConfig, QueryArgs } from "unify-api";
+import {
+  SourceConfig,
+  FindManyArgs,
+  FindOneArgs,
+  UpdateArgs,
+  DeleteArgs,
+  CreateArgs,
+} from "unify-api";
 
-// 客户端配置选项
 export interface ClientOptions {
   baseURL: string;
   timeout?: number;
   headers?: Record<string, string>;
 }
 
-// HTTP方法类型
-type HttpMethod = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
+type HttpMethod = "GET" | "POST" | "PATCH" | "DELETE";
 
-// API请求参数类型
 interface ApiRequestConfig {
   method: HttpMethod;
   url: string;
@@ -19,7 +23,6 @@ interface ApiRequestConfig {
   headers?: Record<string, string>;
 }
 
-// API响应类型
 interface ApiResponse<T = any> {
   data: T;
   status: number;
@@ -27,7 +30,6 @@ interface ApiResponse<T = any> {
   headers: Record<string, string>;
 }
 
-// 基础HTTP客户端
 class HttpClient {
   private baseURL: string;
   private timeout: number;
@@ -129,86 +131,53 @@ class EntityClient<TEntity = any> {
     private entityName: string
   ) {}
 
-  // 查找多个记录
-  async findMany(
-    args?: Omit<QueryArgs, "source_id">
-  ): Promise<ApiResponse<TEntity[]>> {
-    const params = {
-      source_id: this.sourceId,
-      ...args,
-    };
-
+  async findMany(args: FindManyArgs): Promise<ApiResponse<TEntity[]>> {
+    args.source_id = this.sourceId;
     return this.httpClient.request<TEntity[]>({
       method: "GET",
-      url: `/${this.entityName}`,
-      params,
+      url: `/${this.entityName}/list`,
+      params: args,
     });
   }
 
-  // 查找单个记录
-  async findOne(
-    args: { id: string | number } & Record<string, any>
-  ): Promise<ApiResponse<TEntity>> {
-    const { id, ...restArgs } = args;
-    const params = {
-      source_id: this.sourceId,
-      ...restArgs,
-    };
-
+  async findOne(args: FindOneArgs): Promise<ApiResponse<TEntity>> {
+    args.source_id = this.sourceId;
     return this.httpClient.request<TEntity>({
       method: "GET",
-      url: `/${this.entityName}/${id}`,
-      params,
+      url: `/${this.entityName}/find_one`,
+      params: args,
     });
   }
 
-  // 创建记录
-  async create(data: Partial<TEntity>): Promise<ApiResponse<TEntity>> {
+  async create(args: CreateArgs): Promise<ApiResponse<TEntity>> {
+    args.source_id = this.sourceId;
+    console.log("args===>", args);
     return this.httpClient.request<TEntity>({
       method: "POST",
-      url: `/${this.entityName}`,
-      params: { source_id: this.sourceId },
-      data,
+      url: `/${this.entityName}/create`,
+      data: args,
     });
   }
 
-  // 更新记录
-  async update(
-    id: string | number,
-    data: Partial<TEntity>
-  ): Promise<ApiResponse<TEntity>> {
-    return this.httpClient.request<TEntity>({
-      method: "PUT",
-      url: `/${this.entityName}/${id}`,
-      params: { source_id: this.sourceId },
-      data,
-    });
-  }
-
-  // 部分更新记录
-  async patch(
-    id: string | number,
-    data: Partial<TEntity>
-  ): Promise<ApiResponse<TEntity>> {
+  async update(args: UpdateArgs): Promise<ApiResponse<TEntity>> {
+    args.source_id = this.sourceId;
     return this.httpClient.request<TEntity>({
       method: "PATCH",
-      url: `/${this.entityName}/${id}`,
-      params: { source_id: this.sourceId },
-      data,
+      url: `/${this.entityName}/update`,
+      data: args,
     });
   }
 
-  // 删除记录
-  async delete(id: string | number): Promise<ApiResponse<void>> {
+  async delete(args: DeleteArgs): Promise<ApiResponse<void>> {
+    args.source_id = this.sourceId;
     return this.httpClient.request<void>({
       method: "DELETE",
-      url: `/${this.entityName}/${id}`,
-      params: { source_id: this.sourceId },
+      url: `/${this.entityName}/delete`,
+      data: args,
     });
   }
 }
 
-// SDK客户端主类
 export class UnifyApiClient {
   private httpClient: HttpClient;
   private entities: Record<string, EntityClient> = {};
@@ -281,5 +250,5 @@ type ExtractEntityTypes<T extends SourceConfig> = {
 export type TypedClient<T extends SourceConfig> = ExtractEntityTypes<T>;
 
 // 导出主要类型
-export type { ApiResponse, QueryArgs };
+export type { ApiResponse };
 export { EntityClient, HttpClient };

@@ -6,6 +6,7 @@ import {
   EntityConfig,
   ORPCProcedure,
   EntityFunction,
+  EntityFunctionName,
 } from "./types";
 import {
   parseRequestArgs,
@@ -305,7 +306,7 @@ export class RestMapper {
               method: mapping.method,
               path,
               entityName,
-              methodName,
+              entityFunctionName: methodName as EntityFunctionName,
             });
             this.setupEntityPaths.add(routeKey);
           }
@@ -321,24 +322,24 @@ export class RestMapper {
     method,
     path,
     entityName,
-    methodName,
+    entityFunctionName,
   }: {
     method: string;
     path: string;
     entityName: string;
-    methodName: string;
+    entityFunctionName: EntityFunctionName;
   }): void {
-    const routeHandler = async (c: any) => {
+    const routeHandler = async (c: Context) => {
       try {
         // 解析请求参数
-        const args = await parseRequestArgs(c);
+        const args = await parseRequestArgs(c, entityFunctionName);
 
         // 添加路径参数
-        const pathParams = c.req.param();
-        Object.assign(args, pathParams);
+        // const pathParams = c.req.param();
+        // Object.assign(args, pathParams);
 
         // 检查source_id参数
-        const sourceId = args.source_id || c.req.query("source_id");
+        const sourceId = args.source_id;
         if (!sourceId) {
           return c.json({ error: "source_id parameter is required" }, 400);
         }
@@ -349,12 +350,12 @@ export class RestMapper {
           return c.json({ error: `Source '${sourceId}' not found` }, 404);
         }
 
-        const methodKey = `${entityName}:${methodName}`;
+        const methodKey = `${entityName}:${entityFunctionName}`;
         const routeCache = sourceCache.get(methodKey);
         if (!routeCache) {
           return c.json(
             {
-              error: `Method '${methodName}' not found for entity '${entityName}' in source '${sourceId}'`,
+              error: `Method '${entityFunctionName}' not found for entity '${entityName}' in source '${sourceId}'`,
             },
             404
           );

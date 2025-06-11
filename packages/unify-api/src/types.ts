@@ -1,19 +1,44 @@
 import { BlankEnv, BlankSchema } from "hono/types";
 import { PGStorageConfig } from "./storage/pg";
-import type { Hono } from "hono";
+import type { Context, Hono } from "hono";
 
-type BaseArgs = {
+export interface FindManyArgs<T = Record<string, any>> {
   source_id: string;
-} & Record<string, any>;
-
-// 基础查询参数类型
-export interface QueryArgs extends BaseArgs {
   limit?: number;
   offset?: number;
-  select?: string[];
-  where?: Record<string, any>;
+  select?: Array<keyof T>;
+  where?: Partial<T>;
   order_by?: Record<string, "asc" | "desc">;
 }
+
+export interface FindOneArgs<T = Record<string, any>> {
+  source_id: string;
+  where: Partial<T>;
+  select?: Array<keyof T>;
+}
+
+export interface CreateArgs<T = Record<string, any>> {
+  source_id: string;
+  data: Partial<T>;
+}
+
+export interface UpdateArgs<T = Record<string, any>> {
+  source_id: string;
+  where: Partial<T>;
+  data: Partial<T>;
+}
+
+export interface DeleteArgs<T = Record<string, any>> {
+  source_id: string;
+  where: Partial<T>;
+}
+
+export type QueryArgs<T = Record<string, any>> =
+  | FindManyArgs<T>
+  | FindOneArgs<T>
+  | CreateArgs<T>
+  | UpdateArgs<T>
+  | DeleteArgs<T>;
 
 // 数据库字段类型
 export type DatabaseColumnType =
@@ -67,9 +92,8 @@ export type DatabaseDefaultValue =
   | "BIGSERIAL" // PostgreSQL 序列
   | "NOW()"; // SQL 函数
 
-// 实体方法类型 - 基础接口
-export interface EntityFunction<TArgs = QueryArgs> {
-  (args?: TArgs, context?: any): Promise<any> | any;
+export interface EntityFunction<TArgs = Record<string, any>> {
+  (args?: TArgs, context?: Context): Promise<any> | any;
 }
 
 // oRPC Procedure 类型定义
@@ -81,7 +105,9 @@ export interface ORPCProcedure {
 }
 
 // 支持的实体处理器类型 - 支持普通函数和 oRPC procedures
-export type EntityProcedure<TArgs = any> = EntityFunction<TArgs> | ORPCProcedure;
+export type EntityProcedure<TArgs = Record<string, any>> =
+  | EntityFunction<TArgs>
+  | ORPCProcedure;
 
 // 支持的实体方法名类型
 export type EntityFunctionName =
@@ -93,11 +119,11 @@ export type EntityFunctionName =
 
 // 实体配置类型 - 使用更灵活的方法定义
 export interface EntityConfig {
-  findMany?: EntityProcedure<QueryArgs>;
-  findOne?: EntityProcedure<BaseArgs>; // 允许任意参数类型
-  create?: EntityProcedure<BaseArgs>;
-  update?: EntityProcedure<BaseArgs>;
-  delete?: EntityProcedure<BaseArgs>;
+  findMany?: EntityProcedure<FindManyArgs>;
+  findOne?: EntityProcedure<FindOneArgs>;
+  create?: EntityProcedure<CreateArgs>;
+  update?: EntityProcedure<UpdateArgs>;
+  delete?: EntityProcedure<DeleteArgs>;
   table?: {
     name: string;
     schema: string;
@@ -144,7 +170,7 @@ export interface App extends Hono<BlankEnv, BlankSchema, "/"> {}
 
 // REST API 映射配置
 export interface RestMethodMapping {
-  method: "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
+  method: "GET" | "POST" | "PATCH" | "DELETE";
   path: string;
   handler: EntityFunction<any>;
 }
@@ -154,11 +180,9 @@ export const DEFAULT_METHOD_MAPPING: Record<
   string,
   { method: string; pathSuffix?: string }
 > = {
-  findMany: { method: "GET" },
-  findOne: { method: "GET", pathSuffix: "/:id" },
-  create: { method: "POST" },
-  update: { method: "PUT", pathSuffix: "/:id" },
-  patch: { method: "PATCH", pathSuffix: "/:id" },
-  delete: { method: "DELETE", pathSuffix: "/:id" },
-  remove: { method: "DELETE", pathSuffix: "/:id" },
+  findMany: { method: "GET", pathSuffix: "/list" },
+  findOne: { method: "GET", pathSuffix: "/find_one" },
+  create: { method: "POST", pathSuffix: "/create" },
+  update: { method: "PATCH", pathSuffix: "/update" },
+  delete: { method: "DELETE", pathSuffix: "/delete" },
 };

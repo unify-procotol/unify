@@ -1,6 +1,12 @@
 import { Pool, PoolConfig, QueryResult } from "pg";
 import { Storage } from "./interface";
-import { QueryArgs } from "../types";
+import {
+  CreateArgs,
+  FindOneArgs,
+  UpdateArgs,
+  DeleteArgs,
+  QueryArgs,
+} from "../types";
 
 export interface PGStorageConfig extends PoolConfig {}
 
@@ -57,14 +63,14 @@ export class PGStorage implements Storage {
   async create(
     sourceId: string,
     tableName: string,
-    record: Record<string, any>
+    args: CreateArgs
   ): Promise<Record<string, any>> {
     const fullTableName = this.getFullTableName(sourceId, tableName);
     const client = await this.pool.connect();
 
     try {
-      const keys = Object.keys(record);
-      const values = Object.values(record);
+      const keys = Object.keys(args.data);
+      const values = Object.values(args.data);
       const placeholders = keys.map((_, index) => `$${index + 1}`).join(", ");
 
       const query = `
@@ -86,7 +92,7 @@ export class PGStorage implements Storage {
   async findMany(
     sourceId: string,
     tableName: string,
-    args: QueryArgs
+    args?: QueryArgs
   ): Promise<Record<string, any>[]> {
     const fullTableName = this.getFullTableName(sourceId, tableName);
     const client = await this.pool.connect();
@@ -95,7 +101,7 @@ export class PGStorage implements Storage {
       let query = `SELECT `;
 
       // 字段选择
-      if (args.select && args.select.length > 0) {
+      if (args && "select" in args && args.select && args.select.length > 0) {
         query += args.select.join(", ");
       } else {
         query += "*";
@@ -107,7 +113,7 @@ export class PGStorage implements Storage {
       let paramIndex = 1;
 
       // WHERE条件
-      if (args.where) {
+      if (args && "where" in args && args.where) {
         const whereClause = this.buildWhereClause(args.where, paramIndex);
         query += ` ${whereClause.clause}`;
         queryValues.push(...whereClause.values);
@@ -115,19 +121,19 @@ export class PGStorage implements Storage {
       }
 
       // ORDER BY
-      if (args.order_by) {
+      if (args && "order_by" in args && args.order_by) {
         query += ` ${this.buildOrderByClause(args.order_by)}`;
       }
 
       // LIMIT
-      if (args.limit) {
+      if (args && "limit" in args && args.limit) {
         query += ` LIMIT $${paramIndex}`;
         queryValues.push(args.limit);
         paramIndex++;
       }
 
       // OFFSET
-      if (args.offset) {
+      if (args && "offset" in args && args.offset) {
         query += ` OFFSET $${paramIndex}`;
         queryValues.push(args.offset);
       }
@@ -145,14 +151,34 @@ export class PGStorage implements Storage {
   async findOne(
     sourceId: string,
     tableName: string,
-    id: string | number
+    args: FindOneArgs
   ): Promise<Record<string, any> | null> {
     const fullTableName = this.getFullTableName(sourceId, tableName);
     const client = await this.pool.connect();
 
     try {
-      const query = `SELECT * FROM ${fullTableName} WHERE id = $1`;
-      const result: QueryResult = await client.query(query, [id]);
+      let query = `SELECT `;
+
+      // 字段选择
+      if (args.select && args.select.length > 0) {
+        query += args.select.join(", ");
+      } else {
+        query += "*";
+      }
+
+      query += ` FROM ${fullTableName}`;
+
+      const queryValues: any[] = [];
+
+      // WHERE条件
+      const whereClause = this.buildWhereClause(args.where, 1);
+      query += ` ${whereClause.clause}`;
+      queryValues.push(...whereClause.values);
+
+      // 限制返回一条记录
+      query += ` LIMIT 1`;
+
+      const result: QueryResult = await client.query(query, queryValues);
       return result.rows[0] || null;
     } finally {
       client.release();
@@ -165,27 +191,32 @@ export class PGStorage implements Storage {
   async update(
     sourceId: string,
     tableName: string,
-    id: string | number,
-    updates: Record<string, any>
+    args: UpdateArgs
   ): Promise<Record<string, any> | null> {
     const fullTableName = this.getFullTableName(sourceId, tableName);
     const client = await this.pool.connect();
 
     try {
-      const keys = Object.keys(updates);
-      const values = Object.values(updates);
+      const keys = Object.keys(args.data);
+      const values = Object.values(args.data);
       const setClause = keys
         .map((key, index) => `${key} = $${index + 1}`)
         .join(", ");
 
+      // 构建WHERE子句
+      const whereClause = this.buildWhereClause(args.where, keys.length + 1);
+
       const query = `
         UPDATE ${fullTableName}
         SET ${setClause}
-        WHERE id = $${keys.length + 1}
+        ${whereClause.clause}
         RETURNING *
       `;
 
-      const result: QueryResult = await client.query(query, [...values, id]);
+      const result: QueryResult = await client.query(query, [
+        ...values,
+        ...whereClause.values,
+      ]);
       return result.rows[0] || null;
     } finally {
       client.release();
@@ -198,14 +229,17 @@ export class PGStorage implements Storage {
   async delete(
     sourceId: string,
     tableName: string,
-    id: string | number
+    args: DeleteArgs
   ): Promise<boolean> {
     const fullTableName = this.getFullTableName(sourceId, tableName);
     const client = await this.pool.connect();
 
     try {
-      const query = `DELETE FROM ${fullTableName} WHERE id = $1`;
-      const result: QueryResult = await client.query(query, [id]);
+      // 构建WHERE子句
+      const whereClause = this.buildWhereClause(args.where, 1);
+
+      const query = `DELETE FROM ${fullTableName} ${whereClause.clause}`;
+      const result: QueryResult = await client.query(query, whereClause.values);
       return result.rowCount !== null && result.rowCount > 0;
     } finally {
       client.release();
