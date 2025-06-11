@@ -205,10 +205,39 @@ export function createTypedClient<TConfig extends SourceConfig>(
   });
 }
 
-// 主要的导出函数
-export function createClientFromSource<TConfig extends SourceConfig>(
+export type InferClientMapType<T extends Record<string, SourceConfig>> = {
+  [K in keyof T]: InferClientType<T[K]>;
+};
+
+export function createClient<TConfig extends SourceConfig>(
   sourceConfig: TConfig,
   clientOptions: ClientOptions
-): InferClientType<TConfig> {
-  return createTypedClient(sourceConfig, clientOptions);
+): InferClientType<TConfig>;
+
+export function createClient<TSourceMap extends Record<string, SourceConfig>>(
+  sourceMap: TSourceMap,
+  clientOptions: ClientOptions
+): InferClientMapType<TSourceMap>;
+
+export function createClient<
+  T extends SourceConfig | Record<string, SourceConfig>
+>(
+  config: T,
+  clientOptions: ClientOptions
+): T extends SourceConfig
+  ? InferClientType<T>
+  : T extends Record<string, SourceConfig>
+  ? InferClientMapType<T>
+  : never {
+  // 检查是否为单个源配置（包含 id 和 entities 属性）
+  if ("id" in config && "entities" in config) {
+    return createTypedClient(config as any, clientOptions) as any;
+  }
+
+  // 否则视为源配置映射
+  const clientMap = {} as any;
+  for (const [pluginName, sourceConfig] of Object.entries(config)) {
+    clientMap[pluginName] = createTypedClient(sourceConfig, clientOptions);
+  }
+  return clientMap;
 }

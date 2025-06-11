@@ -1,1 +1,1 @@
-export { createClientFromSource } from "./typed-client";
+export { createClient } from "./typed-client";

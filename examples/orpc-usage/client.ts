@@ -1,7 +1,7 @@
-import { createClientFromSource } from "@unify-api/client";
+import { createClient } from "@unify-api/client";
 import { ORPC_DEMO_SOURCE_CONFIG } from "./config";
 
-const client = createClientFromSource(ORPC_DEMO_SOURCE_CONFIG, {
+const client = createClient(ORPC_DEMO_SOURCE_CONFIG, {
   baseURL: "http://localhost:3000",
 });
 

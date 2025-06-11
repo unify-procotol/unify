@@ -50,10 +50,12 @@ export class PGStorage implements Storage {
   /**
    * 构建ORDER BY子句
    */
-  private buildOrderByClause(orderBy: Record<string, "asc" | "desc">): string {
-    const orders = Object.entries(orderBy).map(
-      ([field, direction]) => `${field} ${direction.toUpperCase()}`
-    );
+  private buildOrderByClause(
+    orderBy: Partial<Record<string, "asc" | "desc">>
+  ): string {
+    const orders = Object.entries(orderBy)
+      .filter(([_, direction]) => !!direction)
+      .map(([field, direction]) => `${field} ${direction!.toUpperCase()}`);
     return orders.length > 0 ? `ORDER BY ${orders.join(", ")}` : "";
   }
 
