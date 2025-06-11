@@ -30,8 +30,8 @@ async function demo() {
     // console.log("响应头:", response.headers);
 
     // await client.user2.create({
-    //   id: 789,
     //   name: "test",
+    //   age: 18,
     // });
 
     // 演示类型安全和运行时错误处理：

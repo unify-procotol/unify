@@ -34,10 +34,15 @@ export const ORPC_DEMO_SOURCE_CONFIG = {
             type: "integer" as const,
             nullable: false,
             unique: true,
+            default: "AUTO_INCREMENT",
           },
           name: {
             type: "varchar" as const,
             nullable: false,
+          },
+          age: {
+            type: "integer" as const,
+            nullable: true,
           },
         },
       },
