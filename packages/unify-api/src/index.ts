@@ -1,4 +1,4 @@
-export { RestMapper } from "./rest-mapper";
+export { Adapter } from "./adapter";
 export {
   SourceConfig,
   EntityConfig,
@@ -12,7 +12,7 @@ export {
   CreateArgs,
   DeleteArgs,
   RestMethodMapping,
-  RestMapperOptions,
+  AdapterOptions,
   App,
   DatabaseDefaultValue,
   DEFAULT_METHOD_MAPPING,
@@ -28,9 +28,15 @@ export { FileStorage } from "./storage/file";
 export { PGStorage, PGStorageConfig } from "./storage/pg";
 export { BuiltinMethods } from "./builtin-methods";
 
-import { RestMapper } from "./rest-mapper";
-import { RestMapperOptions } from "./types";
+import { Adapter } from "./adapter";
+import { App, AdapterOptions } from "./types";
 
-export function createSource(options?: RestMapperOptions) {
-  return new RestMapper(undefined, options);
+export function createSource({
+  app,
+  options,
+}: {
+  app?: App;
+  options?: AdapterOptions;
+} = {}) {
+  return new Adapter(app, options);
 }

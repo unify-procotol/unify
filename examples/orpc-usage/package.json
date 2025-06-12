@@ -1,16 +1,12 @@
 {
-  "name": "unify-api-examples",
+  "name": "unify-api-orpc-usage",
   "version": "1.0.0",
   "description": "Examples for unify-api",
   "private": true,
   "type": "module",
   "scripts": {
-    "generate-migrations": "bun run basic-usage/generate-migrations.ts",
-    "basic-usage": "bun run --watch basic-usage/server.ts",
-    "uniweb3": "bun run --watch plugins-usage/uniweb3.ts",
-    "uniweb3-client": "bun run --watch plugins-usage/client.ts",
-    "orpc-server": "bun run --watch orpc-usage/server.ts",
-    "orpc-client": "bun run --watch orpc-usage/client.ts"
+    "server": "bun run --watch server.ts",
+    "client": "bun run --watch client.ts"
   },
   "dependencies": {
     "@orpc/server": "^1.4.5",

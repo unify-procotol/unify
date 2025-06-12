@@ -151,14 +151,10 @@ export interface SourceConfig {
   middleware?: Array<(c: any, next: () => Promise<void>) => Promise<void>>;
 }
 
-// RestMapper 配置选项
-export interface RestMapperOptions {
-  /** 是否启用内置路由（根路径和API文档），默认为 true */
-  enableBuiltinRoutes?: boolean;
-  /** 自定义根路径响应信息 */
-  rootMessage?: string;
+// Adapter 配置选项
+export interface AdapterOptions {
   /** 自定义存储配置 */
-  storageOptions?:
+  storage?:
     | {
         type: "file";
         dataDir?: string;

@@ -12,10 +12,12 @@ const requireAuth = async (c: any, next: () => Promise<void>) => {
 };
 
 const source = createSource({
-  storageOptions: {
-    type: "pg",
-    config: {
-      connectionString: process.env.DATABASE_URL!,
+  options: {
+    storage: {
+      type: "pg",
+      config: {
+        connectionString: process.env.DATABASE_URL!,
+      },
     },
   },
 });

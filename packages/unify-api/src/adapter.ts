@@ -1,7 +1,7 @@
 import {
   SourceConfig,
   DEFAULT_METHOD_MAPPING,
-  RestMapperOptions,
+  AdapterOptions,
   App,
   EntityConfig,
   ORPCProcedure,
@@ -31,30 +31,23 @@ interface RouteCache {
 /**
  * REST API 映射器类
  */
-export class RestMapper {
+export class Adapter {
   private app: App;
-  private sources: Map<string, SourceConfig> = new Map();
-  private options: RestMapperOptions;
   private storage: Storage;
   private builtinMethods: BuiltinMethods;
+  private sources: Map<string, SourceConfig> = new Map();
   private setupEntityPaths: Set<string> = new Set();
   private routeCache: Map<string, Map<string, RouteCache>> = new Map();
 
-  constructor(app?: App, options: RestMapperOptions = {}) {
-    this.options = {
-      enableBuiltinRoutes: true,
-      rootMessage: "REST API Server",
-      ...options,
-    };
-
+  constructor(app?: App, options: AdapterOptions = {}) {
     // 初始化存储实例
-    switch (options.storageOptions?.type) {
+    switch (options.storage?.type) {
       case "pg":
-        this.storage = new PGStorage(options.storageOptions.config);
+        this.storage = new PGStorage(options.storage.config);
         break;
       default:
         this.storage = new FileStorage(
-          options.storageOptions?.dataDir || "./data"
+          options.storage?.dataDir || "./data"
         );
     }
 
@@ -73,11 +66,6 @@ export class RestMapper {
           "Hono is required. Please install hono: npm install hono"
         );
       }
-    }
-
-    // 根据配置决定是否启用内置路由
-    if (this.options.enableBuiltinRoutes) {
-      this.setupBuiltinRoutes();
     }
   }
 
@@ -244,19 +232,6 @@ export class RestMapper {
       }
     });
     return procedures;
-  }
-
-  /**
-   * 设置内置路由（根路径和API文档）
-   */
-  private setupBuiltinRoutes(): void {
-    // 根路径 - 返回API服务器信息
-    this.app.get("/", (c: any) => {
-      return c.json({
-        message: this.options.rootMessage,
-        routes: this.app.routes.map((r) => `${r.method} ${r.path}`),
-      });
-    });
   }
 
   /**
