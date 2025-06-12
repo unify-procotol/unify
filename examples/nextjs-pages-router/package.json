@@ -1,0 +1,29 @@
+{
+  "name": "nextjs-pages-router",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --turbopack",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.14.4",
+    "@unify-api/client": "workspace:*",
+    "@unify-api/plugins": "workspace:*",
+    "hono": "^4.7.11",
+    "next": "15.3.3",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "unify-api": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@tailwindcss/postcss": "^4",
+    "tailwindcss": "^4"
+  }
+}
