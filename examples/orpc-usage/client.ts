@@ -19,22 +19,22 @@ async function demo() {
   );
 
   try {
-    // const findManyRes = await client.user.findMany({
-    //   where: {
-    //     name: "test",
-    //   },
-    //   select: ["id"],
-    //   order_by: {
-    //     id: "asc",
-    //   },
-    // });
+    const findManyRes = await client.user.findMany({
+      where: {
+        name: "test",
+      },
+      select: ["id"],
+      order_by: {
+        id: "asc",
+      },
+    });
 
-    // const findOneRes = await client.user.findOne({
-    //   where: {
-    //     id: 123,
-    //   },
-    //   select: ["id", "name"],
-    // });
+    const findOneRes = await client.user.findOne({
+      where: {
+        id: 123,
+      },
+      select: ["id", "name"],
+    });
 
     // console.log("✅ 成功！");
     // console.log("findManyRes:", findManyRes.data);
