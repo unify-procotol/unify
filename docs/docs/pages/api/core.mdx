@@ -1,0 +1,397 @@
+# Core API
+
+This page documents the core API functions and methods provided by Unify API.
+
+## createSource
+
+Creates a new source instance for registering entity configurations.
+
+### Signature
+
+```typescript
+function createSource(options?: {
+  app?: App;
+  options?: AdapterOptions;
+}): Source
+```
+
+### Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `options` | `{ app?: App; options?: AdapterOptions }` | Optional configuration options |
+
+
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `app` | `Hono` | `new Hono()` | Custom Hono instance |
+| `options` | `AdapterOptions` | `{}` | Adapter options |
+
+### Example
+
+```typescript
+import { createSource } from 'unify-api';
+import { Hono } from 'hono';
+
+// Basic usage
+const source = createSource();
+
+// With custom Hono app
+const app = new Hono();
+const source = createSource({ app });
+```
+
+## Source.register
+
+Registers entity configurations or plugins with the source.
+
+### Signature
+
+```typescript
+register(config: SourceConfig | SourceConfig[] | Plugin | Plugin[]): void
+```
+
+### Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `config` | `SourceConfig \| SourceConfig[] \| Plugin \| Plugin[]` | Configuration(s) or plugin(s) to register |
+
+### SourceConfig
+
+```typescript
+interface SourceConfig {
+  id: string;
+  entities: Record<string, EntityConfig>;
+  middleware?: MiddlewareHandler[];
+}
+```
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `id` | `string` | Unique identifier for the source |
+| `entities` | `Record<string, EntityConfig>` | Entity configurations |
+| `middleware` | `MiddlewareHandler[]` | Optional middleware for all entities |
+
+### EntityConfig
+
+```typescript
+interface EntityConfig {
+  // Custom methods
+  findMany?: MethodHandler;
+  findOne?: MethodHandler;
+  create?: MethodHandler;
+  update?: MethodHandler;
+  delete?: MethodHandler;
+  
+  // Or table configuration
+  table?: TableConfig;
+  
+  // Entity-specific middleware
+  middleware?: MiddlewareHandler[];
+}
+```
+
+### Example
+
+```typescript
+const source = createSource();
+
+// Register single configuration
+source.register({
+  id: "my-api",
+  entities: {
+    user: {
+      findMany: async (args) => {
+        // Implementation
+      }
+    }
+  }
+});
+
+// Register multiple configurations
+source.register([config1, config2]);
+```
+
+## Source.getApp
+
+Returns the underlying Hono application instance.
+
+### Signature
+
+```typescript
+getApp(): Hono
+```
+
+### Returns
+
+| Type | Description |
+|------|-------------|
+| `Hono` | The Hono application instance with registered routes |
+
+### Example
+
+```typescript
+const source = createSource();
+source.register(myConfig);
+
+const app = source.getApp();
+
+// Start server with Bun
+export default {
+  port: 3000,
+  fetch: app.fetch,
+};
+
+// Or use with Express
+import express from 'express';
+const expressApp = express();
+expressApp.use('/', app.fetch);
+```
+
+## createClient
+
+Creates a type-safe client for interacting with your API.
+
+### Signature
+
+```typescript
+function createClient<T extends SourceConfig>(
+  config: T,
+  options: ClientOptions
+): Client<T>
+```
+
+### Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `config` | `T extends SourceConfig` | Source configuration |
+| `options` | `ClientOptions` | Client configuration options |
+
+### ClientOptions
+
+```typescript
+interface ClientOptions {
+  baseURL: string;
+  headers?: Record<string, string>;
+  timeout?: number;
+  fetch?: typeof fetch;
+}
+```
+
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `baseURL` | `string` | - | Base URL for API requests |
+| `headers` | `Record<string, string>` | `{}` | Default headers |
+| `timeout` | `number` | `5000` | Request timeout in milliseconds |
+| `fetch` | `typeof fetch` | `globalThis.fetch` | Custom fetch implementation |
+
+### Example
+
+```typescript
+import { createClient } from '@unify-api/client';
+
+const client = createClient(myConfig, {
+  baseURL: 'http://localhost:3000',
+  headers: {
+    'Authorization': 'Bearer token'
+  },
+  timeout: 10000
+});
+
+// Use the client
+const users = await client.user.findMany();
+```
+
+## Method Handlers
+
+Method handlers are functions that implement the business logic for entity operations.
+
+### Signature
+
+```typescript
+type MethodHandler = (args?: MethodArgs) => Promise<any> | any;
+```
+
+### MethodArgs
+
+```typescript
+interface MethodArgs {
+  where?: Record<string, any>;
+  select?: string[];
+  data?: Record<string, any>;
+  limit?: number;
+  offset?: number;
+  order_by?: Record<string, 'asc' | 'desc'>;
+}
+```
+
+### ORPC Integration
+
+For enhanced type safety and validation, use ORPC:
+
+```typescript
+import { os } from '@orpc/server';
+import { z } from 'zod';
+
+const findMany = os
+  .input(z.object({
+    where: z.record(z.any()).optional(),
+    limit: z.number().min(1).max(100).optional(),
+  }))
+  .output(z.array(UserSchema))
+  .handler(({ input }) => {
+    // Type-safe implementation
+    return users.filter(/* ... */);
+  });
+```
+
+## Middleware
+
+Middleware functions run before entity handlers and can modify requests or responses.
+
+### Signature
+
+```typescript
+type MiddlewareHandler = (c: Context, next: Next) => Promise<void> | void;
+```
+
+### Example
+
+```typescript
+const authMiddleware = async (c, next) => {
+  const token = c.req.header('Authorization');
+  if (!token) {
+    return c.json({ error: 'Unauthorized' }, 401);
+  }
+  
+  // Verify token and set user context
+  c.set('user', await verifyToken(token));
+  await next();
+};
+
+// Apply to all entities in a source
+source.register({
+  id: "protected-api",
+  middleware: [authMiddleware],
+  entities: { /* ... */ }
+});
+
+// Apply to specific entity
+source.register({
+  id: "my-api",
+  entities: {
+    user: {
+      middleware: [authMiddleware],
+      findMany: /* ... */
+    }
+  }
+});
+```
+
+```
+
+## TypeScript Support
+
+Unify API provides full TypeScript support with type inference.
+
+### Type Inference
+
+```typescript
+// Client types are inferred from configuration
+const client = createClient(myConfig, options);
+
+// TypeScript knows about available methods and their signatures
+const users = await client.user.findMany({
+  where: { age: 25 },  // Type-checked
+  select: ['name']     // Type-checked field names
+});
+
+// Return type is inferred
+// users: User[] (based on your schema)
+```
+
+### Custom Types
+
+```typescript
+// Define your own types
+interface User {
+  id: number;
+  name: string;
+  email: string;
+}
+
+// Use in configurations
+const userConfig: EntityConfig = {
+  findMany: async (): Promise<User[]> => {
+    // Implementation
+  }
+};
+```
+
+## Debug Mode
+
+Enable debug logging for development:
+
+```typescript
+const source = createSource({
+  debug: process.env.NODE_ENV === 'development'
+});
+```
+
+Debug mode provides:
+- Request/response logging
+- Route registration information
+- Error stack traces
+- Performance metrics
+
+## Best Practices
+
+### 1. Configuration Organization
+
+```typescript
+// Separate configurations by domain
+export const userConfig = { /* ... */ };
+export const postConfig = { /* ... */ };
+
+// Combine in main source
+source.register([
+  { id: 'users', entities: { user: userConfig } },
+  { id: 'posts', entities: { post: postConfig } }
+]);
+```
+
+### 2. Error Handling
+
+```typescript
+// Use specific error types
+class NotFoundError extends Error {
+  name = 'NotFoundError';
+}
+
+// Handle in method handlers
+const findOne = async (args) => {
+  const user = await database.findUser(args.where);
+  if (!user) {
+    throw new NotFoundError('User not found');
+  }
+  return user;
+};
+```
+
+### 3. Middleware Composition
+
+```typescript
+// Compose middleware for common patterns
+const withAuth = (handler) => [authMiddleware, handler];
+const withLogging = (handler) => [loggingMiddleware, handler];
+
+// Apply to entities
+entities: {
+  user: {
+    middleware: withAuth(withLogging([])),
+    findMany: /* ... */
+  }
+}
+``` 

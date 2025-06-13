@@ -1,0 +1,426 @@
+# Next.js Integration
+
+This guide shows how to integrate Unify API with Next.js applications using both the App Router and Pages Router patterns.
+
+## Overview
+
+Unify API can be seamlessly integrated into Next.js applications as API routes, providing:
+- Server-side API endpoints
+- Type-safe client-server communication
+- Automatic route generation
+- Built-in middleware support
+
+## App Router Integration
+
+For Next.js 13+ applications using the App Router, create a catch-all route handler.
+
+### Setup
+
+Create a route handler that catches all API requests:
+
+```typescript
+// app/api/[...route]/route.ts
+import { createSource } from "unify-api";
+import { SolanaPlugin, EVMPlugin } from "unify-api/plugins";
+import { Hono } from "hono";
+
+export const runtime = "nodejs";
+
+const app = new Hono().basePath("/api");
+
+const source = createSource({ app });
+
+// Register plugins or configurations
+source.register([EVMPlugin, SolanaPlugin]);
+
+// Add custom routes if needed
+app.get("/hello", (c) => {
+  return c.json({
+    message: "Hello from Hono in Next.js App Router!",
+  });
+});
+
+// Export handlers for all HTTP methods
+export const GET = app.fetch;
+export const POST = app.fetch;
+export const PUT = app.fetch;
+export const DELETE = app.fetch;
+export const PATCH = app.fetch;
+export const OPTIONS = app.fetch;
+```
+
+### Directory Structure
+
+```
+src/
+├── app/
+│   ├── api/
+│   │   └── [...route]/
+│   │       └── route.ts
+│   ├── page.tsx
+│   └── layout.tsx
+└── lib/
+    └── api-config.ts
+```
+
+### Custom Configuration
+
+Create a configuration file for your entities:
+
+```typescript
+// lib/api-config.ts
+import { z } from "zod";
+import { os } from "@orpc/server";
+
+const PostSchema = z.object({
+  id: z.number(),
+  title: z.string(),
+  content: z.string(),
+  authorId: z.number(),
+  createdAt: z.date(),
+});
+
+const posts = [
+  {
+    id: 1,
+    title: "Hello World",
+    content: "This is my first post",
+    authorId: 1,
+    createdAt: new Date(),
+  },
+];
+
+export const BlogApiConfig = {
+  id: "blog-api",
+  entities: {
+    post: {
+      findMany: os
+        .input(z.object({
+          where: PostSchema.partial().optional(),
+          select: z.array(PostSchema.keyof()).optional(),
+          limit: z.coerce.number().int().min(1).max(100).optional(),
+          offset: z.coerce.number().int().min(0).optional(),
+        }))
+        .output(z.array(PostSchema.partial()))
+        .handler(({ input }) => {
+          let result = posts;
+          
+          if (input.where) {
+            result = posts.filter((post) =>
+              Object.entries(input.where!).every(([key, value]) => post[key] === value)
+            );
+          }
+          
+          if (input.offset) result = result.slice(input.offset);
+          if (input.limit) result = result.slice(0, input.limit);
+          
+          if (input.select) {
+            result = result.map((post) =>
+              input.select!.reduce((acc, key) => ({ ...acc, [key]: post[key] }), {})
+            );
+          }
+          
+          return result;
+        }),
+        
+      create: os
+        .input(z.object({
+          data: PostSchema.omit({ id: true, createdAt: true }),
+        }))
+        .output(PostSchema)
+        .handler(({ input }) => {
+          const newPost = {
+            id: posts.length + 1,
+            ...input.data,
+            createdAt: new Date(),
+          };
+          posts.push(newPost);
+          return newPost;
+        }),
+    },
+  },
+};
+```
+
+## Pages Router Integration
+
+For Next.js applications using the Pages Router, create a catch-all API route.
+
+### Setup
+
+```typescript
+// pages/api/[...unify].ts
+import { createSource } from "unify-api";
+import { SolanaPlugin, EVMPlugin } from "unify-api/plugins";
+import { Hono } from "hono";
+import { handle } from "@hono/node-server/vercel";
+import type { PageConfig } from "next";
+
+export const config: PageConfig = {
+  api: {
+    bodyParser: false,
+  },
+};
+
+const app = new Hono().basePath("/api");
+
+const source = createSource({ app });
+
+// Register plugins
+source.register([EVMPlugin, SolanaPlugin]);
+
+// Add custom routes
+app.get("/hello", (c) => {
+  return c.json({
+    message: "Hello from Hono in Next.js Pages Router!",
+  });
+});
+
+export default handle(app);
+```
+
+### Directory Structure
+
+```
+src/
+├── pages/
+│   ├── api/
+│   │   └── [...unify].ts
+│   └── index.tsx
+└── lib/
+    └── api-config.ts
+```
+
+## Client-Side Usage
+
+### Creating a Type-Safe Client
+
+```typescript
+// lib/api-client.ts
+import { createClient } from "@unify-api/client";
+import { BlogApiConfig } from "./api-config";
+
+export const apiClient = createClient(BlogApiConfig, {
+  baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000",
+});
+```
+
+### Using in React Components
+
+```tsx
+// components/PostList.tsx
+"use client"; // For App Router
+
+import { useEffect, useState } from "react";
+import { apiClient } from "../lib/api-client";
+
+interface Post {
+  id: number;
+  title: string;
+  content: string;
+  authorId: number;
+  createdAt: Date;
+}
+
+export function PostList() {
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchPosts() {
+      try {
+        const response = await apiClient.post.findMany({
+          limit: 10,
+          select: ["id", "title", "content"],
+        });
+        setPosts(response.data || []);
+      } catch (error) {
+        console.error("Failed to fetch posts:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchPosts();
+  }, []);
+
+  if (loading) return <div>Loading...</div>;
+
+  return (
+    <div>
+      <h2>Blog Posts</h2>
+      {posts.map((post) => (
+        <article key={post.id}>
+          <h3>{post.title}</h3>
+          <p>{post.content}</p>
+        </article>
+      ))}
+    </div>
+  );
+}
+```
+
+### Server-Side Data Fetching
+
+For server-side rendering or static generation:
+
+```tsx
+// app/posts/page.tsx (App Router)
+import { apiClient } from "../../lib/api-client";
+
+async function getServerSideProps() {
+  const response = await apiClient.post.findMany({
+    limit: 10,
+  });
+  
+  return {
+    props: {
+      posts: response.data || [],
+    },
+  };
+}
+
+export default async function PostsPage() {
+  const response = await apiClient.post.findMany({
+    limit: 10,
+  });
+  
+  const posts = response.data || [];
+
+  return (
+    <div>
+      <h1>Posts</h1>
+      {posts.map((post) => (
+        <article key={post.id}>
+          <h3>{post.title}</h3>
+          <p>{post.content}</p>
+        </article>
+      ))}
+    </div>
+  );
+}
+```
+
+## Environment Configuration
+
+### Environment Variables
+
+```bash
+# .env.local
+NEXT_PUBLIC_API_URL=http://localhost:3000
+DATABASE_URL=postgresql://user:password@localhost:5432/mydb
+```
+
+### Next.js Configuration
+
+```typescript
+// next.config.ts
+import type { NextConfig } from "next";
+
+const nextConfig: NextConfig = {
+  experimental: {
+    serverComponentsExternalPackages: ["unify-api"],
+  },
+  async rewrites() {
+    return [
+      {
+        source: "/api/:path*",
+        destination: "/api/:path*",
+      },
+    ];
+  },
+};
+
+export default nextConfig;
+```
+
+## Middleware Integration
+
+Add authentication or other middleware to your Next.js API:
+
+```typescript
+// app/api/[...route]/route.ts
+import { createSource } from "unify-api";
+import { Hono } from "hono";
+import { jwt } from "hono/jwt";
+
+const app = new Hono().basePath("/api");
+
+// Add JWT middleware
+app.use("/protected/*", jwt({
+  secret: process.env.JWT_SECRET!,
+}));
+
+const source = createSource({ app });
+
+// Protected routes
+app.get("/protected/user", (c) => {
+  const payload = c.get("jwtPayload");
+  return c.json({ user: payload });
+});
+
+source.register(yourConfig);
+
+export const GET = app.fetch;
+export const POST = app.fetch;
+```
+
+## Deployment Considerations
+
+### Vercel Deployment
+
+1. **Build Configuration**: Ensure your build includes all necessary dependencies
+2. **Environment Variables**: Set up environment variables in Vercel dashboard
+3. **API Routes**: Vercel automatically handles API routes in both App and Pages Router
+
+### Performance Optimization
+
+```typescript
+// Optimize bundle size
+export const dynamic = "force-dynamic"; // App Router
+export const runtime = "nodejs"; // Use Node.js runtime for better performance
+```
+
+## Running the Examples
+
+### App Router Example
+
+```bash
+cd examples/nextjs-app-router
+npm install
+npm run dev
+```
+
+### Pages Router Example
+
+```bash
+cd examples/nextjs-pages-router
+npm install
+npm run dev
+```
+
+Both examples will be available at `http://localhost:3000`.
+
+## Troubleshooting
+
+### Common Issues
+
+1. **Module Resolution**: Ensure `unify-api` is properly installed
+2. **TypeScript Errors**: Check that types are properly exported
+3. **API Route Conflicts**: Make sure catch-all routes don't conflict with existing API routes
+
+### Debug Mode
+
+Enable debug logging:
+
+```typescript
+const source = createSource({
+  debug: process.env.NODE_ENV === "development",
+});
+```
+
+## Next Steps
+
+- Explore [middleware examples](/examples/middleware) for authentication
+- Learn about [error handling](/guides/error-handling) in production
+- Check out [deployment guides](/guides/deployment) for production setup 

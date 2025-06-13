@@ -1,0 +1,264 @@
+# Basic Usage
+
+This guide walks through the fundamental concepts of Unify API with a complete basic usage example.
+
+## Overview
+
+The basic usage example demonstrates how to:
+- Set up entity configurations with validation
+- Implement CRUD operations with custom handlers
+- Use schema validation with Zod
+- Handle query parameters (where, select, order_by, limit, offset)
+
+## Complete Example
+
+### 1. Configuration Setup
+
+First, create your entity configuration with Zod schema validation:
+
+```typescript
+// config.ts
+import { os } from "@orpc/server";
+import { z } from "zod";
+
+const UserSchema = z.object({
+  id: z.number(),
+  name: z.string(),
+  age: z.number(),
+});
+
+const BasicUsageUsers = [
+  { id: 1, name: "Alice", age: 18 },
+  { id: 2, name: "Bob", age: 20 },
+];
+
+export const BasicUsageSourceConfig = {
+  id: "basic-usage",
+  entities: {
+    user: {
+      findMany: os
+        .input(z.object({
+          where: UserSchema.partial().extend({
+            id: z.coerce.number().int().min(1).optional(),
+          }).optional(),
+          select: z.array(UserSchema.keyof()).optional(),
+          order_by: z.record(UserSchema.keyof(), z.enum(["asc", "desc"])).optional(),
+          offset: z.coerce.number().int().min(0).optional(),
+          limit: z.coerce.number().int().min(1).optional(),
+        }))
+        .output(z.array(UserSchema.partial()))
+        .handler(({ input }) => {
+          const { where, select, order_by, offset, limit } = input;
+          let result = BasicUsageUsers;
+          
+          // Apply where filtering
+          if (where) {
+            result = BasicUsageUsers.filter((user) => {
+              return Object.entries(where).every(([key, value]) => {
+                return user[key] === value;
+              });
+            });
+          }
+          
+          // Apply sorting
+          if (order_by) {
+            const [field, direction] = Object.entries(order_by)[0];
+            result = result.sort((a, b) => {
+              return direction === "asc"
+                ? a[field] - b[field]
+                : b[field] - a[field];
+            });
+          }
+          
+          // Apply pagination
+          if (offset) result = result.slice(offset);
+          if (limit) result = result.slice(0, limit);
+          
+          // Apply field selection
+          if (select) {
+            result = result.map((user) => {
+              return select.reduce((acc, key) => {
+                acc[key] = user[key];
+                return acc;
+              }, {} as Record<string, any>);
+            });
+          }
+          
+          return result;
+        }),
+        
+      findOne: os
+        .input(z.object({
+          where: UserSchema.partial().extend({
+            id: z.coerce.number().int().min(1).optional(),
+          }),
+          select: z.array(UserSchema.keyof()).optional(),
+        }))
+        .output(UserSchema.partial().nullable())
+        .handler(({ input }) => {
+          const { where, select } = input;
+          const record = BasicUsageUsers.find((r) => {
+            return Object.entries(where).every(
+              ([key, value]) => r[key] === value
+            );
+          });
+          
+          if (!record) return null;
+          
+          if (select) {
+            return select.reduce((acc, key) => {
+              acc[key] = record[key];
+              return acc;
+            }, {} as Record<string, any>);
+          }
+          
+          return record;
+        }),
+    },
+  },
+};
+```
+
+### 2. Server Setup
+
+Create a server that registers your configuration:
+
+```typescript
+// server.ts
+import { createSource } from "unify-api";
+import { BasicUsageSourceConfig } from "./config";
+
+const source = createSource();
+source.register(BasicUsageSourceConfig);
+
+const app = source.getApp();
+
+// Log available routes
+console.log("Available routes:");
+app.routes.forEach(route => {
+  console.log(`- ${route.method} ${route.path}`);
+});
+
+export default {
+  port: 3000,
+  fetch: app.fetch,
+};
+```
+
+### 3. Client Usage
+
+Use the generated client to interact with your API:
+
+```typescript
+// client.ts
+import { createClient } from "@unify-api/client";
+import { BasicUsageSourceConfig } from "./config";
+
+const client = createClient(BasicUsageSourceConfig, {
+  baseURL: "http://localhost:3000",
+});
+
+async function demo() {
+  try {
+    // Find multiple users with sorting
+    const findManyRes = await client.user.findMany({
+      order_by: { id: "desc" }
+    });
+    console.log("findMany =>", findManyRes.data);
+
+    // Find single user with field selection
+    const findOneRes = await client.user.findOne({
+      where: { id: 1 },
+      select: ["id", "name"]
+    });
+    console.log("findOne =>", findOneRes.data);
+    
+  } catch (error) {
+    console.error("Error:", error.message);
+  }
+}
+
+demo();
+```
+
+## Key Features Demonstrated
+
+### 1. Schema Validation
+
+The example uses Zod for input/output validation:
+- `UserSchema.partial()` allows partial updates
+- `z.coerce.number()` automatically converts string to number
+- `z.enum(["asc", "desc"])` restricts sorting direction
+
+### 2. Query Processing
+
+The handlers demonstrate processing of common query parameters:
+- **where**: Filter records based on conditions
+- **select**: Return only specified fields
+- **order_by**: Sort results by field and direction
+- **offset/limit**: Implement pagination
+
+### 3. Error Handling
+
+The ORPC integration provides automatic error handling:
+- Input validation errors return 400 status
+- Handler errors are caught and formatted
+- Type-safe error responses
+
+## API Endpoints Generated
+
+This configuration generates the following endpoints:
+
+```
+GET /user/list?source_id=basic-usage
+GET /user/find_one?source_id=basic-usage
+```
+
+### Example Requests
+
+```bash
+# Get all users
+curl "http://localhost:3000/user/list?source_id=basic-usage"
+
+# Get users sorted by age descending
+curl "http://localhost:3000/user/list?source_id=basic-usage&order_by={\"age\":\"desc\"}"
+
+# Get specific user by ID
+curl "http://localhost:3000/user/find_one?source_id=basic-usage&where={\"id\":1}"
+
+# Get only name and age fields
+curl "http://localhost:3000/user/list?source_id=basic-usage&select=[\"name\",\"age\"]"
+
+# Pagination
+curl "http://localhost:3000/user/list?source_id=basic-usage&limit=1&offset=1"
+```
+
+## Running the Example
+
+1. Navigate to the basic usage example:
+   ```bash
+   cd examples/basic-usage
+   ```
+
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+3. Start the server:
+   ```bash
+   npm run dev
+   ```
+
+4. In another terminal, run the client:
+   ```bash
+   npm run client
+   ```
+
+The server will start on port 3000 and the client will demonstrate various API calls.
+
+## Next Steps
+
+- Explore [table configurations](/api/table-config) for database integration
+- Learn about [middleware](/examples/middleware) for authentication
+- Check out [Next.js integration](/examples/nextjs) for full-stack applications 

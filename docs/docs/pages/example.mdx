@@ -1,0 +1,340 @@
+# Examples
+
+This page demonstrates various usage patterns of Unify API with practical examples from basic setup to advanced integrations.
+
+## Basic Usage
+
+The simplest way to get started with Unify API is to create a basic configuration with custom entity methods.
+
+### Server Setup
+
+```typescript
+import { createSource } from "unify-api";
+import { os } from "@orpc/server";
+import { z } from "zod";
+
+// Define your data schema
+const UserSchema = z.object({
+  id: z.number(),
+  name: z.string(),
+  age: z.number(),
+});
+
+// Sample data
+const users = [
+  { id: 1, name: "Alice", age: 18 },
+  { id: 2, name: "Bob", age: 20 },
+];
+
+// Create source configuration
+export const sourceConfig = {
+  id: "basic-usage",
+  entities: {
+    user: {
+      findMany: os
+        .input(z.object({
+          where: UserSchema.partial().optional(),
+          select: z.array(UserSchema.keyof()).optional(),
+          order_by: z.record(UserSchema.keyof(), z.enum(["asc", "desc"])).optional(),
+          offset: z.coerce.number().int().min(0).optional(),
+          limit: z.coerce.number().int().min(1).optional(),
+        }))
+        .output(z.array(UserSchema.partial()))
+        .handler(({ input }) => {
+          const { where, select, order_by, offset, limit } = input;
+          let result = users;
+          
+          // Apply filters
+          if (where) {
+            result = users.filter((user) =>
+              Object.entries(where).every(([key, value]) => user[key] === value)
+            );
+          }
+          
+          // Apply sorting
+          if (order_by) {
+            const [field, direction] = Object.entries(order_by)[0];
+            result = result.sort((a, b) =>
+              direction === "asc" ? a[field] - b[field] : b[field] - a[field]
+            );
+          }
+          
+          // Apply pagination
+          if (offset) result = result.slice(offset);
+          if (limit) result = result.slice(0, limit);
+          
+          // Apply field selection
+          if (select) {
+            result = result.map((user) =>
+              select.reduce((acc, key) => ({ ...acc, [key]: user[key] }), {})
+            );
+          }
+          
+          return result;
+        }),
+        
+      findOne: os
+        .input(z.object({
+          where: UserSchema.partial(),
+          select: z.array(UserSchema.keyof()).optional(),
+        }))
+        .output(UserSchema.partial().nullable())
+        .handler(({ input }) => {
+          const { where, select } = input;
+          const user = users.find((u) =>
+            Object.entries(where).every(([key, value]) => u[key] === value)
+          );
+          
+          if (!user) return null;
+          
+          if (select) {
+            return select.reduce((acc, key) => ({ ...acc, [key]: user[key] }), {});
+          }
+          
+          return user;
+        }),
+    }
+  }
+};
+
+// Create and start server
+const source = createSource();
+source.register(sourceConfig);
+
+const app = source.getApp();
+
+export default {
+  port: 3000,
+  fetch: app.fetch,
+};
+```
+
+### Client Usage
+
+```typescript
+import { createClient } from "@unify-api/client";
+import { sourceConfig } from "./config";
+
+const client = createClient(sourceConfig, {
+  baseURL: "http://localhost:3000",
+});
+
+async function demo() {
+  try {
+    // Find multiple users with sorting
+    const findManyRes = await client.user.findMany({
+      order_by: { id: "desc" }
+    });
+    console.log("All users:", findManyRes.data);
+
+    // Find specific user with field selection
+    const findOneRes = await client.user.findOne({
+      where: { id: 1 },
+      select: ["id", "name"]
+    });
+    console.log("User by ID:", findOneRes.data);
+  } catch (error) {
+    console.error("Error:", error.message);
+  }
+}
+
+demo();
+```
+
+## Table Configuration
+
+Unify API supports table-based configurations for database-like operations:
+
+```typescript
+export const tableConfig = {
+  id: "table-example",
+  entities: {
+    user_table: {
+      table: {
+        name: "users",
+        schema: "public",
+        columns: {
+          id: {
+            type: "integer" as const,
+            nullable: false,
+            unique: true,
+            default: "AUTO_INCREMENT",
+          },
+          name: {
+            type: "varchar" as const,
+            nullable: false,
+          },
+          age: {
+            type: "integer" as const,
+            nullable: true,
+          },
+        },
+      },
+    },
+  },
+};
+```
+
+## Next.js Integration
+
+### Pages Router
+
+For Next.js applications using the Pages Router, create an API route that handles all Unify API requests:
+
+```typescript
+// pages/api/[...unify].ts
+import { createSource } from "unify-api";
+import { SolanaPlugin, EVMPlugin } from "unify-api/plugins";
+import { Hono } from "hono";
+import { handle } from "@hono/node-server/vercel";
+import type { PageConfig } from "next";
+
+export const config: PageConfig = {
+  api: {
+    bodyParser: false,
+  },
+};
+
+const app = new Hono().basePath("/api");
+
+const source = createSource({ app });
+
+// Register plugins
+source.register([EVMPlugin, SolanaPlugin]);
+
+// Add custom routes
+app.get("/hello", (c) => {
+  return c.json({
+    message: "Hello from Hono!",
+  });
+});
+
+export default handle(app);
+```
+
+### App Router
+
+For Next.js applications using the App Router:
+
+```typescript
+// app/api/[...route]/route.ts
+import { createSource } from "unify-api";
+import { SolanaPlugin, EVMPlugin } from "unify-api/plugins";
+import { Hono } from "hono";
+
+export const runtime = "nodejs";
+
+const app = new Hono().basePath("/api");
+
+const source = createSource({ app });
+
+// Register plugins
+source.register([EVMPlugin, SolanaPlugin]);
+
+// Add custom routes
+app.get("/hello", (c) => {
+  return c.json({
+    message: "Hello from Hono!",
+  });
+});
+
+export const GET = app.fetch;
+export const POST = app.fetch;
+export const PUT = app.fetch;
+export const DELETE = app.fetch;
+export const PATCH = app.fetch;
+```
+
+## Middleware Support
+
+Add custom middleware for authentication, logging, or other cross-cutting concerns:
+
+```typescript
+const requireAuth = async (c, next) => {
+  const token = c.req.header('Authorization');
+  if (!token) {
+    return c.json({ error: 'Unauthorized' }, 401);
+  }
+  // Validate token here
+  await next();
+};
+
+const logRequests = async (c, next) => {
+  console.log(`${c.req.method} ${c.req.url}`);
+  await next();
+};
+
+source.register({
+  id: "protected-api",
+  entities: {
+    // ... your entities
+  },
+  middleware: [requireAuth, logRequests]
+});
+```
+
+## Advanced Query Examples
+
+### Complex Filtering
+
+```bash
+# Multiple conditions
+GET /user/list?source_id=my-api&where={"age":{"$gte":18},"name":{"$like":"A%"}}
+
+# Array contains
+GET /user/list?source_id=my-api&where={"tags":{"$in":["premium","vip"]}}
+```
+
+### Advanced Sorting
+
+```bash
+# Multiple field sorting
+GET /user/list?source_id=my-api&order_by={"age":"desc","name":"asc"}
+
+# Nested field sorting
+GET /user/list?source_id=my-api&order_by={"profile.createdAt":"desc"}
+```
+
+### Pagination with Metadata
+
+```typescript
+// Enhanced findMany with pagination metadata
+findMany: async (args) => {
+  const { limit = 10, offset = 0 } = args || {};
+  const total = users.length;
+  const data = users.slice(offset, offset + limit);
+  
+  return {
+    data,
+    meta: {
+      total,
+      page: Math.floor(offset / limit) + 1,
+      pages: Math.ceil(total / limit),
+      hasNext: offset + limit < total,
+      hasPrev: offset > 0,
+    }
+  };
+}
+```
+
+## Running the Examples
+
+1. **Basic Usage**: Navigate to `examples/basic-usage` and run:
+   ```bash
+   npm install
+   npm run dev
+   ```
+
+2. **Next.js Pages Router**: Navigate to `examples/nextjs-pages-router` and run:
+   ```bash
+   npm install
+   npm run dev
+   ```
+
+3. **Next.js App Router**: Navigate to `examples/nextjs-app-router` and run:
+   ```bash
+   npm install
+   npm run dev
+   ```
+
+Each example includes sample data and demonstrates different features of the Unify API SDK.
