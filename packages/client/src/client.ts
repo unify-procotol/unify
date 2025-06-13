@@ -151,7 +151,6 @@ class EntityClient<TEntity = any> {
 
   async create(args: CreateArgs): Promise<ApiResponse<TEntity>> {
     args.source_id = this.sourceId;
-    console.log("args===>", args);
     return this.httpClient.request<TEntity>({
       method: "POST",
       url: `/${this.entityName}/create`,

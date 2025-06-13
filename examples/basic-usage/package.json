@@ -5,8 +5,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "generate-migrations": "bun run generate-migrations.ts",
-    "server": "bun run --watch server.ts"
+    "server": "bun run --watch server.ts",
+    "client": "bun run --watch client.ts"
   },
   "dependencies": {
     "@orpc/server": "^1.4.5",

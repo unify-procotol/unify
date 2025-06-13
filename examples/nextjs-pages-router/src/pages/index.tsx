@@ -7,17 +7,19 @@ export default function Home() {
   const [solanaBalanceData, setSolanaBalanceData] = useState<any>(null);
 
   useEffect(() => {
-    const evmClient = createClient(EVMPlugin, {
-      baseURL: "http://localhost:3000/api",
-    });
-
-    const solanaClient = createClient(SolanaPlugin, {
-      baseURL: "http://localhost:3000/api",
-    });
+    const client = createClient(
+      {
+        EVMPlugin,
+        SolanaPlugin,
+      },
+      {
+        baseURL: "http://localhost:3000/api",
+      }
+    );
 
     const fetchEvmBalance = async () => {
       try {
-        const res = await evmClient.balance.findOne({
+        const res = await client.EVMPlugin.balance.findOne({
           where: {
             address: "0x4f00D43b5aF0a0aAd62E9075D1bFa86a89CDb9aB",
             network: "iotex",
@@ -33,7 +35,7 @@ export default function Home() {
 
     const fetchSolanaBalance = async () => {
       try {
-        const res = await solanaClient.balance.findOne({
+        const res = await client.SolanaPlugin.balance.findOne({
           where: {
             address: "11111111111111111111111111111112",
           },

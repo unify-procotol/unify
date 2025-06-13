@@ -8,10 +8,6 @@ export interface FindManyArgs<T = Record<string, any>> {
   offset?: number;
   select?: Array<keyof T>;
   where?: Partial<T>;
-  // order_by?: Record<keyof T, "asc" | "desc">;
-  // order_by?: {
-  //   [K in keyof T]?: "asc" | "desc";
-  // };
   order_by?: Partial<Record<keyof T, "asc" | "desc">>;
 }
 
