@@ -1,5 +1,5 @@
 import { createSource } from "unify-api";
-import { SolanaPlugin, EVMPlugin } from "@unify-api/plugins/web3";
+import { SolanaPlugin, EVMPlugin } from "../../../../../packages/plugins/dist/uniweb3";
 import { Hono } from "hono";
 import { handle } from "@hono/node-server/vercel";
 import type { PageConfig } from "next";

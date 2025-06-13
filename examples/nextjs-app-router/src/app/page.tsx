@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { createClient } from "@unify-api/client";
-import { EVMPlugin, SolanaPlugin } from "@unify-api/plugins/web3";
+import { EVMPlugin, SolanaPlugin } from "@unify-api/plugins/uniweb3";
 
 export default function Home() {
   const [evmBalanceData, setEvmBalanceData] = useState<any>(null);

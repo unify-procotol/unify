@@ -5,10 +5,10 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {
-    "./web3": {
-      "types": "./dist/web3/index.d.ts",
-      "import": "./dist/web3/index.js",
-      "require": "./dist/web3/index.js"
+    "./uniweb3": {
+      "types": "./dist/uniweb3/index.d.ts",
+      "import": "./dist/uniweb3/index.js",
+      "require": "./dist/uniweb3/index.js"
     }
   },
   "scripts": {

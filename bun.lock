@@ -65,41 +65,6 @@
         "typescript": "^5",
       },
     },
-    "examples/orpc-usage": {
-      "name": "unify-api-orpc-usage",
-      "version": "1.0.0",
-      "dependencies": {
-        "@orpc/server": "^1.4.5",
-        "@unify-api/cli": "workspace:*",
-        "@unify-api/client": "workspace:*",
-        "@unify-api/plugins": "workspace:*",
-        "hono": "^4.7.11",
-        "unify-api": "workspace:*",
-        "zod": "^3.25.57",
-      },
-      "devDependencies": {
-        "@types/node": "^20.10.0",
-        "ts-node": "^10.9.2",
-        "typescript": "^5.3.0",
-      },
-    },
-    "examples/plugins-usage": {
-      "name": "unify-api-plugins-usage",
-      "version": "1.0.0",
-      "dependencies": {
-        "@orpc/server": "^1.4.5",
-        "@unify-api/client": "workspace:*",
-        "@unify-api/plugins": "workspace:*",
-        "hono": "^4.7.11",
-        "unify-api": "workspace:*",
-        "zod": "^3.25.57",
-      },
-      "devDependencies": {
-        "@types/node": "^20.10.0",
-        "ts-node": "^10.9.2",
-        "typescript": "^5.3.0",
-      },
-    },
     "packages/cli": {
       "name": "@unify-api/cli",
       "version": "1.0.0",
@@ -582,10 +547,6 @@
     "unify-api": ["unify-api@workspace:packages/unify-api"],
 
     "unify-api-basic-usage": ["unify-api-basic-usage@workspace:examples/basic-usage"],
-
-    "unify-api-orpc-usage": ["unify-api-orpc-usage@workspace:examples/orpc-usage"],
-
-    "unify-api-plugins-usage": ["unify-api-plugins-usage@workspace:examples/plugins-usage"],
 
     "utf-8-validate": ["utf-8-validate@5.0.10", "", { "dependencies": { "node-gyp-build": "^4.3.0" } }, "sha512-Z6czzLq4u8fPOyx7TU6X3dvUZVvoJmxSQ+IcrlmagKhilxlhZgxPK6C5Jqbkw1IDUmFTM+cz9QDnnLTwDz/2gQ=="],
 
