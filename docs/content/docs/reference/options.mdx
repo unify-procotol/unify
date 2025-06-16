@@ -1,0 +1,372 @@
+---
+title: Options
+description: Unify provides various configuration options to customize your server behavior, storage, and entity management.
+---
+
+## AdapterOptions
+
+Configuration options passed to the Adapter constructor when creating a source.
+
+```typescript
+interface AdapterOptions {
+  storage?: StorageConfig;
+}
+```
+
+### storage
+
+Optional storage configuration that determines how data is persisted.
+
+**Type:** `StorageConfig`  
+**Default:** File storage with `./data` directory
+
+#### File Storage
+
+```typescript
+{
+  type: "file";
+  dataDir?: string;
+}
+```
+
+- **dataDir** - Directory path for storing JSON files. Defaults to `"./data"`
+
+#### PostgreSQL Storage
+
+```typescript
+{
+  type: "pg";
+  config: PGStorageConfig;
+}
+```
+
+- **config** - PostgreSQL connection configuration (extends Node.js `pg` PoolConfig)
+
+**Example:**
+```typescript
+const source = createSource({
+  options: {
+    storage: {
+      type: "pg",
+      config: {
+        host: "localhost",
+        port: 5432,
+        database: "myapp",
+        user: "postgres",
+        password: "password"
+      }
+    }
+  }
+});
+```
+
+## SourceConfig
+
+Configuration for registering a data source with entities.
+
+```typescript
+interface SourceConfig {
+  id: string;
+  entities: Record<string, EntityConfig>;
+  middleware?: Array<(c: Context, next: () => Promise<void>) => Promise<void>>;
+}
+```
+
+### id
+
+**Type:** `string`  
+**Required:** Yes
+
+Unique identifier for the data source. Used as a prefix for table names and API paths.
+
+### entities
+
+**Type:** `Record<string, EntityConfig>`  
+**Required:** Yes
+
+Object mapping entity names to their configurations. Each key becomes an entity endpoint.
+
+### middleware
+
+**Type:** `Array<(c: Context, next: () => Promise<void>) => Promise<void>>`  
+**Optional**
+
+Array of Hono middleware functions to apply to all entity routes in this source.
+
+**Example:**
+```typescript
+const sourceConfig: SourceConfig = {
+  id: "blog",
+  entities: {
+    posts: {
+      // EntityConfig
+    },
+    users: {
+      // EntityConfig
+    }
+  },
+  middleware: [
+    async (c, next) => {
+      console.log(`Request to ${c.req.path}`);
+      await next();
+    }
+  ]
+};
+```
+
+## EntityConfig
+
+Configuration for individual entities within a source.
+
+```typescript
+interface EntityConfig {
+  findMany?: EntityProcedure<FindManyArgs>;
+  findOne?: EntityProcedure<FindOneArgs>;
+  create?: EntityProcedure<CreateArgs>;
+  update?: EntityProcedure<UpdateArgs>;
+  delete?: EntityProcedure<DeleteArgs>;
+  table?: TableConfig;
+}
+```
+
+### CRUD Operations
+
+Each operation accepts either a custom function or oRPC procedure:
+
+#### findMany
+
+**Type:** `EntityProcedure<FindManyArgs>`  
+**Optional**
+
+Handler for retrieving multiple records.
+
+**FindManyArgs:**
+```typescript
+interface FindManyArgs<T = Record<string, any>> {
+  source_id: string;
+  limit?: number;
+  offset?: number;
+  select?: Array<keyof T>;
+  where?: Partial<T>;
+  order_by?: Partial<Record<keyof T, "asc" | "desc">>;
+}
+```
+
+#### findOne
+
+**Type:** `EntityProcedure<FindOneArgs>`  
+**Optional**
+
+Handler for retrieving a single record.
+
+**FindOneArgs:**
+```typescript
+interface FindOneArgs<T = Record<string, any>> {
+  source_id: string;
+  where: Partial<T>;
+  select?: Array<keyof T>;
+}
+```
+
+#### create
+
+**Type:** `EntityProcedure<CreateArgs>`  
+**Optional**
+
+Handler for creating new records.
+
+**CreateArgs:**
+```typescript
+interface CreateArgs<T = Record<string, any>> {
+  source_id: string;
+  data: Partial<T>;
+}
+```
+
+#### update
+
+**Type:** `EntityProcedure<UpdateArgs>`  
+**Optional**
+
+Handler for updating existing records.
+
+**UpdateArgs:**
+```typescript
+interface UpdateArgs<T = Record<string, any>> {
+  source_id: string;
+  where: Partial<T>;
+  data: Partial<T>;
+}
+```
+
+#### delete
+
+**Type:** `EntityProcedure<DeleteArgs>`  
+**Optional**
+
+Handler for deleting records.
+
+**DeleteArgs:**
+```typescript
+interface DeleteArgs<T = Record<string, any>> {
+  source_id: string;
+  where: Partial<T>;
+}
+```
+
+### table
+
+**Type:** `TableConfig`  
+**Optional**
+
+Database table schema configuration for built-in CRUD operations.
+
+```typescript
+interface TableConfig {
+  name: string;
+  schema: string;
+  columns: Record<string, ColumnConfig>;
+}
+```
+
+#### TableConfig Properties
+
+- **name** - Database table name
+- **schema** - Database schema name  
+- **columns** - Column definitions
+
+#### ColumnConfig
+
+```typescript
+interface ColumnConfig {
+  type: DatabaseColumnType;
+  nullable?: boolean;
+  unique?: boolean;
+  default?: DatabaseDefaultValue;
+}
+```
+
+## Database Types
+
+### DatabaseColumnType
+
+Supported database column types:
+
+```typescript
+type DatabaseColumnType =
+  | "varchar" | "text" | "char"
+  | "int" | "integer" | "bigint" | "smallint" | "tinyint"
+  | "decimal" | "numeric" | "float" | "double" | "real"
+  | "boolean" | "bool"
+  | "date" | "datetime" | "timestamp" | "time" | "year"
+  | "json" | "jsonb"
+  | "uuid"
+  | "binary" | "varbinary" | "blob" | "longblob" | "mediumblob" | "tinyblob"
+  | "enum" | "set";
+```
+
+### DatabaseDefaultValue
+
+Supported default values for database columns:
+
+```typescript
+type DatabaseDefaultValue =
+  | string | number | boolean | object | null
+  | "CURRENT_TIMESTAMP" | "CURRENT_DATE" | "CURRENT_TIME"
+  | "LOCALTIMESTAMP" | "LOCALTIME"
+  | "UUID()" | "AUTO_INCREMENT" | "SERIAL" | "BIGSERIAL" | "NOW()";
+```
+
+## REST API Mapping
+
+Unify automatically maps entity operations to REST endpoints:
+
+| Operation | HTTP Method | Path Suffix | Description |
+|-----------|-------------|-------------|-------------|
+| findMany  | GET         | /list       | Get multiple records |
+| findOne   | GET         | /find_one   | Get single record |
+| create    | POST        | /create     | Create new record |
+| update    | PATCH       | /update     | Update existing record |
+| delete    | DELETE      | /delete     | Delete record |
+
+**URL Pattern:** `/{sourceId}/{entityName}/{operation}`
+
+**Example:** For source `blog` and entity `posts`:
+- `GET /blog/posts/list` - Get all posts
+- `POST /blog/posts/create` - Create new post
+- `PATCH /blog/posts/update` - Update post
+- `DELETE /blog/posts/delete` - Delete post
+
+## Complete Example
+
+```typescript
+import { createSource } from "@unify/server";
+
+const source = createSource({
+  options: {
+    storage: {
+      type: "pg",
+      config: {
+        host: "localhost",
+        port: 5432,
+        database: "blog_db",
+        user: "postgres",
+        password: "password"
+      }
+    }
+  }
+});
+
+source.register({
+  id: "blog",
+  entities: {
+    posts: {
+      table: {
+        name: "posts",
+        schema: "public",
+        columns: {
+          id: {
+            type: "integer",
+            default: "AUTO_INCREMENT"
+          },
+          title: {
+            type: "varchar",
+            nullable: false
+          },
+          content: {
+            type: "text"
+          },
+          published: {
+            type: "boolean",
+            default: false
+          },
+          created_at: {
+            type: "timestamp",
+            default: "CURRENT_TIMESTAMP"
+          }
+        }
+      }
+    },
+    users: {
+      // Custom handlers
+      findMany: async (args) => {
+        // Custom logic
+        return [];
+      },
+      create: async (args) => {
+        // Custom logic
+        return {};
+      }
+    }
+  },
+  middleware: [
+    async (c, next) => {
+      // Add CORS headers
+      c.header("Access-Control-Allow-Origin", "*");
+      await next();
+    }
+  ]
+});
+
+export default source.getApp();
+```

@@ -1,4 +1,4 @@
-import { createClient } from "@unify-api/client";
+import { createClient } from "@unify/client";
 import { BasicUsageSourceConfig } from "./config";
 
 const client = createClient(BasicUsageSourceConfig, {

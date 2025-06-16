@@ -1,0 +1,268 @@
+---
+title: Next.js Integration
+description: Unify provides complete Next.js support, including both App Router and Pages Router routing methods. This guide will show you how to integrate Unify in Next.js projects.
+
+---
+
+## Install Dependencies
+
+First, install the required dependency packages:
+
+```package-install
+@unify/server @unify/client @unify/uniweb3 hono
+```
+
+### App Router Additional Dependencies
+
+For App Router, no additional dependencies are required.
+
+### Pages Router Additional Dependencies
+
+For Pages Router, you need to additionally install:
+
+```package-install
+@hono/node-server
+```
+
+## App Router Integration
+
+### Project Structure
+
+```
+nextjs-app-router/
+├── src/
+│   └── app/
+│       ├── api/
+│       │   └── [...route]/
+│       │       └── route.ts      # API routes
+│       ├── globals.css
+│       ├── layout.tsx
+│       └── page.tsx              # Main page
+├── package.json
+├── next.config.ts
+└── tsconfig.json
+```
+
+### API Route Setup
+
+Create API routes in `src/app/api/[...route]/route.ts`:
+
+```typescript
+import { createSource } from "@unify/server";
+import { SolanaPlugin, EVMPlugin } from "@unify/uniweb3";
+import { Hono } from "hono";
+
+export const runtime = "nodejs";
+
+const app = new Hono().basePath("/api");
+
+const source = createSource({
+  app,
+});
+
+source.register([EVMPlugin, SolanaPlugin]);
+
+// Optional: Add custom routes
+app.get("/hello", (c) => {
+  return c.json({
+    message: "Hello from Hono!",
+  });
+});
+
+export const GET = app.fetch;
+export const POST = app.fetch;
+```
+
+### Client Usage
+
+Using Unify client in page components:
+
+```tsx
+"use client";
+
+import { useEffect, useState } from "react";
+import { createClient } from "@unify/client";
+import { EVMPlugin, SolanaPlugin } from "@unify/uniweb3";
+
+export default function Home() {
+  const [evmBalanceData, setEvmBalanceData] = useState<any>(null);
+  const [solanaBalanceData, setSolanaBalanceData] = useState<any>(null);
+
+  useEffect(() => {
+    const client = createClient(
+      {
+        EVMPlugin,
+        SolanaPlugin,
+      },
+      {
+        baseURL: "http://localhost:3000/api",
+      }
+    );
+
+    const fetchEvmBalance = async () => {
+      try {
+        const res = await client.EVMPlugin.balance.findOne({
+          where: {
+            address: "0x4f00D43b5aF0a0aAd62E9075D1bFa86a89CDb9aB",
+            network: "iotex",
+          },
+        });
+        if (res.data) {
+          setEvmBalanceData(res.data);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    const fetchSolanaBalance = async () => {
+      try {
+        const res = await client.SolanaPlugin.balance.findOne({
+          where: {
+            address: "11111111111111111111111111111112",
+          },
+        });
+        if (res.data) {
+          setSolanaBalanceData(res.data);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchEvmBalance();
+    fetchSolanaBalance();
+  }, []);
+
+  return (
+    <div className="min-h-screen w-full flex flex-col items-center p-10">
+      {evmBalanceData && <p>{JSON.stringify(evmBalanceData, null, 2)}</p>}
+      {solanaBalanceData && <p>{JSON.stringify(solanaBalanceData, null, 2)}</p>}
+    </div>
+  );
+}
+```
+
+## Pages Router Integration
+
+
+### Project Structure
+
+```
+nextjs-pages-router/
+├── src/
+│   ├── pages/
+│   │   ├── api/
+│   │   │   └── [...unify].ts     # API routes
+│   │   ├── _app.tsx
+│   │   ├── _document.tsx
+│   │   └── index.tsx             # Main page
+│   └── styles/
+│       └── globals.css
+├── package.json
+├── next.config.ts
+└── tsconfig.json
+```
+
+### API Route Setup
+
+Create API routes in `src/pages/api/[...unify].ts`:
+
+```typescript
+import { createSource } from "@unify/server";
+import { SolanaPlugin, EVMPlugin } from "@unify/uniweb3";
+import { Hono } from "hono";
+import { handle } from "@hono/node-server/vercel";
+import type { PageConfig } from "next";
+
+export const config: PageConfig = {
+  api: {
+    bodyParser: false,
+  },
+};
+
+const app = new Hono().basePath("/api");
+
+const source = createSource({
+  app,
+});
+
+source.register([EVMPlugin, SolanaPlugin]);
+
+// Optional: Add custom routes
+app.get("/hello", (c) => {
+  return c.json({
+    message: "Hello from Hono!",
+  });
+});
+
+export default handle(app);
+```
+
+### Client Usage
+
+Using Unify client in page components:
+
+```tsx
+import { useEffect, useState } from "react";
+import { createClient } from "@unify/client";
+import { EVMPlugin, SolanaPlugin } from "@unify/uniweb3";
+
+export default function Home() {
+  const [evmBalanceData, setEvmBalanceData] = useState<any>(null);
+  const [solanaBalanceData, setSolanaBalanceData] = useState<any>(null);
+
+  useEffect(() => {
+    const client = createClient(
+      {
+        EVMPlugin,
+        SolanaPlugin,
+      },
+      {
+        baseURL: "http://localhost:3000/api",
+      }
+    );
+
+    const fetchEvmBalance = async () => {
+      try {
+        const res = await client.EVMPlugin.balance.findOne({
+          where: {
+            address: "0x4f00D43b5aF0a0aAd62E9075D1bFa86a89CDb9aB",
+            network: "iotex",
+          },
+        });
+        if (res.data) {
+          setEvmBalanceData(res.data);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    const fetchSolanaBalance = async () => {
+      try {
+        const res = await client.SolanaPlugin.balance.findOne({
+          where: {
+            address: "11111111111111111111111111111112",
+          },
+        });
+        if (res.data) {
+          setSolanaBalanceData(res.data);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchEvmBalance();
+    fetchSolanaBalance();
+  }, []);
+
+  return (
+    <div className="min-h-screen w-full flex flex-col items-center p-10">
+      {evmBalanceData && <p>{JSON.stringify(evmBalanceData, null, 2)}</p>}
+      {solanaBalanceData && <p>{JSON.stringify(solanaBalanceData, null, 2)}</p>}
+    </div>
+  );
+}
+```

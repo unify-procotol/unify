@@ -1,7 +1,7 @@
 {
-  "name": "unify-api-basic-usage",
+  "name": "basic-usage",
   "version": "1.0.0",
-  "description": "Examples for unify-api",
+  "description": "Examples for @unify",
   "private": true,
   "type": "module",
   "scripts": {
@@ -10,11 +10,10 @@
   },
   "dependencies": {
     "@orpc/server": "^1.4.5",
-    "@unify-api/cli": "workspace:*",
-    "@unify-api/plugins": "workspace:*",
-    "@unify-api/client": "workspace:*",
+    "@unify/cli": "workspace:*",
+    "@unify/client": "workspace:*",
     "hono": "^4.7.11",
-    "unify-api": "workspace:*",
+    "@unify/server": "workspace:*",
     "zod": "^3.25.57"
   },
   "devDependencies": {

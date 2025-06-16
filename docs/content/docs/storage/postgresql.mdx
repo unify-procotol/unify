@@ -1,0 +1,87 @@
+---
+title: PostgreSQL
+description: Configure PostgreSQL as your storage backend with @unify/server
+---
+
+## Configuration
+
+To use PostgreSQL as your storage backend, configure your source with the `pg` storage type:
+
+```typescript
+import { createSource } from "@unify/server";
+
+const source = createSource({
+  options: {
+    storage: {
+      type: "pg",
+      config: {
+        connectionString: process.env.DATABASE_URL!,
+      },
+    },
+  },
+});
+```
+
+## Environment Variables
+
+Make sure to set your database connection string in your environment variables:
+
+```bash
+DATABASE_URL=postgresql://username:password@localhost:5432/database_name
+```
+
+## Database Migrations
+
+To set up your database tables, create a migration file and run it to initialize your schema.
+
+### Creating Migration File
+
+Create a file named `generate-migrations.ts`:
+
+```typescript
+import { createPgTablesFromConfig } from "@unify/migrations";
+import blogConfig from "./config";
+
+// 运行迁移
+createPgTablesFromConfig([blogConfig], process.env.DATABASE_URL!);
+```
+
+### Running Migrations
+
+Execute the migration file using Bun:
+
+```bash
+bun run generate-migrations.ts
+```
+
+This command will:
+- Connect to your PostgreSQL database
+- Create the necessary tables based on your configuration
+- Set up the schema required for your application
+
+## Prerequisites
+
+Before using PostgreSQL with @unify, ensure you have:
+
+1. **PostgreSQL Server**: A running PostgreSQL instance (local or remote)
+2. **Database Created**: A database created for your application
+3. **Connection String**: Proper connection string with credentials
+4. **Environment Variables**: DATABASE_URL configured in your environment
+
+## Best Practices
+
+- Use connection pooling for better performance in production
+- Ensure your database user has appropriate permissions
+- Consider using SSL connections for production environments
+- Regularly backup your data
+- Monitor database performance and optimize queries as needed
+
+## Troubleshooting
+
+### Common Issues
+
+**Connection Errors**: Verify your connection string format and database credentials.
+
+**Permission Errors**: Ensure your database user has CREATE and ALTER privileges.
+
+**Migration Failures**: Check that your configuration is valid and the database is accessible.

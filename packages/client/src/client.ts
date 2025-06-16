@@ -5,7 +5,7 @@ import {
   UpdateArgs,
   DeleteArgs,
   CreateArgs,
-} from "unify-api";
+} from "@unify/server";
 
 export interface ClientOptions {
   baseURL: string;

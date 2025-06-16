@@ -1,7 +1,7 @@
 {
-  "name": "@unify-api/client",
+  "name": "@unify/client",
   "version": "1.0.0",
-  "description": "Type-safe client library for unify-api",
+  "description": "Type-safe client library for Unify",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {
@@ -28,7 +28,7 @@
   "license": "MIT",
   "dependencies": {
     "zod": "^3.25.57",
-    "unify-api": "workspace:*"
+    "@unify/server": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^20.10.0",

@@ -4,9 +4,9 @@ import { program } from "commander";
 import * as fs from "fs";
 import * as path from "path";
 import { spawn } from "child_process";
-import { SourceConfig } from "unify-api";
-import { FileStorage } from "unify-api";
-import { BuiltinMethods } from "unify-api";
+import { SourceConfig } from "@unify/server";
+import { FileStorage } from "@unify/server";
+import { BuiltinMethods } from "@unify/server";
 
 /**
  * CLI工具 - 用于预先初始化表结构和生成内置方法
@@ -421,7 +421,7 @@ class UnifyServerCLI {
 
 // 设置CLI命令
 program
-  .name("unify-api")
+  .name("@unify/server")
   .description("CLI tool for Unify Server")
   .version("1.0.0");
 

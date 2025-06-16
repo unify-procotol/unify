@@ -1,0 +1,199 @@
+---
+title: UniWeb3 Plugin
+description: UniWeb3 is a comprehensive blockchain plugin for Unify that provides unified access to multiple blockchain networks. It includes support for EVM-compatible chains and Solana, allowing you to query blockchain data through a consistent API.
+
+---
+
+## Features
+
+- **Multi-Chain Support**: Query data from EVM-compatible chains and Solana
+- **Unified API**: Consistent interface across different blockchain networks
+- **Balance Queries**: Retrieve account balances across supported networks
+- **Type Safety**: Full TypeScript support with type definitions
+
+## Installation
+
+Install the UniWeb3 plugin along with Unify dependencies:
+
+```package-install
+@unify/server @unify/client @unify/uniweb3
+```
+
+## Server Setup
+
+### Basic Setup
+
+Register the UniWeb3 plugins in your Unify server:
+
+```typescript
+import { createSource } from "@unify/server";
+import { SolanaPlugin, EVMPlugin } from "@unify/uniweb3";
+
+const source = createSource();
+
+// Register both EVM and Solana plugins
+source.register([EVMPlugin, SolanaPlugin]);
+
+const app = source.getApp();
+
+console.log(
+  app.routes.map((route) => `- ${route.method} ${route.path}`).join("\n")
+);
+
+export default {
+  port: 3000,
+  fetch: app.fetch,
+};
+```
+
+## Client Usage
+
+### Creating a Client
+
+```typescript
+import { createClient } from "@unify/client";
+import { EVMPlugin, SolanaPlugin } from "@unify/uniweb3";
+
+const client = createClient(
+  {
+    EVMPlugin,
+    SolanaPlugin,
+  },
+  {
+    baseURL: "http://localhost:3000", // Your server URL
+  }
+);
+```
+
+### EVM Plugin Operations
+
+#### Balance Queries
+
+Query account balances on EVM-compatible networks:
+
+```typescript
+// Get balance for a specific address on IoTeX network
+const evmBalanceRes = await client.EVMPlugin.balance.findOne({
+  where: {
+    address: "0x4f00D43b5aF0a0aAd62E9075D1bFa86a89CDb9aB",
+    network: "iotex",
+  },
+});
+```
+
+#### Supported EVM Networks
+
+The EVM plugin supports various networks including:
+- Ethereum
+- IoTeX
+- Polygon
+- Binance Smart Chain
+- And other EVM-compatible chains
+
+### Solana Plugin Operations
+
+#### Balance Queries
+
+Query account balances on Solana:
+
+```typescript
+// Get balance for a Solana address
+const solanaBalanceRes = await client.SolanaPlugin.balance.findOne({
+  where: {
+    address: "11111111111111111111111111111112",
+  },
+});
+```
+
+## Complete Example
+
+Here's a complete example showing how to use both plugins:
+
+```typescript
+import { createClient } from "@unify/client";
+import { EVMPlugin, SolanaPlugin } from "@unify/uniweb3";
+
+async function queryBalances() {
+  const client = createClient(
+    {
+      EVMPlugin,
+      SolanaPlugin,
+    },
+    {
+      baseURL: "http://localhost:3000/api",
+    }
+  );
+
+  try {
+    // Query EVM balance
+    const evmResult = await client.EVMPlugin.balance.findOne({
+      where: {
+        address: "0x4f00D43b5aF0a0aAd62E9075D1bFa86a89CDb9aB",
+        network: "iotex",
+      },
+    });
+
+    if (evmResult.data) {
+      console.log("EVM Balance:", evmResult.data);
+    }
+
+    // Query Solana balance
+    const solanaResult = await client.SolanaPlugin.balance.findOne({
+      where: {
+        address: "11111111111111111111111111111112",
+      },
+    });
+
+    if (solanaResult.data) {
+      console.log("Solana Balance:", solanaResult.data);
+    }
+  } catch (error) {
+    console.error("Error querying balances:", error);
+  }
+}
+
+queryBalances();
+```
+
+## API Reference
+
+### EVMPlugin
+
+#### `balance.findOne(options)`
+
+Query balance for an EVM address.
+
+**Parameters:**
+- `options.where.address`: The wallet address to query
+- `options.where.network`: The EVM network to query (e.g., "iotex", "ethereum")
+
+**Returns:**
+- Promise resolving to balance data
+
+### SolanaPlugin
+
+#### `balance.findOne(options)`
+
+Query balance for a Solana address.
+
+**Parameters:**
+- `options.where.address`: The Solana wallet address to query
+
+**Returns:**
+- Promise resolving to balance data
+
+## Integration Examples
+
+The UniWeb3 plugin works seamlessly with various frameworks:
+
+- [Next.js Integration](/docs/integrations/next) - Complete Next.js setup guide
+- Express.js Integration - Coming soon
+- Fastify Integration - Coming soon
+
+## Best Practices
+
+1. **Error Handling**: Always implement proper error handling for network requests
+2. **Rate Limiting**: Be mindful of API rate limits when making frequent requests
+3. **Caching**: Consider implementing caching for frequently requested data
+4. **Address Validation**: Validate addresses before making requests
+5. **Network Selection**: Ensure you're using the correct network identifier for EVM queries

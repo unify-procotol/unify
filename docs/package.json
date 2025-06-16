@@ -1,20 +1,36 @@
 {
-  "name": "unify-api-docs",
-  "private": true,
+  "name": "docs",
   "version": "0.0.0",
-  "type": "module",
+  "private": true,
   "scripts": {
-    "dev": "vocs dev",
-    "build": "vocs build",
-    "preview": "vocs preview"
+    "build": "next build",
+    "dev": "next dev",
+    "start": "next start",
+    "postinstall": "fumadocs-mdx"
   },
   "dependencies": {
-    "react": "latest",
-    "react-dom": "latest",
-    "vocs": "latest"
+    "fumadocs-core": "15.5.2",
+    "fumadocs-docgen": "^2.0.1",
+    "fumadocs-mdx": "11.6.8",
+    "fumadocs-twoslash": "^3.1.4",
+    "fumadocs-typescript": "^4.0.6",
+    "fumadocs-ui": "15.5.2",
+    "lucide-react": "^0.515.0",
+    "next": "15.3.3",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "remark-math": "^6.0.0",
+    "rehype-katex": "^7.0.1",
+    "@shikijs/transformers": "^1.24.2"
   },
   "devDependencies": {
-    "@types/react": "latest",
-    "typescript": "latest"
+    "@types/node": "24.0.1",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "typescript": "^5.8.3",
+    "@types/mdx": "^2.0.13",
+    "@tailwindcss/postcss": "^4.1.10",
+    "tailwindcss": "^4.1.10",
+    "postcss": "^8.5.5"
   }
 }

@@ -6,7 +6,7 @@ import {
   CreateArgs,
   UpdateArgs,
   DeleteArgs,
-} from "unify-api";
+} from "@unify/server";
 import { UnifyApiClient, ClientOptions, ApiResponse } from "./client";
 
 // 从实体配置推断实体类型

@@ -7,7 +7,7 @@ Unify Server CLI 工具用于预先初始化表结构和生成内置方法，提
 ## 安装
 
 ```bash
-bun install @unify-api/cli
+bun install @unifycli
 ```
 
 ## 配置文件格式
@@ -106,7 +106,7 @@ export default config;
    - `export const config = {...}`
    - `export const sourceConfig = {...}`
    - `export default {...}`
-3. **避免导入依赖**：配置文件应该是自包含的，不要导入 `unify-api` 模块
+3. **避免导入依赖**：配置文件应该是自包含的，不要导入 `@unify` 模块
 
 ### 2. JSON 配置文件
 
@@ -142,16 +142,16 @@ export default config;
 
 ```bash
 # 验证 TypeScript 配置
-@unify-api/cli validate-config blog-config.ts
+@unifycli validate-config blog-config.ts
 
 # 验证 JSON 配置
-@unify-api/cli validate-config blog-config.json
+@unifycli validate-config blog-config.json
 ```
 
 ### 初始化表结构
 
 ```bash
-@unify-api/cli init-tables blog-config.ts
+@unifycli init-tables blog-config.ts
 ```
 
 预先创建表结构定义，避免运行时初始化开销。
@@ -159,10 +159,10 @@ export default config;
 ### 生成 TypeScript 类型定义
 
 ```bash
-@unify-api/cli generate-types blog-config.ts
+@unifycli generate-types blog-config.ts
 
 # 自定义输出路径
-@unify-api/cli generate-types blog-config.ts -o ./types/blog.ts
+@unifycli generate-types blog-config.ts -o ./types/blog.ts
 ```
 
 生成的类型文件示例：
@@ -198,10 +198,10 @@ export interface comment {
 ### 生成方法文档
 
 ```bash
-@unify-api/cli generate-methods blog-config.ts
+@unifycli generate-methods blog-config.ts
 
 # 自定义输出路径
-@unify-api/cli generate-methods blog-config.ts -o ./docs/methods.json
+@unifycli generate-methods blog-config.ts -o ./docs/methods.json
 ```
 
 生成包含所有可用内置方法的文档。
@@ -209,7 +209,7 @@ export interface comment {
 ### 一键完整设置 (推荐)
 
 ```bash
-@unify-api/cli setup blog-config.ts
+@unifycli setup blog-config.ts
 ```
 
 执行完整的设置流程：
@@ -223,13 +223,13 @@ export interface comment {
 ### 自定义数据目录
 
 ```bash
-@unify-api/cli init-tables blog-config.ts --data-dir ./custom-data
+@unifycli init-tables blog-config.ts --data-dir ./custom-data
 ```
 
 ### 自定义输出路径
 
 ```bash
-@unify-api/cli setup blog-config.ts \
+@unifycli setup blog-config.ts \
   --methods-output ./docs/api-methods.json \
   --types-output ./types/api-types.ts
 ```
@@ -241,7 +241,7 @@ export interface comment {
 ### 基本集成
 
 ```typescript
-import { createSource } from "unify-api";
+import { createSource } from "@unify/server";
 import blogConfig from "./blog-config.ts";
 
 const source = createSource();
@@ -260,7 +260,7 @@ export default {
 ### 带中间件的集成
 
 ```typescript
-import { createSource } from "unify-api";
+import { createSource } from "@unify/server";
 import blogConfig from "./blog-config.ts";
 
 // 认证中间件
@@ -302,20 +302,20 @@ export default {
 # 编辑 blog-config.ts
 
 # 2. 验证配置
-@unify-api/cli validate-config blog-config.ts
+@unifycli validate-config blog-config.ts
 
 # 3. 初始化开发环境
-@unify-api/cli setup blog-config.ts
+@unifycli setup blog-config.ts
 
 # 4. 生成类型文件（可选，用于开发时的类型提示）
-@unify-api/cli generate-types blog-config.ts -o ./types/blog.ts
+@unifycli generate-types blog-config.ts -o ./types/blog.ts
 ```
 
 ### 2. 在服务器中使用
 
 ```typescript
 // blog-server.ts
-import { createSource } from "unify-api";
+import { createSource } from "@unify/server";
 import blogConfig from "./blog-config.ts";
 
 const source = createSource();
@@ -332,7 +332,7 @@ export default {
 
 ```bash
 # 预构建优化（可选）
-@unify-api/cli setup blog-config.ts --data-dir ./production-data
+@unifycli setup blog-config.ts --data-dir ./production-data
 
 # 部署应用
 npm start
@@ -363,8 +363,8 @@ npm start
 ```json
 {
   "scripts": {
-    "setup": "@unify-api/cli setup blog-config.ts",
-    "validate": "@unify-api/cli validate-config blog-config.ts",
+    "setup": "@unifycli setup blog-config.ts",
+    "validate": "@unifycli validate-config blog-config.ts",
     "build": "npm run setup && tsc"
   }
 }

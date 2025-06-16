@@ -1,16 +1,9 @@
 {
-  "name": "@unify-api/plugins",
+  "name": "@unify/uniweb3",
   "version": "1.0.0",
   "description": "Unified source plugins for blockchain data",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "exports": {
-    "./uniweb3": {
-      "types": "./dist/uniweb3/index.d.ts",
-      "import": "./dist/uniweb3/index.js",
-      "require": "./dist/uniweb3/index.js"
-    }
-  },
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch"
@@ -26,7 +19,7 @@
     "@orpc/server": "^1.5.0",
     "@solana/web3.js": "^1.95.2",
     "ethers": "^6.13.2",
-    "unify-api": "workspace:*",
+    "@unify/server": "workspace:*",
     "zod": "^3.25.61"
   },
   "devDependencies": {
@@ -38,7 +31,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/your-org/unify-api.git"
+    "url": "git+https://github.com/your-org/@unify.git"
   },
   "license": "MIT"
 }

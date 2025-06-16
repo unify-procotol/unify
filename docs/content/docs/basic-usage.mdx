@@ -1,0 +1,295 @@
+---
+title: Basic Usage
+description: This guide will walk you through the basic usage of Unify, showing you how to set up a server and client for your API endpoints.
+---
+
+## Defining Entity Configuration
+
+Create a `config.ts` file to define your entities and their operations:
+
+```typescript
+import { os } from "@orpc/server";
+import { z } from "zod";
+
+// Define the User schema
+const UserSchema = z.object({
+  id: z.number(),
+  name: z.string(),
+  age: z.number(),
+});
+
+// Sample data
+const BasicUsageUsers = [
+  { id: 1, name: "test", age: 18 },
+  { id: 2, name: "test2", age: 20 },
+];
+
+export const BasicUsageSourceConfig = {
+  id: "basic-usage",
+  entities: {
+    // Entity with custom methods
+    user: {
+      findMany: os
+        .input(
+          z.object({
+            where: UserSchema.partial().extend({
+              id: z.coerce.number().int().min(1).optional(),
+            }).optional(),
+            select: z.array(UserSchema.keyof()).optional(),
+            order_by: z
+              .record(UserSchema.keyof(), z.enum(["asc", "desc"]))
+              .optional(),
+            offset: z.coerce.number().int().min(0).optional(),
+            limit: z.coerce.number().int().min(1).optional(),
+          })
+        )
+        .output(z.array(UserSchema.partial()))
+        .handler(({ input }) => {
+          const { where, select, order_by, offset, limit } = input;
+          
+          let result = [...BasicUsageUsers];
+          
+          // Apply filtering
+          if (where) {
+            result = result.filter((user) => {
+              return Object.entries(where).every(([key, value]) => {
+                return user[key] === value;
+              });
+            });
+          }
+          
+          // Apply sorting
+          if (order_by) {
+            const [field, direction] = Object.entries(order_by)[0];
+            result.sort((a, b) => {
+              return direction === "asc"
+                ? a[field] - b[field]
+                : b[field] - a[field];
+            });
+          }
+          
+          // Apply pagination
+          if (offset) {
+            result = result.slice(offset);
+          }
+          if (limit) {
+            result = result.slice(0, limit);
+          }
+          
+          // Apply field selection
+          if (select) {
+            result = result.map((user) => {
+              return select.reduce((acc, key) => {
+                acc[key] = user[key];
+                return acc;
+              }, {} as Record<string, any>);
+            });
+          }
+          
+          return result;
+        }),
+        
+      findOne: os
+        .input(
+          z.object({
+            where: UserSchema.partial().extend({
+              id: z.coerce.number().int().min(1).optional(),
+            }),
+            select: z.array(UserSchema.keyof()).optional(),
+          })
+        )
+        .output(UserSchema.partial().nullable())
+        .handler(({ input }) => {
+          const { where, select } = input;
+          const record = BasicUsageUsers.find((r) => {
+            return Object.entries(where).every(
+              ([key, value]) => r[key] === value
+            );
+          });
+          
+          if (!record) {
+            return null;
+          }
+          
+          if (select) {
+            return select.reduce((acc, key) => {
+              acc[key] = record[key];
+              return acc;
+            }, {} as Record<string, any>);
+          }
+          
+          return record;
+        }),
+    },
+    
+    // Table-based entity with automatic CRUD
+    user_table: {
+      table: {
+        name: "users",
+        schema: "public",
+        columns: {
+          id: {
+            type: "integer" as const,
+            nullable: false,
+            unique: true,
+            default: "AUTO_INCREMENT",
+          },
+          name: {
+            type: "varchar" as const,
+            nullable: false,
+          },
+          age: {
+            type: "integer" as const,
+            nullable: true,
+          },
+        },
+      },
+    },
+  },
+};
+```
+
+## Creating the Server
+
+Create a `server.ts` file to set up your API server:
+
+```typescript
+import { createSource } from "@unify/server";
+import { BasicUsageSourceConfig } from "./config";
+
+// Create a new source instance
+const source = createSource();
+
+// Register your configuration
+source.register([BasicUsageSourceConfig]);
+
+// Get the Hono app instance
+const app = source.getApp();
+
+// Log available routes
+console.log(
+  app.routes.map((route) => `- ${route.method} ${route.path}`).join("\n")
+);
+
+// Export for runtime (Bun/Node.js)
+export default {
+  port: 3000,
+  fetch: app.fetch,
+};
+```
+
+## Creating the Client
+
+Create a `client.ts` file to consume your API:
+
+```typescript
+import { createClient } from "@unify/client";
+import { BasicUsageSourceConfig } from "./config";
+
+// Create a type-safe client
+const client = createClient(BasicUsageSourceConfig, {
+  baseURL: "http://localhost:3000",
+});
+
+async function demo() {
+  try {
+    // Query multiple users with sorting
+    const findManyRes = await client.user.findMany({
+      order_by: {
+        id: "desc",
+      },
+    });
+    console.log("findMany=>", findManyRes.data);
+
+    // Query a single user with field selection
+    const findOneRes = await client.user.findOne({
+      where: {
+        id: 1,
+      },
+      select: ["id", "name"],
+    });
+    console.log("findOne=>", findOneRes.data);
+
+    // Use table-based entity
+    const tableUserFindManyRes = await client.user_table.findMany({
+      select: ["id", "name"],
+    });
+    console.log("tableUserFindMany=>", tableUserFindManyRes.data);
+
+    const tableUserFindOneRes = await client.user_table.findOne({
+      where: {
+        id: 1,
+      },
+    });
+    console.log("tableUserFindOne=>", tableUserFindOneRes.data);
+
+  } catch (error) {
+    console.log("❌ Error:", error.message);
+  }
+}
+
+demo();
+```
+
+## Running the Example
+
+
+1. **Start the server:**
+   ```bash
+   # Using Bun
+   bun run server
+   
+   # Using pnpm
+   pnpm run server
+   ```
+
+2. **In another terminal, run the client:**
+   ```bash
+   # Using Bun
+   bun run client
+   
+   # Using pnpm
+   pnpm run client
+   ```
+
+## Key Concepts
+
+### Entity Types
+
+Unify supports two types of entities:
+
+1. **Custom Entities**: Define your own methods using `@orpc/server` handlers
+2. **Table Entities**: Define table schema for automatic CRUD operations
+
+### API Mapping
+
+The SDK automatically maps entity methods to REST API endpoints:
+
+| Method | HTTP Method | Path | Description |
+|--------|-------------|------|-------------|
+| `findMany` | GET | `/{entity}/list?source_id={source_id}` | Find multiple records |
+| `findOne` | GET | `/{entity}/find_one?source_id={source_id}` | Find single record |
+| `create` | POST | `/{entity}/create?source_id={source_id}` | Create new record |
+| `update` | PATCH | `/{entity}/update?source_id={source_id}` | Update record |
+| `delete` | DELETE | `/{entity}/delete?source_id={source_id}` | Delete record |
+
+
+### Query Parameters
+
+All endpoints support these query parameters:
+
+- `where`: Filter conditions (JSON object)
+- `select`: Select specific fields (array of strings)
+- `order_by`: Sort results (JSON object or `field:asc/desc`)
+- `limit`: Limit number of results
+- `offset`: Skip number of results
+
+### Type Safety
+
+The client is fully type-safe based on your entity configuration. TypeScript will provide autocomplete and type checking for all your API calls.
+
+## Next Steps
+
+- Learn about [Advanced Configuration](/docs/advanced-configuration)
+- Explore [Database Integration](/docs/integrations/database)
+- Check out [Plugin System](/docs/plugins)

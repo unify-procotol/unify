@@ -1,4 +1,4 @@
-import { createSource } from "unify-api";
+import { createSource } from "@unify/server";
 import { BasicUsageSourceConfig } from "./config";
 
 const source = createSource();
