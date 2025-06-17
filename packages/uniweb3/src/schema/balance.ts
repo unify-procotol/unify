@@ -3,7 +3,7 @@ import { z } from "zod";
 export const BalanceInputSchema = z.object({
   where: z.object({
     address: z.string(),
-    network: z.string().optional(),
+    chain_id: z.number().optional(),
   }),
 });
 

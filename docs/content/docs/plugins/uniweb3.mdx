@@ -76,7 +76,7 @@ Query account balances on EVM-compatible networks:
 const evmBalanceRes = await client.EVMPlugin.balance.findOne({
   where: {
     address: "0x4f00D43b5aF0a0aAd62E9075D1bFa86a89CDb9aB",
-    network: "iotex",
+    chain_id: 4689,
   },
 });
 ```
@@ -129,7 +129,7 @@ async function queryBalances() {
     const evmResult = await client.EVMPlugin.balance.findOne({
       where: {
         address: "0x4f00D43b5aF0a0aAd62E9075D1bFa86a89CDb9aB",
-        network: "iotex",
+        chain_id: 4689,
       },
     });
 

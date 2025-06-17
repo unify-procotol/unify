@@ -1,6 +1,6 @@
 {
   "name": "@unify/uniweb3",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "Unified source plugins for blockchain data",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -31,7 +31,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/your-org/@unify.git"
+    "url": "git+https://github.com/iotexproject/unify.git"
   },
   "license": "MIT"
 }

@@ -24,25 +24,23 @@ export class EVMHandler implements NetworkHandler {
   }
 }
 
-export const EVM_NETWORK_CONFIG = {
-  ethereum: () => new EVMHandler("https://ethereum-rpc.publicnode.com", "ETH"),
-  iotex: () => new EVMHandler("https://babel-api.mainnet.iotex.io", "IOTX"),
-  polygon: () => new EVMHandler("https://polygon-rpc.com", "MATIC"),
-  bsc: () => new EVMHandler("https://bsc-dataseed.binance.org", "BNB"),
+export const EVM_CHAIN_CONFIG = {
+  1: () => new EVMHandler("https://ethereum-rpc.publicnode.com", "ETH"),
+  4689: () => new EVMHandler("https://babel-api.mainnet.iotex.io", "IOTX"),
+  137: () => new EVMHandler("https://polygon-rpc.com", "MATIC"),
+  56: () => new EVMHandler("https://bsc-dataseed.binance.org", "BNB"),
 } as const;
 
-export type EVMNetwork = keyof typeof EVM_NETWORK_CONFIG;
+export type EVMChainId = keyof typeof EVM_CHAIN_CONFIG;
 
-export function createEVMHandler(network: string): NetworkHandler {
-  const normalizedNetwork = network.toLowerCase() as EVMNetwork;
-
-  if (!EVM_NETWORK_CONFIG[normalizedNetwork]) {
+export function createEVMHandler(chainId: EVMChainId) {
+  if (!EVM_CHAIN_CONFIG[chainId]) {
     throw new Error(
-      `Unsupported EVM network: ${network}. Supported networks: ${Object.keys(
-        EVM_NETWORK_CONFIG
+      `Unsupported EVM chain: ${chainId}. Supported chains: ${Object.keys(
+        EVM_CHAIN_CONFIG
       ).join(", ")}`
     );
   }
 
-  return EVM_NETWORK_CONFIG[normalizedNetwork]();
+  return EVM_CHAIN_CONFIG[chainId]();
 }

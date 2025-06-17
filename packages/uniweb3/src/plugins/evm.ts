@@ -1,12 +1,12 @@
 import { os } from "@orpc/server";
 import { BalanceInputSchema, BalanceOutputSchema } from "../schema/balance";
-import { createEVMHandler } from "../handlers/evm";
+import { createEVMHandler, EVMHandler } from "../handlers/evm";
 
-const evmNetworkHandlers = {
-  ethereum: createEVMHandler("ethereum"),
-  iotex: createEVMHandler("iotex"),
-  polygon: createEVMHandler("polygon"),
-  bsc: createEVMHandler("bsc"),
+const evmHandlers: Record<number, EVMHandler> = {
+  1: createEVMHandler(1),
+  4689: createEVMHandler(4689),
+  137: createEVMHandler(137),
+  56: createEVMHandler(56),
 };
 
 export const EVMPlugin = {
@@ -18,17 +18,21 @@ export const EVMPlugin = {
         .output(BalanceOutputSchema)
         .handler(async ({ input }) => {
           const { where } = input;
-          const network =
-            (where.network as keyof typeof evmNetworkHandlers) || "ethereum";
-          const handler = evmNetworkHandlers[network];
-          if (!handler) {
+
+          // Default to ethereum (chain ID 1) if no chain is specified
+          const chainId = where.chain_id || 1;
+          const networkName = evmHandlers[chainId];
+
+          if (!networkName) {
             throw {
               status: 400,
-              message: `Unsupported EVM network: ${network}. Supported networks: ${Object.keys(
-                evmNetworkHandlers
+              message: `Unsupported chain ID: ${chainId}. Supported chain IDs: ${Object.keys(
+                evmHandlers
               ).join(", ")}`,
             };
           }
+
+          const handler = evmHandlers[chainId];
           const balance = await handler.getBalance(where.address);
           return {
             balance,

@@ -10,7 +10,6 @@
   },
   "dependencies": {
     "@orpc/server": "^1.4.5",
-    "@unify/cli": "workspace:*",
     "@unify/client": "workspace:*",
     "hono": "^4.7.11",
     "@unify/server": "workspace:*",

@@ -1,8 +1,5 @@
 import { os } from "@orpc/server";
-import {
-  BalanceInputSchema,
-  BalanceOutputSchema,
-} from "../schema/balance";
+import { BalanceInputSchema, BalanceOutputSchema } from "../schema/balance";
 import { SolanaHandler } from "../handlers/solana";
 
 export const SolanaPlugin = {

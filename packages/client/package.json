@@ -1,16 +1,9 @@
 {
   "name": "@unify/client",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "Type-safe client library for Unify",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.js"
-    }
-  },
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
@@ -37,5 +30,9 @@
   "files": [
     "dist",
     "README.md"
-  ]
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/iotexproject/unify.git"
+  }
 } 
