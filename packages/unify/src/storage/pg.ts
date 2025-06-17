@@ -17,16 +17,10 @@ export class PGStorage implements Storage {
     this.pool = new Pool(config);
   }
 
-  /**
-   * 获取完整表名（包含sourceId前缀）
-   */
   private getFullTableName(sourceId: string, tableName: string): string {
     return `${sourceId}_${tableName}`;
   }
 
-  /**
-   * 构建WHERE子句
-   */
   private buildWhereClause(
     where: Record<string, any>,
     startIndex: number = 1
@@ -47,9 +41,6 @@ export class PGStorage implements Storage {
     };
   }
 
-  /**
-   * 构建ORDER BY子句
-   */
   private buildOrderByClause(
     orderBy: Partial<Record<string, "asc" | "desc">>
   ): string {
@@ -59,9 +50,6 @@ export class PGStorage implements Storage {
     return orders.length > 0 ? `ORDER BY ${orders.join(", ")}` : "";
   }
 
-  /**
-   * 创建记录
-   */
   async create(
     sourceId: string,
     tableName: string,
@@ -88,9 +76,6 @@ export class PGStorage implements Storage {
     }
   }
 
-  /**
-   * 查找多条记录
-   */
   async findMany(
     sourceId: string,
     tableName: string,
@@ -102,7 +87,6 @@ export class PGStorage implements Storage {
     try {
       let query = `SELECT `;
 
-      // 字段选择
       if (args && "select" in args && args.select && args.select.length > 0) {
         query += args.select.join(", ");
       } else {
@@ -114,7 +98,6 @@ export class PGStorage implements Storage {
       const queryValues: any[] = [];
       let paramIndex = 1;
 
-      // WHERE条件
       if (args && "where" in args && args.where) {
         const whereClause = this.buildWhereClause(args.where, paramIndex);
         query += ` ${whereClause.clause}`;
@@ -122,19 +105,16 @@ export class PGStorage implements Storage {
         paramIndex += whereClause.values.length;
       }
 
-      // ORDER BY
       if (args && "order_by" in args && args.order_by) {
         query += ` ${this.buildOrderByClause(args.order_by)}`;
       }
 
-      // LIMIT
       if (args && "limit" in args && args.limit) {
         query += ` LIMIT $${paramIndex}`;
         queryValues.push(args.limit);
         paramIndex++;
       }
 
-      // OFFSET
       if (args && "offset" in args && args.offset) {
         query += ` OFFSET $${paramIndex}`;
         queryValues.push(args.offset);
@@ -147,9 +127,6 @@ export class PGStorage implements Storage {
     }
   }
 
-  /**
-   * 查找单条记录
-   */
   async findOne(
     sourceId: string,
     tableName: string,
@@ -161,7 +138,6 @@ export class PGStorage implements Storage {
     try {
       let query = `SELECT `;
 
-      // 字段选择
       if (args.select && args.select.length > 0) {
         query += args.select.join(", ");
       } else {
@@ -172,12 +148,10 @@ export class PGStorage implements Storage {
 
       const queryValues: any[] = [];
 
-      // WHERE条件
       const whereClause = this.buildWhereClause(args.where, 1);
       query += ` ${whereClause.clause}`;
       queryValues.push(...whereClause.values);
 
-      // 限制返回一条记录
       query += ` LIMIT 1`;
 
       const result: QueryResult = await client.query(query, queryValues);
@@ -187,9 +161,6 @@ export class PGStorage implements Storage {
     }
   }
 
-  /**
-   * 更新记录
-   */
   async update(
     sourceId: string,
     tableName: string,
@@ -205,7 +176,6 @@ export class PGStorage implements Storage {
         .map((key, index) => `${key} = $${index + 1}`)
         .join(", ");
 
-      // 构建WHERE子句
       const whereClause = this.buildWhereClause(args.where, keys.length + 1);
 
       const query = `
@@ -225,9 +195,6 @@ export class PGStorage implements Storage {
     }
   }
 
-  /**
-   * 删除记录
-   */
   async delete(
     sourceId: string,
     tableName: string,
@@ -237,7 +204,6 @@ export class PGStorage implements Storage {
     const client = await this.pool.connect();
 
     try {
-      // 构建WHERE子句
       const whereClause = this.buildWhereClause(args.where, 1);
 
       const query = `DELETE FROM ${fullTableName} ${whereClause.clause}`;
@@ -248,9 +214,6 @@ export class PGStorage implements Storage {
     }
   }
 
-  /**
-   * 清空表
-   */
   async truncate(sourceId: string, tableName: string): Promise<void> {
     const fullTableName = this.getFullTableName(sourceId, tableName);
     const client = await this.pool.connect();
@@ -263,9 +226,6 @@ export class PGStorage implements Storage {
     }
   }
 
-  /**
-   * 检查表是否存在
-   */
   async tableExists(sourceId: string, tableName: string): Promise<boolean> {
     const fullTableName = this.getFullTableName(sourceId, tableName);
     const client = await this.pool.connect();
@@ -284,9 +244,6 @@ export class PGStorage implements Storage {
     }
   }
 
-  /**
-   * 创建表（辅助方法）
-   */
   async createTable(
     sourceId: string,
     tableName: string,
@@ -312,7 +269,6 @@ export class PGStorage implements Storage {
           }
 
           if (config.default !== undefined) {
-            // 处理PostgreSQL特殊函数，不需要引号
             const pgFunctions = [
               "CURRENT_TIMESTAMP",
               "NOW()",
@@ -351,9 +307,6 @@ export class PGStorage implements Storage {
     }
   }
 
-  /**
-   * 关闭连接池
-   */
   async close(): Promise<void> {
     await this.pool.end();
   }

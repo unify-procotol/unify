@@ -16,9 +16,6 @@ export class BuiltinMethods {
     this.storage = storage;
   }
 
-  /**
-   * 为实体生成内置CRUD方法
-   */
   generateBuiltinMethods(
     source_id: string,
     entityName: string,
@@ -26,14 +23,12 @@ export class BuiltinMethods {
   ): Record<string, EntityFunction<any>> {
     const methods: Record<string, EntityFunction<any>> = {};
 
-    // 只有在配置了 table 时才生成内置方法
     if (!entityConfig.table) {
       return methods;
     }
 
     const tableName = entityConfig.table?.name || entityName;
 
-    // 只有在用户没有定义对应方法时才添加内置方法
     if (!entityConfig.findMany) {
       methods.findMany = this.createFindManyMethod(source_id, tableName);
     }
@@ -65,9 +60,6 @@ export class BuiltinMethods {
     return methods;
   }
 
-  /**
-   * 创建findMany方法
-   */
   private createFindManyMethod(
     source_id: string,
     tableName: string
@@ -77,9 +69,6 @@ export class BuiltinMethods {
     };
   }
 
-  /**
-   * 创建findOne方法
-   */
   private createFindOneMethod(
     source_id: string,
     tableName: string
@@ -102,9 +91,6 @@ export class BuiltinMethods {
     };
   }
 
-  /**
-   * 获取系统字段列表（自动管理的字段）
-   */
   private getSystemFields(entityConfig: EntityConfig): string[] {
     const systemFields: string[] = [];
 
@@ -136,9 +122,6 @@ export class BuiltinMethods {
     return systemFields;
   }
 
-  /**
-   * 过滤系统字段
-   */
   private filterSystemFields(
     data: Record<string, any>,
     entityConfig: EntityConfig
@@ -151,9 +134,6 @@ export class BuiltinMethods {
     return filteredData;
   }
 
-  /**
-   * 创建create方法
-   */
   private createCreateMethod(
     source_id: string,
     tableName: string,
@@ -164,7 +144,6 @@ export class BuiltinMethods {
         throw { status: 400, message: "Data is required" };
       }
 
-      // 验证必填字段
       if (entityConfig.table?.columns) {
         this.validateRequiredFields(
           args.data,
@@ -174,7 +153,6 @@ export class BuiltinMethods {
         );
       }
 
-      // 过滤掉系统字段
       const recordData = this.filterSystemFields(args.data, entityConfig);
 
       return await this.storage.create(source_id, tableName, {
@@ -184,9 +162,6 @@ export class BuiltinMethods {
     };
   }
 
-  /**
-   * 创建update方法
-   */
   private createUpdateMethod(
     sourceId: string,
     tableName: string,
@@ -201,7 +176,6 @@ export class BuiltinMethods {
         throw { status: 400, message: "Data is required" };
       }
 
-      // 过滤掉系统字段
       const updateData = this.filterSystemFields(args.data, entityConfig);
       if (Object.keys(updateData).length === 0) {
         throw { status: 400, message: "No fields to update" };
@@ -220,9 +194,6 @@ export class BuiltinMethods {
     };
   }
 
-  /**
-   * 创建delete方法
-   */
   private createDeleteMethod(
     sourceId: string,
     tableName: string
@@ -245,9 +216,6 @@ export class BuiltinMethods {
     };
   }
 
-  /**
-   * 验证必填字段
-   */
   private validateRequiredFields(
     data: Record<string, any>,
     columns: Record<string, any>,
@@ -258,7 +226,6 @@ export class BuiltinMethods {
     const systemFields = this.getSystemFields(entityConfig);
 
     Object.entries(columns).forEach(([fieldName, fieldConfig]) => {
-      // 跳过系统字段
       if (systemFields.includes(fieldName)) {
         return;
       }
@@ -278,9 +245,6 @@ export class BuiltinMethods {
     }
   }
 
-  /**
-   * 初始化表结构（如果配置了table schema）
-   */
   async initializeTable(
     source_id: string,
     entityName: string,

@@ -28,9 +28,6 @@ interface RouteCache {
   middleware: Array<(c: Context, next: () => Promise<void>) => Promise<void>>;
 }
 
-/**
- * REST API 映射器类
- */
 export class Adapter {
   private app: App;
   private storage: Storage;
@@ -40,24 +37,19 @@ export class Adapter {
   private routeCache: Map<string, Map<string, RouteCache>> = new Map();
 
   constructor(app?: App, options: AdapterOptions = {}) {
-    // 初始化存储实例
     switch (options.storage?.type) {
       case "pg":
         this.storage = new PGStorage(options.storage.config);
         break;
       default:
-        this.storage = new FileStorage(
-          options.storage?.dataDir || "./data"
-        );
+        this.storage = new FileStorage(options.storage?.dataDir || "./data");
     }
 
     this.builtinMethods = new BuiltinMethods(this.storage);
 
-    // 使用动态导入避免编译时的 hono 依赖问题
     if (app) {
       this.app = app;
     } else {
-      // 在运行时动态创建 Hono 实例
       try {
         const { Hono } = require("hono");
         this.app = new Hono();
@@ -69,28 +61,18 @@ export class Adapter {
     }
   }
 
-  /**
-   * 注册源配置
-   */
   register(config: SourceConfig | SourceConfig[]): void {
-    // 如果传入的是数组，逐一注册
     if (Array.isArray(config)) {
       config.forEach((cfg) => this.registerSingle(cfg));
-      // 批量注册完成后只执行一次路由设置
       this.setupUnifiedRoutes();
       return;
     }
 
-    // 单个配置的注册
     this.registerSingle(config);
     this.setupUnifiedRoutes();
   }
 
-  /**
-   * 注册单个源配置
-   */
   private registerSingle(config: SourceConfig): void {
-    // 如果是重新注册，先清理旧缓存
     if (this.sources.has(config.id)) {
       this.clearRouteCache(config.id);
     }
@@ -99,9 +81,6 @@ export class Adapter {
     this.buildRouteCache(config);
   }
 
-  /**
-   * 构建路由缓存
-   */
   private buildRouteCache(config: SourceConfig): void {
     const sourceCache = new Map<string, RouteCache>();
 
@@ -136,9 +115,6 @@ export class Adapter {
     this.routeCache.set(config.id, sourceCache);
   }
 
-  /**
-   * 检查是否是ORPC procedure
-   */
   private isORPCProcedure(handler: any): boolean {
     return (
       handler &&
@@ -149,59 +125,39 @@ export class Adapter {
     );
   }
 
-  /**
-   * 清理指定源的缓存
-   */
   private clearRouteCache(sourceId: string): void {
     this.routeCache.delete(sourceId);
   }
 
-  /**
-   * 清理所有缓存
-   */
   public clearAllCache(): void {
     this.routeCache.clear();
   }
 
-  /**
-   * 获取 Hono 应用实例
-   */
   getApp() {
     return this.app;
   }
 
-  /**
-   * 获取存储实例
-   */
   getStorage(): Storage {
     return this.storage;
   }
 
-  /**
-   * 获取方法映射配置
-   */
   private getMethodMapping(
     methodName: string
   ): { method: string; pathSuffix?: string } | null {
     return DEFAULT_METHOD_MAPPING[methodName] || null;
   }
 
-  /**
-   * 获取实体的所有方法（内置方法 + 用户自定义方法）
-   */
   private getAllEntityMethods(
     sourceId: string,
     entityName: string,
     entityConfig: EntityConfig
   ) {
-    // 生成内置方法
     const builtinMethods = this.builtinMethods.generateBuiltinMethods(
       sourceId,
       entityName,
       entityConfig
     );
 
-    // 合并用户自定义方法和内置方法
     const allMethods = { ...builtinMethods };
 
     if (typeof entityConfig === "object" && entityConfig !== null) {
@@ -220,9 +176,6 @@ export class Adapter {
     return allMethods;
   }
 
-  /**
-   * 获取实体的所有 oRPC procedures
-   */
   private getAllORPCProcedures(entityConfig: EntityConfig) {
     const procedures: Record<string, ORPCProcedure> = {};
     Object.getOwnPropertyNames(entityConfig).forEach((methodName) => {
@@ -234,11 +187,7 @@ export class Adapter {
     return procedures;
   }
 
-  /**
-   * 设置统一路由，支持通过source_id参数路由到不同的source
-   */
   private setupUnifiedRoutes(): void {
-    // 收集所有实体和方法的组合
     const entityMethods = new Map<string, Set<string>>();
 
     this.sources.forEach((config) => {
@@ -264,7 +213,6 @@ export class Adapter {
       });
     });
 
-    // 为每个实体的每个方法设置统一路由
     entityMethods.forEach((methods, entityName) => {
       methods.forEach((methodName) => {
         const mapping = this.getMethodMapping(methodName);
@@ -275,7 +223,6 @@ export class Adapter {
           });
           const routeKey = `${mapping.method}:${path}`;
 
-          // 避免重复设置相同的路由
           if (!this.setupEntityPaths.has(routeKey)) {
             this.setupUnifiedRoute({
               method: mapping.method,
@@ -290,9 +237,6 @@ export class Adapter {
     });
   }
 
-  /**
-   * 设置统一路由处理器
-   */
   private setupUnifiedRoute({
     method,
     path,
@@ -306,20 +250,16 @@ export class Adapter {
   }): void {
     const routeHandler = async (c: Context) => {
       try {
-        // 解析请求参数
         const args = await parseRequestArgs(c, entityFunctionName);
 
-        // 添加路径参数
         // const pathParams = c.req.param();
         // Object.assign(args, pathParams);
 
-        // 检查source_id参数
         const sourceId = args.source_id;
         if (!sourceId) {
           return c.json({ error: "source_id parameter is required" }, 400);
         }
 
-        // 从缓存中获取路由信息
         const sourceCache = this.routeCache.get(sourceId);
         if (!sourceCache) {
           return c.json({ error: `Source '${sourceId}' not found` }, 404);
@@ -336,7 +276,6 @@ export class Adapter {
           );
         }
 
-        // 应用中间件（从缓存中获取）
         for (const mw of routeCache.middleware) {
           let middlewareResult: any = null;
           const next = () => Promise.resolve();
@@ -346,10 +285,8 @@ export class Adapter {
           }
         }
 
-        // 调用实体方法（从缓存中获取的处理器）
         const result = await routeCache.handler(args, c);
 
-        // 标准化响应
         const response = normalizeResponse(result);
 
         return c.json(response);
@@ -359,7 +296,6 @@ export class Adapter {
       }
     };
 
-    // 根据 HTTP 方法注册路由
     switch (method.toUpperCase()) {
       case "GET":
         this.app.get(path, routeHandler);

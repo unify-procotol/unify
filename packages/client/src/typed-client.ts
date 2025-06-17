@@ -7,9 +7,8 @@ import {
   UpdateArgs,
   DeleteArgs,
 } from "@unify/server";
-import { UnifyApiClient, ClientOptions, ApiResponse } from "./client";
+import { UnifyClient, ClientOptions, ApiResponse } from "./client";
 
-// 从实体配置推断实体类型
 type InferEntityType<T extends EntityConfig> = T extends {
   table: { columns: infer C };
 }
@@ -29,7 +28,6 @@ type InferEntityType<T extends EntityConfig> = T extends {
     : { [key: string]: any }
   : { [key: string]: any };
 
-// 数据库类型到TypeScript类型的映射
 type MapColumnType<T> = T extends
   | "integer"
   | "int"
@@ -64,7 +62,6 @@ type ExtractORPCOutputType<T> = T extends { "~orpc": any }
     : any
   : any;
 
-// 检查实体配置是否包含任何 oRPC 过程
 type HasORPCProcedures<T extends EntityConfig> = (
   T extends { findMany?: infer FM } ? IsORPCProcedure<FM> : false
 ) extends true
@@ -83,7 +80,6 @@ type HasORPCProcedures<T extends EntityConfig> = (
   ? true
   : false;
 
-// 实体方法接口 - 标准类型推断
 interface TypedEntityMethods<TEntity extends EntityConfig> {
   findMany(
     args?: Omit<FindManyArgs<TEntity>, "source_id">
@@ -102,7 +98,6 @@ interface TypedEntityMethods<TEntity extends EntityConfig> {
   ): Promise<ApiResponse<{ success: boolean; message: string }>>;
 }
 
-// 针对 oRPC 配置的特殊类型推断
 type TypedEntityMethodsForORPC<TEntityConfig extends EntityConfig> = {
   findMany(
     args?: TEntityConfig extends { findMany?: infer F }
@@ -167,22 +162,19 @@ type TypedEntityMethodsForORPC<TEntityConfig extends EntityConfig> = {
   delete(id: string | number): Promise<ApiResponse<void>>;
 };
 
-// 从SourceConfig推断客户端类型
 export type InferClientType<T extends SourceConfig> = {
   [K in keyof T["entities"]]: HasORPCProcedures<T["entities"][K]> extends true
     ? TypedEntityMethodsForORPC<T["entities"][K]>
     : TypedEntityMethods<InferEntityType<T["entities"][K]>>;
 };
 
-// 创建类型化客户端的工厂函数
 export function createTypedClient<TConfig extends SourceConfig>(
   sourceConfig: TConfig,
   clientOptions: ClientOptions
 ): InferClientType<TConfig> {
-  const client = new UnifyApiClient(clientOptions);
+  const client = new UnifyClient(clientOptions);
   const sourceId = sourceConfig.id;
 
-  // 使用 Proxy 来动态创建实体方法
   return new Proxy({} as InferClientType<TConfig>, {
     get(target, entityName: string | symbol) {
       if (
@@ -229,12 +221,10 @@ export function createClient<
   : T extends Record<string, SourceConfig>
   ? InferClientMapType<T>
   : never {
-  // 检查是否为单个源配置（包含 id 和 entities 属性）
   if ("id" in config && "entities" in config) {
     return createTypedClient(config as any, clientOptions) as any;
   }
 
-  // 否则视为源配置映射
   const clientMap = {} as any;
   for (const [pluginName, sourceConfig] of Object.entries(config)) {
     clientMap[pluginName] = createTypedClient(sourceConfig, clientOptions);

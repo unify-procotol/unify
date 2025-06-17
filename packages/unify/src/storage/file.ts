@@ -56,7 +56,6 @@ export class FileStorage implements Storage {
     writeFileSync(tablePath, JSON.stringify(data, null, 2));
   }
 
-  // 创建记录
   async create(
     sourceId: string,
     tableName: string,
@@ -64,12 +63,10 @@ export class FileStorage implements Storage {
   ): Promise<Record<string, any>> {
     const tableData = this.loadTable(sourceId, tableName);
     const { data } = args;
-    // 添加自增ID（如果没有提供id）
     if (!data.id) {
       data.id = tableData.autoIncrement++;
     }
 
-    // 添加时间戳
     data.created_at = new Date().toISOString();
     data.updated_at = data.created_at;
 
@@ -79,7 +76,6 @@ export class FileStorage implements Storage {
     return data;
   }
 
-  // 查找多条记录
   async findMany(
     sourceId: string,
     tableName: string,
@@ -88,7 +84,6 @@ export class FileStorage implements Storage {
     const tableData = this.loadTable(sourceId, tableName);
     let records = [...tableData.records];
 
-    // 过滤条件
     if (args.where) {
       records = records.filter((record) =>
         Object.entries(args.where!).every(
@@ -97,7 +92,6 @@ export class FileStorage implements Storage {
       );
     }
 
-    // 排序
     if (args.order_by) {
       const [field, direction] = Object.entries(args.order_by)[0];
       records.sort((a, b) => {
@@ -110,7 +104,6 @@ export class FileStorage implements Storage {
       });
     }
 
-    // 分页
     if (args.offset) {
       records = records.slice(args.offset);
     }
@@ -118,7 +111,6 @@ export class FileStorage implements Storage {
       records = records.slice(0, args.limit);
     }
 
-    // 字段选择
     if (args.select) {
       records = records.map((record) => {
         const selected: Record<string, any> = {};
@@ -134,7 +126,6 @@ export class FileStorage implements Storage {
     return records;
   }
 
-  // 查找单条记录
   async findOne(
     sourceId: string,
     tableName: string,
@@ -159,7 +150,6 @@ export class FileStorage implements Storage {
     return records[0] || null;
   }
 
-  // 更新记录
   async update(
     sourceId: string,
     tableName: string,
@@ -183,7 +173,6 @@ export class FileStorage implements Storage {
     return record;
   }
 
-  // 删除记录
   async delete(
     sourceId: string,
     tableName: string,
@@ -204,12 +193,10 @@ export class FileStorage implements Storage {
     return true;
   }
 
-  // 清空表
   async truncate(sourceId: string, tableName: string): Promise<void> {
     this.saveTable(sourceId, tableName, { records: [], autoIncrement: 1 });
   }
 
-  // 检查表是否存在
   async tableExists(sourceId: string, tableName: string): Promise<boolean> {
     return existsSync(this.getTablePath(sourceId, tableName));
   }

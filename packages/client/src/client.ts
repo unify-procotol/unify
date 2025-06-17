@@ -36,7 +36,7 @@ class HttpClient {
   private defaultHeaders: Record<string, string>;
 
   constructor(options: ClientOptions) {
-    this.baseURL = options.baseURL.replace(/\/$/, ""); // 移除末尾斜杠
+    this.baseURL = options.baseURL.replace(/\/$/, "");
     this.timeout = options.timeout || 30000;
     this.defaultHeaders = options.headers || {};
   }
@@ -44,10 +44,8 @@ class HttpClient {
   async request<T = any>(config: ApiRequestConfig): Promise<ApiResponse<T>> {
     const { method, url, params = {}, data, headers = {} } = config;
 
-    // 构建完整URL
     let fullUrl = `${this.baseURL}${url}`;
 
-    // 处理查询参数
     if (Object.keys(params).length > 0) {
       const searchParams = new URLSearchParams();
       Object.entries(params).forEach(([key, value]) => {
@@ -62,21 +60,18 @@ class HttpClient {
       fullUrl += `?${searchParams.toString()}`;
     }
 
-    // 合并headers
     const finalHeaders = {
       "Content-Type": "application/json",
       ...this.defaultHeaders,
       ...headers,
     };
 
-    // 准备fetch选项
     const fetchOptions: RequestInit = {
       method,
       headers: finalHeaders,
       signal: AbortSignal.timeout(this.timeout),
     };
 
-    // 添加请求体（非GET请求）
     if (method !== "GET" && data) {
       fetchOptions.body = JSON.stringify(data);
     }
@@ -123,7 +118,6 @@ class HttpClient {
   }
 }
 
-// 实体客户端基类
 class EntityClient<TEntity = any> {
   constructor(
     private httpClient: HttpClient,
@@ -177,7 +171,7 @@ class EntityClient<TEntity = any> {
   }
 }
 
-export class UnifyApiClient {
+export class UnifyClient {
   private httpClient: HttpClient;
   private entities: Record<string, EntityClient> = {};
 
@@ -185,7 +179,6 @@ export class UnifyApiClient {
     this.httpClient = new HttpClient(options);
   }
 
-  // 注册实体
   registerEntity<TEntity = any>(
     sourceId: string,
     entityName: string
@@ -201,7 +194,6 @@ export class UnifyApiClient {
     return this.entities[key] as EntityClient<TEntity>;
   }
 
-  // 获取实体客户端
   getEntity<TEntity = any>(
     sourceId: string,
     entityName: string
@@ -218,21 +210,17 @@ export class UnifyApiClient {
   }
 }
 
-// SDK工厂函数
-export function createClient(options: ClientOptions): UnifyApiClient {
-  return new UnifyApiClient(options);
+export function createClient(options: ClientOptions): UnifyClient {
+  return new UnifyClient(options);
 }
 
-// 从SourceConfig生成类型化SDK的工厂函数
 export function createTypedClient<TSourceConfig extends SourceConfig>(
   options: ClientOptions
 ): TypedClient<TSourceConfig> {
-  const client = new UnifyApiClient(options);
+  const client = new UnifyClient(options);
   return new Proxy({} as TypedClient<TSourceConfig>, {
     get(_, entityName: string | symbol) {
       if (typeof entityName === "string") {
-        // 这里需要从某个地方获取sourceId，暂时使用一个默认值
-        // 在实际使用中，可以通过配置或其他方式传入
         return client.getEntity("default", entityName);
       }
       return undefined;
@@ -240,14 +228,10 @@ export function createTypedClient<TSourceConfig extends SourceConfig>(
   });
 }
 
-// 类型推导辅助类型
 type ExtractEntityTypes<T extends SourceConfig> = {
   [K in keyof T["entities"]]: EntityClient<any>;
 };
 
-// 类型化客户端类型
 export type TypedClient<T extends SourceConfig> = ExtractEntityTypes<T>;
-
-// 导出主要类型
 export type { ApiResponse };
 export { EntityClient, HttpClient };

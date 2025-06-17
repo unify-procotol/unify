@@ -24,7 +24,6 @@ export class EVMHandler implements NetworkHandler {
   }
 }
 
-// EVM网络配置
 export const EVM_NETWORK_CONFIG = {
   ethereum: () => new EVMHandler("https://ethereum-rpc.publicnode.com", "ETH"),
   iotex: () => new EVMHandler("https://babel-api.mainnet.iotex.io", "IOTX"),

@@ -1,12 +1,10 @@
 import { PGStorage } from "../storage/pg";
 import { DatabaseDefaultValue, SourceConfig } from "../types";
 
-// 创建数据库迁移脚本
 export async function createPgTablesFromConfig(
   sourceConfigList: SourceConfig[],
   connectionString: string
 ) {
-  // 确保设置数据库连接字符串
   if (!connectionString) {
     console.error(
       "❌ DATABASE_URL environment variable is required or connectionString parameter must be provided"
@@ -17,7 +15,6 @@ export async function createPgTablesFromConfig(
   console.log("🚀 Initializing database tables for configuration...");
   console.log("Tables to be created:");
 
-  // 显示将要创建的表
   sourceConfigList.forEach((config) => {
     Object.entries(config.entities).forEach(([entityName, entityConfig]) => {
       if (entityConfig.table) {
@@ -26,17 +23,14 @@ export async function createPgTablesFromConfig(
     });
   });
 
-  // 创建PostgreSQL存储实例
   const pgStorage = new PGStorage({
     connectionString: connectionString,
   });
 
   try {
-    // 遍历每个源配置
     for (const config of sourceConfigList) {
       console.log(`\nProcessing configuration: ${config.id}`);
 
-      // 遍历配置中的每个实体，创建对应的表
       for (const [entityName, entityConfig] of Object.entries(
         config.entities
       )) {
@@ -44,7 +38,6 @@ export async function createPgTablesFromConfig(
           const tableName = entityConfig.table.name;
           const fullTableName = `${config.id}_${tableName}`;
 
-          // 检查表是否已存在
           const tableExists = await pgStorage.tableExists(config.id, tableName);
 
           if (tableExists) {
@@ -54,7 +47,6 @@ export async function createPgTablesFromConfig(
 
           console.log(`Creating table for entity: ${entityName}`);
 
-          // 提取列配置，包含所有在SourceConfig中定义的字段
           const columns: Record<
             string,
             {
@@ -67,14 +59,14 @@ export async function createPgTablesFromConfig(
 
           Object.entries(entityConfig.table.columns).forEach(
             ([colName, colConfig]) => {
-              // 处理默认值，特别是 AUTO_INCREMENT 转换为 PostgreSQL 兼容格式
+              // Handling Default Values, Especially AUTO_INCREMENT Conversion to PostgreSQL Compatible Formats
               let defaultValue = colConfig.default;
               if (colConfig.default === "AUTO_INCREMENT") {
-                // PostgreSQL 不支持 AUTO_INCREMENT，需要使用 SERIAL 类型或 IDENTITY
-                // 这里设为 undefined，让 SERIAL 类型处理自增
+                // PostgreSQL does not support AUTO_INCREMENT, you need to use the SERIAL type or IDENTITY
+                //  This is set to undefined to allow the SERIAL type to handle self-incrementation.
                 defaultValue = undefined;
               } else if (colConfig.default === "NOW()") {
-                // PostgreSQL 中使用 CURRENT_TIMESTAMP 或保持 NOW()
+                // Using CURRENT_TIMESTAMP or Keeping NOW() in PostgreSQL
                 defaultValue = "CURRENT_TIMESTAMP";
               }
 
@@ -101,7 +93,6 @@ export async function createPgTablesFromConfig(
               `✅ Table created: ${config.id}_${entityConfig.table.name}`
             );
           } catch (createError: any) {
-            // 处理序列已存在的错误
             if (
               createError.message &&
               createError.message.includes("already exists")
@@ -122,14 +113,11 @@ export async function createPgTablesFromConfig(
     console.error("❌ Error creating tables:", error);
     process.exit(1);
   } finally {
-    // 关闭数据库连接
     await pgStorage.close();
   }
 }
 
-// 映射数据类型到PostgreSQL类型
 function mapColumnType(type: string, isAutoIncrement: boolean = false): string {
-  // 如果是自增类型，优先使用 SERIAL
   if (isAutoIncrement) {
     if (type.toLowerCase() === "integer") {
       return "SERIAL";

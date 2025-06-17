@@ -2,7 +2,6 @@ import { Context } from "hono";
 import { EntityFunctionName } from "./types";
 import { ContentfulStatusCode } from "hono/utils/http-status";
 
-// 解析 JSON 或返回默认值
 function parseJsonOrDefault(value: string, defaultValue: any = undefined): any {
   try {
     return JSON.parse(value);
@@ -11,28 +10,23 @@ function parseJsonOrDefault(value: string, defaultValue: any = undefined): any {
   }
 }
 
-// 解析整数参数
 function parseIntParam(value: string): number | undefined {
   const parsed = parseInt(value, 10);
   return isNaN(parsed) ? undefined : parsed;
 }
 
-// 解析 where 条件
 function parseWhereCondition(whereStr: string): any {
   const parsed = parseJsonOrDefault(whereStr);
   if (parsed !== undefined) return parsed;
 
-  // 如果不是 JSON，暂时返回 undefined
-  // 原始代码的简单键值对处理逻辑不完整
   return undefined;
 }
 
-// 解析排序条件
 function parseOrderBy(orderStr: string): any {
   const parsed = parseJsonOrDefault(orderStr);
   if (parsed !== undefined) return parsed;
 
-  // 简单格式：field:asc 或 field:desc
+  // Simple format: field:asc or field:desc
   const [field, direction] = orderStr.split(":");
   if (field && (direction === "asc" || direction === "desc")) {
     return { [field]: direction };
@@ -51,7 +45,7 @@ export async function parseRequestArgs(
     const query = c.req.query();
     args.source_id = query.source_id;
 
-    // 通用查询参数解析（findMany 和 findOne 都支持）
+    // Generic query parameter parsing (supported by both findMany and findOne)
     if (["findMany", "findOne"].includes(entityFunction)) {
       if (query.where) {
         const where = parseWhereCondition(query.where);
@@ -68,7 +62,7 @@ export async function parseRequestArgs(
       }
     }
 
-    // findMany 特有参数
+    // findMany-specific parameters
     if (entityFunction === "findMany") {
       if (query.limit) {
         const limit = parseIntParam(query.limit);
@@ -108,16 +102,13 @@ export async function parseRequestArgs(
           break;
       }
     } catch {
-      // 忽略解析错误
+      // Ignore parsing errors
     }
   }
 
   return args;
 }
 
-/**
- * 构建 REST API 路径
- */
 export function buildRestPath({
   entityName,
   pathSuffix,
@@ -130,9 +121,6 @@ export function buildRestPath({
   return pathSuffix ? basePath + pathSuffix : basePath;
 }
 
-/**
- * 标准化响应数据
- */
 export function normalizeResponse(data: any): any {
   if (data === null || data === undefined) {
     return null;
@@ -140,9 +128,6 @@ export function normalizeResponse(data: any): any {
   return data;
 }
 
-/**
- * 处理错误响应
- */
 export function handleError(error: any): {
   error: string;
   message: string;
