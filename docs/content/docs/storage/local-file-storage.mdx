@@ -15,7 +15,7 @@ By default, @unify/server uses local file storage without any configuration requ
 import { createSource } from "@unify/server";
 
 // Simplest configuration - uses default file storage
-const source = createSource({});
+const source = createSource();
 ```
 
 ## Custom Configuration
@@ -54,7 +54,7 @@ Local file storage is ideal for:
 
 ### Minimal Setup (Recommended for Testing)
 ```typescript
-const source = createSource({});
+const source = createSource();
 ```
 
 ### Custom Data Directory
