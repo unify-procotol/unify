@@ -1,25 +1,21 @@
 import {
   SourceConfig,
   DEFAULT_METHOD_MAPPING,
-  AdapterOptions,
-  App,
   EntityConfig,
   ORPCProcedure,
   EntityFunction,
   EntityFunctionName,
-} from "./types";
+  Storage,
+} from "@unify/core";
 import {
   parseRequestArgs,
   buildRestPath,
   normalizeResponse,
   handleError,
-} from "./utils";
-import { Storage } from "./storage/interface";
-import { FileStorage } from "./storage/file";
+} from "@unify/core";
 import { BuiltinMethods } from "./builtin-methods";
-import { PGStorage } from "./storage/pg";
-
 import type { Context } from "hono";
+import { AdapterOptions, App } from "./types";
 
 interface RouteCache {
   sourceConfig: SourceConfig;
@@ -30,22 +26,17 @@ interface RouteCache {
 
 export class Adapter {
   private app: App;
-  private storage: Storage;
-  private builtinMethods: BuiltinMethods;
+  private storage?: Storage;
+  private builtinMethods?: BuiltinMethods;
   private sources: Map<string, SourceConfig> = new Map();
   private setupEntityPaths: Set<string> = new Set();
   private routeCache: Map<string, Map<string, RouteCache>> = new Map();
 
   constructor(app?: App, options: AdapterOptions = {}) {
-    switch (options.storage?.type) {
-      case "pg":
-        this.storage = new PGStorage(options.storage.config);
-        break;
-      default:
-        this.storage = new FileStorage(options.storage?.dataDir || "./data");
+    if (options.storage) {
+      this.storage = options.storage;
+      this.builtinMethods = new BuiltinMethods(this.storage);
     }
-
-    this.builtinMethods = new BuiltinMethods(this.storage);
 
     if (app) {
       this.app = app;
@@ -137,7 +128,7 @@ export class Adapter {
     return this.app;
   }
 
-  getStorage(): Storage {
+  getStorage(): Storage | undefined {
     return this.storage;
   }
 
@@ -152,11 +143,13 @@ export class Adapter {
     entityName: string,
     entityConfig: EntityConfig
   ) {
-    const builtinMethods = this.builtinMethods.generateBuiltinMethods(
-      sourceId,
-      entityName,
-      entityConfig
-    );
+    const builtinMethods = this.builtinMethods
+      ? this.builtinMethods.generateBuiltinMethods(
+          sourceId,
+          entityName,
+          entityConfig
+        )
+      : {};
 
     const allMethods = { ...builtinMethods };
 
@@ -292,6 +285,7 @@ export class Adapter {
         return c.json(response);
       } catch (error) {
         const errorResponse = handleError(error);
+        // @ts-ignore
         return c.json(errorResponse, errorResponse.status);
       }
     };

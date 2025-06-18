@@ -1,6 +1,6 @@
-import { BlankEnv, BlankSchema } from "hono/types";
-import { PGStorageConfig } from "./storage/pg";
-import type { Context, Hono } from "hono";
+// ============================================================================
+// Query and Operation Types
+// ============================================================================
 
 export interface FindManyArgs<T = Record<string, any>> {
   source_id: string;
@@ -39,6 +39,10 @@ export type QueryArgs<T = Record<string, any>> =
   | CreateArgs<T>
   | UpdateArgs<T>
   | DeleteArgs<T>;
+
+// ============================================================================
+// Database and Schema Types
+// ============================================================================
 
 export type DatabaseColumnType =
   | "varchar"
@@ -90,8 +94,25 @@ export type DatabaseDefaultValue =
   | "BIGSERIAL" // PostgreSQL sequence
   | "NOW()"; // SQL function
 
+export interface TableColumn {
+  type: DatabaseColumnType;
+  nullable?: boolean;
+  unique?: boolean;
+  default?: DatabaseDefaultValue;
+}
+
+export interface TableSchema {
+  name: string;
+  schema: string;
+  columns: Record<string, TableColumn>;
+}
+
+// ============================================================================
+// Entity and Configuration Types
+// ============================================================================
+
 export interface EntityFunction<TArgs = Record<string, any>> {
-  (args?: TArgs, context?: Context): Promise<any> | any;
+  (args?: TArgs, context?: any): Promise<any> | any;
 }
 
 export interface ORPCProcedure {
@@ -118,55 +139,53 @@ export interface EntityConfig {
   create?: EntityProcedure<CreateArgs>;
   update?: EntityProcedure<UpdateArgs>;
   delete?: EntityProcedure<DeleteArgs>;
-  table?: {
-    name: string;
-    schema: string;
-    columns: {
-      [key: string]: {
-        type: DatabaseColumnType;
-        nullable?: boolean;
-        unique?: boolean;
-        default?: DatabaseDefaultValue;
-      };
-    };
-  };
+  table?: TableSchema;
 }
 
 export interface SourceConfig {
   id: string;
-  entities: {
-    [entityName: string]: EntityConfig;
-  };
+  entities: Record<string, EntityConfig>;
   middleware?: Array<(c: any, next: () => Promise<void>) => Promise<void>>;
 }
 
-export interface AdapterOptions {
-  storage?:
-    | {
-        type: "file";
-        dataDir?: string;
-      }
-    | {
-        type: "pg";
-        config: PGStorageConfig;
-      };
+// ============================================================================
+// Storage Interface
+// ============================================================================
+
+export interface Storage {
+  create(
+    sourceId: string,
+    tableName: string,
+    args: CreateArgs
+  ): Promise<Record<string, any>>;
+
+  findMany(
+    sourceId: string,
+    tableName: string,
+    args?: QueryArgs
+  ): Promise<Record<string, any>[]>;
+
+  findOne(
+    sourceId: string,
+    tableName: string,
+    args: FindOneArgs
+  ): Promise<Record<string, any> | null>;
+
+  update(
+    sourceId: string,
+    tableName: string,
+    args: UpdateArgs
+  ): Promise<Record<string, any> | null>;
+
+  delete(
+    sourceId: string,
+    tableName: string,
+    args: DeleteArgs
+  ): Promise<boolean>;
+
+  truncate(sourceId: string, tableName: string): Promise<void>;
+
+  tableExists(sourceId: string, tableName: string): Promise<boolean>;
+
+  close?(): Promise<void>;
 }
-
-export interface App extends Hono<BlankEnv, BlankSchema, "/"> {}
-
-export interface RestMethodMapping {
-  method: "GET" | "POST" | "PATCH" | "DELETE";
-  path: string;
-  handler: EntityFunction<any>;
-}
-
-export const DEFAULT_METHOD_MAPPING: Record<
-  string,
-  { method: string; pathSuffix?: string }
-> = {
-  findMany: { method: "GET", pathSuffix: "/list" },
-  findOne: { method: "GET", pathSuffix: "/find_one" },
-  create: { method: "POST", pathSuffix: "/create" },
-  update: { method: "PATCH", pathSuffix: "/update" },
-  delete: { method: "DELETE", pathSuffix: "/delete" },
-};

@@ -1,5 +1,5 @@
-import { PGStorage } from "../storage/pg";
-import { DatabaseDefaultValue, SourceConfig } from "../types";
+import { PGStorage } from "../pg";
+import { DatabaseDefaultValue, SourceConfig } from "@unify/core";
 
 export async function createPgTablesFromConfig(
   sourceConfigList: SourceConfig[],

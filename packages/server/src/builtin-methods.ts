@@ -1,4 +1,3 @@
-import { Storage } from "./storage/interface";
 import {
   EntityFunction,
   EntityConfig,
@@ -7,7 +6,8 @@ import {
   UpdateArgs,
   CreateArgs,
   DeleteArgs,
-} from "./types";
+  Storage,
+} from "@unify/core";
 
 export class BuiltinMethods {
   private storage: Storage;

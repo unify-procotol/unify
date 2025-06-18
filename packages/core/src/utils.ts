@@ -1,6 +1,4 @@
-import { Context } from "hono";
 import { EntityFunctionName } from "./types";
-import { ContentfulStatusCode } from "hono/utils/http-status";
 
 function parseJsonOrDefault(value: string, defaultValue: any = undefined): any {
   try {
@@ -35,7 +33,7 @@ function parseOrderBy(orderStr: string): any {
 }
 
 export async function parseRequestArgs(
-  c: Context,
+  c: any,
   entityFunction: EntityFunctionName
 ) {
   const method = c.req.method;
@@ -131,7 +129,7 @@ export function normalizeResponse(data: any): any {
 export function handleError(error: any): {
   error: string;
   message: string;
-  status: ContentfulStatusCode;
+  status: number;
 } {
   if (error.status && error.message) {
     return {
@@ -147,3 +145,14 @@ export function handleError(error: any): {
     status: 500,
   };
 }
+
+export const DEFAULT_METHOD_MAPPING: Record<
+  string,
+  { method: string; pathSuffix?: string }
+> = {
+  findMany: { method: "GET", pathSuffix: "/list" },
+  findOne: { method: "GET", pathSuffix: "/find_one" },
+  create: { method: "POST", pathSuffix: "/create" },
+  update: { method: "PATCH", pathSuffix: "/update" },
+  delete: { method: "DELETE", pathSuffix: "/delete" },
+};

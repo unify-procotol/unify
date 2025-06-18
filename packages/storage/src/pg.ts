@@ -1,24 +1,23 @@
 import { Pool, PoolConfig, QueryResult } from "pg";
-import { Storage } from "./interface";
 import {
   CreateArgs,
   FindOneArgs,
   UpdateArgs,
   DeleteArgs,
   QueryArgs,
-} from "../types";
-
-export interface PGStorageConfig extends PoolConfig {}
+  Storage,
+} from "@unify/core";
 
 export class PGStorage implements Storage {
   private pool: Pool;
 
-  constructor(config: PGStorageConfig) {
+  constructor(config: PoolConfig) {
     this.pool = new Pool(config);
   }
 
   private getFullTableName(sourceId: string, tableName: string): string {
-    return `${sourceId}_${tableName}`;
+    const fullName = `${sourceId}_${tableName}`;
+    return fullName.toLowerCase().replace(/[^a-z0-9_]/g, "_");
   }
 
   private buildWhereClause(

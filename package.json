@@ -8,12 +8,17 @@
     "examples/*"
   ],
   "scripts": {
-    "build:server": "cd packages/unify && bun run build",
-    "dev:server": "cd packages/unify && bun run dev",
+    "build:core": "cd packages/core && bun run build",
+    "dev:core": "cd packages/core && bun run dev",
+    "build:server": "cd packages/server && bun run build",
+    "dev:server": "cd packages/server && bun run dev",
     "build:client": "cd packages/client && bun run build",
     "dev:client": "cd packages/client && bun run dev",
     "build:uniweb3": "cd packages/uniweb3 && bun run build",
-    "dev:uniweb3": "cd packages/uniweb3 && bun run dev"
+    "dev:uniweb3": "cd packages/uniweb3 && bun run dev",
+    "build:storage": "cd packages/storage && bun run build",
+    "dev:storage": "cd packages/storage && bun run dev",
+    "build:all": "bun run build:core && bun run build:storage && bun run build:server && bun run build:client"
   },
   "author": "osdodo",
   "license": "MIT"

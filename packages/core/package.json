@@ -1,7 +1,7 @@
 {
-  "name": "@unify/client",
+  "name": "@unify/core",
   "version": "0.0.1",
-  "description": "Type-safe client library for Unify",
+  "description": "Core types and utilities for the Unify framework",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
@@ -11,19 +11,15 @@
     "prepublishOnly": "bun run build"
   },
   "keywords": [
-    "api",
-    "client",
-    "typescript",
-    "rest",
-    "type-safe"
+    "unify",
+    "core",
+    "types",
+    "utilities"
   ],
   "author": "osdodo",
   "license": "MIT",
-  "dependencies": {
-    "@unify/core": "workspace:*",
-    "zod": "^3.25.57"
-  },
   "devDependencies": {
+    "@types/node": "^20.10.0",
     "typescript": "^5.3.0"
   },
   "files": [
@@ -32,6 +28,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/iotexproject/unify.git"
+    "url": "git+https://github.com/iotexproject/unify.git",
+    "directory": "packages/core"
   }
-}
+} 

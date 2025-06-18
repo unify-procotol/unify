@@ -1,13 +1,13 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 import { join } from "path";
-import { Storage } from "./interface";
 import {
   CreateArgs,
   DeleteArgs,
   FindManyArgs,
   FindOneArgs,
   UpdateArgs,
-} from "../types";
+  Storage,
+} from "@unify/core";
 
 export interface TableData {
   records: Record<string, any>[];

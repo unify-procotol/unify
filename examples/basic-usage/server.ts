@@ -1,7 +1,15 @@
 import { createSource } from "@unify/server";
 import { BasicUsageSourceConfig } from "./config";
+import { FileStorage, PGStorage } from "@unify/storage";
 
-const source = createSource();
+const source = createSource({
+  options: {
+    storage: new FileStorage("./data"),
+    // storage: new PGStorage({
+    //   connectionString: process.env.DATABASE_URL!,
+    // }),
+  },
+});
 
 source.register(BasicUsageSourceConfig);
 
