@@ -5,6 +5,8 @@ import {
   UpdateArgs,
   DeleteArgs,
   CreateArgs,
+  buildRestPath,
+  DEFAULT_METHOD_MAPPING,
 } from "@unify/core";
 
 export interface ClientOptions {
@@ -129,7 +131,10 @@ class EntityClient<TEntity = any> {
     args.source_id = this.sourceId;
     return this.httpClient.request<TEntity[]>({
       method: "GET",
-      url: `/${this.entityName}/list`,
+      url: buildRestPath({
+        entityName: this.entityName,
+        pathSuffix: DEFAULT_METHOD_MAPPING.findMany.pathSuffix,
+      }),
       params: args,
     });
   }
@@ -138,7 +143,10 @@ class EntityClient<TEntity = any> {
     args.source_id = this.sourceId;
     return this.httpClient.request<TEntity>({
       method: "GET",
-      url: `/${this.entityName}/find_one`,
+      url: buildRestPath({
+        entityName: this.entityName,
+        pathSuffix: DEFAULT_METHOD_MAPPING.findOne.pathSuffix,
+      }),
       params: args,
     });
   }
@@ -147,7 +155,10 @@ class EntityClient<TEntity = any> {
     args.source_id = this.sourceId;
     return this.httpClient.request<TEntity>({
       method: "POST",
-      url: `/${this.entityName}/create`,
+      url: buildRestPath({
+        entityName: this.entityName,
+        pathSuffix: DEFAULT_METHOD_MAPPING.create.pathSuffix,
+      }),
       data: args,
     });
   }
@@ -156,7 +167,10 @@ class EntityClient<TEntity = any> {
     args.source_id = this.sourceId;
     return this.httpClient.request<TEntity>({
       method: "PATCH",
-      url: `/${this.entityName}/update`,
+      url: buildRestPath({
+        entityName: this.entityName,
+        pathSuffix: DEFAULT_METHOD_MAPPING.update.pathSuffix,
+      }),
       data: args,
     });
   }
@@ -165,7 +179,10 @@ class EntityClient<TEntity = any> {
     args.source_id = this.sourceId;
     return this.httpClient.request<void>({
       method: "DELETE",
-      url: `/${this.entityName}/delete`,
+      url: buildRestPath({
+        entityName: this.entityName,
+        pathSuffix: DEFAULT_METHOD_MAPPING.delete.pathSuffix,
+      }),
       data: args,
     });
   }

@@ -111,7 +111,6 @@ export function buildRestPath({
   entityName,
   pathSuffix,
 }: {
-  sourceId?: string;
   entityName: string;
   pathSuffix?: string;
 }): string {
