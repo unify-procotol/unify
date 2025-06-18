@@ -1,11 +1,39 @@
 import { DocsLayout } from "fumadocs-ui/layouts/docs";
 import type { ReactNode } from "react";
 import { baseOptions } from "@/app/layout.config";
-import { Book, Database, LayoutGrid, Plug } from "lucide-react";
+import { Book, Database, LayoutGrid, Plug, SquarePlay } from "lucide-react";
 
 export default function Layout({ children }: { children: ReactNode }) {
   return (
     <DocsLayout
+      sidebar={{
+        tabs: [
+          {
+            title: "Docs",
+            description: "get started and plugins",
+            url: "/docs/introduction",
+            icon: <Book />,
+            urls: new Set([
+              "/docs/introduction",
+              "/docs/installation",
+              "/docs/basic-usage",
+              "/docs/integrations/next",
+              "/docs/plugins/uniweb3",
+              "/docs/storage/local-file-storage",
+              "/docs/storage/postgresql",
+              "/docs/reference/options",
+              "/docs/reference/contributing",
+            ]),
+          },
+          {
+            title: "Examples",
+            description: "examples and guides",
+            url: "/docs/examples/next",
+            icon: <SquarePlay />,
+            urls: new Set(["/docs/examples/next"]),
+          },
+        ],
+      }}
       tree={{
         name: "docs",
         children: [
@@ -88,6 +116,19 @@ export default function Layout({ children }: { children: ReactNode }) {
               },
             ],
             icon: <Book />,
+          },
+          {
+            type: "folder",
+            name: "Examples",
+            children: [
+              {
+                type: "page",
+                name: "Next.js",
+                url: "/docs/examples/next",
+              },
+            ],
+            icon: <SquarePlay />,
+            root: true,
           },
         ],
       }}
