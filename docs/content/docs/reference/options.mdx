@@ -46,16 +46,9 @@ Optional storage configuration that determines how data is persisted.
 ```typescript
 const source = createSource({
   options: {
-    storage: {
-      type: "pg",
-      config: {
-        host: "localhost",
-        port: 5432,
-        database: "myapp",
-        user: "postgres",
-        password: "password"
-      }
-    }
+    storage: new PGStorage({
+      connectionString: process.env.DATABASE_URL!,
+    }),
   }
 });
 ```
@@ -301,19 +294,13 @@ Unify automatically maps entity operations to REST endpoints:
 
 ```typescript
 import { createSource } from "@unify/server";
+import { PGStorage } from "@unify/storage";
 
 const source = createSource({
   options: {
-    storage: {
-      type: "pg",
-      config: {
-        host: "localhost",
-        port: 5432,
-        database: "blog_db",
-        user: "postgres",
-        password: "password"
-      }
-    }
+    storage: new PGStorage({
+      connectionString: process.env.DATABASE_URL!,
+    }),
   }
 });
 
