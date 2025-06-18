@@ -33,23 +33,6 @@ export default function Layout({ children }: { children: ReactNode }) {
           },
           {
             type: "folder",
-            name: "Storage",
-            children: [
-              {
-                type: "page",
-                name: "Local File Storage",
-                url: "/docs/storage/local-file-storage",
-              },
-              {
-                type: "page",
-                name: "PostgreSQL",
-                url: "/docs/storage/postgresql",
-              },
-            ],
-            icon: <Database />,
-          },
-          {
-            type: "folder",
             name: "Integrations",
             children: [
               {
@@ -71,6 +54,23 @@ export default function Layout({ children }: { children: ReactNode }) {
               },
             ],
             icon: <Plug />,
+          },
+          {
+            type: "folder",
+            name: "Storage",
+            children: [
+              {
+                type: "page",
+                name: "Local File Storage",
+                url: "/docs/storage/local-file-storage",
+              },
+              {
+                type: "page",
+                name: "PostgreSQL",
+                url: "/docs/storage/postgresql",
+              },
+            ],
+            icon: <Database />,
           },
           {
             type: "folder",
