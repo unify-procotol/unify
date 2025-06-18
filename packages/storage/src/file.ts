@@ -56,11 +56,16 @@ export class FileStorage implements Storage {
     writeFileSync(tablePath, JSON.stringify(data, null, 2));
   }
 
-  async create(
-    sourceId: string,
-    tableName: string,
-    args: CreateArgs
-  ): Promise<Record<string, any>> {
+  async create({
+    sourceId,
+    tableName,
+    args,
+  }: {
+    sourceId: string;
+    tableName: string;
+    args: CreateArgs;
+    schema?: string;
+  }): Promise<Record<string, any>> {
     const tableData = this.loadTable(sourceId, tableName);
     const { data } = args;
     if (!data.id) {
@@ -76,15 +81,20 @@ export class FileStorage implements Storage {
     return data;
   }
 
-  async findMany(
-    sourceId: string,
-    tableName: string,
-    args: FindManyArgs
-  ): Promise<Record<string, any>[]> {
+  async findMany({
+    sourceId,
+    tableName,
+    args,
+  }: {
+    sourceId: string;
+    tableName: string;
+    args?: FindManyArgs;
+    schema?: string;
+  }): Promise<Record<string, any>[]> {
     const tableData = this.loadTable(sourceId, tableName);
     let records = [...tableData.records];
 
-    if (args.where) {
+    if (args?.where) {
       records = records.filter((record) =>
         Object.entries(args.where!).every(
           ([key, value]) => record[key] === value
@@ -92,7 +102,7 @@ export class FileStorage implements Storage {
       );
     }
 
-    if (args.order_by) {
+    if (args?.order_by) {
       const [field, direction] = Object.entries(args.order_by)[0];
       records.sort((a, b) => {
         const aVal = a[field];
@@ -104,14 +114,14 @@ export class FileStorage implements Storage {
       });
     }
 
-    if (args.offset) {
+    if (args?.offset) {
       records = records.slice(args.offset);
     }
-    if (args.limit) {
+    if (args?.limit) {
       records = records.slice(0, args.limit);
     }
 
-    if (args.select) {
+    if (args?.select) {
       records = records.map((record) => {
         const selected: Record<string, any> = {};
         args.select!.forEach((field) => {
@@ -126,11 +136,16 @@ export class FileStorage implements Storage {
     return records;
   }
 
-  async findOne(
-    sourceId: string,
-    tableName: string,
-    args: FindOneArgs
-  ): Promise<Record<string, any> | null> {
+  async findOne({
+    sourceId,
+    tableName,
+    args,
+  }: {
+    sourceId: string;
+    tableName: string;
+    args: FindOneArgs;
+    schema?: string;
+  }): Promise<Record<string, any> | null> {
     const tableData = this.loadTable(sourceId, tableName);
     const { where, select } = args;
     const records = tableData.records.filter((r) => {
@@ -150,11 +165,16 @@ export class FileStorage implements Storage {
     return records[0] || null;
   }
 
-  async update(
-    sourceId: string,
-    tableName: string,
-    args: UpdateArgs
-  ): Promise<Record<string, any> | null> {
+  async update({
+    sourceId,
+    tableName,
+    args,
+  }: {
+    sourceId: string;
+    tableName: string;
+    args: UpdateArgs;
+    schema?: string;
+  }): Promise<Record<string, any> | null> {
     const tableData = this.loadTable(sourceId, tableName);
     const { where, data } = args;
 
@@ -173,11 +193,16 @@ export class FileStorage implements Storage {
     return record;
   }
 
-  async delete(
-    sourceId: string,
-    tableName: string,
-    args: DeleteArgs
-  ): Promise<boolean> {
+  async delete({
+    sourceId,
+    tableName,
+    args,
+  }: {
+    sourceId: string;
+    tableName: string;
+    args: DeleteArgs;
+    schema?: string;
+  }): Promise<boolean> {
     const tableData = this.loadTable(sourceId, tableName);
 
     const { where } = args;
@@ -193,11 +218,25 @@ export class FileStorage implements Storage {
     return true;
   }
 
-  async truncate(sourceId: string, tableName: string): Promise<void> {
+  async truncate({
+    sourceId,
+    tableName,
+  }: {
+    sourceId: string;
+    tableName: string;
+    schema?: string;
+  }): Promise<void> {
     this.saveTable(sourceId, tableName, { records: [], autoIncrement: 1 });
   }
 
-  async tableExists(sourceId: string, tableName: string): Promise<boolean> {
+  async tableExists({
+    sourceId,
+    tableName,
+  }: {
+    sourceId: string;
+    tableName: string;
+    schema?: string;
+  }): Promise<boolean> {
     return existsSync(this.getTablePath(sourceId, tableName));
   }
 }

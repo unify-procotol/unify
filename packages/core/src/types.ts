@@ -103,7 +103,7 @@ export interface TableColumn {
 
 export interface TableSchema {
   name: string;
-  schema: string;
+  schema?: string;
   columns: Record<string, TableColumn>;
 }
 
@@ -153,39 +153,54 @@ export interface SourceConfig {
 // ============================================================================
 
 export interface Storage {
-  create(
-    sourceId: string,
-    tableName: string,
-    args: CreateArgs
-  ): Promise<Record<string, any>>;
+  create(args: {
+    sourceId: string;
+    tableName: string;
+    args: CreateArgs;
+    schema?: string;
+    tableSchema: TableSchema;
+  }): Promise<Record<string, any>>;
 
-  findMany(
-    sourceId: string,
-    tableName: string,
-    args?: QueryArgs
-  ): Promise<Record<string, any>[]>;
+  findMany(args: {
+    sourceId: string;
+    tableName: string;
+    args?: QueryArgs;
+    schema?: string;
+  }): Promise<Record<string, any>[]>;
 
-  findOne(
-    sourceId: string,
-    tableName: string,
-    args: FindOneArgs
-  ): Promise<Record<string, any> | null>;
+  findOne(args: {
+    sourceId: string;
+    tableName: string;
+    args: FindOneArgs;
+    schema?: string;
+  }): Promise<Record<string, any> | null>;
 
-  update(
-    sourceId: string,
-    tableName: string,
-    args: UpdateArgs
-  ): Promise<Record<string, any> | null>;
+  update(args: {
+    sourceId: string;
+    tableName: string;
+    args: UpdateArgs;
+    schema?: string;
+    tableSchema: TableSchema;
+  }): Promise<Record<string, any> | null>;
 
-  delete(
-    sourceId: string,
-    tableName: string,
-    args: DeleteArgs
-  ): Promise<boolean>;
+  delete(args: {
+    sourceId: string;
+    tableName: string;
+    args: DeleteArgs;
+    schema?: string;
+  }): Promise<boolean>;
 
-  truncate(sourceId: string, tableName: string): Promise<void>;
+  truncate(args: {
+    sourceId: string;
+    tableName: string;
+    schema?: string;
+  }): Promise<void>;
 
-  tableExists(sourceId: string, tableName: string): Promise<boolean>;
+  tableExists(args: {
+    sourceId: string;
+    tableName: string;
+    schema?: string;
+  }): Promise<boolean>;
 
   close?(): Promise<void>;
 }

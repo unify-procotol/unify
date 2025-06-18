@@ -1,4 +1,4 @@
-import { PGStorage } from "../pg";
+import { getFullTableName, PGStorage } from "../pg";
 import { DatabaseDefaultValue, SourceConfig } from "@unify/core";
 
 export async function createPgTablesFromConfig(
@@ -13,15 +13,6 @@ export async function createPgTablesFromConfig(
   }
 
   console.log("🚀 Initializing database tables for configuration...");
-  console.log("Tables to be created:");
-
-  sourceConfigList.forEach((config) => {
-    Object.entries(config.entities).forEach(([entityName, entityConfig]) => {
-      if (entityConfig.table) {
-        console.log(`- ${config.id}_${entityConfig.table.name}`);
-      }
-    });
-  });
 
   const pgStorage = new PGStorage({
     connectionString: connectionString,
@@ -29,17 +20,26 @@ export async function createPgTablesFromConfig(
 
   try {
     for (const config of sourceConfigList) {
-      console.log(`\nProcessing configuration: ${config.id}`);
+      const sourceId = config.id;
+      console.log(`\nProcessing configuration: ${sourceId}`);
 
       for (const [entityName, entityConfig] of Object.entries(
         config.entities
       )) {
         if (entityConfig.table) {
+          const schema = entityConfig.table.schema;
           const tableName = entityConfig.table.name;
-          const fullTableName = `${config.id}_${tableName}`;
+          const fullTableName = getFullTableName({
+            sourceId,
+            tableName,
+            schema,
+          });
 
-          const tableExists = await pgStorage.tableExists(config.id, tableName);
-
+          const tableExists = await pgStorage.tableExists({
+            sourceId,
+            tableName,
+            schema,
+          });
           if (tableExists) {
             console.log(`⚠️  Table already exists, skipping: ${fullTableName}`);
             continue;
@@ -83,15 +83,14 @@ export async function createPgTablesFromConfig(
           );
 
           try {
-            await pgStorage.createTable(
-              config.id,
-              entityConfig.table.name,
-              columns
-            );
+            await pgStorage.createTable({
+              sourceId,
+              schema,
+              tableName,
+              columns,
+            });
 
-            console.log(
-              `✅ Table created: ${config.id}_${entityConfig.table.name}`
-            );
+            console.log(`✅ Table created: ${fullTableName}`);
           } catch (createError: any) {
             if (
               createError.message &&

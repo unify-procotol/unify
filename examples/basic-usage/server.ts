@@ -4,10 +4,10 @@ import { FileStorage, PGStorage } from "@unify/storage";
 
 const source = createSource({
   options: {
-    storage: new FileStorage("./data"),
-    // storage: new PGStorage({
-    //   connectionString: process.env.DATABASE_URL!,
-    // }),
+    // storage: new FileStorage("./data"),
+    storage: new PGStorage({
+      connectionString: process.env.DATABASE_URL!,
+    }),
   },
 });
 

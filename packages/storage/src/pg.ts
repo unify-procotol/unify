@@ -6,18 +6,29 @@ import {
   DeleteArgs,
   QueryArgs,
   Storage,
+  TableSchema,
 } from "@unify/core";
+
+export function getFullTableName({
+  sourceId,
+  tableName,
+  schema,
+}: {
+  sourceId: string;
+  tableName: string;
+  schema?: string;
+}): string {
+  const fullTableName = `${sourceId}_${tableName}`
+    .toLowerCase()
+    .replace(/[^a-z0-9_]/g, "_");
+  return schema ? `${schema}.${fullTableName}` : fullTableName;
+}
 
 export class PGStorage implements Storage {
   private pool: Pool;
 
   constructor(config: PoolConfig) {
     this.pool = new Pool(config);
-  }
-
-  private getFullTableName(sourceId: string, tableName: string): string {
-    const fullName = `${sourceId}_${tableName}`;
-    return fullName.toLowerCase().replace(/[^a-z0-9_]/g, "_");
   }
 
   private buildWhereClause(
@@ -49,19 +60,37 @@ export class PGStorage implements Storage {
     return orders.length > 0 ? `ORDER BY ${orders.join(", ")}` : "";
   }
 
-  async create(
-    sourceId: string,
-    tableName: string,
-    args: CreateArgs
-  ): Promise<Record<string, any>> {
-    const fullTableName = this.getFullTableName(sourceId, tableName);
+  async create({
+    sourceId,
+    tableName,
+    args,
+    schema,
+    tableSchema,
+  }: {
+    sourceId: string;
+    tableName: string;
+    args: CreateArgs;
+    schema?: string;
+    tableSchema: TableSchema;
+  }): Promise<Record<string, any>> {
+    const recordData = validateAndFilterFields({
+      data: args.data,
+      tableSchema,
+      operation: "create",
+    });
+
+    const fullTableName = getFullTableName({
+      sourceId,
+      tableName,
+      schema,
+    });
+
     const client = await this.pool.connect();
 
     try {
-      const keys = Object.keys(args.data);
-      const values = Object.values(args.data);
+      const keys = Object.keys(recordData);
+      const values = Object.values(recordData);
       const placeholders = keys.map((_, index) => `$${index + 1}`).join(", ");
-
       const query = `
         INSERT INTO ${fullTableName} (${keys.join(", ")})
         VALUES (${placeholders})
@@ -70,17 +99,29 @@ export class PGStorage implements Storage {
 
       const result: QueryResult = await client.query(query, values);
       return result.rows[0];
+    } catch (error) {
+      throw { status: 500, message: "Create failed" };
     } finally {
       client.release();
     }
   }
 
-  async findMany(
-    sourceId: string,
-    tableName: string,
-    args?: QueryArgs
-  ): Promise<Record<string, any>[]> {
-    const fullTableName = this.getFullTableName(sourceId, tableName);
+  async findMany({
+    sourceId,
+    tableName,
+    args,
+    schema,
+  }: {
+    sourceId: string;
+    tableName: string;
+    args?: QueryArgs;
+    schema?: string;
+  }): Promise<Record<string, any>[]> {
+    const fullTableName = getFullTableName({
+      sourceId,
+      tableName,
+      schema,
+    });
     const client = await this.pool.connect();
 
     try {
@@ -126,12 +167,22 @@ export class PGStorage implements Storage {
     }
   }
 
-  async findOne(
-    sourceId: string,
-    tableName: string,
-    args: FindOneArgs
-  ): Promise<Record<string, any> | null> {
-    const fullTableName = this.getFullTableName(sourceId, tableName);
+  async findOne({
+    sourceId,
+    tableName,
+    args,
+    schema,
+  }: {
+    sourceId: string;
+    tableName: string;
+    args: FindOneArgs;
+    schema?: string;
+  }): Promise<Record<string, any> | null> {
+    const fullTableName = getFullTableName({
+      sourceId,
+      tableName,
+      schema,
+    });
     const client = await this.pool.connect();
 
     try {
@@ -160,17 +211,40 @@ export class PGStorage implements Storage {
     }
   }
 
-  async update(
-    sourceId: string,
-    tableName: string,
-    args: UpdateArgs
-  ): Promise<Record<string, any> | null> {
-    const fullTableName = this.getFullTableName(sourceId, tableName);
+  async update({
+    sourceId,
+    tableName,
+    args,
+    schema,
+    tableSchema,
+  }: {
+    sourceId: string;
+    tableName: string;
+    args: UpdateArgs;
+    schema?: string;
+    tableSchema: TableSchema;
+  }): Promise<Record<string, any> | null> {
+    const updateData = validateAndFilterFields({
+      data: args.data,
+      tableSchema,
+      operation: "update",
+    });
+
+    if (Object.keys(updateData).length === 0) {
+      throw { status: 400, message: "No fields to update" };
+    }
+
+    const fullTableName = getFullTableName({
+      sourceId,
+      tableName,
+      schema,
+    });
+
     const client = await this.pool.connect();
 
     try {
-      const keys = Object.keys(args.data);
-      const values = Object.values(args.data);
+      const keys = Object.keys(updateData);
+      const values = Object.values(updateData);
       const setClause = keys
         .map((key, index) => `${key} = $${index + 1}`)
         .join(", ");
@@ -183,28 +257,38 @@ export class PGStorage implements Storage {
         ${whereClause.clause}
         RETURNING *
       `;
-
       const result: QueryResult = await client.query(query, [
         ...values,
         ...whereClause.values,
       ]);
       return result.rows[0] || null;
+    } catch (error) {
+      throw { status: 500, message: "Update failed" };
     } finally {
       client.release();
     }
   }
 
-  async delete(
-    sourceId: string,
-    tableName: string,
-    args: DeleteArgs
-  ): Promise<boolean> {
-    const fullTableName = this.getFullTableName(sourceId, tableName);
+  async delete({
+    sourceId,
+    tableName,
+    args,
+    schema,
+  }: {
+    sourceId: string;
+    tableName: string;
+    args: DeleteArgs;
+    schema?: string;
+  }): Promise<boolean> {
+    const fullTableName = getFullTableName({
+      sourceId,
+      tableName,
+      schema,
+    });
     const client = await this.pool.connect();
 
     try {
       const whereClause = this.buildWhereClause(args.where, 1);
-
       const query = `DELETE FROM ${fullTableName} ${whereClause.clause}`;
       const result: QueryResult = await client.query(query, whereClause.values);
       return result.rowCount !== null && result.rowCount > 0;
@@ -213,8 +297,20 @@ export class PGStorage implements Storage {
     }
   }
 
-  async truncate(sourceId: string, tableName: string): Promise<void> {
-    const fullTableName = this.getFullTableName(sourceId, tableName);
+  async truncate({
+    sourceId,
+    tableName,
+    schema,
+  }: {
+    sourceId: string;
+    tableName: string;
+    schema?: string;
+  }): Promise<void> {
+    const fullTableName = getFullTableName({
+      sourceId,
+      tableName,
+      schema,
+    });
     const client = await this.pool.connect();
 
     try {
@@ -225,36 +321,74 @@ export class PGStorage implements Storage {
     }
   }
 
-  async tableExists(sourceId: string, tableName: string): Promise<boolean> {
-    const fullTableName = this.getFullTableName(sourceId, tableName);
+  async tableExists({
+    sourceId,
+    tableName,
+    schema,
+  }: {
+    sourceId: string;
+    tableName: string;
+    schema?: string;
+  }): Promise<boolean> {
+    const fullTableName = getFullTableName({
+      sourceId,
+      tableName,
+    });
     const client = await this.pool.connect();
 
     try {
-      const query = `
-        SELECT EXISTS (
-          SELECT FROM information_schema.tables 
-          WHERE table_name = $1
-        )
-      `;
-      const result: QueryResult = await client.query(query, [fullTableName]);
+      let query: string;
+      let params: string[];
+
+      if (schema) {
+        query = `
+          SELECT EXISTS (
+            SELECT FROM information_schema.tables 
+            WHERE table_schema = $1 AND table_name = $2
+          )
+        `;
+        params = [schema, fullTableName];
+      } else {
+        query = `
+          SELECT EXISTS (
+            SELECT FROM information_schema.tables 
+            WHERE table_name = $1
+          )
+        `;
+        params = [fullTableName];
+      }
+
+      const result: QueryResult = await client.query(query, params);
       return result.rows[0].exists;
     } finally {
       client.release();
     }
   }
 
-  async createTable(
-    sourceId: string,
-    tableName: string,
+  async createTable({
+    sourceId,
+    schema,
+    tableName,
+    columns,
+  }: {
+    sourceId: string;
+    schema?: string;
+    tableName: string;
     columns: Record<
       string,
       { type: string; nullable?: boolean; unique?: boolean; default?: any }
-    >
-  ): Promise<void> {
-    const fullTableName = this.getFullTableName(sourceId, tableName);
+    >;
+  }): Promise<void> {
+    const fullTableName = getFullTableName({
+      sourceId,
+      tableName,
+    });
     const client = await this.pool.connect();
 
     try {
+      // Create schema if it doesn't exist
+      await client.query(`CREATE SCHEMA IF NOT EXISTS ${schema}`);
+
       const columnDefinitions = Object.entries(columns).map(
         ([name, config]) => {
           let definition = `${name} ${config.type}`;
@@ -295,7 +429,7 @@ export class PGStorage implements Storage {
       );
 
       const query = `
-        CREATE TABLE IF NOT EXISTS ${fullTableName} (
+        CREATE TABLE IF NOT EXISTS ${schema}.${fullTableName} (
           ${columnDefinitions.join(",\n          ")}
         )
       `;
@@ -309,4 +443,62 @@ export class PGStorage implements Storage {
   async close(): Promise<void> {
     await this.pool.end();
   }
+}
+
+const SYSTEM_FIELD_DEFAULTS = new Set([
+  "CURRENT_TIMESTAMP",
+  "CURRENT_DATE",
+  "CURRENT_TIME",
+  "LOCALTIMESTAMP",
+  "LOCALTIME",
+  "UUID()",
+  "AUTO_INCREMENT",
+  "SERIAL",
+  "NOW()",
+]);
+
+function validateAndFilterFields({
+  data,
+  tableSchema,
+  operation,
+}: {
+  data: Record<string, any>;
+  tableSchema: TableSchema;
+  operation: "create" | "update";
+}): Record<string, any> {
+  const { columns } = tableSchema;
+  if (!columns) {
+    throw { status: 400, message: "Table schema is not defined" };
+  }
+
+  const errors: string[] = [];
+  const filteredData: Record<string, any> = {};
+
+  for (const [fieldName, fieldConfig] of Object.entries(columns)) {
+    const hasValue = data[fieldName] !== undefined && data[fieldName] !== null;
+
+    const isSystemField =
+      typeof fieldConfig.default === "string" &&
+      SYSTEM_FIELD_DEFAULTS.has(fieldConfig.default);
+    if (isSystemField) continue;
+
+    if (operation === "create") {
+      const isRequired =
+        !fieldConfig.nullable && fieldConfig.default === undefined;
+      if (isRequired && !hasValue) {
+        errors.push(`Field '${fieldName}' is required`);
+        continue;
+      }
+    }
+
+    if (hasValue) {
+      filteredData[fieldName] = data[fieldName];
+    }
+  }
+
+  if (errors.length > 0) {
+    throw { status: 400, message: `Validation failed: ${errors.join(", ")}` };
+  }
+
+  return filteredData;
 }
