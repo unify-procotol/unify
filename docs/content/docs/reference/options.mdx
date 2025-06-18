@@ -9,7 +9,7 @@ Configuration options passed to the Adapter constructor when creating a source.
 
 ```typescript
 interface AdapterOptions {
-  storage?: StorageConfig;
+  storage?: Storage;
 }
 ```
 
@@ -17,41 +17,40 @@ interface AdapterOptions {
 
 Optional storage configuration that determines how data is persisted.
 
-**Type:** `StorageConfig`  
-**Default:** File storage with `./data` directory
+**Type:** `Storage`  
+**Default:** No storage (must be provided manually)
 
-#### File Storage
+## Storage Implementations
+
+Unify provides two built-in storage implementations:
+
+### FileStorage
+
+JSON-based file system storage.
 
 ```typescript
-{
-  type: "file";
-  dataDir?: string;
-}
+import { FileStorage } from "@unify/storage";
+
+const storage = new FileStorage("./data");
 ```
 
+**Parameters:**
 - **dataDir** - Directory path for storing JSON files. Defaults to `"./data"`
 
-#### PostgreSQL Storage
+### PGStorage
+
+PostgreSQL database-based storage.
 
 ```typescript
-{
-  type: "pg";
-  config: PGStorageConfig;
-}
-```
+import { PGStorage } from "@unify/storage";
 
-- **config** - PostgreSQL connection configuration (extends Node.js `pg` PoolConfig)
-
-**Example:**
-```typescript
-const source = createSource({
-  options: {
-    storage: new PGStorage({
-      connectionString: process.env.DATABASE_URL!,
-    }),
-  }
+const storage = new PGStorage({
+  connectionString: process.env.DATABASE_URL!,
 });
 ```
+
+**Parameters:**
+- **config** - PostgreSQL connection configuration (extends Node.js `pg` PoolConfig)
 
 ## SourceConfig
 
@@ -118,7 +117,7 @@ interface EntityConfig {
   create?: EntityProcedure<CreateArgs>;
   update?: EntityProcedure<UpdateArgs>;
   delete?: EntityProcedure<DeleteArgs>;
-  table?: TableConfig;
+  table?: TableSchema;
 }
 ```
 
@@ -209,29 +208,29 @@ interface DeleteArgs<T = Record<string, any>> {
 
 ### table
 
-**Type:** `TableConfig`  
+**Type:** `TableSchema`  
 **Optional**
 
 Database table schema configuration for built-in CRUD operations.
 
 ```typescript
-interface TableConfig {
+interface TableSchema {
   name: string;
-  schema: string;
-  columns: Record<string, ColumnConfig>;
+  schema?: string;
+  columns: Record<string, TableColumn>;
 }
 ```
 
-#### TableConfig Properties
+#### TableSchema Properties
 
 - **name** - Database table name
-- **schema** - Database schema name  
+- **schema** - Database schema name (optional)
 - **columns** - Column definitions
 
-#### ColumnConfig
+#### TableColumn
 
 ```typescript
-interface ColumnConfig {
+interface TableColumn {
   type: DatabaseColumnType;
   nullable?: boolean;
   unique?: boolean;
@@ -282,67 +281,116 @@ Unify automatically maps entity operations to REST endpoints:
 | update    | PATCH       | /update     | Update existing record |
 | delete    | DELETE      | /delete     | Delete record |
 
-**URL Pattern:** `/{sourceId}/{entityName}/{operation}`
+**URL Pattern:** `/{entityName}/{operation}`
 
-**Example:** For source `blog` and entity `posts`:
-- `GET /blog/posts/list` - Get all posts
-- `POST /blog/posts/create` - Create new post
-- `PATCH /blog/posts/update` - Update post
-- `DELETE /blog/posts/delete` - Delete post
+## Client Configuration
+
+### ClientOptions
+
+Configuration options when creating a client:
+
+```typescript
+interface ClientOptions {
+  baseURL: string;
+  timeout?: number;
+  headers?: Record<string, string>;
+}
+```
+
+- **baseURL** - Base URL of the API server
+- **timeout** - Request timeout in milliseconds
+- **headers** - Default request headers
 
 ## Complete Example
 
+### Server Side
+
 ```typescript
 import { createSource } from "@unify/server";
-import { PGStorage } from "@unify/storage";
+import { PGStorage, FileStorage } from "@unify/storage";
+import { os } from "@orpc/server";
+import { z } from "zod";
 
+// Create data source
 const source = createSource({
   options: {
+    // Use PostgreSQL storage
     storage: new PGStorage({
       connectionString: process.env.DATABASE_URL!,
     }),
-  }
+    // Or use file storage
+    // storage: new FileStorage("./data"),
+  },
 });
 
+// Register source configuration
 source.register({
   id: "blog",
   entities: {
+    // Custom entity using oRPC procedures
     posts: {
+      findMany: os
+        .input(z.object({
+          where: z.object({
+            published: z.boolean().optional(),
+          }).optional(),
+          limit: z.number().optional(),
+        }))
+        .output(z.array(z.object({
+          id: z.number(),
+          title: z.string(),
+          content: z.string(),
+          published: z.boolean(),
+        })))
+        .handler(async ({ input }) => {
+          // Custom logic
+          return [];
+        }),
+      
+      create: os
+        .input(z.object({
+          title: z.string(),
+          content: z.string(),
+          published: z.boolean().default(false),
+        }))
+        .output(z.object({
+          id: z.number(),
+          title: z.string(),
+          content: z.string(),
+          published: z.boolean(),
+        }))
+        .handler(async ({ input }) => {
+          // Custom creation logic
+          return { id: 1, ...input };
+        }),
+    },
+    
+    // Built-in CRUD entity using table schema
+    users: {
       table: {
-        name: "posts",
+        name: "users",
         schema: "public",
         columns: {
           id: {
             type: "integer",
+            nullable: false,
+            unique: true,
             default: "AUTO_INCREMENT"
           },
-          title: {
+          name: {
             type: "varchar",
             nullable: false
           },
-          content: {
-            type: "text"
-          },
-          published: {
-            type: "boolean",
-            default: false
+          email: {
+            type: "varchar",
+            nullable: false,
+            unique: true
           },
           created_at: {
             type: "timestamp",
             default: "CURRENT_TIMESTAMP"
           }
         }
-      }
-    },
-    users: {
-      // Custom handlers
-      findMany: async (args) => {
-        // Custom logic
-        return [];
-      },
-      create: async (args) => {
-        // Custom logic
-        return {};
       }
     }
   },
@@ -355,5 +403,86 @@ source.register({
   ]
 });
 
-export default source.getApp();
+export default {
+  port: 3000,
+  fetch: source.getApp().fetch,
+};
+```
+
+### Client Side
+
+```typescript
+import { createClient } from "@unify/client";
+
+// Define source configuration (same as server side)
+const sourceConfig = {
+  id: "blog",
+  entities: {
+    posts: {
+      // oRPC procedure configuration
+    },
+    users: {
+      table: {
+        name: "users",
+        schema: "public",
+        columns: {
+          id: { type: "integer" as const },
+          name: { type: "varchar" as const },
+          email: { type: "varchar" as const },
+          created_at: { type: "timestamp" as const }
+        }
+      }
+    }
+  }
+};
+
+// Create type-safe client
+const client = createClient(sourceConfig, {
+  baseURL: "http://localhost:3000",
+});
+
+// Use the client
+async function example() {
+  // Get posts list
+  const posts = await client.posts.findMany({
+    where: { published: true },
+    limit: 10,
+  });
+  
+  // Create new user
+  const user = await client.users.create({
+    data: {
+      name: "John Doe",
+      email: "john@example.com",
+    },
+  });
+  
+  // Update user
+  const updatedUser = await client.users.update({
+    where: { id: user.data.id },
+    data: { name: "Jane Doe" },
+  });
+  
+  console.log("Posts:", posts.data);
+  console.log("User:", updatedUser.data);
+}
+```
+
+### Multi-Source Client
+
+```typescript
+import { createClient } from "@unify/client";
+
+const sourceMap = {
+  blog: blogSourceConfig,
+  ecommerce: ecommerceSourceConfig,
+};
+
+const client = createClient(sourceMap, {
+  baseURL: "http://localhost:3000",
+});
+
+// Access entities from different sources
+await client.blog.posts.findMany();
+await client.ecommerce.products.findMany();
 ```

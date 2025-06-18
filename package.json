@@ -17,8 +17,7 @@
     "build:uniweb3": "cd packages/uniweb3 && bun run build",
     "dev:uniweb3": "cd packages/uniweb3 && bun run dev",
     "build:storage": "cd packages/storage && bun run build",
-    "dev:storage": "cd packages/storage && bun run dev",
-    "build:all": "bun run build:core && bun run build:storage && bun run build:server && bun run build:client"
+    "dev:storage": "cd packages/storage && bun run dev"
   },
   "author": "osdodo",
   "license": "MIT"
