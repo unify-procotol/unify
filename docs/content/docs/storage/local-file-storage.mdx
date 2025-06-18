@@ -7,40 +7,20 @@ description: Configure local file storage as your storage backend with @unify/se
 
 Local file storage is the default storage backend for @unify/server, designed primarily for local development and testing. It stores data directly on your local file system.
 
-## Default Configuration
-
-By default, @unify/server uses local file storage without any configuration required:
-
-```typescript
-import { createSource } from "@unify/server";
-
-// Simplest configuration - uses default file storage
-const source = createSource();
-```
-
-## Custom Configuration
+## Configuration
 
 You can customize the local file storage behavior by explicitly configuring the storage options:
 
 ```typescript
 import { createSource } from "@unify/server";
+import { FileStorage } from "@unify/storage";
 
 const source = createSource({
   options: {
-    storage: {
-      type: "file",
-      dataDir: "./data",
-    },
+    storage: new FileStorage("./data"),
   },
 });
 ```
-
-## Configuration Options
-
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `type` | `string` | `"file"` | Storage type (always "file" for local storage) |
-| `dataDir` | `string` | `"./data"` | Directory where data files will be stored |
 
 ## Use Cases
 
@@ -50,24 +30,6 @@ Local file storage is ideal for:
 - **Prototyping** - Rapid development without cloud storage setup
 - **Small applications** - Simple deployments where cloud storage isn't needed
 
-## Example Configurations
-
-### Minimal Setup (Recommended for Testing)
-```typescript
-const source = createSource();
-```
-
-### Custom Data Directory
-```typescript
-const source = createSource({
-  options: {
-    storage: {
-      type: "file",
-      dataDir: "./my-custom-data",
-    },
-  },
-});
-```
 
 ## Notes
 

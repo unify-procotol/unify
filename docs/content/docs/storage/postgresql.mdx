@@ -9,15 +9,13 @@ To use PostgreSQL as your storage backend, configure your source with the `pg` s
 
 ```typescript
 import { createSource } from "@unify/server";
+import { PGStorage } from "@unify/storage";
 
 const source = createSource({
   options: {
-    storage: {
-      type: "pg",
-      config: {
-        connectionString: process.env.DATABASE_URL!,
-      },
-    },
+    storage: new PGStorage({
+      connectionString: process.env.DATABASE_URL!,
+    }),
   },
 });
 ```
@@ -39,10 +37,10 @@ To set up your database tables, create a migration file and run it to initialize
 Create a file named `generate-migrations.ts`:
 
 ```typescript
-import { createPgTablesFromConfig } from "@unify/server/migrations";
-import blogConfig from "./config";
+import { createPgTablesFromConfig } from "@unify/storage/migrations";
+import { BasicUsageSourceConfig } from "./config";
 
-createPgTablesFromConfig([blogConfig], process.env.DATABASE_URL!);
+createPgTablesFromConfig([BasicUsageSourceConfig], process.env.DATABASE_URL!);
 ```
 
 ### Running Migrations
