@@ -116,7 +116,6 @@
       "dependencies": {
         "@orpc/server": "^1.5.0",
         "@solana/web3.js": "^1.95.2",
-        "@unify/server": "workspace:*",
         "ethers": "^6.13.2",
         "zod": "^3.25.61",
       },

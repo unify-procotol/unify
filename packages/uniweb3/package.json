@@ -19,7 +19,6 @@
     "@orpc/server": "^1.5.0",
     "@solana/web3.js": "^1.95.2",
     "ethers": "^6.13.2",
-    "@unify/server": "workspace:*",
     "zod": "^3.25.61"
   },
   "devDependencies": {
