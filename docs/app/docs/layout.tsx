@@ -19,8 +19,6 @@ export default function Layout({ children }: { children: ReactNode }) {
               "/docs/basic-usage",
               "/docs/integrations/next",
               "/docs/plugins/uniweb3",
-              "/docs/storage/local-file-storage",
-              "/docs/storage/postgresql",
               "/docs/reference/options",
               "/docs/reference/contributing",
             ]),
@@ -82,23 +80,6 @@ export default function Layout({ children }: { children: ReactNode }) {
               },
             ],
             icon: <Plug />,
-          },
-          {
-            type: "folder",
-            name: "Storage",
-            children: [
-              {
-                type: "page",
-                name: "Local File Storage",
-                url: "/docs/storage/local-file-storage",
-              },
-              {
-                type: "page",
-                name: "PostgreSQL",
-                url: "/docs/storage/postgresql",
-              },
-            ],
-            icon: <Database />,
           },
           {
             type: "folder",
