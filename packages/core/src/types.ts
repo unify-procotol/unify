@@ -3,14 +3,12 @@ export interface BaseEntity {}
 export interface FindManyArgs<T extends BaseEntity> {
   limit?: number;
   offset?: number;
-  select?: Array<keyof T>;
   where?: Partial<T>;
   order_by?: Partial<Record<keyof T, "asc" | "desc">>;
 }
 
 export interface FindOneArgs<T extends BaseEntity> {
   where: Partial<T>;
-  select?: Array<keyof T>;
 }
 
 export interface CreationArgs<T extends BaseEntity> {

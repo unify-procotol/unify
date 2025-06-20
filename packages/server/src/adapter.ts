@@ -93,7 +93,6 @@ export class Unify {
         const adapter = getAdapter(source!);
         const result = await adapter.findOne({
           where: params.where,
-          select: params.select,
         });
 
         return c.json({ data: result, entity, source });

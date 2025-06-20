@@ -26,10 +26,10 @@ export class UnifyClient {
     const { method, url, params, data, headers } = options;
 
     // 构建完整的 URL
-    const baseUrl = this.config.baseUrl.endsWith('/') 
-      ? this.config.baseUrl.slice(0, -1) 
+    const baseUrl = this.config.baseUrl.endsWith("/")
+      ? this.config.baseUrl.slice(0, -1)
       : this.config.baseUrl;
-    const cleanUrl = url.startsWith('/') ? url.slice(1) : url;
+    const cleanUrl = url.startsWith("/") ? url.slice(1) : url;
     const fullUrl = new URL(`${baseUrl}/${cleanUrl}`);
 
     // 添加查询参数
@@ -77,8 +77,8 @@ export class UnifyClient {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-            const result = await response.json();
-      
+      const result = await response.json();
+
       // Handle error responses
       if (result.error) {
         throw new Error(result.error);
@@ -106,7 +106,6 @@ export class UnifyClient {
               const params: Record<string, any> = { source };
 
               if (args.where) params.where = args.where;
-              if (args.select) params.select = args.select;
               if (args.order_by) params.order_by = args.order_by;
               if (args.limit) params.limit = args.limit;
               if (args.offset) params.offset = args.offset;
@@ -124,8 +123,6 @@ export class UnifyClient {
                 source,
                 where: args.where,
               };
-
-              if (args.select) params.select = args.select;
 
               return this.request<T | null>({
                 method: "GET",
@@ -162,9 +159,9 @@ export class UnifyClient {
               const result = await this.request<{ success: boolean }>({
                 method: "DELETE",
                 url: `/${entityName}/delete`,
-                params: { 
+                params: {
                   source,
-                  where: args.where 
+                  where: args.where,
                 },
               });
               return result.success;

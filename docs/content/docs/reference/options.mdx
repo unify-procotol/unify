@@ -25,7 +25,6 @@ Arguments for finding multiple records.
 interface FindManyArgs<T extends BaseEntity> {
   limit?: number;
   offset?: number;
-  select?: Array<keyof T>;
   where?: Partial<T>;
   order_by?: Partial<Record<keyof T, "asc" | "desc">>;
 }
@@ -45,7 +44,6 @@ Arguments for finding a single record.
 ```typescript
 interface FindOneArgs<T extends BaseEntity> {
   where: Partial<T>;
-  select?: Array<keyof T>;
 }
 ```
 
