@@ -23,129 +23,125 @@ Install the UniWeb3 plugin along with Unify dependencies:
 
 ### Basic Setup
 
-Register the UniWeb3 plugins in your Unify server:
+Register the UniWeb3 adapters in your Unify server:
 
 ```typescript
-import { createSource } from "@unify/server";
-import { SolanaPlugin, EVMPlugin } from "@unify/uniweb3";
+import { Unify } from "@unify/server";
+import { SolanaAdapter, EVMAdapter } from "@unify/uniweb3";
 
-const source = createSource();
+// Register Web3 adapters
+const server = Unify.register([
+  { source: "solana", adapter: new SolanaAdapter() },
+  { source: "evm", adapter: new EVMAdapter() },
+]);
 
-// Register both EVM and Solana plugins
-source.register([EVMPlugin, SolanaPlugin]);
-
-const app = source.getApp();
-
+console.log("🚀 Starting Unify server on port 3000");
+console.log("📊 Available endpoints:");
 console.log(
-  app.routes.map((route) => `- ${route.method} ${route.path}`).join("\n")
+  '  GET  /wallet/find_one?source=solana&where={"address":"wallet_address"} - Get Solana wallet balance'
+);
+console.log(
+  '  GET  /wallet/find_one?source=evm&where={"address":"wallet_address","network":"ethereum"} - Get EVM wallet balance'
 );
 
 export default {
   port: 3000,
-  fetch: app.fetch,
+  fetch: server.fetch,
 };
 ```
 
 ## Client Usage
 
-### Creating a Client
+### Initializing the Client
 
 ```typescript
-import { createClient } from "@unify/client";
-import { EVMPlugin, SolanaPlugin } from "@unify/uniweb3";
+import { Repo, UnifyClient } from "@unify/client";
+import { WalletEntity } from "@unify/uniweb3";
 
-const client = createClient(
-  {
-    EVMPlugin,
-    SolanaPlugin,
-  },
-  {
-    baseURL: "http://localhost:3000", // Your server URL
-  }
-);
+// Initialize the client
+UnifyClient.init({
+  baseUrl: "http://localhost:3000",
+  timeout: 10000,
+});
 ```
 
-### EVM Plugin Operations
-
-#### Balance Queries
+### EVM Wallet Queries
 
 Query account balances on EVM-compatible networks:
 
 ```typescript
 // Get balance for a specific address on IoTeX network
-const evmBalanceRes = await client.EVMPlugin.balance.findOne({
+const evmWallet = await Repo<WalletEntity>("wallet", "evm").findOne({
   where: {
-    address: "0x...",
-    chain_id: 4689,
+    address: "0x4f00D43b5aF0a0aAd62E9075D1bFa86a89CDb9aB",
+    network: "iotex",
   },
 });
+
+console.log("EVM Wallet:", evmWallet);
 ```
 
 #### Supported EVM Networks
 
-The EVM plugin supports various networks including:
-- Ethereum
-- IoTeX
-- Polygon
-- Binance Smart Chain
+The EVM adapter supports various networks including:
+- `ethereum` - Ethereum mainnet
+- `iotex` - IoTeX network
+- `polygon` - Polygon
+- `bsc` - Binance Smart Chain
 - And other EVM-compatible chains
 
-### Solana Plugin Operations
-
-#### Balance Queries
+### Solana Wallet Queries
 
 Query account balances on Solana:
 
 ```typescript
 // Get balance for a Solana address
-const solanaBalanceRes = await client.SolanaPlugin.balance.findOne({
+const solanaWallet = await Repo<WalletEntity>("wallet", "solana").findOne({
   where: {
     address: "11111111111111111111111111111112",
   },
 });
+
+console.log("Solana Wallet:", solanaWallet);
 ```
 
 ## Complete Example
 
-Here's a complete example showing how to use both plugins:
+Here's a complete example showing how to use both adapters:
 
 ```typescript
-import { createClient } from "@unify/client";
-import { EVMPlugin, SolanaPlugin } from "@unify/uniweb3";
+import { Repo, UnifyClient } from "@unify/client";
+import { WalletEntity } from "@unify/uniweb3";
+
+// Initialize the client
+UnifyClient.init({
+  baseUrl: "http://localhost:3000",
+  timeout: 10000,
+});
 
 async function queryBalances() {
-  const client = createClient(
-    {
-      EVMPlugin,
-      SolanaPlugin,
-    },
-    {
-      baseURL: "http://localhost:3000/api",
-    }
-  );
-
   try {
-    // Query EVM balance
-    const evmResult = await client.EVMPlugin.balance.findOne({
+    // Query EVM wallet balance
+    const evmWallet = await Repo<WalletEntity>("wallet", "evm").findOne({
       where: {
-        address: "0x...",
-        chain_id: 4689,
+        address: "0x4f00D43b5aF0a0aAd62E9075D1bFa86a89CDb9aB",
+        network: "iotex",
       },
     });
 
-    if (evmResult.data) {
-      console.log("EVM Balance:", evmResult.data);
+    if (evmWallet) {
+      console.log("EVM Wallet:", evmWallet);
     }
 
-    // Query Solana balance
-    const solanaResult = await client.SolanaPlugin.balance.findOne({
+    // Query Solana wallet balance
+    const solanaWallet = await Repo<WalletEntity>("wallet", "solana").findOne({
       where: {
         address: "11111111111111111111111111111112",
       },
     });
 
-    if (solanaResult.data) {
-      console.log("Solana Balance:", solanaResult.data);
+    if (solanaWallet) {
+      console.log("Solana Wallet:", solanaWallet);
     }
   } catch (error) {
     console.error("Error querying balances:", error);
@@ -157,30 +153,44 @@ queryBalances();
 
 ## API Reference
 
-### EVMPlugin
+### WalletEntity Interface
 
-#### `balance.findOne(options)`
+```typescript
+interface WalletEntity extends BaseEntity {
+  address: string;
+  balance: string;
+  network: string;
+  token?: {
+    symbol: string;
+    decimals: number;
+  };
+}
+```
 
-Query balance for an EVM address.
+### EVM Adapter
+
+#### `Repo<WalletEntity>("wallet", "evm").findOne(options)`
+
+Query balance for an EVM wallet address.
 
 **Parameters:**
 - `options.where.address`: The wallet address to query
 - `options.where.network`: The EVM network to query (e.g., "iotex", "ethereum")
 
 **Returns:**
-- Promise resolving to balance data
+- Promise resolving to `WalletEntity` or `null`
 
-### SolanaPlugin
+### Solana Adapter
 
-#### `balance.findOne(options)`
+#### `Repo<WalletEntity>("wallet", "solana").findOne(options)`
 
-Query balance for a Solana address.
+Query balance for a Solana wallet address.
 
 **Parameters:**
 - `options.where.address`: The Solana wallet address to query
 
 **Returns:**
-- Promise resolving to balance data
+- Promise resolving to `WalletEntity` or `null`
 
 ## Integration Examples
 

@@ -3,14 +3,59 @@ title: Installation
 description: Get started with Unify - installation guide and setup instructions
 ---
 
-### Install the Package
+## Core Packages
+
+Install the core Unify packages:
 
 ```package-install
-@unify/core @unify/server @unify/client @orpc/server hono zod
+@unify/server @unify/client hono
 ```
 
-### Install Plugins
+## Web3 Support
+
+For Web3 functionality, install the UniWeb3 plugin:
 
 ```package-install
 @unify/uniweb3
 ```
+
+## Framework Integration
+
+### Next.js
+
+For Next.js Pages Router, additionally install:
+
+```package-install
+@hono/node-server
+```
+
+For Next.js App Router, no additional dependencies are required.
+
+### Other Frameworks
+
+Unify works with any framework that supports Hono. Check the [Integrations](/docs/integrations) section for specific setup guides.
+
+## Quick Start
+
+After installation, you can quickly set up a Web3-enabled server:
+
+```typescript
+import { Unify } from "@unify/server";
+import { SolanaAdapter, EVMAdapter } from "@unify/uniweb3";
+
+const server = Unify.register([
+  { source: "solana", adapter: new SolanaAdapter() },
+  { source: "evm", adapter: new EVMAdapter() },
+]);
+
+export default {
+  port: 3000,
+  fetch: server.fetch,
+};
+```
+
+## Next Steps
+
+- Follow the [Basic Usage](/docs/basic-usage) guide to get started
+- Explore [Next.js Integration](/docs/integrations/next) for frontend setup
+- Check out the [Examples](/docs/examples) for complete implementations

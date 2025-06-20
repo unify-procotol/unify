@@ -181,47 +181,35 @@ export default function HomePage() {
 function CodeExample() {
   const [activeTab, setActiveTab] = useState<"server" | "client">("server");
 
-  const serverCode = `import { createSource } from "@unify/server";
-import { SolanaPlugin, EVMPlugin } from "@unify/uniweb3";
+  const serverCode = `import { Unify } from "@unify/server";
+import { SolanaAdapter, EVMAdapter } from "@unify/uniweb3";
 
-const source = createSource();
-
-source.register([EVMPlugin, SolanaPlugin]);
-
-const app = source.getApp();
-
-console.log(
-  app.routes
-    .map((route) => \`- \${route.method} \${route.path}\`)
-    .join("\\n")
-);
+const app = Unify.register([
+  { source: "solana", adapter: new SolanaAdapter() },
+  { source: "evm", adapter: new EVMAdapter() },
+]);
 
 export default {
   port: 3000,
   fetch: app.fetch,
 };`;
 
-  const clientCode = `import { createClient } from "@unify/client";
-import { EVMPlugin, SolanaPlugin } from "@unify/uniweb3";
+  const clientCode = `import { Repo, UnifyClient } from "@unify/client";
+import { WalletEntity } from "@unify/uniweb3";
 
-const client = createClient(
-  {
-    EVMPlugin,
-    SolanaPlugin,
-  },
-  {
-    baseURL: "http://localhost:3000", // Your server URL
-  }
-);
+UnifyClient.init({
+  baseUrl: "http://localhost:3000",
+  timeout: 10000,
+});
 
-const evmBalanceRes = await client.EVMPlugin.balance.findOne({
+const evmBalanceRes = await Repo<WalletEntity>("wallet", "evm").findOne({
   where: {
     address: "0x...",
-    chain_id: 4689,
+    network: "iotex",
   },
 });
 
-const solanaBalanceRes = await client.SolanaPlugin.balance.findOne({
+const solanaBalanceRes = await Repo<WalletEntity>("wallet", "solana").findOne({
   where: {
     address: "11111111111111111111111111111112",
   },

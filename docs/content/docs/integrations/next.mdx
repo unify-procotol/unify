@@ -48,22 +48,31 @@ nextjs-app-router/
 Create API routes in `src/app/api/[...route]/route.ts`:
 
 ```typescript
-import { createSource } from "@unify/server";
-import { SolanaPlugin, EVMPlugin } from "@unify/uniweb3";
-import { Hono } from "hono";
+import { Unify } from "@unify/server";
+import { SolanaAdapter, EVMAdapter } from "@unify/uniweb3";
+import { Hono, Context } from "hono";
 
 export const runtime = "nodejs";
 
+// Create custom Hono app instance
 const app = new Hono().basePath("/api");
 
-const source = createSource({
-  app,
+// Add custom middleware or routes
+app.get("/custom", (c: Context) => {
+  return c.json({ message: "This is a custom route!" });
 });
 
-source.register([EVMPlugin, SolanaPlugin]);
+// Initialize Unify with the app
+Unify.init({ app });
 
-// Optional: Add custom routes
-app.get("/hello", (c) => {
+// Register Web3 adapters
+Unify.register([
+  { source: "solana", adapter: new SolanaAdapter() },
+  { source: "evm", adapter: new EVMAdapter() },
+]);
+
+// Add additional custom routes
+app.get("/hello", (c: Context) => {
   return c.json({
     message: "Hello from Hono!",
   });
@@ -80,50 +89,51 @@ Using Unify client in page components:
 ```tsx
 "use client";
 
+import { Repo, UnifyClient } from "@unify/client";
+import { WalletEntity } from "@unify/uniweb3";
 import { useEffect, useState } from "react";
-import { createClient } from "@unify/client";
-import { EVMPlugin, SolanaPlugin } from "@unify/uniweb3";
 
 export default function Home() {
   const [evmBalanceData, setEvmBalanceData] = useState<any>(null);
   const [solanaBalanceData, setSolanaBalanceData] = useState<any>(null);
 
   useEffect(() => {
-    const client = createClient(
-      {
-        EVMPlugin,
-        SolanaPlugin,
+    // Initialize the client
+    UnifyClient.init({
+      baseUrl: "http://localhost:3000/api",
+      timeout: 10000,
+      headers: {
+        Authorization: "Bearer your-token-here",
       },
-      {
-        baseURL: "http://localhost:3000/api",
-      }
-    );
+    });
 
+    // Fetch EVM wallet balance
     const fetchEvmBalance = async () => {
       try {
-        const res = await client.EVMPlugin.balance.findOne({
+        const data = await Repo<WalletEntity>("wallet", "evm").findOne({
           where: {
-            address: "0x...",
-            chain_id: 4689,
+            address: "0x4f00D43b5aF0a0aAd62E9075D1bFa86a89CDb9aB",
+            network: "iotex",
           },
         });
-        if (res.data) {
-          setEvmBalanceData(res.data);
+        if (data) {
+          setEvmBalanceData(data);
         }
       } catch (error) {
         console.error(error);
       }
     };
 
+    // Fetch Solana wallet balance
     const fetchSolanaBalance = async () => {
       try {
-        const res = await client.SolanaPlugin.balance.findOne({
+        const data = await Repo<WalletEntity>("wallet", "solana").findOne({
           where: {
             address: "11111111111111111111111111111112",
           },
         });
-        if (res.data) {
-          setSolanaBalanceData(res.data);
+        if (data) {
+          setSolanaBalanceData(data);
         }
       } catch (error) {
         console.error(error);
@@ -169,8 +179,8 @@ nextjs-pages-router/
 Create API routes in `src/pages/api/[...unify].ts`:
 
 ```typescript
-import { createSource } from "@unify/server";
-import { SolanaPlugin, EVMPlugin } from "@unify/uniweb3";
+import { Unify } from "@unify/server";
+import { SolanaAdapter, EVMAdapter } from "@unify/uniweb3";
 import { Hono } from "hono";
 import { handle } from "@hono/node-server/vercel";
 import type { PageConfig } from "next";
@@ -183,13 +193,16 @@ export const config: PageConfig = {
 
 const app = new Hono().basePath("/api");
 
-const source = createSource({
-  app,
-});
+// Initialize Unify
+Unify.init({ app });
 
-source.register([EVMPlugin, SolanaPlugin]);
+// Register Web3 adapters
+Unify.register([
+  { source: "solana", adapter: new SolanaAdapter() },
+  { source: "evm", adapter: new EVMAdapter() },
+]);
 
-// Optional: Add custom routes
+// Add custom routes
 app.get("/hello", (c) => {
   return c.json({
     message: "Hello from Hono!",
@@ -204,35 +217,33 @@ export default handle(app);
 Using Unify client in page components:
 
 ```tsx
+import { Repo, UnifyClient } from "@unify/client";
+import { WalletEntity } from "@unify/uniweb3";
 import { useEffect, useState } from "react";
-import { createClient } from "@unify/client";
-import { EVMPlugin, SolanaPlugin } from "@unify/uniweb3";
 
 export default function Home() {
   const [evmBalanceData, setEvmBalanceData] = useState<any>(null);
   const [solanaBalanceData, setSolanaBalanceData] = useState<any>(null);
 
   useEffect(() => {
-    const client = createClient(
-      {
-        EVMPlugin,
-        SolanaPlugin,
+    UnifyClient.init({
+      baseUrl: "http://localhost:3000/api",
+      timeout: 10000,
+      headers: {
+        Authorization: "Bearer your-token-here",
       },
-      {
-        baseURL: "http://localhost:3000/api",
-      }
-    );
+    });
 
     const fetchEvmBalance = async () => {
       try {
-        const res = await client.EVMPlugin.balance.findOne({
+        const data = await Repo<WalletEntity>("wallet", "evm").findOne({
           where: {
-            address: "0x...",
-            chain_id: 4689,
+            address: "0x4f00D43b5aF0a0aAd62E9075D1bFa86a89CDb9aB",
+            network: "iotex",
           },
         });
-        if (res.data) {
-          setEvmBalanceData(res.data);
+        if (data) {
+          setEvmBalanceData(data);
         }
       } catch (error) {
         console.error(error);
@@ -241,13 +252,13 @@ export default function Home() {
 
     const fetchSolanaBalance = async () => {
       try {
-        const res = await client.SolanaPlugin.balance.findOne({
+        const data = await Repo<WalletEntity>("wallet", "solana").findOne({
           where: {
             address: "11111111111111111111111111111112",
           },
         });
-        if (res.data) {
-          setSolanaBalanceData(res.data);
+        if (data) {
+          setSolanaBalanceData(data);
         }
       } catch (error) {
         console.error(error);

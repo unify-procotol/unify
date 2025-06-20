@@ -1,7 +1,7 @@
 import { Unify } from "@unify/server";
 import { SolanaAdapter, EVMAdapter } from "@unify/uniweb3";
 
-const server = Unify.register([
+const app = Unify.register([
   { source: "solana", adapter: new SolanaAdapter() },
   { source: "evm", adapter: new EVMAdapter() },
 ]);
@@ -17,5 +17,5 @@ console.log(
 
 export default {
   port: 3000,
-  fetch: server.fetch,
+  fetch: app.fetch,
 };
