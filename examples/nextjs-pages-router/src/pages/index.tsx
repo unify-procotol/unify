@@ -1,32 +1,30 @@
+import { Repo, UnifyClient } from "@unify/client";
+import { WalletEntity } from "@unify/uniweb3";
 import { useEffect, useState } from "react";
-import { createClient } from "@unify/client";
-import { EVMPlugin, SolanaPlugin } from "@unify/uniweb3";
 
 export default function Home() {
   const [evmBalanceData, setEvmBalanceData] = useState<any>(null);
   const [solanaBalanceData, setSolanaBalanceData] = useState<any>(null);
 
   useEffect(() => {
-    const client = createClient(
-      {
-        EVMPlugin,
-        SolanaPlugin,
+    UnifyClient.init({
+      baseUrl: "http://localhost:3000/api",
+      timeout: 10000,
+      headers: {
+        Authorization: "Bearer your-token-here",
       },
-      {
-        baseURL: "http://localhost:3000/api",
-      }
-    );
+    });
 
     const fetchEvmBalance = async () => {
       try {
-        const res = await client.EVMPlugin.balance.findOne({
+        const data = await Repo<WalletEntity>("wallet", "evm").findOne({
           where: {
             address: "0x4f00D43b5aF0a0aAd62E9075D1bFa86a89CDb9aB",
-            chain_id: 4689,
+            network: "iotex",
           },
         });
-        if (res.data) {
-          setEvmBalanceData(res.data);
+        if (data) {
+          setEvmBalanceData(data);
         }
       } catch (error) {
         console.error(error);
@@ -35,13 +33,13 @@ export default function Home() {
 
     const fetchSolanaBalance = async () => {
       try {
-        const res = await client.SolanaPlugin.balance.findOne({
+        const data = await Repo<WalletEntity>("wallet", "solana").findOne({
           where: {
             address: "11111111111111111111111111111112",
           },
         });
-        if (res.data) {
-          setSolanaBalanceData(res.data);
+        if (data) {
+          setSolanaBalanceData(data);
         }
       } catch (error) {
         console.error(error);

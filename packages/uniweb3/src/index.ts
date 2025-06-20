@@ -1,2 +1,3 @@
-export { EVMPlugin } from "./plugins/evm";
-export { SolanaPlugin } from "./plugins/solana";
+export { EVMAdapter } from "./adapters/evm-adapter";
+export { SolanaAdapter } from "./adapters/solana-adapter";
+export * from "./entities";

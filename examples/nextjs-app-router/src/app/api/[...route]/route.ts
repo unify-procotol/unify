@@ -1,18 +1,24 @@
-import { createSource } from "@unify/server";
-import { SolanaPlugin, EVMPlugin } from "@unify/uniweb3";
-import { Hono } from "hono";
+import { Unify } from "@unify/server";
+import { SolanaAdapter, EVMAdapter } from "@unify/uniweb3";
+import { Hono, Context } from "hono";
 
 export const runtime = "nodejs";
 
+// 创建自定义的 Hono app 实例
 const app = new Hono().basePath("/api");
 
-const source = createSource({
-  app,
+// 添加自定义中间件或路由
+app.get("/custom", (c: Context) => {
+  return c.json({ message: "This is a custom route!" });
 });
 
-source.register([EVMPlugin, SolanaPlugin]);
+Unify.init({ app });
+Unify.register([
+  { source: "solana", adapter: new SolanaAdapter() },
+  { source: "evm", adapter: new EVMAdapter() },
+]);
 
-app.get("/hello", (c) => {
+app.get("/hello", (c: Context) => {
   return c.json({
     message: "Hello from Hono!",
   });
