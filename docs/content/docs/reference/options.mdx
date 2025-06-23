@@ -33,7 +33,6 @@ interface FindManyArgs<T extends BaseEntity> {
 **Properties:**
 - `limit` - Maximum number of records to return
 - `offset` - Number of records to skip
-- `select` - Array of fields to select
 - `where` - Filter conditions
 - `order_by` - Sort order specification
 
@@ -49,7 +48,6 @@ interface FindOneArgs<T extends BaseEntity> {
 
 **Properties:**
 - `where` - Filter conditions (required)
-- `select` - Array of fields to select
 
 ### CreationArgs
 
