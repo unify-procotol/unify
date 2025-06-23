@@ -29,22 +29,36 @@ export interface RelationConfig<T extends BaseEntity, R extends BaseEntity> {
   };
 }
 
-// Select 类型定义
-export type SelectFields<T extends BaseEntity> = {
-  [K in keyof T]?: boolean;
-};
+// Select 类型定义 - 提取被 @Relations 装饰的字段
+export type RelationFields<T> = {
+  [K in keyof T]: T[K] extends (infer U)[]
+    ? U extends Record<string, any>
+      ? K
+      : never
+    : T[K] extends Record<string, any> | undefined
+    ? K extends string
+      ? T[K] extends string | number | boolean | Date | null | undefined
+        ? never
+        : K
+      : never
+    : never;
+}[keyof T];
 
 export interface FindManyArgs<T extends BaseEntity> {
   limit?: number;
   offset?: number;
   where?: WhereCondition<T>;
   order_by?: Partial<Record<keyof T, "asc" | "desc">>;
-  select?: SelectFields<T>;
+  include?: {
+    [K in RelationFields<T>]?: boolean;
+  };
 }
 
 export interface FindOneArgs<T extends BaseEntity> {
   where: WhereCondition<T>;
-  select?: SelectFields<T>;
+  include?: {
+    [K in RelationFields<T>]?: boolean;
+  };
 }
 
 export interface CreationArgs<T extends BaseEntity> {
@@ -70,11 +84,14 @@ export interface DataSourceAdapter<T extends BaseEntity> {
 
 // 关系元数据存储
 export interface RelationMetadata {
-  type: 'toOne' | 'toMany';
+  type: "toOne" | "toMany";
   target: () => any;
   config?: RelationConfig<any, any>;
   foreignKey?: string;
 }
 
 // 存储实体关系元数据的全局 Map
-export const relationMetadataMap = new Map<string, Map<string, RelationMetadata>>();
+export const relationMetadataMap = new Map<
+  string,
+  Map<string, RelationMetadata>
+>();

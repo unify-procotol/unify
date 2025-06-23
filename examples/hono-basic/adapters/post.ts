@@ -63,7 +63,7 @@ class PostAdapter implements DataSourceAdapter<PostEntity> {
       return postData.find((post) => post.id === idValue) || null;
     }
     
-    // 如果有 userId 条件，按 userId 查找第一个匹配的文章
+    // // 如果有 userId 条件，按 userId 查找第一个匹配的文章
     if (where.userId) {
       const userIdValue = typeof where.userId === 'object' ? where.userId.$eq : where.userId;
       return postData.find((post) => post.userId === userIdValue) || null;

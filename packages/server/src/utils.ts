@@ -30,7 +30,7 @@ export function parseQueryParams<T extends BaseEntity>(c: Context) {
   const params: any = {};
 
   // 解析 JSON 参数
-  const jsonParams = ["where", "order_by", "select"];
+  const jsonParams = ["where", "order_by", "include"];
   for (const param of jsonParams) {
     if (query[param]) {
       try {
@@ -85,8 +85,6 @@ export function validateSource(source: string | undefined, c: Context) {
   return null;
 }
 
-// Unify 类的配置接口
-
 export interface AdapterRegistration {
   source: string;
   adapter: DataSourceAdapter<any>;
@@ -96,9 +94,9 @@ export interface AdapterRegistration {
 export async function loadRelations<T extends BaseEntity>(
   entity: T,
   entityName: string,
-  select?: { [key: string]: boolean }
+  include?: { [key: string]: boolean }
 ): Promise<T> {
-  if (!select) {
+  if (!include) {
     return entity;
   }
 
@@ -109,57 +107,72 @@ export async function loadRelations<T extends BaseEntity>(
 
   const result = { ...entity } as any;
 
-  for (const [propertyKey, shouldLoad] of Object.entries(select)) {
+  for (const [propertyKey, shouldLoad] of Object.entries(include)) {
     if (!shouldLoad) continue;
 
     const relationMetadata = relations.get(propertyKey);
     if (!relationMetadata) continue;
 
     try {
-      if (relationMetadata.type === 'toOne') {
+      if (relationMetadata.type === "toOne") {
         // 处理一对一关系
         const foreignKey = relationMetadata.foreignKey;
-        
-        if (foreignKey && typeof foreignKey === 'string' && (entity as any)[foreignKey]) {
+
+        if (
+          foreignKey &&
+          typeof foreignKey === "string" &&
+          (entity as any)[foreignKey]
+        ) {
           // 尝试从不同的适配器获取关联数据
-          const relatedEntityName = getEntityNameFromTarget(relationMetadata.target);
+          const relatedEntityName = getEntityNameFromTarget(
+            relationMetadata.target
+          );
           const adapter = tryGetAdapter(relatedEntityName);
-          
+
           if (adapter) {
             const foreignKeyValue = (entity as any)[foreignKey];
-            const whereCondition: any = { id: foreignKeyValue };
-            
+            const whereCondition = { id: foreignKeyValue };
+
             const relatedEntity = await adapter.findOne({
-              where: whereCondition
+              where: whereCondition,
             });
-            
+
             result[propertyKey] = relatedEntity;
           }
         }
-      } else if (relationMetadata.type === 'toMany') {
+      } else if (relationMetadata.type === "toMany") {
         // 处理一对多关系
         const config = relationMetadata.config;
         if (config?.fields) {
-          const relatedEntityName = getEntityNameFromTarget(relationMetadata.target);
+          const relatedEntityName = getEntityNameFromTarget(
+            relationMetadata.target
+          );
           const adapter = tryGetAdapter(relatedEntityName);
           if (adapter) {
             // 构建查询条件
             const whereCondition: any = {};
-            for (const [localField, foreignField] of Object.entries(config.fields)) {
+            for (const [localField, foreignField] of Object.entries(
+              config.fields
+            )) {
               if ((entity as any)[localField]) {
                 whereCondition[foreignField] = (entity as any)[localField];
               }
             }
-            
+
             const findManyArgs: any = { where: whereCondition };
             if (config.findOptions) {
-              if (config.findOptions.limit) findManyArgs.limit = config.findOptions.limit;
-              if (config.findOptions.orderBy) findManyArgs.order_by = config.findOptions.orderBy;
+              if (config.findOptions.limit)
+                findManyArgs.limit = config.findOptions.limit;
+              if (config.findOptions.orderBy)
+                findManyArgs.order_by = config.findOptions.orderBy;
               if (config.findOptions.where) {
-                findManyArgs.where = { ...findManyArgs.where, ...config.findOptions.where };
+                findManyArgs.where = {
+                  ...findManyArgs.where,
+                  ...config.findOptions.where,
+                };
               }
             }
-            
+
             const relatedEntities = await adapter.findMany(findManyArgs);
             result[propertyKey] = relatedEntities;
           }
@@ -177,12 +190,12 @@ export async function loadRelations<T extends BaseEntity>(
 // 从目标函数获取实体名称
 function getEntityNameFromTarget(target: (() => any) | any): string {
   try {
-    let entityName = '';
-    
-    if (typeof target === 'function') {
+    let entityName = "";
+
+    if (typeof target === "function") {
       // 如果 target 是函数，调用它获取类或实例
       const result = target();
-      if (typeof result === 'function') {
+      if (typeof result === "function") {
         // 如果返回的是构造函数
         entityName = result.name;
       } else {
@@ -193,11 +206,11 @@ function getEntityNameFromTarget(target: (() => any) | any): string {
       // 如果 target 本身就是实例
       entityName = target.constructor.name;
     }
-    
+
     // 将 "UserEntity" 转换为 "user"
-    return entityName.toLowerCase().replace('entity', '');
+    return entityName.toLowerCase().replace("entity", "");
   } catch (error) {
-    return '';
+    return "";
   }
 }
 

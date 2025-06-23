@@ -83,6 +83,18 @@ export default function Layout({ children }: { children: ReactNode }) {
           },
           {
             type: "folder",
+            name: "Relations",
+            children: [
+              {
+                type: "page",
+                name: "Relations",
+                url: "/docs/relations",
+              },
+            ],
+            icon: <LayoutGrid />,
+          },
+          {
+            type: "folder",
             name: "Reference",
             children: [
               {

@@ -13,7 +13,7 @@ export class Relations {
   static toMany<T extends BaseEntity, R extends BaseEntity>(
     targetEntity: () => new () => R,
     config?: RelationConfig<T, R>
-  ): PropertyDecorator {
+  ) {
     return function (target: any, propertyKey: string | symbol) {
       const entityName = target.constructor.name;
 
@@ -41,7 +41,7 @@ export class Relations {
   static toOne<T extends BaseEntity, R extends BaseEntity>(
     targetEntity: () => new () => R,
     foreignKey: string
-  ): PropertyDecorator {
+  ) {
     return function (target: any, propertyKey: string | symbol) {
       const entityName = target.constructor.name;
 

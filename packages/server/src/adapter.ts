@@ -71,11 +71,11 @@ export class Unify {
         const params = parseQueryParams(c);
         const result = await adapter.findMany(params);
 
-        if (result && result.length > 0 && params.select) {
+        if (result && result.length > 0 && params.include) {
           // 获取实体类名，首字母大写
           const entityClassName = entity.charAt(0).toUpperCase() + entity.slice(1) + 'Entity';
           const enrichedResult = await Promise.all(
-            result.map(item => loadRelations(item, entityClassName, params.select))
+            result.map(item => loadRelations(item, entityClassName, params.include))
           );
           return c.json({ data: enrichedResult, entity, source });
         }
@@ -105,10 +105,10 @@ export class Unify {
           where: params.where,
         });
 
-        if (result && params.select) {
+        if (result && params.include) {
           // 获取实体类名，首字母大写
           const entityClassName = entity.charAt(0).toUpperCase() + entity.slice(1) + 'Entity';
-          const enrichedResult = await loadRelations(result, entityClassName, params.select);
+          const enrichedResult = await loadRelations(result, entityClassName, params.include);
           return c.json({ data: enrichedResult, entity, source });
         }
 

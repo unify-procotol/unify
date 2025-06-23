@@ -1,0 +1,282 @@
+---
+title: Relations
+description: Learn how to define and use entity relations in Unify to create connected data models
+---
+
+# Relations
+
+Relations in Unify allow you to define connections between different entities, enabling you to query related data in a single request. This is particularly useful for creating complex data models with interconnected entities.
+
+## Overview
+
+Unify supports two types of relations:
+- **One-to-Many (toMany)**: One entity can have multiple related entities
+- **One-to-One (toOne)**: One entity relates to exactly one other entity
+
+## Defining Relations
+
+### One-to-Many Relation
+
+Use the `@Relations.toMany` decorator to define a one-to-many relationship:
+
+```typescript
+import { Relations } from "@unify/core";
+import { PostEntity } from "./post";
+
+class UserEntity {
+  id = "";
+  name = "";
+  email = "";
+  avatar = "";
+
+  @Relations.toMany(() => PostEntity, {
+    fields: {
+      id: "userId"  // UserEntity.id maps to PostEntity.userId
+    }
+  })
+  posts?: PostEntity[];
+}
+
+export { UserEntity };
+```
+
+### One-to-One Relation
+
+Use the `@Relations.toOne` decorator to define a one-to-one relationship:
+
+```typescript
+import { Relations } from "@unify/core";
+import type { UserEntity } from "./user";
+
+class PostEntity {
+  id = "";
+  title = "";
+  content = "";
+  userId = "";
+
+  @Relations.toOne(() => require("./user").UserEntity, "userId")
+  user?: UserEntity;
+}
+
+export { PostEntity };
+```
+
+## Relation Configuration
+
+### toMany Configuration
+
+The `@Relations.toMany` decorator accepts a configuration object:
+
+```typescript
+@Relations.toMany(() => TargetEntity, {
+  fields: {
+    localField: "foreignField"  // Maps local field to foreign field
+  }
+})
+```
+
+- `localField`: The field in the current entity
+- `foreignField`: The corresponding field in the target entity
+
+### toOne Configuration
+
+The `@Relations.toOne` decorator requires a foreign key:
+
+```typescript
+@Relations.toOne(() => TargetEntity, "foreignKeyField")
+```
+
+- `foreignKeyField`: The field that contains the reference to the target entity
+
+## Server Setup
+
+To use relations, you need to register all related entities and their adapters:
+
+```typescript
+import { Unify } from "@unify/server";
+import { UserAdapter } from "./adapters/user";
+import { PostAdapter } from "./adapters/post";
+// Import entities to ensure decorators are registered
+import { UserEntity } from "./entities/user";
+import { PostEntity } from "./entities/post";
+
+// Create entity instances to trigger decorator registration
+new UserEntity();
+new PostEntity();
+
+const app = Unify.register([
+  { source: "user", adapter: new UserAdapter() },
+  { source: "post", adapter: new PostAdapter() },
+]);
+
+export default {
+  port: 3000,
+  fetch: app.fetch,
+};
+```
+
+## Adapter Implementation
+
+Your adapters need to support filtering by foreign keys to enable relations:
+
+```typescript
+class PostAdapter implements DataSourceAdapter<PostEntity> {
+  async findMany(args?: FindManyArgs<PostEntity>): Promise<PostEntity[]> {
+    const where = args?.where || {};
+    
+    // Support filtering by userId for relations
+    if (where.userId) {
+      const userIdValue = typeof where.userId === 'object' ? where.userId.$eq : where.userId;
+      return postData.filter((post) => post.userId === userIdValue);
+    }
+    
+    return postData;
+  }
+  
+  // ... other methods
+}
+```
+
+## Querying Relations
+
+### Client Usage
+
+Use the `include` option to include related data in your queries:
+
+```typescript
+import { Repo, UnifyClient } from "@unify/client";
+import { UserEntity } from "./entities/user";
+
+UnifyClient.init({
+  baseUrl: "http://localhost:3000",
+  timeout: 10000,
+});
+
+// Query user with their posts
+const userData = await Repo<UserEntity>("user", "user").findMany({
+  where: {
+    id: "1",
+  },
+  include: {
+    posts: true,  // Include related posts
+  },
+});
+
+console.log("User with posts:", userData);
+```
+
+### Query Post with User
+
+```typescript
+import { PostEntity } from "./entities/post";
+
+// Query post with its author
+const postData = await Repo<PostEntity>("post", "post").findOne({
+  where: {
+    id: "1",
+  },
+  include: {
+    user: true,  // Include related user
+  },
+});
+
+console.log("Post with author:", postData);
+```
+
+## API Endpoints
+
+Relations are automatically handled through the generated REST API:
+
+```bash
+# Get user with posts
+GET /user/find_many?where={"id":"1"}&include={"posts":true}
+
+# Get post with user
+GET /post/find_one?where={"id":"1"}&include={"user":true}
+```
+
+## Complete Example
+
+Here's a complete working example with User and Post entities:
+
+### Entities
+
+**user.ts**
+```typescript
+import { Relations } from "@unify/core";
+import { PostEntity } from "./post";
+
+class UserEntity {
+  id = "";
+  name = "";
+  email = "";
+  avatar = "";
+
+  @Relations.toMany(() => PostEntity, {
+    fields: {
+      id: "userId"
+    }
+  })
+  posts?: PostEntity[];
+}
+
+export { UserEntity };
+```
+
+**post.ts**
+```typescript
+import { Relations } from "@unify/core";
+import type { UserEntity } from "./user";
+
+class PostEntity {
+  id = "";
+  title = "";
+  content = "";
+  userId = "";
+
+  @Relations.toOne(() => require("./user").UserEntity, "userId")
+  user?: UserEntity;
+}
+
+export { PostEntity };
+```
+
+### Client Query
+
+```typescript
+// Query all users with their posts
+const users = await Repo<UserEntity>("user", "user").findMany({
+  include: {
+    posts: true,
+  },
+});
+
+// Query specific post with author information
+const post = await Repo<PostEntity>("post", "post").findOne({
+  where: { id: "1" },
+  include: {
+    user: true,
+  },
+});
+```
+
+## Best Practices
+
+1. **Lazy Loading**: Relations are only loaded when explicitly requested via `include`
+2. **Circular References**: Use `require()` or dynamic imports to avoid circular dependency issues
+3. **Foreign Key Indexing**: Ensure your adapters can efficiently filter by foreign keys
+4. **Type Safety**: Use TypeScript interfaces to maintain type safety across relations
+
+## Key Features
+
+- 🔗 **Flexible Relations**: Support for one-to-one and one-to-many relationships
+- 🚀 **Lazy Loading**: Relations are only loaded when requested
+- 🎯 **Type Safe**: Full TypeScript support with proper type inference
+- 📊 **Efficient Queries**: Optimized relation loading with minimal database calls
+- 🔧 **Easy Setup**: Simple decorator-based configuration
+
+## Next Steps
+
+- Explore [Basic Usage](/docs/basic-usage) for general Unify concepts
+- Learn about [Framework Integrations](/docs/integrations) for frontend usage
+- Check out the [complete example](https://github.com/your-repo/unify/tree/main/examples/hono-basic) in the repository

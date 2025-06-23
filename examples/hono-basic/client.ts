@@ -13,7 +13,7 @@ const fetchUser = async () => {
       id: "1",
       // email: "john.doe@example.com",
     },
-    select: {
+    include: {
       posts: true,
     },
   });
@@ -22,16 +22,16 @@ const fetchUser = async () => {
 
 fetchUser();
 
-// const fetchPost = async () => {
-//   const data = await Repo<PostEntity>("post", "post").findOne({
-//     where: {
-//       id: "2",
-//     },
-//     select: {
-//       user: true,
-//     },
-//   });
-//   console.log("fetchPost===>", data);
-// };
+const fetchPost = async () => {
+  const data = await Repo<PostEntity>("post", "post").findOne({
+    where: {
+      id: "2",
+    },
+    include: {
+      user: true,
+    },
+  });
+  console.log("fetchPost===>", data);
+};
 
-// fetchPost();
+fetchPost();

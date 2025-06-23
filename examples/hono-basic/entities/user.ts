@@ -9,8 +9,8 @@ class UserEntity {
 
   @Relations.toMany(() => PostEntity, {
     fields: {
-      id: "userId"  // UserEntity.id 对应 PostEntity.userId
-    }
+      id: "userId", // UserEntity.id 对应 PostEntity.userId
+    },
   })
   posts?: PostEntity[];
 }
