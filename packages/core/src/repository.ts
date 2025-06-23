@@ -18,7 +18,7 @@ export class Repository<T extends BaseEntity> {
     this.adapter = adapter;
   }
 
-  async findMany(args: FindManyArgs<T>) {
+  async findMany(args?: FindManyArgs<T>) {
     return this.adapter.findMany(args);
   }
 

@@ -19,15 +19,19 @@ export class SolanaAdapter implements DataSourceAdapter<WalletEntity> {
 
   async findOne(args: FindOneArgs<WalletEntity>): Promise<WalletEntity | null> {
     const { address } = args.where;
-    if (!address) {
+    
+    // 提取实际的字符串值（处理 QueryOperators）
+    const addressValue = typeof address === 'string' ? address : address?.$eq;
+    
+    if (!addressValue) {
       throw {
         status: 400,
         message: "Invalid arguments",
       };
     }
-    const balance = await handler.getBalance(address);
+    const balance = await handler.getBalance(addressValue);
     return {
-      address: address,
+      address: addressValue,
       balance: balance.toString(),
       network: "solana",
       token: {

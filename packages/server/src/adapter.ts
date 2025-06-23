@@ -6,6 +6,7 @@ import {
   adapterRegistry,
   getAdapter,
   handleError,
+  loadRelations,
   parseQueryParams,
   registerAdapter,
   validateSource,
@@ -70,6 +71,15 @@ export class Unify {
         const params = parseQueryParams(c);
         const result = await adapter.findMany(params);
 
+        if (result && result.length > 0 && params.select) {
+          // 获取实体类名，首字母大写
+          const entityClassName = entity.charAt(0).toUpperCase() + entity.slice(1) + 'Entity';
+          const enrichedResult = await Promise.all(
+            result.map(item => loadRelations(item, entityClassName, params.select))
+          );
+          return c.json({ data: enrichedResult, entity, source });
+        }
+
         return c.json({ data: result, entity, source });
       } catch (error) {
         return handleError(error, c);
@@ -94,6 +104,13 @@ export class Unify {
         const result = await adapter.findOne({
           where: params.where,
         });
+
+        if (result && params.select) {
+          // 获取实体类名，首字母大写
+          const entityClassName = entity.charAt(0).toUpperCase() + entity.slice(1) + 'Entity';
+          const enrichedResult = await loadRelations(result, entityClassName, params.select);
+          return c.json({ data: enrichedResult, entity, source });
+        }
 
         return c.json({ data: result, entity, source });
       } catch (error) {

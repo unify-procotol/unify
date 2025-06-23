@@ -1,9 +1,7 @@
-import type { BaseEntity } from "@unify/core";
-
-export interface WalletEntity extends BaseEntity {
-  address: string;
-  balance: string;
-  network: string;
+export class WalletEntity {
+  address = "";
+  balance = "";
+  network = "";
   token?: {
     symbol: string;
     decimals: number;

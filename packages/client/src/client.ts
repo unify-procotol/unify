@@ -109,6 +109,7 @@ export class UnifyClient {
               if (args.order_by) params.order_by = args.order_by;
               if (args.limit) params.limit = args.limit;
               if (args.offset) params.offset = args.offset;
+              if (args.select) params.select = args.select;
 
               return this.request<T[]>({
                 method: "GET",
@@ -123,6 +124,8 @@ export class UnifyClient {
                 source,
                 where: args.where,
               };
+
+              if (args.select) params.select = args.select;
 
               return this.request<T | null>({
                 method: "GET",

@@ -1,19 +1,18 @@
 import { Unify } from "@unify/server";
-import { SolanaAdapter, EVMAdapter } from "@unify/uniweb3";
+import { UserAdapter } from "./adapters/user";
+import { PostAdapter } from "./adapters/post";
+// 导入实体类以确保装饰器被注册
+import { UserEntity } from "./entities/user";
+import { PostEntity } from "./entities/post";
+
+// 创建实体实例以触发装饰器注册
+new UserEntity();
+new PostEntity();
 
 const app = Unify.register([
-  { source: "solana", adapter: new SolanaAdapter() },
-  { source: "evm", adapter: new EVMAdapter() },
+  { source: "user", adapter: new UserAdapter() },
+  { source: "post", adapter: new PostAdapter() },
 ]);
-
-console.log("🚀 Starting Unify server on port 3000");
-console.log("📊 Available endpoints:");
-console.log(
-  '  GET  /wallet/find_one?source=solana&where={"address":"wallet_address"} - Get Solana wallet balance'
-);
-console.log(
-  '  GET  /wallet/find_one?source=evm&where={"address":"wallet_address","network":"ethereum"} - Get EVM wallet balance'
-);
 
 export default {
   port: 3000,
