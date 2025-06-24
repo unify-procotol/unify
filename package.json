@@ -18,5 +18,8 @@
     "dev:uniweb3": "cd packages/uniweb3 && bun run dev"
   },
   "author": "osdodo",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "@typescript-eslint/typescript-estree": "^8.35.0"
+  }
 }

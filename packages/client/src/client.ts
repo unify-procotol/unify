@@ -45,8 +45,6 @@ export class UnifyClient {
       });
     }
 
-    console.log(`Making ${method} request to:`, fullUrl.toString());
-
     // 准备请求配置
     const requestInit: RequestInit = {
       method,
@@ -86,8 +84,6 @@ export class UnifyClient {
         throw new Error(result.error);
       }
 
-      console.log(`Request to ${url} returned:`, result.data);
-
       // Return the data field from the response
       return result.data;
     } catch (error) {
@@ -121,13 +117,6 @@ export class UnifyClient {
                 params,
               });
 
-              console.log("findMany result:", result);
-              console.log("args.include:", args.include);
-              console.log(
-                "include check:",
-                args.include && result && result.length > 0
-              );
-
               // 如果有include回调函数，在客户端执行关联查询
               if (args.include && result && result.length > 0) {
                 return await this.loadRelationsForMany(result, args.include);
@@ -149,10 +138,6 @@ export class UnifyClient {
                 url: `/${entityName}/find_one`,
                 params,
               });
-
-              console.log("findOne result:", result);
-              console.log("args.include:", args.include);
-              console.log("include check:", args.include && result);
 
               // 如果有include回调函数，在客户端执行关联查询
               if (args.include && result) {
