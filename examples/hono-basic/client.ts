@@ -1,7 +1,7 @@
 import { UserEntity } from "./entities/user";
 import { PostEntity } from "./entities/post";
-
 import { repo, UnifyClient } from "@unilab/httply";
+
 UnifyClient.init({
   baseUrl: "http://localhost:3000",
   timeout: 10000,

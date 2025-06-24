@@ -1,24 +1,24 @@
-import { IsArray, IsOptional, IsString, ValidateNested } from "class-validator";
-import { Type } from "class-transformer";
+import { Fields, Relations } from "@unilab/core";
 import { PostEntity } from "./post";
 
 export class UserEntity {
-  @IsString()
+  @Fields.string()
   id = "";
-  
-  @IsString()
+
+  @Fields.string()
   name = "";
 
-  @IsString()
+  @Fields.number()
+  age = 0;
+
+  @Fields.string()
   email = "";
 
-  @IsString()
+  @Fields.string({ optional: true })
   avatar = "";
 
-  @IsArray()
-  @IsOptional()
-  @ValidateNested({ each: true })
-  @Type(() => PostEntity)
+  @Relations.toMany(() => PostEntity, {
+    optional: true,
+  })
   posts?: PostEntity[];
 }
-

@@ -1,9 +1,8 @@
 import { repo, UnifyClient } from "@unilab/httply";
 import { Entity } from "./entities/entity";
-import { validationMetadatasToSchemas } from "class-validator-jsonschema";
-
-export * from "./entities/user";
-export * from "./entities/post";
+import { generateSchemas } from "@unilab/core";
+import { UserEntity } from "./entities/user";
+import { PostEntity } from "./entities/post";
 
 UnifyClient.init({
   baseUrl: "http://localhost:3000",
@@ -11,21 +10,11 @@ UnifyClient.init({
 });
 
 const demo = async () => {
-  const { defaultMetadataStorage } = require("class-transformer/cjs/storage");
-  const schemas = validationMetadatasToSchemas({
-    classTransformerMetadataStorage: defaultMetadataStorage,
-  });
+  // Generate schemas from entity classes
+  const schemas = generateSchemas([UserEntity, PostEntity]);
 
-  await repo<Entity>("entity", "global").create({
-    data: {
-      name: "demo",
-      schemas: schemas,
-    },
-  });
-
-  const data = await repo<Entity>("entity", "global").findMany();
-  console.log("length===>", data.length);
-  console.log("fetchEntities===>", JSON.stringify(data, null, 2));
+  console.log("UserEntity schema:", JSON.stringify(schemas.UserEntity, null, 2));
+  console.log("PostEntity schema:", JSON.stringify(schemas.PostEntity, null, 2));
 };
 
 demo();

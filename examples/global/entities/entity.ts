@@ -1,4 +1,4 @@
-import { SchemaObject } from "openapi3-ts";
+import { SchemaObject } from "./decorators";
 
 export class Entity {
   name: string = "";
