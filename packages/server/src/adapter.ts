@@ -6,12 +6,11 @@ import {
   adapterRegistry,
   getAdapter,
   handleError,
-  loadRelations,
   parseQueryParams,
   registerAdapter,
   validateSource,
 } from "./utils";
-import { BaseEntity, DataSourceAdapter, Repository } from "@unify/core";
+import { BaseEntity, DataSourceAdapter, Repository } from "@unilab/core";
 
 export interface UnifyConfig {
   app?: Hono;

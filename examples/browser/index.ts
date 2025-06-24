@@ -1,11 +1,23 @@
 import { UserEntity } from "./entities/user";
 import { PostEntity } from "./entities/post";
+import { repo, UnifyClient } from "@unilab/client";
+import { UserAdapter } from "./adapters/user";
+import { PostAdapter } from "./adapters/post";
 
-import { repo, UnifyClient } from "@unilab/httply";
 UnifyClient.init({
-  baseUrl: "http://localhost:3000",
-  timeout: 10000,
+  enableDebug: false,
 });
+
+UnifyClient.register([
+  {
+    source: "user",
+    adapter: new UserAdapter(),
+  },
+  {
+    source: "post",
+    adapter: new PostAdapter(),
+  },
+]);
 
 const fetchUser = async () => {
   const data = await repo<UserEntity>("user", "user").findMany({

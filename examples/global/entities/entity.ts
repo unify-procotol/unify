@@ -1,11 +1,6 @@
-import { ClassDeclaration, InterfaceDeclaration } from "../utils/ast-converter";
+import { SchemaObject } from "openapi3-ts";
 
 export class Entity {
-  name: string = "Entity";
-  ast: ClassDeclaration | InterfaceDeclaration = {
-    kind: "ClassDeclaration",
-    name: "Entity",
-    modifiers: ["export"],
-    members: [],
-  };
+  name: string = "";
+  schemas: Record<string, SchemaObject> = {};
 }

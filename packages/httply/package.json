@@ -1,7 +1,7 @@
 {
-  "name": "@unilab/server",
+  "name": "@unilab/httply",
   "version": "0.0.1",
-  "description": "A Hono-based SDK that maps entity configurations to REST API endpoints",
+  "description": "HTTP client library for Unify",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
@@ -11,21 +11,20 @@
     "prepublishOnly": "bun run build"
   },
   "keywords": [
-    "hono",
-    "rest",
     "api",
-    "cli"
+    "client",
+    "typescript",
+    "rest",
+    "type-safe"
   ],
   "author": "osdodo",
   "license": "MIT",
   "dependencies": {
     "@unilab/core": "workspace:*",
-    "hono": "^4.7.11",
-    "@hono/node-server": "^1.12.2"
+    "zod": "^3.25.57"
   },
   "devDependencies": {
-    "typescript": "^5.3.0",
-    "@types/bun": "^1.1.12"
+    "typescript": "^5.3.0"
   },
   "files": [
     "dist",

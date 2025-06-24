@@ -1,7 +1,7 @@
 {
-  "name": "@unify/client",
-  "version": "0.0.3",
-  "description": "Type-safe client library for Unify",
+  "name": "@unilab/client",
+  "version": "0.0.1",
+  "description": "Lightweight browser-only client library for Unify without HTTP functionality",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
@@ -20,8 +20,9 @@
     "api",
     "client",
     "typescript",
-    "rest",
-    "type-safe"
+    "browser",
+    "type-safe",
+    "lightweight"
   ],
   "author": "osdodo",
   "license": "MIT",
@@ -51,5 +52,6 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/iotexproject/unify.git"
-  }
+  },
+  "browser": true
 }

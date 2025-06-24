@@ -181,8 +181,8 @@ export default function HomePage() {
 function CodeExample() {
   const [activeTab, setActiveTab] = useState<"server" | "client">("server");
 
-  const serverCode = `import { Unify } from "@unify/server";
-import { SolanaAdapter, EVMAdapter } from "@unify/uniweb3";
+  const serverCode = `import { Unify } from "@unilab/server";
+import { SolanaAdapter, EVMAdapter } from "@unilab/uniweb3";
 
 const app = Unify.register([
   { source: "solana", adapter: new SolanaAdapter() },
@@ -194,8 +194,8 @@ export default {
   fetch: app.fetch,
 };`;
 
-  const clientCode = `import { repo, UnifyClient } from "@unify/client";
-import { WalletEntity } from "@unify/uniweb3/entities";
+  const clientCode = `import { repo, UnifyClient } from "@unilab/httply";
+import { WalletEntity } from "@unilab/uniweb3/entities";
 
 UnifyClient.init({
   baseUrl: "http://localhost:3000",

@@ -1,7 +1,7 @@
 {
   "name": "global-example",
   "version": "1.0.0",
-  "description": "Global example using @unify/server and @unify/client",
+  "description": "Global example using @unilab/server and @unilab/client",
   "main": "server.ts",
   "scripts": {
     "dev": "bun run server.ts",
@@ -9,22 +9,25 @@
     "client": "bun run client.ts"
   },
   "dependencies": {
-    "@unify/server": "workspace:*",
-    "@unify/client": "workspace:*",
-    "@unify/core": "workspace:*",
-    "hono": "^4.7.11",
-    "@hono/node-server": "^1.12.2"
+    "@hono/node-server": "^1.12.2",
+    "@unilab/httply": "workspace:*",
+    "@unilab/core": "workspace:*",
+    "@unilab/server": "workspace:*",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.2",
+    "class-validator-jsonschema": "^5.0.2",
+    "hono": "^4.7.11"
   },
   "devDependencies": {
     "@types/bun": "^1.1.12",
-    "typescript": "^5.3.0"
+    "typescript": "^5.8.3"
   },
   "keywords": [
     "hono",
-    "unify",
+    "unilab",
     "api",
     "example"
   ],
   "author": "osdodo",
   "license": "MIT"
-} 
+}

@@ -1,0 +1,23 @@
+{
+  "name": "browser-example",
+  "version": "1.0.0",
+  "description": "Basic browser example using @unilab/httply",
+  "main": "server.ts",
+  "scripts": {
+    "dev": "bun run index.ts"
+  },
+  "dependencies": {
+    "@unilab/client": "workspace:*",
+    "@unilab/core": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.0"
+  },
+  "keywords": [
+    "unilab",
+    "browser",
+    "example"
+  ],
+  "author": "osdodo",
+  "license": "MIT"
+}

@@ -1,5 +1,5 @@
 import type { Context } from "hono";
-import type { BaseEntity, DataSourceAdapter } from "@unify/core";
+import type { BaseEntity, DataSourceAdapter } from "@unilab/core";
 
 // 适配器注册表
 export const adapterRegistry = new Map<string, () => DataSourceAdapter<any>>();

@@ -1,4 +1,4 @@
-# @unify/server
+# @unilab/server
 
 A simplified server package for building unified APIs with multiple data source adapters.
 
@@ -13,9 +13,9 @@ A simplified server package for building unified APIs with multiple data source 
 ## Installation
 
 ```bash
-npm install @unify/server
+npm install @unilab/server
 # For Web3 adapters
-npm install @unify/uniweb3
+npm install @unilab/uniweb3
 ```
 
 ## Quick Start
@@ -23,8 +23,8 @@ npm install @unify/uniweb3
 ### Basic Usage
 
 ```typescript
-import { Unify } from "@unify/server";
-import { SolanaAdapter, EVMAdapter } from "@unify/uniweb3";
+import { Unify } from "@unilab/server";
+import { SolanaAdapter, EVMAdapter } from "@unilab/uniweb3";
 
 // Initialize Unify (creates internal Hono app)
 const app = Unify.init();
@@ -45,8 +45,8 @@ export default {
 ### With Custom Hono App
 
 ```typescript
-import { Unify } from "@unify/server";
-import { SolanaAdapter, EVMAdapter } from "@unify/uniweb3";
+import { Unify } from "@unilab/server";
+import { SolanaAdapter, EVMAdapter } from "@unilab/uniweb3";
 import { Hono } from "hono";
 
 // Create custom Hono app
@@ -74,8 +74,8 @@ export const POST = app.fetch;
 
 ```typescript
 // app/api/[...route]/route.ts
-import { Unify } from "@unify/server";
-import { SolanaAdapter, EVMAdapter } from "@unify/uniweb3";
+import { Unify } from "@unilab/server";
+import { SolanaAdapter, EVMAdapter } from "@unilab/uniweb3";
 import { Hono } from "hono";
 
 export const runtime = "nodejs";
@@ -173,8 +173,8 @@ curl "http://localhost:3000/health"
 
 **Before:**
 ```typescript
-import { Unify } from "@unify/server";
-import { SolanaAdapter, EVMAdapter } from "@unify/uniweb3";
+import { Unify } from "@unilab/server";
+import { SolanaAdapter, EVMAdapter } from "@unilab/uniweb3";
 
 const unify = new Unify();
 unify.init({ app });
@@ -186,8 +186,8 @@ const server = unify.register([
 
 **After:**
 ```typescript
-import { Unify } from "@unify/server";
-import { SolanaAdapter, EVMAdapter } from "@unify/uniweb3";
+import { Unify } from "@unilab/server";
+import { SolanaAdapter, EVMAdapter } from "@unilab/uniweb3";
 
 Unify.init({ app });
 Unify.register([

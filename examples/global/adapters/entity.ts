@@ -5,131 +5,10 @@ import {
   FindManyArgs,
   FindOneArgs,
   UpdateArgs,
-} from "@unify/core";
+} from "@unilab/core";
 import { Entity } from "../entities/entity";
 
-const entities: Entity[] = [
-  {
-    name: "PostEntity",
-    ast: {
-      kind: "ClassDeclaration",
-      name: "PostEntity",
-      modifiers: ["export"],
-      members: [
-        {
-          kind: "PropertySignature",
-          name: "id",
-          type: {
-            kind: "StringKeyword",
-            typeName: "string",
-          },
-          optional: false,
-          modifiers: [],
-        },
-        {
-          kind: "PropertySignature",
-          name: "title",
-          type: {
-            kind: "StringKeyword",
-            typeName: "string",
-          },
-          optional: false,
-          modifiers: [],
-        },
-        {
-          kind: "PropertySignature",
-          name: "content",
-          type: {
-            kind: "StringKeyword",
-            typeName: "string",
-          },
-          optional: false,
-          modifiers: [],
-        },
-        {
-          kind: "PropertySignature",
-          name: "userId",
-          type: {
-            kind: "StringKeyword",
-            typeName: "string",
-          },
-          optional: true,
-          modifiers: [],
-        },
-        {
-          kind: "PropertySignature",
-          name: "user",
-          type: {
-            kind: "UndefinedKeyword",
-            typeName: "undefined",
-          },
-          optional: true,
-          modifiers: [],
-        },
-      ],
-    },
-  },
-  {
-    name: "UserEntity",
-    ast: {
-      kind: "ClassDeclaration",
-      name: "UserEntity",
-      modifiers: ["export"],
-      members: [
-        {
-          kind: "PropertySignature",
-          name: "id",
-          type: {
-            kind: "StringKeyword",
-            typeName: "string",
-          },
-          optional: false,
-          modifiers: [],
-        },
-        {
-          kind: "PropertySignature",
-          name: "name",
-          type: {
-            kind: "StringKeyword",
-            typeName: "string",
-          },
-          optional: false,
-          modifiers: [],
-        },
-        {
-          kind: "PropertySignature",
-          name: "email",
-          type: {
-            kind: "StringKeyword",
-            typeName: "string",
-          },
-          optional: false,
-          modifiers: [],
-        },
-        {
-          kind: "PropertySignature",
-          name: "avatar",
-          type: {
-            kind: "StringKeyword",
-            typeName: "string",
-          },
-          optional: true,
-          modifiers: [],
-        },
-        {
-          kind: "PropertySignature",
-          name: "posts",
-          type: {
-            kind: "UndefinedKeyword",
-            typeName: "undefined",
-          },
-          optional: true,
-          modifiers: [],
-        },
-      ],
-    },
-  },
-];
+const entities: Entity[] = [];
 
 export class EntityAdapter implements DataSourceAdapter<Entity> {
   async findMany(args?: FindManyArgs<Entity>): Promise<Entity[]> {
@@ -149,8 +28,8 @@ export class EntityAdapter implements DataSourceAdapter<Entity> {
   }
 
   async create(args: CreationArgs<Entity>): Promise<Entity> {
-    const { name, ast } = args.data;
-    if (!name || !ast) {
+    const { name, schemas } = args.data;
+    if (!name || !schemas) {
       throw {
         status: 400,
         message: "name and ast are required",
@@ -159,18 +38,18 @@ export class EntityAdapter implements DataSourceAdapter<Entity> {
 
     entities.push({
       name,
-      ast,
+      schemas,
     });
 
     return {
       name,
-      ast,
+      schemas,
     };
   }
 
   async update(args: UpdateArgs<Entity>): Promise<Entity> {
-    const { name, ast } = args.data;
-    if (!name || !ast) {
+    const { name, schemas } = args.data;
+    if (!name || !schemas) {
       throw {
         status: 400,
         message: "name and ast are required",
@@ -183,7 +62,7 @@ export class EntityAdapter implements DataSourceAdapter<Entity> {
         message: "entity not found",
       };
     }
-    entity.ast = ast;
+    entity.schemas = schemas;
     return entity;
   }
 

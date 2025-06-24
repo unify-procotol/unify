@@ -74,7 +74,7 @@ export class PostEntity {
 Server setup remains the same - just register your adapters:
 
 ```typescript
-import { Unify } from "@unify/server";
+import { Unify } from "@unilab/server";
 import { UserAdapter } from "./adapters/user";
 import { PostAdapter } from "./adapters/post";
 
@@ -132,7 +132,7 @@ class PostAdapter implements DataSourceAdapter<PostEntity> {
 For `findOne` queries, relation callbacks receive the single entity:
 
 ```typescript
-import { repo, UnifyClient } from "@unify/client";
+import { repo, UnifyClient } from "@unilab/client";
 import { PostEntity, UserEntity } from "./entities";
 
 // Query a post with its author
@@ -260,7 +260,7 @@ const posts = await repo<PostEntity>("post", "post").findMany({
 Initialize the Unify client as usual:
 
 ```typescript
-import { UnifyClient } from "@unify/client";
+import { UnifyClient } from "@unilab/httply";
 
 UnifyClient.init({
   baseUrl: "http://localhost:3000",

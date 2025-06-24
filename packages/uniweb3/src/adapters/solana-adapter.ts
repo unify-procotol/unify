@@ -5,7 +5,7 @@ import type {
   FindManyArgs,
   FindOneArgs,
   UpdateArgs,
-} from "@unify/core";
+} from "@unilab/core";
 import type { WalletEntity } from "../entities/wallet";
 import { SolanaHandler } from "../handlers/solana";
 

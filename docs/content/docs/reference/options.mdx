@@ -1,9 +1,9 @@
 ---
 title: API Reference
-description: Complete API reference for Unify packages including @unify/core, @unify/server, and @unify/client.
+description: Complete API reference for Unify packages including @unilab/core, @unilab/server, and @unilab/client.
 ---
 
-# @unify/core
+# @unilab/core
 
 Core types and interfaces for the Unify framework.
 
@@ -27,7 +27,14 @@ interface FindManyArgs<T extends BaseEntity> {
   offset?: number;
   where?: Partial<T>;
   order_by?: Partial<Record<keyof T, "asc" | "desc">>;
+  include?: {
+    [key: string]: RelationCallbackMany<T, any>;
+  };
 }
+
+export type RelationCallbackMany<T extends BaseEntity, R extends BaseEntity> = (
+  entities: T[]
+) => Promise<R[]>;
 ```
 
 **Properties:**
@@ -35,6 +42,7 @@ interface FindManyArgs<T extends BaseEntity> {
 - `offset` - Number of records to skip
 - `where` - Filter conditions
 - `order_by` - Sort order specification
+- `include` - Include related entities
 
 ### FindOneArgs
 
@@ -112,8 +120,8 @@ Repository class for interacting with data sources.
 class Repository<T extends BaseEntity> {
   constructor(adapter: DataSourceAdapter<T>);
   
-  async findMany(args: FindManyArgs<T>): Promise<T[]>;
-  async findOne(args: FindOneArgs<T>): Promise<T | null>;
+  async findMany(args?: FindManyArgs<T>): Promise<T[]>;
+  async findOne(args?: FindOneArgs<T>): Promise<T | null>;
   async create(args: CreationArgs<T>): Promise<T>;
   async update(args: UpdateArgs<T>): Promise<T>;
   async delete(args: DeletionArgs<T>): Promise<boolean>;
@@ -144,7 +152,7 @@ function Repo<T extends BaseEntity>(
 ): Repository<T>
 ```
 
-# @unify/server
+# @unilab/server
 
 Server-side components for creating Unify API servers.
 
@@ -169,7 +177,7 @@ static init(config?: UnifyConfig): Hono
 
 **Example:**
 ```typescript
-import { Unify } from "@unify/server";
+import { Unify } from "@unilab/server";
 import { Hono } from "hono";
 
 // Use default app
@@ -195,8 +203,8 @@ static register(adapters: AdapterRegistration[]): Hono
 
 **Example:**
 ```typescript
-import { Unify } from "@unify/server";
-import { SolanaAdapter, EVMAdapter } from "@unify/uniweb3";
+import { Unify } from "@unilab/server";
+import { SolanaAdapter, EVMAdapter } from "@unilab/uniweb3";
 
 const server = Unify.register([
   { source: "solana", adapter: new SolanaAdapter() },
@@ -286,7 +294,7 @@ Validate that a required source parameter is provided.
 function validateSource(source: string | undefined, c: Context): Response | null
 ```
 
-# @unify/client
+# @unilab/httply
 
 Client-side components for consuming Unify APIs.
 
@@ -337,7 +345,7 @@ static init(config: ClientConfig): void
 
 **Example:**
 ```typescript
-import { UnifyClient } from "@unify/client";
+import { UnifyClient } from "@unilab/httply";
 
 UnifyClient.init({
   baseUrl: "http://localhost:3000",
@@ -361,8 +369,8 @@ static Repo<T extends BaseEntity>(
 
 **Example:**
 ```typescript
-import { UnifyClient } from "@unify/client";
-import { WalletEntity } from "@unify/uniweb3/entities";
+import { UnifyClient } from "@unilab/httply";
+import { WalletEntity } from "@unilab/uniweb3/entities";
 
 const walletRepo = UnifyClient.repo<WalletEntity>("wallet", "evm");
 ```
@@ -427,8 +435,8 @@ function Repo<T extends BaseEntity>(
 
 **Example:**
 ```typescript
-import { repo } from "@unify/client";
-import { WalletEntity } from "@unify/uniweb3/entities";
+import { repo } from "@unilab/httply";
+import { WalletEntity } from "@unilab/uniweb3/entities";
 
 // Initialize client first
 UnifyClient.init({ baseUrl: "http://localhost:3000" });
@@ -454,7 +462,7 @@ Find multiple records.
 - `offset` - Number of records to skip
 - `where` - JSON filter conditions
 - `order_by` - JSON sort specification
-- `select` - JSON array of fields to return
+- `include` - Include related entities
 
 **Example:**
 ```bash
@@ -468,7 +476,7 @@ Find a single record.
 **Query Parameters:**
 - `source` (required) - Data source identifier
 - `where` (required) - JSON filter conditions
-- `select` - JSON array of fields to return
+- `include` - Include related entities
 
 **Example:**
 ```bash
@@ -557,8 +565,8 @@ Common HTTP status codes:
 ### Basic Server Setup
 
 ```typescript
-import { Unify } from "@unify/server";
-import { SolanaAdapter, EVMAdapter } from "@unify/uniweb3";
+import { Unify } from "@unilab/server";
+import { SolanaAdapter, EVMAdapter } from "@unilab/uniweb3";
 
 // Register adapters and start server
 const server = Unify.register([
@@ -575,8 +583,8 @@ export default {
 ### Basic Client Usage
 
 ```typescript
-import { UnifyClient, repo } from "@unify/client";
-import { WalletEntity } from "@unify/uniweb3/entities";
+import { UnifyClient, repo } from "@unilab/httply";
+import { WalletEntity } from "@unilab/uniweb3/entities";
 
 // Initialize client
 UnifyClient.init({
@@ -595,7 +603,7 @@ console.log("Wallet balance:", wallet?.balance);
 ### Custom Adapter Implementation
 
 ```typescript
-import type { DataSourceAdapter, BaseEntity } from "@unify/core";
+import type { DataSourceAdapter, BaseEntity } from "@unilab/core";
 
 interface CustomEntity extends BaseEntity {
   id: string;

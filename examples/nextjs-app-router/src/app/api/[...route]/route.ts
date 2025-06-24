@@ -1,5 +1,5 @@
-import { Unify } from "@unify/server";
-import { SolanaAdapter, EVMAdapter } from "@unify/uniweb3";
+import { Unify } from "@unilab/server";
+import { SolanaAdapter, EVMAdapter } from "@unilab/uniweb3";
 import { Hono, Context } from "hono";
 
 export const runtime = "nodejs";

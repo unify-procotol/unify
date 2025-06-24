@@ -1,7 +1,9 @@
-import { repo, UnifyClient } from "@unify/client";
+import { repo, UnifyClient } from "@unilab/httply";
 import { Entity } from "./entities/entity";
-import { WalletEntity } from "@unify/uniweb3/entities";
-import { classToAST } from "./utils/ast-converter";
+import { validationMetadatasToSchemas } from "class-validator-jsonschema";
+
+export * from "./entities/user";
+export * from "./entities/post";
 
 UnifyClient.init({
   baseUrl: "http://localhost:3000",
@@ -9,10 +11,15 @@ UnifyClient.init({
 });
 
 const demo = async () => {
+  const { defaultMetadataStorage } = require("class-transformer/cjs/storage");
+  const schemas = validationMetadatasToSchemas({
+    classTransformerMetadataStorage: defaultMetadataStorage,
+  });
+
   await repo<Entity>("entity", "global").create({
     data: {
-      name: "WalletEntity",
-      ast: classToAST(WalletEntity),
+      name: "demo",
+      schemas: schemas,
     },
   });
 
