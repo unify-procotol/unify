@@ -364,7 +364,7 @@ static Repo<T extends BaseEntity>(
 import { UnifyClient } from "@unify/client";
 import { WalletEntity } from "@unify/uniweb3";
 
-const walletRepo = UnifyClient.Repo<WalletEntity>("wallet", "evm");
+const walletRepo = UnifyClient.repo<WalletEntity>("wallet", "evm");
 ```
 
 ## Configuration Interfaces
@@ -427,15 +427,15 @@ function Repo<T extends BaseEntity>(
 
 **Example:**
 ```typescript
-import { Repo } from "@unify/client";
+import { repo } from "@unify/client";
 import { WalletEntity } from "@unify/uniweb3";
 
 // Initialize client first
 UnifyClient.init({ baseUrl: "http://localhost:3000" });
 
 // Use the convenience function
-const walletRepo = Repo<WalletEntity>("wallet", "solana");
-const wallet = await walletRepo.findOne({
+const walletRepo = repo<WalletEntity>("wallet", "solana");
+const wallet = await walletrepo.findOne({
   where: { address: "11111111111111111111111111111112" }
 });
 ```
@@ -575,7 +575,7 @@ export default {
 ### Basic Client Usage
 
 ```typescript
-import { UnifyClient, Repo } from "@unify/client";
+import { UnifyClient, repo } from "@unify/client";
 import { WalletEntity } from "@unify/uniweb3";
 
 // Initialize client
@@ -585,7 +585,7 @@ UnifyClient.init({
 });
 
 // Query wallet balance
-const wallet = await Repo<WalletEntity>("wallet", "solana").findOne({
+const wallet = await repo<WalletEntity>("wallet", "solana").findOne({
   where: { address: "11111111111111111111111111111112" }
 });
 

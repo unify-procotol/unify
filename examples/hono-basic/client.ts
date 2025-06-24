@@ -1,4 +1,4 @@
-import { Repo, UnifyClient } from "@unify/client";
+import { repo, UnifyClient } from "@unify/client";
 import { UserEntity } from "./entities/user";
 import { PostEntity } from "./entities/post";
 
@@ -8,7 +8,7 @@ UnifyClient.init({
 });
 
 const fetchUser = async () => {
-  const data = await Repo<UserEntity>("user", "user").findMany({
+  const data = await repo<UserEntity>("user", "user").findMany({
     where: {
       id: "1",
       // email: "john.doe@example.com",
@@ -23,7 +23,7 @@ const fetchUser = async () => {
 fetchUser();
 
 const fetchPost = async () => {
-  const data = await Repo<PostEntity>("post", "post").findOne({
+  const data = await repo<PostEntity>("post", "post").findOne({
     where: {
       id: "2",
     },

@@ -11,6 +11,7 @@ import {
   registerAdapter,
   validateSource,
 } from "./utils";
+import { BaseEntity, DataSourceAdapter, Repository } from "@unify/core";
 
 export interface UnifyConfig {
   app?: Hono;
@@ -56,6 +57,19 @@ export class Unify {
     return this.app;
   }
 
+  static repo<T extends BaseEntity>({
+    source,
+    adapter,
+  }: {
+    source: string;
+    adapter: DataSourceAdapter<T>;
+  }): Repository<T> {
+    if (!adapterRegistry.has(source)) {
+      registerAdapter(source, () => adapter);
+    }
+    return new Repository<T>(adapter);
+  }
+
   // 静态设置路由方法
   private static setupRoutes() {
     // GET /{entity}/list - Find multiple records
@@ -73,9 +87,12 @@ export class Unify {
 
         if (result && result.length > 0 && params.include) {
           // 获取实体类名，首字母大写
-          const entityClassName = entity.charAt(0).toUpperCase() + entity.slice(1) + 'Entity';
+          const entityClassName =
+            entity.charAt(0).toUpperCase() + entity.slice(1) + "Entity";
           const enrichedResult = await Promise.all(
-            result.map(item => loadRelations(item, entityClassName, params.include))
+            result.map((item) =>
+              loadRelations(item, entityClassName, params.include)
+            )
           );
           return c.json({ data: enrichedResult, entity, source });
         }
@@ -107,8 +124,13 @@ export class Unify {
 
         if (result && params.include) {
           // 获取实体类名，首字母大写
-          const entityClassName = entity.charAt(0).toUpperCase() + entity.slice(1) + 'Entity';
-          const enrichedResult = await loadRelations(result, entityClassName, params.include);
+          const entityClassName =
+            entity.charAt(0).toUpperCase() + entity.slice(1) + "Entity";
+          const enrichedResult = await loadRelations(
+            result,
+            entityClassName,
+            params.include
+          );
           return c.json({ data: enrichedResult, entity, source });
         }
 

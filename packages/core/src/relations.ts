@@ -30,6 +30,9 @@ export class Relations {
         target: targetEntity,
         config,
       });
+
+      // 自动注册实体类到全局注册表
+      Relations.registerEntity(entityName, target.constructor);
     };
   }
 
@@ -58,6 +61,9 @@ export class Relations {
         target: targetEntity,
         foreignKey,
       });
+
+      // 自动注册实体类到全局注册表
+      Relations.registerEntity(entityName, target.constructor);
     };
   }
 
@@ -82,5 +88,16 @@ export class Relations {
     entityName: string
   ): Map<string, RelationMetadata> | undefined {
     return relationMetadataMap.get(entityName);
+  }
+
+  /**
+   * 注册实体类到全局注册表（内部使用）
+   * @param entityName 实体名称
+   * @param entityClass 实体类构造函数
+   */
+  private static registerEntity(entityName: string, entityClass: any) {
+    // 这里可以添加额外的实体注册逻辑
+    // 目前只是确保装饰器被正确执行
+    console.debug(`Entity ${entityName} registered with relations`);
   }
 }

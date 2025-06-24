@@ -1,6 +1,6 @@
 "use client";
 
-import { Repo, UnifyClient } from "@unify/client";
+import { repo, UnifyClient } from "@unify/client";
 import { WalletEntity } from "@unify/uniweb3";
 import { useEffect, useState } from "react";
 
@@ -19,7 +19,7 @@ export default function Home() {
 
     const fetchEvmBalance = async () => {
       try {
-        const data = await Repo<WalletEntity>("wallet", "evm").findOne({
+        const data = await repo<WalletEntity>("wallet", "evm").findOne({
           where: {
             address: "0x4f00D43b5aF0a0aAd62E9075D1bFa86a89CDb9aB",
             network: "iotex",
@@ -35,7 +35,7 @@ export default function Home() {
 
     const fetchSolanaBalance = async () => {
       try {
-        const data = await Repo<WalletEntity>("wallet", "solana").findOne({
+        const data = await repo<WalletEntity>("wallet", "solana").findOne({
           where: {
             address: "11111111111111111111111111111112",
           },

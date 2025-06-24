@@ -196,7 +196,7 @@ export class UnifyClient {
   }
 
   // 静态 Repo 方法
-  static Repo<T extends BaseEntity>(
+  static repo<T extends BaseEntity>(
     entityName: string,
     source: string
   ): Repository<T> {
@@ -207,10 +207,10 @@ export class UnifyClient {
   }
 }
 
-// 便捷的全局 Repo 函数（向后兼容）
-export function Repo<T extends BaseEntity>(
+// 便捷的全局 repo 函数（向后兼容）
+export function repo<T extends BaseEntity>(
   entityName: string,
   source: string
 ): Repository<T> {
-  return UnifyClient.Repo<T>(entityName, source);
+  return UnifyClient.repo<T>(entityName, source);
 }

@@ -7,10 +7,10 @@ export const adapterRegistry = new Map<string, () => DataSourceAdapter<any>>();
 
 // 注册适配器
 export function registerAdapter<T extends BaseEntity>(
-  name: string,
+  source: string,
   adapterFactory: () => DataSourceAdapter<T>
 ) {
-  adapterRegistry.set(name, adapterFactory);
+  adapterRegistry.set(source, adapterFactory);
 }
 
 // 获取适配器

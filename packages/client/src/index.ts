@@ -1,3 +1,3 @@
 export * from "./types";
 
-export { UnifyClient, Repo } from "./client";
+export { UnifyClient, repo } from "./client";

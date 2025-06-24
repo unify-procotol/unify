@@ -194,7 +194,7 @@ export default {
   fetch: app.fetch,
 };`;
 
-  const clientCode = `import { Repo, UnifyClient } from "@unify/client";
+  const clientCode = `import { repo, UnifyClient } from "@unify/client";
 import { WalletEntity } from "@unify/uniweb3";
 
 UnifyClient.init({
@@ -202,14 +202,14 @@ UnifyClient.init({
   timeout: 10000,
 });
 
-const evmBalanceRes = await Repo<WalletEntity>("wallet", "evm").findOne({
+const evmBalanceRes = await repo<WalletEntity>("wallet", "evm").findOne({
   where: {
     address: "0x...",
     network: "iotex",
   },
 });
 
-const solanaBalanceRes = await Repo<WalletEntity>("wallet", "solana").findOne({
+const solanaBalanceRes = await repo<WalletEntity>("wallet", "solana").findOne({
   where: {
     address: "11111111111111111111111111111112",
   },

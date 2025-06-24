@@ -1,7 +1,7 @@
 import { Relations } from "@unify/core";
 import { PostEntity } from "./post";
 
-class UserEntity {
+export class UserEntity {
   id = "";
   name = "";
   email = "";
@@ -14,5 +14,3 @@ class UserEntity {
   })
   posts?: PostEntity[];
 }
-
-export { UserEntity };
