@@ -96,13 +96,10 @@ To use relations, you need to register all related entities and their adapters:
 import { Unify } from "@unify/server";
 import { UserAdapter } from "./adapters/user";
 import { PostAdapter } from "./adapters/post";
-// Import entities to ensure decorators are registered
 import { UserEntity } from "./entities/user";
 import { PostEntity } from "./entities/post";
 
-// Create entity instances to trigger decorator registration
-new UserEntity();
-new PostEntity();
+EntityRegistry.register(UserEntity, PostEntity);
 
 const app = Unify.register([
   { source: "user", adapter: new UserAdapter() },
