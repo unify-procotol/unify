@@ -194,7 +194,7 @@ export default {
   fetch: app.fetch,
 };`;
 
-  const clientCode = `import { repo, UnifyClient } from "@unilab/client";
+  const clientCode = `import { repo, UnifyClient } from "@unilab/httply";
 import { WalletEntity } from "@unilab/uniweb3/entities";
 
 UnifyClient.init({
