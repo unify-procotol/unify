@@ -45,6 +45,8 @@ export class UnifyClient {
       });
     }
 
+    console.log(`Making ${method} request to:`, fullUrl.toString());
+
     // 准备请求配置
     const requestInit: RequestInit = {
       method,
@@ -84,6 +86,8 @@ export class UnifyClient {
         throw new Error(result.error);
       }
 
+      console.log(`Request to ${url} returned:`, result.data);
+
       // Return the data field from the response
       return result.data;
     } catch (error) {
@@ -109,13 +113,27 @@ export class UnifyClient {
               if (args.order_by) params.order_by = args.order_by;
               if (args.limit) params.limit = args.limit;
               if (args.offset) params.offset = args.offset;
-              if (args.include) params.include = args.include;
 
-              return this.request<T[]>({
+              // 不发送include到服务器，在客户端处理
+              const result = await this.request<T[]>({
                 method: "GET",
                 url: `/${entityName}/list`,
                 params,
               });
+
+              console.log("findMany result:", result);
+              console.log("args.include:", args.include);
+              console.log(
+                "include check:",
+                args.include && result && result.length > 0
+              );
+
+              // 如果有include回调函数，在客户端执行关联查询
+              if (args.include && result && result.length > 0) {
+                return await this.loadRelationsForMany(result, args.include);
+              }
+
+              return result;
             };
 
           case "findOne":
@@ -125,13 +143,23 @@ export class UnifyClient {
                 where: args.where,
               };
 
-              if (args.include) params.include = args.include;
-
-              return this.request<T | null>({
+              // 不发送include到服务器，在客户端处理
+              const result = await this.request<T | null>({
                 method: "GET",
                 url: `/${entityName}/find_one`,
                 params,
               });
+
+              console.log("findOne result:", result);
+              console.log("args.include:", args.include);
+              console.log("include check:", args.include && result);
+
+              // 如果有include回调函数，在客户端执行关联查询
+              if (args.include && result) {
+                return await this.loadRelations(result, args.include);
+              }
+
+              return result;
             };
 
           case "create":
@@ -175,6 +203,104 @@ export class UnifyClient {
         }
       },
     });
+  }
+
+  // 客户端关联数据加载 - 单个实体
+  private async loadRelations<T extends BaseEntity>(
+    entity: T,
+    include: { [key: string]: (entity: T) => Promise<any> }
+  ): Promise<T> {
+    console.log(
+      "loadRelations called for entity:",
+      entity,
+      "include:",
+      Object.keys(include)
+    );
+    const result = { ...entity } as any;
+
+    // 并行处理所有关联查询
+    const relationPromises = Object.entries(include).map(
+      async ([propertyKey, callback]) => {
+        try {
+          console.log(`Loading relation ${propertyKey} for entity:`, entity);
+          const relatedData = await callback(entity);
+          console.log(`Relation ${propertyKey} loaded:`, relatedData);
+          return { propertyKey, relatedData };
+        } catch (error) {
+          console.warn(`Failed to load relation ${propertyKey}:`, error);
+          return { propertyKey, relatedData: null };
+        }
+      }
+    );
+
+    // 等待所有关联查询完成
+    const relationResults = await Promise.all(relationPromises);
+
+    // 将结果合并到实体中
+    relationResults.forEach(({ propertyKey, relatedData }) => {
+      result[propertyKey] = relatedData;
+    });
+
+    console.log("loadRelations result:", result);
+    return result;
+  }
+
+  // 客户端关联数据加载 - 多个实体
+  private async loadRelationsForMany<T extends BaseEntity>(
+    entities: T[],
+    include: { [key: string]: (entities: T[]) => Promise<any> }
+  ): Promise<T[]> {
+    console.log(
+      "loadRelationsForMany called for entities:",
+      entities,
+      "include:",
+      Object.keys(include)
+    );
+    const results = [...entities] as any[];
+
+    // 并行处理所有关联查询
+    const relationPromises = Object.entries(include).map(
+      async ([propertyKey, callback]) => {
+        try {
+          console.log(
+            `Loading relation ${propertyKey} for entities:`,
+            entities
+          );
+          const relatedData = await callback(entities);
+          console.log(`Relation ${propertyKey} loaded:`, relatedData);
+          return { propertyKey, relatedData };
+        } catch (error) {
+          console.warn(`Failed to load relation ${propertyKey}:`, error);
+          return { propertyKey, relatedData: null };
+        }
+      }
+    );
+
+    // 等待所有关联查询完成
+    const relationResults = await Promise.all(relationPromises);
+
+    // 将结果分配到对应的实体中
+    relationResults.forEach(({ propertyKey, relatedData }) => {
+      if (Array.isArray(relatedData)) {
+        // 如果返回的是数组，需要根据外键分组
+        results.forEach((entity) => {
+          const entityId = entity.id;
+          // 根据关联逻辑匹配数据
+          entity[propertyKey] = relatedData.filter((item: any) => {
+            // 假设关联数据有userId字段指向主实体
+            return item.userId === entityId;
+          });
+        });
+      } else {
+        // 如果返回的不是数组，直接分配
+        results.forEach((entity) => {
+          entity[propertyKey] = relatedData;
+        });
+      }
+    });
+
+    console.log("loadRelationsForMany result:", results);
+    return results;
   }
 
   // 全局客户端实例

@@ -1,4 +1,3 @@
-import { Relations } from "@unify/core";
 import type { UserEntity } from "./user";
 
 export class PostEntity {
@@ -7,6 +6,5 @@ export class PostEntity {
   content = "";
   userId = "";
 
-  @Relations.toOne(() => require("./user").UserEntity, "userId")
   user?: UserEntity;
 }

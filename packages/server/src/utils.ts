@@ -1,6 +1,5 @@
 import type { Context } from "hono";
 import type { BaseEntity, DataSourceAdapter } from "@unify/core";
-import { Relations } from "@unify/core";
 
 // 适配器注册表
 export const adapterRegistry = new Map<string, () => DataSourceAdapter<any>>();
@@ -90,101 +89,104 @@ export interface AdapterRegistration {
   adapter: DataSourceAdapter<any>;
 }
 
-// 加载关系数据
+// 新的关联数据加载函数 - 支持回调函数
 export async function loadRelations<T extends BaseEntity>(
   entity: T,
-  entityName: string,
-  include?: { [key: string]: boolean }
+  include?: { [key: string]: (ids: string[] | string) => Promise<any> }
 ): Promise<T> {
   if (!include) {
     return entity;
   }
 
-  const relations = Relations.getAllRelationMetadata(entityName);
-  if (!relations) {
-    return entity;
-  }
-
   const result = { ...entity } as any;
 
-  for (const [propertyKey, shouldLoad] of Object.entries(include)) {
-    if (!shouldLoad) continue;
-
-    const relationMetadata = relations.get(propertyKey);
-    if (!relationMetadata) continue;
-
-    try {
-      if (relationMetadata.type === "toOne") {
-        // 处理一对一关系
-        const foreignKey = relationMetadata.foreignKey;
-
-        if (
-          foreignKey &&
-          typeof foreignKey === "string" &&
-          (entity as any)[foreignKey]
-        ) {
-          // 尝试从不同的适配器获取关联数据
-          const relatedEntityName = getEntityNameFromTarget(
-            relationMetadata.target
-          );
-          const adapter = tryGetAdapter(relatedEntityName);
-
-          if (adapter) {
-            const foreignKeyValue = (entity as any)[foreignKey];
-            const whereCondition = { id: foreignKeyValue };
-
-            const relatedEntity = await adapter.findOne({
-              where: whereCondition,
-            });
-
-            result[propertyKey] = relatedEntity;
-          }
+  // 并行处理所有关联查询
+  const relationPromises = Object.entries(include).map(
+    async ([propertyKey, callback]) => {
+      try {
+        // 根据实体的id字段调用回调函数
+        const entityId = (entity as any).id;
+        if (entityId) {
+          const relatedData = await callback(entityId);
+          return { propertyKey, relatedData };
         }
-      } else if (relationMetadata.type === "toMany") {
-        // 处理一对多关系
-        const config = relationMetadata.config;
-        if (config?.fields) {
-          const relatedEntityName = getEntityNameFromTarget(
-            relationMetadata.target
-          );
-          const adapter = tryGetAdapter(relatedEntityName);
-          if (adapter) {
-            // 构建查询条件
-            const whereCondition: any = {};
-            for (const [localField, foreignField] of Object.entries(
-              config.fields
-            )) {
-              if ((entity as any)[localField]) {
-                whereCondition[foreignField] = (entity as any)[localField];
-              }
-            }
-
-            const findManyArgs: any = { where: whereCondition };
-            if (config.findOptions) {
-              if (config.findOptions.limit)
-                findManyArgs.limit = config.findOptions.limit;
-              if (config.findOptions.orderBy)
-                findManyArgs.order_by = config.findOptions.orderBy;
-              if (config.findOptions.where) {
-                findManyArgs.where = {
-                  ...findManyArgs.where,
-                  ...config.findOptions.where,
-                };
-              }
-            }
-
-            const relatedEntities = await adapter.findMany(findManyArgs);
-            result[propertyKey] = relatedEntities;
-          }
-        }
+      } catch (error) {
+        console.warn(`Failed to load relation ${propertyKey}:`, error);
+        return { propertyKey, relatedData: null };
       }
-    } catch (error) {
-      console.warn(`Failed to load relation ${propertyKey}:`, error);
-      // 继续处理其他关系，不因为一个关系失败而中断
+      return { propertyKey, relatedData: null };
     }
-  }
+  );
+
+  // 等待所有关联查询完成
+  const relationResults = await Promise.all(relationPromises);
+
+  // 将结果合并到实体中
+  relationResults.forEach(({ propertyKey, relatedData }) => {
+    result[propertyKey] = relatedData;
+  });
 
   return result;
+}
+
+// 批量加载关联数据 - 用于findMany操作
+export async function loadRelationsForMany<T extends BaseEntity>(
+  entities: T[],
+  include?: { [key: string]: (ids: string[] | string) => Promise<any> }
+): Promise<T[]> {
+  if (!include || entities.length === 0) {
+    return entities;
+  }
+
+  const results = [...entities] as any[];
+
+  // 并行处理所有关联查询
+  const relationPromises = Object.entries(include).map(
+    async ([propertyKey, callback]) => {
+      try {
+        // 收集所有id
+        const ids = entities.map((entity: any) => entity.id).filter(Boolean);
+        if (ids.length > 0) {
+          const relatedData = await callback(ids);
+          return { propertyKey, relatedData };
+        }
+      } catch (error) {
+        console.warn(`Failed to load relation ${propertyKey}:`, error);
+        return { propertyKey, relatedData: null };
+      }
+      return { propertyKey, relatedData: null };
+    }
+  );
+
+  // 等待所有关联查询完成
+  const relationResults = await Promise.all(relationPromises);
+
+  // 将结果分配到对应的实体中
+  relationResults.forEach(({ propertyKey, relatedData }) => {
+    if (Array.isArray(relatedData)) {
+      // 如果返回的是数组，需要根据外键分组
+      results.forEach((entity, index) => {
+        const entityId = entity.id;
+        // 这里需要根据具体的关联逻辑来匹配数据
+        // 对于一对多关系，relatedData应该是按userId分组的
+        if (Array.isArray(relatedData)) {
+          entity[propertyKey] = relatedData.filter((item: any) => {
+            // 假设关联数据有userId字段指向主实体
+            return item.userId === entityId;
+          });
+        } else {
+          entity[propertyKey] = relatedData;
+        }
+      });
+    } else {
+      // 如果返回的不是数组，直接分配
+      results.forEach((entity) => {
+        entity[propertyKey] = relatedData;
+      });
+    }
+  });
+
+  return results;
 }
 
 // 从目标函数获取实体名称

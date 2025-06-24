@@ -14,10 +14,19 @@ const fetchUser = async () => {
       // email: "john.doe@example.com",
     },
     include: {
-      posts: true,
+      posts: (userList) => {
+        const ids = userList.map((user) => user.id);
+        return repo<PostEntity>("post", "post").findMany({
+          where: {
+            userId: {
+              $in: ids,
+            },
+          },
+        });
+      },
     },
   });
-  console.log("fetchUser===>", data);
+  console.log("fetchUser===>", JSON.stringify(data, null, 2));
 };
 
 fetchUser();
@@ -28,10 +37,17 @@ const fetchPost = async () => {
       id: "2",
     },
     include: {
-      user: true,
+      user: (post) => {
+        const userId = post.userId;
+        return repo<UserEntity>("user", "user").findOne({
+          where: {
+            id: userId,
+          },
+        });
+      },
     },
   });
-  console.log("fetchPost===>", data);
+  console.log("fetchPost===>", JSON.stringify(data, null, 2));
 };
 
 fetchPost();
