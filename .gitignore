@@ -63,3 +63,4 @@ temp/
 
 # Testing
 .vitest/ 
+.next/

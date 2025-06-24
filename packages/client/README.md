@@ -2,6 +2,23 @@
 
 Type-safe HTTP client for Unify API that automatically maps entity methods to REST endpoints using Proxy.
 
+## 🎨 Unify Studio
+
+**new feature** now includes a visual database browser like Prisma Studio:
+
+```bash
+# start Unify Studio
+npx unify-studio
+```
+
+Studio provides:
+- 🔍 view all entities and adapters
+- 📊 browse and display data tables  
+- 🎨 modern UI interface
+- ⚡ real-time data loading
+
+Detailed information please refer to [Studio documentation](./studio/README.md).
+
 ## Installation
 
 ```bash
