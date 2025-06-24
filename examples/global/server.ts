@@ -1,4 +1,4 @@
-import { Unify } from "@unify/server";
+import { Unify } from "@unilab/server";
 import { EntityAdapter } from "./adapters/entity";
 
 const app = Unify.register([

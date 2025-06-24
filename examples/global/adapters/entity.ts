@@ -5,7 +5,7 @@ import {
   FindManyArgs,
   FindOneArgs,
   UpdateArgs,
-} from "@unify/core";
+} from "@unilab/core";
 import { Entity } from "../entities/entity";
 
 const entities: Entity[] = [];

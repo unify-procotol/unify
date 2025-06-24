@@ -1,7 +1,7 @@
 {
   "name": "global-example",
   "version": "1.0.0",
-  "description": "Global example using @unify/server and @unify/client",
+  "description": "Global example using @unilab/server and @unilab/client",
   "main": "server.ts",
   "scripts": {
     "dev": "bun run server.ts",
@@ -10,9 +10,9 @@
   },
   "dependencies": {
     "@hono/node-server": "^1.12.2",
-    "@unify/client": "workspace:*",
-    "@unify/core": "workspace:*",
-    "@unify/server": "workspace:*",
+    "@unilab/httply": "workspace:*",
+    "@unilab/core": "workspace:*",
+    "@unilab/server": "workspace:*",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.2",
     "class-validator-jsonschema": "^5.0.2",
@@ -24,7 +24,7 @@
   },
   "keywords": [
     "hono",
-    "unify",
+    "unilab",
     "api",
     "example"
   ],

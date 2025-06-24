@@ -12,8 +12,8 @@ Unify provides built-in Web3 support for blockchain operations. Here's how to ge
 Create a `server.ts` file to set up your API server with Web3 adapters:
 
 ```typescript
-import { Unify } from "@unify/server";
-import { SolanaAdapter, EVMAdapter } from "@unify/uniweb3";
+import { Unify } from "@unilab/server";
+import { SolanaAdapter, EVMAdapter } from "@unilab/uniweb3";
 
 // Register Web3 adapters
 const server = Unify.register([
@@ -41,8 +41,8 @@ export default {
 Create a `client.ts` file to consume your API:
 
 ```typescript
-import { repo, UnifyClient } from "@unify/client";
-import { WalletEntity } from "@unify/uniweb3/entities";
+import { repo, UnifyClient } from "@unilab/client";
+import { WalletEntity } from "@unilab/uniweb3/entities";
 
 // Initialize the client
 UnifyClient.init({

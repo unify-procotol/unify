@@ -1,4 +1,4 @@
-import { repo, UnifyClient } from "@unify/client";
+import { repo, UnifyClient } from "@unilab/httply";
 import { Entity } from "./entities/entity";
 import { validationMetadatasToSchemas } from "class-validator-jsonschema";
 

@@ -1,9 +1,9 @@
 ---
 title: API Reference
-description: Complete API reference for Unify packages including @unify/core, @unify/server, and @unify/client.
+description: Complete API reference for Unify packages including @unilab/core, @unilab/server, and @unilab/client.
 ---
 
-# @unify/core
+# @unilab/core
 
 Core types and interfaces for the Unify framework.
 
@@ -144,7 +144,7 @@ function Repo<T extends BaseEntity>(
 ): Repository<T>
 ```
 
-# @unify/server
+# @unilab/server
 
 Server-side components for creating Unify API servers.
 
@@ -169,7 +169,7 @@ static init(config?: UnifyConfig): Hono
 
 **Example:**
 ```typescript
-import { Unify } from "@unify/server";
+import { Unify } from "@unilab/server";
 import { Hono } from "hono";
 
 // Use default app
@@ -195,8 +195,8 @@ static register(adapters: AdapterRegistration[]): Hono
 
 **Example:**
 ```typescript
-import { Unify } from "@unify/server";
-import { SolanaAdapter, EVMAdapter } from "@unify/uniweb3";
+import { Unify } from "@unilab/server";
+import { SolanaAdapter, EVMAdapter } from "@unilab/uniweb3";
 
 const server = Unify.register([
   { source: "solana", adapter: new SolanaAdapter() },
@@ -286,7 +286,7 @@ Validate that a required source parameter is provided.
 function validateSource(source: string | undefined, c: Context): Response | null
 ```
 
-# @unify/client
+# @unilab/client
 
 Client-side components for consuming Unify APIs.
 
@@ -337,7 +337,7 @@ static init(config: ClientConfig): void
 
 **Example:**
 ```typescript
-import { UnifyClient } from "@unify/client";
+import { UnifyClient } from "@unilab/client";
 
 UnifyClient.init({
   baseUrl: "http://localhost:3000",
@@ -361,8 +361,8 @@ static Repo<T extends BaseEntity>(
 
 **Example:**
 ```typescript
-import { UnifyClient } from "@unify/client";
-import { WalletEntity } from "@unify/uniweb3/entities";
+import { UnifyClient } from "@unilab/client";
+import { WalletEntity } from "@unilab/uniweb3/entities";
 
 const walletRepo = UnifyClient.repo<WalletEntity>("wallet", "evm");
 ```
@@ -427,8 +427,8 @@ function Repo<T extends BaseEntity>(
 
 **Example:**
 ```typescript
-import { repo } from "@unify/client";
-import { WalletEntity } from "@unify/uniweb3/entities";
+import { repo } from "@unilab/client";
+import { WalletEntity } from "@unilab/uniweb3/entities";
 
 // Initialize client first
 UnifyClient.init({ baseUrl: "http://localhost:3000" });
@@ -557,8 +557,8 @@ Common HTTP status codes:
 ### Basic Server Setup
 
 ```typescript
-import { Unify } from "@unify/server";
-import { SolanaAdapter, EVMAdapter } from "@unify/uniweb3";
+import { Unify } from "@unilab/server";
+import { SolanaAdapter, EVMAdapter } from "@unilab/uniweb3";
 
 // Register adapters and start server
 const server = Unify.register([
@@ -575,8 +575,8 @@ export default {
 ### Basic Client Usage
 
 ```typescript
-import { UnifyClient, repo } from "@unify/client";
-import { WalletEntity } from "@unify/uniweb3/entities";
+import { UnifyClient, repo } from "@unilab/client";
+import { WalletEntity } from "@unilab/uniweb3/entities";
 
 // Initialize client
 UnifyClient.init({
@@ -595,7 +595,7 @@ console.log("Wallet balance:", wallet?.balance);
 ### Custom Adapter Implementation
 
 ```typescript
-import type { DataSourceAdapter, BaseEntity } from "@unify/core";
+import type { DataSourceAdapter, BaseEntity } from "@unilab/core";
 
 interface CustomEntity extends BaseEntity {
   id: string;

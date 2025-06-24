@@ -1,6 +1,6 @@
 {
-  "name": "@unify/core",
-  "version": "0.0.3",
+  "name": "@unilab/core",
+  "version": "0.0.1",
   "description": "Core types and utilities for the Unify framework",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

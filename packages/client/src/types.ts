@@ -1,19 +1,13 @@
+import type { DataSourceAdapter, BaseEntity } from "@unilab/core";
+
 export interface ClientConfig {
-  baseUrl: string;
-  timeout?: number;
-  headers?: Record<string, string>;
+  enableDebug?: boolean;
+  namespace?: string;
 }
 
-export interface HttpRequestOptions {
-  method: "GET" | "POST" | "PATCH" | "DELETE";
-  url: string;
-  params?: Record<string, any>;
-  data?: any;
-  headers?: Record<string, string>;
+export interface AdapterRegistration<T extends BaseEntity = BaseEntity> {
+  source: string;
+  adapter: DataSourceAdapter<T>;
 }
 
-export interface ApiResponse<T = any> {
-  data: T;
-  success: boolean;
-  message?: string;
-} 
+export type AdapterRegistry = Map<string, DataSourceAdapter<BaseEntity>>;

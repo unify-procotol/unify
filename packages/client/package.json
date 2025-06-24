@@ -1,7 +1,7 @@
 {
-  "name": "@unify/client",
-  "version": "0.0.3",
-  "description": "Type-safe client library for Unify",
+  "name": "@unilab/client",
+  "version": "0.0.1",
+  "description": "Lightweight browser-only client library for Unify without HTTP functionality",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
@@ -14,14 +14,14 @@
     "api",
     "client",
     "typescript",
-    "rest",
-    "type-safe"
+    "browser",
+    "type-safe",
+    "lightweight"
   ],
   "author": "osdodo",
   "license": "MIT",
   "dependencies": {
-    "@unify/core": "workspace:*",
-    "zod": "^3.25.57"
+    "@unilab/core": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5.3.0"
@@ -33,5 +33,6 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/iotexproject/unify.git"
-  }
+  },
+  "browser": true
 }

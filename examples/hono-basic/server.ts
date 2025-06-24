@@ -1,4 +1,4 @@
-import { Unify } from "@unify/server";
+import { Unify } from "@unilab/server";
 import { UserAdapter } from "./adapters/user";
 import { PostAdapter } from "./adapters/post";
 
