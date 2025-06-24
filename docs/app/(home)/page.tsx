@@ -195,7 +195,7 @@ export default {
 };`;
 
   const clientCode = `import { repo, UnifyClient } from "@unify/client";
-import { WalletEntity } from "@unify/uniweb3";
+import { WalletEntity } from "@unify/uniweb3/entities";
 
 UnifyClient.init({
   baseUrl: "http://localhost:3000",

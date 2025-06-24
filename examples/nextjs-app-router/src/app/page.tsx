@@ -1,7 +1,7 @@
 "use client";
 
 import { repo, UnifyClient } from "@unify/client";
-import { WalletEntity } from "@unify/uniweb3";
+import { WalletEntity } from "@unify/uniweb3/entities";
 import { useEffect, useState } from "react";
 
 export default function Home() {

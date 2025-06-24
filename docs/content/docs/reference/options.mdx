@@ -362,7 +362,7 @@ static Repo<T extends BaseEntity>(
 **Example:**
 ```typescript
 import { UnifyClient } from "@unify/client";
-import { WalletEntity } from "@unify/uniweb3";
+import { WalletEntity } from "@unify/uniweb3/entities";
 
 const walletRepo = UnifyClient.repo<WalletEntity>("wallet", "evm");
 ```
@@ -428,7 +428,7 @@ function Repo<T extends BaseEntity>(
 **Example:**
 ```typescript
 import { repo } from "@unify/client";
-import { WalletEntity } from "@unify/uniweb3";
+import { WalletEntity } from "@unify/uniweb3/entities";
 
 // Initialize client first
 UnifyClient.init({ baseUrl: "http://localhost:3000" });
@@ -576,7 +576,7 @@ export default {
 
 ```typescript
 import { UnifyClient, repo } from "@unify/client";
-import { WalletEntity } from "@unify/uniweb3";
+import { WalletEntity } from "@unify/uniweb3/entities";
 
 // Initialize client
 UnifyClient.init({
