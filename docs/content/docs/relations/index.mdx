@@ -1,0 +1,331 @@
+---
+title: Relations
+description: Learn how to use callback-based relation queries in Unify to create connected data models
+---
+
+# Relations
+
+Relations in Unify allow you to define connections between different entities using flexible callback functions. This approach enables you to query related data in a single request with complete control over the relation logic.
+
+## Overview
+
+Unify supports flexible relation queries through callback functions:
+- **One-to-Many Relations**: Load multiple related entities for each main entity
+- **One-to-One Relations**: Load a single related entity for each main entity
+- **Custom Logic**: Define complex relation logic based on any entity properties
+
+## Key Concepts
+
+### Callback-Based Relations
+
+Instead of pre-defining relations with decorators, you define relation logic at query time using callback functions:
+
+- For `findOne` queries: callbacks receive the single entity as parameter
+- For `findMany` queries: callbacks receive an array of entities as parameter
+
+### Type Safety
+
+The relation callbacks are fully type-safe and automatically inferred based on the query type:
+
+```typescript
+// findOne - callback receives single entity
+include: {
+  user: (post: PostEntity) => Promise<UserEntity | null>
+}
+
+// findMany - callback receives entity array  
+include: {
+  posts: (users: UserEntity[]) => Promise<PostEntity[]>
+}
+```
+
+## Entity Definition
+
+Entities no longer need relation decorators. Simply define your entity classes:
+
+**user.ts**
+```typescript
+export class UserEntity {
+  id = "";
+  name = "";
+  email = "";
+  avatar = "";
+  
+  // Relations are handled via callback functions in queries
+  posts?: PostEntity[];
+}
+```
+
+**post.ts**
+```typescript
+export class PostEntity {
+  id = "";
+  title = "";
+  content = "";
+  userId = "";
+  
+  // Relations are handled via callback functions in queries
+  user?: UserEntity;
+}
+```
+
+## Server Setup
+
+Server setup remains the same - just register your adapters:
+
+```typescript
+import { Unify } from "@unify/server";
+import { UserAdapter } from "./adapters/user";
+import { PostAdapter } from "./adapters/post";
+
+const app = Unify.register([
+  { source: "user", adapter: new UserAdapter() },
+  { source: "post", adapter: new PostAdapter() },
+]);
+
+export default {
+  port: 3000,
+  fetch: app.fetch,
+};
+```
+
+## Adapter Implementation
+
+Your adapters need to support query operators like `$in` for efficient relation queries:
+
+```typescript
+class PostAdapter implements DataSourceAdapter<PostEntity> {
+  async findMany(args?: FindManyArgs<PostEntity>): Promise<PostEntity[]> {
+    const where = args?.where || {};
+    
+    // Support $in operator for relation queries
+    if (where.userId) {
+      if (typeof where.userId === 'object') {
+        if (where.userId.$in) {
+          return postData.filter((post) => 
+            where.userId.$in.includes(post.userId)
+          );
+        }
+        if (where.userId.$eq) {
+          return postData.filter((post) => 
+            post.userId === where.userId.$eq
+          );
+        }
+      } else {
+        return postData.filter((post) => 
+          post.userId === where.userId
+        );
+      }
+    }
+    
+    return postData;
+  }
+  
+  // ... other methods
+}
+```
+
+## Querying Relations
+
+### One-to-One Relations (findOne)
+
+For `findOne` queries, relation callbacks receive the single entity:
+
+```typescript
+import { repo, UnifyClient } from "@unify/client";
+import { PostEntity, UserEntity } from "./entities";
+
+// Query a post with its author
+const post = await repo<PostEntity>("post", "post").findOne({
+  where: { id: "2" },
+  include: {
+    user: (post) => {
+      // Access any property of the post entity
+      const userId = post.userId;
+      return repo<UserEntity>("user", "user").findOne({
+        where: { id: userId },
+      });
+    },
+  },
+});
+
+console.log("Post with author:", post);
+```
+
+### One-to-Many Relations (findMany)
+
+For `findMany` queries, relation callbacks receive an array of entities:
+
+```typescript
+// Query users with their posts
+const users = await repo<UserEntity>("user", "user").findMany({
+  where: { id: "1" },
+  include: {
+    posts: (userList) => {
+      // Extract IDs from the user list
+      const ids = userList.map((user) => user.id);
+      return repo<PostEntity>("post", "post").findMany({
+        where: {
+          userId: { $in: ids },
+        },
+      });
+    },
+  },
+});
+
+console.log("Users with posts:", users);
+```
+
+### Complex Relation Logic
+
+You can implement complex relation logic based on any entity properties:
+
+```typescript
+// Load posts based on user's email domain
+const users = await repo<UserEntity>("user", "user").findMany({
+  include: {
+    posts: (userList) => {
+      // Filter users by email domain
+      const adminUsers = userList.filter(user => 
+        user.email.endsWith('@admin.com')
+      );
+      const adminIds = adminUsers.map(user => user.id);
+      
+      return repo<PostEntity>("post", "post").findMany({
+        where: {
+          userId: { $in: adminIds },
+          status: "published", // Additional filtering
+        },
+      });
+    },
+  },
+});
+```
+
+## Advanced Examples
+
+### Conditional Relations
+
+```typescript
+// Load different relations based on entity properties
+const posts = await repo<PostEntity>("post", "post").findMany({
+  include: {
+    author: (postList) => {
+      // Only load authors for published posts
+      const publishedPosts = postList.filter(post => 
+        post.status === 'published'
+      );
+      const authorIds = publishedPosts.map(post => post.authorId);
+      
+      return repo<UserEntity>("user", "user").findMany({
+        where: { id: { $in: authorIds } },
+      });
+    },
+  },
+});
+```
+
+### Nested Relations
+
+```typescript
+// Load posts with their authors and comments
+const posts = await repo<PostEntity>("post", "post").findMany({
+  include: {
+    author: (postList) => {
+      const authorIds = postList.map(post => post.authorId);
+      return repo<UserEntity>("user", "user").findMany({
+        where: { id: { $in: authorIds } },
+        include: {
+          profile: (users) => {
+            const userIds = users.map(user => user.id);
+            return repo<ProfileEntity>("profile", "profile").findMany({
+              where: { userId: { $in: userIds } },
+            });
+          },
+        },
+      });
+    },
+    comments: (postList) => {
+      const postIds = postList.map(post => post.id);
+      return repo<CommentEntity>("comment", "comment").findMany({
+        where: { postId: { $in: postIds } },
+      });
+    },
+  },
+});
+```
+
+## Client Setup
+
+Initialize the Unify client as usual:
+
+```typescript
+import { UnifyClient } from "@unify/client";
+
+UnifyClient.init({
+  baseUrl: "http://localhost:3000",
+  timeout: 10000,
+});
+```
+
+## Best Practices
+
+1. **Efficient Queries**: Use `$in` operator for batch loading related entities
+2. **Type Safety**: Let TypeScript infer callback parameter types
+3. **Flexible Logic**: Leverage full entity data for complex relation logic
+4. **Performance**: Consider using parallel queries for independent relations
+5. **Error Handling**: Wrap relation callbacks in try-catch blocks for robustness
+
+## Key Features
+
+- 🎯 **Flexible Relations**: Define relation logic at query time
+- 🚀 **Type Safe**: Full TypeScript support with automatic type inference
+- 📊 **Efficient**: Client-side parallel relation loading
+- 🔧 **Simple**: No decorators or pre-configuration needed
+- 💪 **Powerful**: Access to full entity data in relation callbacks
+
+## Migration from Decorator-Based Relations
+
+If you're migrating from the old decorator-based system:
+
+### Before (Deprecated)
+```typescript
+class UserEntity {
+  @Relations.toMany(() => PostEntity, {
+    fields: { id: "userId" }
+  })
+  posts?: PostEntity[];
+}
+
+// Usage
+const users = await repo.findMany({
+  include: { posts: true }
+});
+```
+
+### After (New Approach)
+```typescript
+class UserEntity {
+  id = "";
+  // No decorators needed
+  posts?: PostEntity[];
+}
+
+// Usage
+const users = await repo.findMany({
+  include: {
+    posts: (userList) => {
+      const ids = userList.map(user => user.id);
+      return repo<PostEntity>("post", "post").findMany({
+        where: { userId: { $in: ids } }
+      });
+    }
+  }
+});
+```
+
+## Next Steps
+
+- Explore [Basic Usage](/docs/basic-usage) for general Unify concepts
+- Learn about [Framework Integrations](/docs/integrations) for frontend usage
+- Check out the [complete example](https://github.com/your-repo/unify/tree/main/examples/hono-basic) in the repository

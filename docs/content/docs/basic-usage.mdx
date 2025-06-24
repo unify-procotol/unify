@@ -41,8 +41,8 @@ export default {
 Create a `client.ts` file to consume your API:
 
 ```typescript
-import { Repo, UnifyClient } from "@unify/client";
-import { WalletEntity } from "@unify/uniweb3";
+import { repo, UnifyClient } from "@unify/client";
+import { WalletEntity } from "@unify/uniweb3/entities";
 
 // Initialize the client
 UnifyClient.init({
@@ -53,7 +53,7 @@ UnifyClient.init({
 async function demo() {
   try {
     // Query EVM wallet balance
-    const evmWallet = await Repo<WalletEntity>("wallet", "evm").findOne({
+    const evmWallet = await repo<WalletEntity>("wallet", "evm").findOne({
       where: {
         address: "0x4f00D43b5aF0a0aAd62E9075D1bFa86a89CDb9aB",
         network: "iotex",
@@ -62,7 +62,7 @@ async function demo() {
     console.log("EVM Wallet:", evmWallet);
 
     // Query Solana wallet balance
-    const solanaWallet = await Repo<WalletEntity>("wallet", "solana").findOne({
+    const solanaWallet = await repo<WalletEntity>("wallet", "solana").findOne({
       where: {
         address: "11111111111111111111111111111112",
       },

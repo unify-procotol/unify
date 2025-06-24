@@ -23,27 +23,32 @@ export class EVMAdapter implements DataSourceAdapter<WalletEntity> {
 
   async findOne(args: FindOneArgs<WalletEntity>): Promise<WalletEntity | null> {
     const { address, network } = args.where;
-    if (!address || !network) {
+
+    // 提取实际的字符串值（处理 QueryOperators）
+    const addressValue = typeof address === "string" ? address : address?.$eq;
+    const networkValue = typeof network === "string" ? network : network?.$eq;
+
+    if (!addressValue || !networkValue) {
       throw {
         status: 400,
         message: "Invalid arguments",
       };
     }
 
-    const handler = evmHandlers[network as EVMNetwork];
+    const handler = evmHandlers[networkValue as EVMNetwork];
     if (!handler) {
       throw {
         status: 400,
-        message: `Unsupported network: ${network}. Supported networks: ${Object.keys(
+        message: `Unsupported network: ${networkValue}. Supported networks: ${Object.keys(
           evmHandlers
         ).join(", ")}`,
       };
     }
-    const balance = await handler.getBalance(address);
+    const balance = await handler.getBalance(addressValue);
     return {
-      address: address,
+      address: addressValue,
       balance: balance.toString(),
-      network: network,
+      network: networkValue,
       token: {
         symbol: handler.symbol,
         decimals: 18,

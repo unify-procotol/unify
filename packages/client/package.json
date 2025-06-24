@@ -1,6 +1,6 @@
 {
   "name": "@unify/client",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "description": "Type-safe client library for Unify",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

@@ -4,6 +4,10 @@
   "description": "Unified source plugins for blockchain data",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js",
+    "./entities": "./dist/entities/index.js"
+  },
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch"

@@ -1,37 +1,53 @@
-import { Repo, UnifyClient } from "@unify/client";
-import { WalletEntity } from "@unify/uniweb3";
+import { repo, UnifyClient } from "@unify/client";
+import { UserEntity } from "./entities/user";
+import { PostEntity } from "./entities/post";
 
 UnifyClient.init({
   baseUrl: "http://localhost:3000",
   timeout: 10000,
 });
 
-const fetchEvmBalance = async () => {
-  try {
-    const data = await Repo<WalletEntity>("wallet", "evm").findOne({
-      where: {
-        address: "0x4f00D43b5aF0a0aAd62E9075D1bFa86a89CDb9aB",
-        network: "iotex",
+const fetchUser = async () => {
+  const data = await repo<UserEntity>("user", "user").findMany({
+    where: {
+      id: "1",
+      // email: "john.doe@example.com",
+    },
+    include: {
+      posts: (userList) => {
+        const ids = userList.map((user) => user.id);
+        return repo<PostEntity>("post", "post").findMany({
+          where: {
+            userId: {
+              $in: ids,
+            },
+          },
+        });
       },
-    });
-    console.log("fetchEvmBalance===>", data);
-  } catch (error) {
-    console.error(error);
-  }
+    },
+  });
+  console.log("fetchUser===>", JSON.stringify(data, null, 2));
 };
 
-const fetchSolanaBalance = async () => {
-  try {
-    const data = await Repo<WalletEntity>("wallet", "solana").findOne({
-      where: {
-        address: "11111111111111111111111111111112",
+fetchUser();
+
+const fetchPost = async () => {
+  const data = await repo<PostEntity>("post", "post").findOne({
+    where: {
+      id: "2",
+    },
+    include: {
+      user: (post) => {
+        const userId = post.userId;
+        return repo<UserEntity>("user", "user").findOne({
+          where: {
+            id: userId,
+          },
+        });
       },
-    });
-    console.log("fetchSolanaBalance===>", data);
-  } catch (error) {
-    console.error(error);
-  }
+    },
+  });
+  console.log("fetchPost===>", JSON.stringify(data, null, 2));
 };
 
-fetchEvmBalance();
-fetchSolanaBalance();
+fetchPost();

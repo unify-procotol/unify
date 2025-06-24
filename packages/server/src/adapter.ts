@@ -6,10 +6,12 @@ import {
   adapterRegistry,
   getAdapter,
   handleError,
+  loadRelations,
   parseQueryParams,
   registerAdapter,
   validateSource,
 } from "./utils";
+import { BaseEntity, DataSourceAdapter, Repository } from "@unify/core";
 
 export interface UnifyConfig {
   app?: Hono;
@@ -53,6 +55,19 @@ export class Unify {
     );
 
     return this.app;
+  }
+
+  static repo<T extends BaseEntity>({
+    source,
+    adapter,
+  }: {
+    source: string;
+    adapter: DataSourceAdapter<T>;
+  }): Repository<T> {
+    if (!adapterRegistry.has(source)) {
+      registerAdapter(source, () => adapter);
+    }
+    return new Repository<T>(adapter);
   }
 
   // 静态设置路由方法

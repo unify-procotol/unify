@@ -33,7 +33,6 @@ interface FindManyArgs<T extends BaseEntity> {
 **Properties:**
 - `limit` - Maximum number of records to return
 - `offset` - Number of records to skip
-- `select` - Array of fields to select
 - `where` - Filter conditions
 - `order_by` - Sort order specification
 
@@ -49,7 +48,6 @@ interface FindOneArgs<T extends BaseEntity> {
 
 **Properties:**
 - `where` - Filter conditions (required)
-- `select` - Array of fields to select
 
 ### CreationArgs
 
@@ -364,9 +362,9 @@ static Repo<T extends BaseEntity>(
 **Example:**
 ```typescript
 import { UnifyClient } from "@unify/client";
-import { WalletEntity } from "@unify/uniweb3";
+import { WalletEntity } from "@unify/uniweb3/entities";
 
-const walletRepo = UnifyClient.Repo<WalletEntity>("wallet", "evm");
+const walletRepo = UnifyClient.repo<WalletEntity>("wallet", "evm");
 ```
 
 ## Configuration Interfaces
@@ -429,15 +427,15 @@ function Repo<T extends BaseEntity>(
 
 **Example:**
 ```typescript
-import { Repo } from "@unify/client";
-import { WalletEntity } from "@unify/uniweb3";
+import { repo } from "@unify/client";
+import { WalletEntity } from "@unify/uniweb3/entities";
 
 // Initialize client first
 UnifyClient.init({ baseUrl: "http://localhost:3000" });
 
 // Use the convenience function
-const walletRepo = Repo<WalletEntity>("wallet", "solana");
-const wallet = await walletRepo.findOne({
+const walletRepo = repo<WalletEntity>("wallet", "solana");
+const wallet = await walletrepo.findOne({
   where: { address: "11111111111111111111111111111112" }
 });
 ```
@@ -577,8 +575,8 @@ export default {
 ### Basic Client Usage
 
 ```typescript
-import { UnifyClient, Repo } from "@unify/client";
-import { WalletEntity } from "@unify/uniweb3";
+import { UnifyClient, repo } from "@unify/client";
+import { WalletEntity } from "@unify/uniweb3/entities";
 
 // Initialize client
 UnifyClient.init({
@@ -587,7 +585,7 @@ UnifyClient.init({
 });
 
 // Query wallet balance
-const wallet = await Repo<WalletEntity>("wallet", "solana").findOne({
+const wallet = await repo<WalletEntity>("wallet", "solana").findOne({
   where: { address: "11111111111111111111111111111112" }
 });
 
