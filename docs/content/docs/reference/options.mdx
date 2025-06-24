@@ -7,14 +7,6 @@ description: Complete API reference for Unify packages including @unilab/core, @
 
 Core types and interfaces for the Unify framework.
 
-## BaseEntity
-
-Base interface that all entities must extend.
-
-```typescript
-interface BaseEntity {}
-```
-
 ## Repository Operations Arguments
 
 ### FindManyArgs
@@ -22,7 +14,7 @@ interface BaseEntity {}
 Arguments for finding multiple records.
 
 ```typescript
-interface FindManyArgs<T extends BaseEntity> {
+interface FindManyArgs<T extends Record<string, any>> {
   limit?: number;
   offset?: number;
   where?: Partial<T>;
@@ -32,7 +24,7 @@ interface FindManyArgs<T extends BaseEntity> {
   };
 }
 
-export type RelationCallbackMany<T extends BaseEntity, R extends BaseEntity> = (
+export type RelationCallbackMany<T extends Record<string, any>, R extends Record<string, any>> = (
   entities: T[]
 ) => Promise<R[]>;
 ```
@@ -49,7 +41,7 @@ export type RelationCallbackMany<T extends BaseEntity, R extends BaseEntity> = (
 Arguments for finding a single record.
 
 ```typescript
-interface FindOneArgs<T extends BaseEntity> {
+interface FindOneArgs<T extends Record<string, any>> {
   where: Partial<T>;
 }
 ```
@@ -62,7 +54,7 @@ interface FindOneArgs<T extends BaseEntity> {
 Arguments for creating a new record.
 
 ```typescript
-interface CreationArgs<T extends BaseEntity> {
+interface CreationArgs<T extends Record<string, any>> {
   data: Partial<T>;
 }
 ```
@@ -75,7 +67,7 @@ interface CreationArgs<T extends BaseEntity> {
 Arguments for updating an existing record.
 
 ```typescript
-interface UpdateArgs<T extends BaseEntity> {
+interface UpdateArgs<T extends Record<string, any>> {
   where: Partial<T>;
   data: Partial<T>;
 }
@@ -90,7 +82,7 @@ interface UpdateArgs<T extends BaseEntity> {
 Arguments for deleting records.
 
 ```typescript
-interface DeletionArgs<T extends BaseEntity> {
+interface DeletionArgs<T extends Record<string, any>> {
   where: Partial<T>;
 }
 ```
@@ -103,7 +95,7 @@ interface DeletionArgs<T extends BaseEntity> {
 Interface that all data source adapters must implement.
 
 ```typescript
-interface DataSourceAdapter<T extends BaseEntity> {
+interface DataSourceAdapter<T extends Record<string, any>> {
   findMany(args: FindManyArgs<T>): Promise<T[]>;
   findOne(args: FindOneArgs<T>): Promise<T | null>;
   create(args: CreationArgs<T>): Promise<T>;
@@ -117,7 +109,7 @@ interface DataSourceAdapter<T extends BaseEntity> {
 Repository class for interacting with data sources.
 
 ```typescript
-class Repository<T extends BaseEntity> {
+class Repository<T extends Record<string, any>> {
   constructor(adapter: DataSourceAdapter<T>);
   
   async findMany(args?: FindManyArgs<T>): Promise<T[]>;
@@ -135,7 +127,7 @@ class Repository<T extends BaseEntity> {
 Register a data source adapter.
 
 ```typescript
-function registerAdapter<T extends BaseEntity>(
+function registerAdapter<T extends Record<string, any>>(
   name: string,
   adapterFactory: () => DataSourceAdapter<T>
 ): void
@@ -146,7 +138,7 @@ function registerAdapter<T extends BaseEntity>(
 Create a repository instance for a specific entity and source.
 
 ```typescript
-function Repo<T extends BaseEntity>(
+function Repo<T extends Record<string, any>>(
   entityName: string,
   source: string
 ): Repository<T>
@@ -254,7 +246,7 @@ interface AdapterRegistration {
 Register a data source adapter in the global registry.
 
 ```typescript
-function registerAdapter<T extends BaseEntity>(
+function registerAdapter<T extends Record<string, any>>(
   name: string,
   adapterFactory: () => DataSourceAdapter<T>
 ): void
@@ -265,7 +257,7 @@ function registerAdapter<T extends BaseEntity>(
 Retrieve a registered adapter by name.
 
 ```typescript
-function getAdapter<T extends BaseEntity>(
+function getAdapter<T extends Record<string, any>>(
   source: string
 ): DataSourceAdapter<T>
 ```
@@ -275,7 +267,7 @@ function getAdapter<T extends BaseEntity>(
 Parse HTTP query parameters into structured arguments.
 
 ```typescript
-function parseQueryParams<T extends BaseEntity>(c: Context): any
+function parseQueryParams<T extends Record<string, any>>(c: Context): any
 ```
 
 ### handleError
@@ -318,7 +310,7 @@ constructor(config: ClientConfig)
 Create a repository proxy for a specific entity and data source.
 
 ```typescript
-createRepositoryProxy<T extends BaseEntity>(
+createRepositoryProxy<T extends Record<string, any>>(
   entityName: string,
   source: string
 ): Repository<T>
@@ -361,7 +353,7 @@ UnifyClient.init({
 Create a repository instance using the global client.
 
 ```typescript
-static Repo<T extends BaseEntity>(
+static Repo<T extends Record<string, any>>(
   entityName: string,
   source: string
 ): Repository<T>
@@ -427,7 +419,7 @@ interface ApiResponse<T = any> {
 Global convenience function for creating repository instances.
 
 ```typescript
-function Repo<T extends BaseEntity>(
+function Repo<T extends Record<string, any>>(
   entityName: string,
   source: string
 ): Repository<T>
@@ -603,9 +595,9 @@ console.log("Wallet balance:", wallet?.balance);
 ### Custom Adapter Implementation
 
 ```typescript
-import type { DataSourceAdapter, BaseEntity } from "@unilab/core";
+import type { DataSourceAdapter } from "@unilab/core";
 
-interface CustomEntity extends BaseEntity {
+interface CustomEntity extends Record<string, any> {
   id: string;
   name: string;
 }

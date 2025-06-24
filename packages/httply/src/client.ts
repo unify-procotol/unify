@@ -1,5 +1,4 @@
 import type {
-  BaseEntity,
   FindManyArgs,
   FindOneArgs,
   CreationArgs,
@@ -94,7 +93,7 @@ export class UnifyClient {
     }
   }
 
-  createRepositoryProxy<T extends BaseEntity>(
+  createRepositoryProxy<T extends Record<string, any>>(
     entityName: string,
     source: string
   ): Repository<T> {
@@ -191,7 +190,7 @@ export class UnifyClient {
   }
 
   // 客户端关联数据加载 - 单个实体
-  private async loadRelations<T extends BaseEntity>(
+  private async loadRelations<T extends Record<string, any>>(
     entity: T,
     include: { [key: string]: (entity: T) => Promise<any> }
   ): Promise<T> {
@@ -222,7 +221,7 @@ export class UnifyClient {
   }
 
   // 客户端关联数据加载 - 多个实体
-  private async loadRelationsForMany<T extends BaseEntity>(
+  private async loadRelationsForMany<T extends Record<string, any>>(
     entities: T[],
     include: { [key: string]: (entities: T[]) => Promise<any> }
   ): Promise<T[]> {
@@ -286,7 +285,7 @@ export class UnifyClient {
   }
 
   // 静态 Repo 方法
-  static repo<T extends BaseEntity>(
+  static repo<T extends Record<string, any>>(
     entityName: string,
     source: string
   ): Repository<T> {
@@ -298,7 +297,7 @@ export class UnifyClient {
 }
 
 // 便捷的全局 repo 函数（向后兼容）
-export function repo<T extends BaseEntity>(
+export function repo<T extends Record<string, any>>(
   entityName: string,
   source: string
 ): Repository<T> {

@@ -1,5 +1,4 @@
 import type {
-  BaseEntity,
   CreationArgs,
   DataSourceAdapter,
   DeletionArgs,
@@ -8,7 +7,7 @@ import type {
   UpdateArgs,
 } from "./types";
 
-export class Repository<T extends BaseEntity> {
+export class Repository<T extends Record<string, any>> {
   private adapter: DataSourceAdapter<T>;
 
   constructor(adapter: DataSourceAdapter<T>) {

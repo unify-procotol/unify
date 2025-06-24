@@ -1,11 +1,11 @@
 import type { Context } from "hono";
-import type { BaseEntity, DataSourceAdapter } from "@unilab/core";
+import type { DataSourceAdapter } from "@unilab/core";
 
 // 适配器注册表
 export const adapterRegistry = new Map<string, () => DataSourceAdapter<any>>();
 
 // 注册适配器
-export function registerAdapter<T extends BaseEntity>(
+export function registerAdapter<T extends Record<string, any>>(
   source: string,
   adapterFactory: () => DataSourceAdapter<T>
 ) {
@@ -13,7 +13,7 @@ export function registerAdapter<T extends BaseEntity>(
 }
 
 // 获取适配器
-export function getAdapter<T extends BaseEntity>(
+export function getAdapter<T extends Record<string, any>>(
   source: string
 ): DataSourceAdapter<T> {
   const adapterFactory = adapterRegistry.get(source);
@@ -24,7 +24,7 @@ export function getAdapter<T extends BaseEntity>(
 }
 
 // 解析查询参数
-export function parseQueryParams<T extends BaseEntity>(c: Context) {
+export function parseQueryParams<T extends Record<string, any>>(c: Context) {
   const query = c.req.query();
   const params: any = {};
 
@@ -90,7 +90,7 @@ export interface AdapterRegistration {
 }
 
 // 新的关联数据加载函数 - 支持回调函数
-export async function loadRelations<T extends BaseEntity>(
+export async function loadRelations<T extends Record<string, any>>(
   entity: T,
   include?: { [key: string]: (ids: string[] | string) => Promise<any> }
 ): Promise<T> {
@@ -130,7 +130,7 @@ export async function loadRelations<T extends BaseEntity>(
 }
 
 // 批量加载关联数据 - 用于findMany操作
-export async function loadRelationsForMany<T extends BaseEntity>(
+export async function loadRelationsForMany<T extends Record<string, any>>(
   entities: T[],
   include?: { [key: string]: (ids: string[] | string) => Promise<any> }
 ): Promise<T[]> {

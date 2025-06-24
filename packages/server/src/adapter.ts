@@ -10,17 +10,25 @@ import {
   registerAdapter,
   validateSource,
 } from "./utils";
-import { BaseEntity, DataSourceAdapter, Repository } from "@unilab/core";
+import {
+  DataSourceAdapter,
+  generateSchemas,
+  Repository,
+  SchemaObject,
+} from "@unilab/core";
 
 export interface UnifyConfig {
   app?: Hono;
+  entities?: Record<string, any>[];
+  adapters: AdapterRegistration[];
 }
 
 export class Unify {
   private static app: Hono;
+  private static entitySchemas: Record<string, SchemaObject> = {};
 
   // 静态初始化方法
-  static init(config: UnifyConfig = {}) {
+  static init(config: UnifyConfig) {
     // 如果传入了外部 app，使用它；否则创建新的 app
     if (config.app) {
       this.app = config.app;
@@ -32,17 +40,11 @@ export class Unify {
       this.app.onError((err, c) => handleError(err, c));
     }
 
-    return this.app;
-  }
-
-  // 静态注册适配器方法
-  static register(adapters: AdapterRegistration[]) {
-    // 如果 app 未初始化，使用默认配置初始化
-    if (!this.app) {
-      this.init();
+    if (config.entities) {
+      this.entitySchemas = generateSchemas(config.entities);
     }
 
-    adapters.forEach(({ source, adapter }) => {
+    config.adapters.forEach(({ source, adapter }) => {
       registerAdapter(source, () => adapter);
     });
 
@@ -50,13 +52,15 @@ export class Unify {
     this.setupRoutes();
 
     console.log(
-      `✅ Registered adapters: ${adapters.map((a) => a.source).join(", ")}`
+      `✅ Registered adapters: ${config.adapters
+        .map((a) => a.source)
+        .join(", ")}`
     );
 
     return this.app;
   }
 
-  static repo<T extends BaseEntity>({
+  static repo<T extends Record<string, any>>({
     source,
     adapter,
   }: {
@@ -204,5 +208,10 @@ export class Unify {
   // 静态获取 app 实例方法
   static getApp() {
     return this.app;
+  }
+
+  // 静态获取实体模式方法
+  static getEntitySchemas(): Record<string, SchemaObject> {
+    return this.entitySchemas;
   }
 }

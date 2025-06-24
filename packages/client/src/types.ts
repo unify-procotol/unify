@@ -1,13 +1,16 @@
-import type { DataSourceAdapter, BaseEntity } from "@unilab/core";
+import type { DataSourceAdapter } from "@unilab/core";
 
 export interface ClientConfig {
   enableDebug?: boolean;
-  namespace?: string;
+  adapters: AdapterRegistration<any>[];
 }
 
-export interface AdapterRegistration<T extends BaseEntity = BaseEntity> {
+export interface AdapterRegistration<T extends Record<string, any>> {
   source: string;
   adapter: DataSourceAdapter<T>;
 }
 
-export type AdapterRegistry = Map<string, DataSourceAdapter<BaseEntity>>;
+export type AdapterRegistry = Map<
+  string,
+  DataSourceAdapter<Record<string, any>>
+>;

@@ -1,8 +1,5 @@
 import { repo, UnifyClient } from "@unilab/httply";
 import { Entity } from "./entities/entity";
-import { generateSchemas } from "@unilab/core";
-import { UserEntity } from "./entities/user";
-import { PostEntity } from "./entities/post";
 
 UnifyClient.init({
   baseUrl: "http://localhost:3000",
@@ -10,11 +7,13 @@ UnifyClient.init({
 });
 
 const demo = async () => {
-  // Generate schemas from entity classes
-  const schemas = generateSchemas([UserEntity, PostEntity]);
-
-  console.log("UserEntity schema:", JSON.stringify(schemas.UserEntity, null, 2));
-  console.log("PostEntity schema:", JSON.stringify(schemas.PostEntity, null, 2));
+  // const res = await repo<Entity>("entity", "_global").findOne({
+  //   where: {
+  //     name: "PostEntity",
+  //   },
+  // });
+  const res = await repo<Entity>("entity", "_global").findMany();
+  console.log("res=>", res);
 };
 
 demo();

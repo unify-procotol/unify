@@ -1,6 +1,6 @@
-import { SchemaObject } from "./decorators";
+import { SchemaObject } from "@unilab/core";
 
 export class Entity {
   name: string = "";
-  schemas: Record<string, SchemaObject> = {};
+  schema: SchemaObject = {};
 }
