@@ -195,21 +195,13 @@ export class UnifyClient {
     entity: T,
     include: { [key: string]: (entity: T) => Promise<any> }
   ): Promise<T> {
-    console.log(
-      "loadRelations called for entity:",
-      entity,
-      "include:",
-      Object.keys(include)
-    );
     const result = { ...entity } as any;
 
     // 并行处理所有关联查询
     const relationPromises = Object.entries(include).map(
       async ([propertyKey, callback]) => {
         try {
-          console.log(`Loading relation ${propertyKey} for entity:`, entity);
           const relatedData = await callback(entity);
-          console.log(`Relation ${propertyKey} loaded:`, relatedData);
           return { propertyKey, relatedData };
         } catch (error) {
           console.warn(`Failed to load relation ${propertyKey}:`, error);
@@ -226,7 +218,6 @@ export class UnifyClient {
       result[propertyKey] = relatedData;
     });
 
-    console.log("loadRelations result:", result);
     return result;
   }
 
@@ -235,24 +226,13 @@ export class UnifyClient {
     entities: T[],
     include: { [key: string]: (entities: T[]) => Promise<any> }
   ): Promise<T[]> {
-    console.log(
-      "loadRelationsForMany called for entities:",
-      entities,
-      "include:",
-      Object.keys(include)
-    );
     const results = [...entities] as any[];
 
     // 并行处理所有关联查询
     const relationPromises = Object.entries(include).map(
       async ([propertyKey, callback]) => {
         try {
-          console.log(
-            `Loading relation ${propertyKey} for entities:`,
-            entities
-          );
           const relatedData = await callback(entities);
-          console.log(`Relation ${propertyKey} loaded:`, relatedData);
           return { propertyKey, relatedData };
         } catch (error) {
           console.warn(`Failed to load relation ${propertyKey}:`, error);
@@ -284,7 +264,6 @@ export class UnifyClient {
       }
     });
 
-    console.log("loadRelationsForMany result:", results);
     return results;
   }
 
