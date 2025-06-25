@@ -14,3 +14,8 @@ export type AdapterRegistry = Map<
   string,
   DataSourceAdapter<Record<string, any>>
 >;
+
+export interface RelationMapping {
+  localField: string;
+  foreignField: string;
+}

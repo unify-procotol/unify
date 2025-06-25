@@ -18,13 +18,18 @@ export class EntityAdapter implements DataSourceAdapter<Entity> {
     if (entityName) {
       const actualEntityName =
         typeof entityName === "string" ? entityName : entityName.$eq;
-      if (actualEntityName && schemas[actualEntityName]) {
-        return [
-          {
-            name: actualEntityName,
-            schema: schemas[actualEntityName],
-          },
-        ];
+      if (actualEntityName) {
+        const schema = schemas[actualEntityName];
+        if (schema) {
+          return [
+            {
+              name: actualEntityName,
+              schema: schema,
+            },
+          ];
+        } else {
+          return [];
+        }
       }
     }
 

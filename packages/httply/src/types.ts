@@ -16,4 +16,9 @@ export interface ApiResponse<T = any> {
   data: T;
   success: boolean;
   message?: string;
+}
+
+export interface RelationMapping {
+  localField: string;
+  foreignField: string;
 } 

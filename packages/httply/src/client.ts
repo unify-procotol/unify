@@ -6,7 +6,11 @@ import type {
   DeletionArgs,
   Repository,
 } from "@unilab/core";
-import type { ClientConfig, HttpRequestOptions, ApiResponse } from "./types";
+import type {
+  ClientConfig,
+  HttpRequestOptions,
+  RelationMapping,
+} from "./types";
 
 export class UnifyClient {
   private config: ClientConfig;
@@ -116,7 +120,6 @@ export class UnifyClient {
                 params,
               });
 
-              // 如果有include回调函数，在客户端执行关联查询
               if (args.include && result && result.length > 0) {
                 return await this.loadRelationsForMany(result, args.include);
               }
@@ -231,11 +234,14 @@ export class UnifyClient {
     const relationPromises = Object.entries(include).map(
       async ([propertyKey, callback]) => {
         try {
-          const relatedData = await callback(entities);
-          return { propertyKey, relatedData };
+          const relationPromise = callback(entities);
+          // 检查是否有关联映射信息附加到 Promise 上
+          const relationMapping = (relationPromise as any).__relationMapping;
+          const relatedData = await relationPromise;
+          return { propertyKey, relatedData, relationMapping };
         } catch (error) {
           console.warn(`Failed to load relation ${propertyKey}:`, error);
-          return { propertyKey, relatedData: null };
+          return { propertyKey, relatedData: null, relationMapping: null };
         }
       }
     );
@@ -244,16 +250,20 @@ export class UnifyClient {
     const relationResults = await Promise.all(relationPromises);
 
     // 将结果分配到对应的实体中
-    relationResults.forEach(({ propertyKey, relatedData }) => {
+    relationResults.forEach(({ propertyKey, relatedData, relationMapping }) => {
       if (Array.isArray(relatedData)) {
         // 如果返回的是数组，需要根据外键分组
         results.forEach((entity) => {
-          const entityId = entity.id;
-          // 根据关联逻辑匹配数据
-          entity[propertyKey] = relatedData.filter((item: any) => {
-            // 假设关联数据有userId字段指向主实体
-            return item.userId === entityId;
-          });
+          // 优先使用 Promise 上的关联映射信息，然后是传入的映射信息，最后是默认逻辑
+          const mapping = relationMapping;
+          if (mapping) {
+            const localValue = entity[mapping.localField];
+            entity[propertyKey] = relatedData.filter((item: any) => {
+              return item[mapping.foreignField] === localValue;
+            });
+          } else {
+            entity[propertyKey] = relatedData;
+          }
         });
       } else {
         // 如果返回的不是数组，直接分配
@@ -294,6 +304,33 @@ export class UnifyClient {
       source
     );
   }
+
+  // 静态 JoinRepo 方法
+  static joinRepo<T extends Record<string, any>>(
+    entityName: string,
+    source: string,
+    relationMapping: RelationMapping
+  ): Repository<T> {
+    const baseRepo = UnifyClient.repo<T>(entityName, source);
+
+    // 包装 repository，为返回的 Promise 添加关联映射信息
+    return new Proxy(baseRepo, {
+      get: (target, prop: string) => {
+        const originalMethod = (target as any)[prop];
+
+        if (prop === "findMany" || prop === "findOne") {
+          return (...args: any[]) => {
+            const resultPromise = originalMethod.apply(target, args);
+            // 为 Promise 添加关联映射信息
+            (resultPromise as any).__relationMapping = relationMapping;
+            return resultPromise;
+          };
+        }
+
+        return originalMethod;
+      },
+    });
+  }
 }
 
 // 便捷的全局 repo 函数（向后兼容）
@@ -302,4 +339,13 @@ export function repo<T extends Record<string, any>>(
   source: string
 ): Repository<T> {
   return UnifyClient.repo<T>(entityName, source);
+}
+
+// 便捷的全局 joinRepo 函数
+export function joinRepo<T extends Record<string, any>>(
+  entityName: string,
+  source: string,
+  relationMapping: RelationMapping
+): Repository<T> {
+  return UnifyClient.joinRepo<T>(entityName, source, relationMapping);
 }

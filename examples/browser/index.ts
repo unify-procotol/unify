@@ -1,6 +1,6 @@
 import { UserEntity } from "./entities/user";
 import { PostEntity } from "./entities/post";
-import { repo, UnifyClient } from "@unilab/client";
+import { joinRepo, repo, UnifyClient } from "@unilab/client";
 import { UserAdapter } from "./adapters/user";
 import { PostAdapter } from "./adapters/post";
 
@@ -20,14 +20,17 @@ UnifyClient.init({
 
 const fetchUser = async () => {
   const data = await repo<UserEntity>("user", "user").findMany({
-    where: {
-      id: "1",
-      // email: "john.doe@example.com",
-    },
+    // where: {
+    //   id: "1",
+    //   // email: "john.doe@example.com",
+    // },
     include: {
       posts: (userList) => {
         const ids = userList.map((user) => user.id);
-        return repo<PostEntity>("post", "post").findMany({
+        return joinRepo<PostEntity>("post", "post", {
+          localField: "id",
+          foreignField: "userId",
+        }).findMany({
           where: {
             userId: {
               $in: ids,
@@ -42,23 +45,23 @@ const fetchUser = async () => {
 
 fetchUser();
 
-const fetchPost = async () => {
-  const data = await repo<PostEntity>("post", "post").findOne({
-    where: {
-      id: "2",
-    },
-    include: {
-      user: (post) => {
-        const userId = post.userId;
-        return repo<UserEntity>("user", "user").findOne({
-          where: {
-            id: userId,
-          },
-        });
-      },
-    },
-  });
-  console.log("fetchPost===>", JSON.stringify(data, null, 2));
-};
+// const fetchPost = async () => {
+//   const data = await repo<PostEntity>("post", "post").findOne({
+//     where: {
+//       id: "2",
+//     },
+//     include: {
+//       user: (post) => {
+//         const userId = post.userId;
+//         return repo<UserEntity>("user", "user").findOne({
+//           where: {
+//             id: userId,
+//           },
+//         });
+//       },
+//     },
+//   });
+//   console.log("fetchPost===>", JSON.stringify(data, null, 2));
+// };
 
-fetchPost();
+// fetchPost();
