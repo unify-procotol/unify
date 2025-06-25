@@ -4,6 +4,10 @@
   "description": "Core types and utilities for the Unify framework",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js",
+    "./middleware": "./dist/middleware/index.js"
+  },
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
@@ -34,4 +38,4 @@
     "url": "git+https://github.com/iotexproject/unify.git",
     "directory": "packages/core"
   }
-} 
+}

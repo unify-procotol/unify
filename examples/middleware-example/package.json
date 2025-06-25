@@ -1,0 +1,24 @@
+{
+  "name": "middleware-example",
+  "version": "1.0.0",
+  "description": "middleware example using @unilab/core",
+  "main": "index.ts",
+  "scripts": {
+    "test:hook": "bun run hook-test.ts",
+    "test:logging": "bun run logging-test.ts"
+  },
+  "dependencies": {
+    "@unilab/core": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3"
+  },
+  "keywords": [
+    "hono",
+    "unilab",
+    "api",
+    "example"
+  ],
+  "author": "osdodo",
+  "license": "MIT"
+}

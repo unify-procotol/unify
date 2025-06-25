@@ -62,3 +62,34 @@ export interface DataSourceAdapter<T extends Record<string, any>> {
   update(args: UpdateArgs<T>): Promise<T>;
   delete(args: DeletionArgs<T>): Promise<boolean>;
 }
+
+// Middleware 相关类型定义
+export type MiddlewareContext<T extends Record<string, any>> = {
+  operation: "findMany" | "findOne" | "create" | "update" | "delete";
+  args: any;
+  result?: any;
+  metadata?: Record<string, any>;
+};
+
+export type MiddlewareNext<T extends Record<string, any>> = () => Promise<any>;
+
+export type Middleware<T extends Record<string, any>> = (
+  context: MiddlewareContext<T>,
+  next: MiddlewareNext<T>
+) => Promise<any>;
+
+export type MiddlewareOptions = {
+  position?: "before" | "after" | "around";
+  priority?: number;
+  name?: string;
+};
+
+export interface MiddlewareManager<T extends Record<string, any>> {
+  use(middleware: Middleware<T>, options?: MiddlewareOptions): void;
+  remove(name: string): boolean;
+  clear(): void;
+  execute(
+    context: MiddlewareContext<T>,
+    operation: () => Promise<any>
+  ): Promise<any>;
+}

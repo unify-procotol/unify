@@ -1,3 +1,4 @@
+import { MiddlewareManager } from "./middleware/manager";
 import type {
   CreationArgs,
   DataSourceAdapter,
@@ -5,32 +6,93 @@ import type {
   FindManyArgs,
   FindOneArgs,
   UpdateArgs,
+  Middleware,
+  MiddlewareOptions,
+  MiddlewareContext,
 } from "./types";
 
 export class Repository<T extends Record<string, any>> {
   private adapter: DataSourceAdapter<T>;
+  private middlewareManager: MiddlewareManager<T>;
 
   constructor(adapter: DataSourceAdapter<T>) {
     this.adapter = adapter;
+    this.middlewareManager = new MiddlewareManager<T>();
+  }
+
+  // Middleware management methods
+  use(middleware: Middleware<T>, options?: MiddlewareOptions): this {
+    this.middlewareManager.use(middleware, options);
+    return this;
+  }
+
+  removeMiddleware(name: string): boolean {
+    return this.middlewareManager.remove(name);
+  }
+
+  clearMiddlewares(): void {
+    this.middlewareManager.clear();
   }
 
   async findMany(args?: FindManyArgs<T>) {
-    return this.adapter.findMany(args);
+    const context: MiddlewareContext<T> = {
+      operation: "findMany",
+      args,
+      metadata: {},
+    };
+
+    return this.middlewareManager.execute(context, async () => {
+      return this.adapter.findMany(args);
+    });
   }
 
   async findOne(args: FindOneArgs<T>) {
-    return this.adapter.findOne(args);
+    const context: MiddlewareContext<T> = {
+      operation: "findOne",
+      args,
+      metadata: {},
+    };
+
+    return this.middlewareManager.execute(context, async () => {
+      return this.adapter.findOne(args);
+    });
   }
 
   async create(args: CreationArgs<T>) {
-    return this.adapter.create(args);
+    const context: MiddlewareContext<T> = {
+      operation: "create",
+      args,
+      metadata: {},
+    };
+
+    return this.middlewareManager.execute(context, async () => {
+      const result = await this.adapter.create(args);
+      return result;
+    });
   }
 
   async update(args: UpdateArgs<T>) {
-    return this.adapter.update(args);
+    const context: MiddlewareContext<T> = {
+      operation: "update",
+      args,
+      metadata: {},
+    };
+
+    return this.middlewareManager.execute(context, async () => {
+      return this.adapter.update(args);
+    });
   }
 
   async delete(args: DeletionArgs<T>) {
-    return this.adapter.delete(args);
+    const context: MiddlewareContext<T> = {
+      operation: "delete",
+      args,
+      metadata: {},
+    };
+
+    return this.middlewareManager.execute(context, async () => {
+      const result = await this.adapter.delete(args);
+      return result;
+    });
   }
 }
