@@ -3,7 +3,7 @@ import { PostEntity } from "./entities/post";
 import { joinRepo, repo, UnifyClient } from "@unilab/client";
 import { UserAdapter } from "./adapters/user";
 import { PostAdapter } from "./adapters/post";
-import { BalancePlugin } from "@unilab/uniweb3";
+import { WalletPlugin } from "@unilab/uniweb3";
 import { WalletEntity } from "@unilab/uniweb3/entities";
 import { Plugin } from "@unilab/core";
 import { Logging } from "@unilab/core/middleware";
@@ -18,7 +18,7 @@ const MyPlugin: Plugin = {
 
 UnifyClient.init({
   enableDebug: true,
-  plugins: [MyPlugin, BalancePlugin],
+  plugins: [MyPlugin, WalletPlugin],
   middleware: [Logging()],
 });
 

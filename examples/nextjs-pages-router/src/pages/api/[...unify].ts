@@ -1,5 +1,5 @@
 import { Unify } from "@unilab/server";
-import { BalancePlugin } from "@unilab/uniweb3";
+import { WalletPlugin } from "@unilab/uniweb3";
 import { Hono } from "hono";
 import { handle } from "@hono/node-server/vercel";
 import type { PageConfig } from "next";
@@ -14,7 +14,7 @@ const app = new Hono().basePath("/api");
 
 Unify.init({
   app,
-  plugins: [BalancePlugin],
+  plugins: [WalletPlugin],
 });
 
 app.get("/hello", (c) => {

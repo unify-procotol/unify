@@ -2,7 +2,7 @@ import { Plugin } from "@unilab/core";
 import { WalletEntity } from "../entities/wallet";
 import { SolanaAdapter, EVMAdapter } from "../adapters";
 
-export const BalancePlugin: Plugin = {
+export const WalletPlugin: Plugin = {
   entities: [WalletEntity],
   adapters: [
     {

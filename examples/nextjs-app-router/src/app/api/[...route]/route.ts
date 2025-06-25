@@ -1,5 +1,5 @@
 import { Unify } from "@unilab/server";
-import { BalancePlugin } from "@unilab/uniweb3";
+import { WalletPlugin } from "@unilab/uniweb3";
 import { Hono, Context } from "hono";
 
 export const runtime = "nodejs";
@@ -14,7 +14,7 @@ app.get("/custom", (c: Context) => {
 
 Unify.init({
   app,
-  plugins: [BalancePlugin],
+  plugins: [WalletPlugin],
 });
 
 app.get("/hello", (c: Context) => {
