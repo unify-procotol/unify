@@ -294,7 +294,6 @@ export class UnifyClient {
     return UnifyClient.globalClient;
   }
 
-  // 静态 Repo 方法
   static repo<T extends Record<string, any>>(
     entityName: string,
     source: string
@@ -305,13 +304,12 @@ export class UnifyClient {
     );
   }
 
-  // 静态 JoinRepo 方法
-  static joinRepo<T extends Record<string, any>>(
+  static joinRepo<F extends Record<string, any>, L extends Record<string, any>>(
     entityName: string,
     source: string,
-    relationMapping: RelationMapping
-  ): Repository<T> {
-    const baseRepo = UnifyClient.repo<T>(entityName, source);
+    relationMapping: RelationMapping<F, L>
+  ): Repository<F> {
+    const baseRepo = UnifyClient.repo<F>(entityName, source);
 
     // 包装 repository，为返回的 Promise 添加关联映射信息
     return new Proxy(baseRepo, {
@@ -333,7 +331,6 @@ export class UnifyClient {
   }
 }
 
-// 便捷的全局 repo 函数（向后兼容）
 export function repo<T extends Record<string, any>>(
   entityName: string,
   source: string
@@ -341,11 +338,13 @@ export function repo<T extends Record<string, any>>(
   return UnifyClient.repo<T>(entityName, source);
 }
 
-// 便捷的全局 joinRepo 函数
-export function joinRepo<T extends Record<string, any>>(
+export function joinRepo<
+  F extends Record<string, any> = Record<string, any>,
+  L extends Record<string, any> = Record<string, any>
+>(
   entityName: string,
   source: string,
-  relationMapping: RelationMapping
-): Repository<T> {
-  return UnifyClient.joinRepo<T>(entityName, source, relationMapping);
+  relationMapping: RelationMapping<F, L>
+): Repository<F> {
+  return UnifyClient.joinRepo<F, L>(entityName, source, relationMapping);
 }

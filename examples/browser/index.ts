@@ -27,7 +27,7 @@ const fetchUser = async () => {
     include: {
       posts: (userList) => {
         const ids = userList.map((user) => user.id);
-        return joinRepo<PostEntity>("post", "post", {
+        return joinRepo<PostEntity, UserEntity>("post", "post", {
           localField: "id",
           foreignField: "userId",
         }).findMany({
