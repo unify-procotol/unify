@@ -9,13 +9,22 @@ UnifyClient.init({
 
 const fetchUser = async () => {
   const data = await repo<UserEntity>("user", "user").findMany({
-    // where: {
-    //   id: "2",
-    //   // email: "john.doe@example.com",
-    // },
+    where: {
+      id: "2",
+      // email: "john.doe@example.com",
+    },
     include: {
       posts: (userList) => {
         const ids = userList.map((user) => user.id);
+        // return repo<PostEntity>("post", "post").findMany({
+        //   where: {
+        //     userId: {
+        //       $in: ids,
+        //     },
+        //   },
+        // });
+
+        // 没有设置where参数，则必须使用joinRepo，其他情况可以直接使用repo
         return joinRepo<PostEntity, UserEntity>("post", "post", {
           localField: "id",
           foreignField: "userId",
