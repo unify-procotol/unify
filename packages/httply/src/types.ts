@@ -16,4 +16,12 @@ export interface ApiResponse<T = any> {
   data: T;
   success: boolean;
   message?: string;
-} 
+}
+
+export interface RelationMapping<
+  T extends Record<string, any>,
+  F extends Record<string, any>
+> {
+  localField: keyof F;
+  foreignField: keyof T;
+}

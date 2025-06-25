@@ -1,7 +1,7 @@
 {
   "name": "browser-example",
   "version": "1.0.0",
-  "description": "Basic browser example using @unilab/httply",
+  "description": "Basic browser example using @unilab/client",
   "main": "server.ts",
   "scripts": {
     "dev": "bun run index.ts"

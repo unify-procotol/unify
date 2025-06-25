@@ -11,6 +11,7 @@ import type {
   AdapterRegistration,
   AdapterRegistry,
   ClientConfig,
+  RelationMapping,
 } from "./types";
 
 export class UnifyClient {
@@ -141,28 +142,52 @@ export class UnifyClient {
     entities: T[],
     include: { [key: string]: (entities: T[]) => Promise<any> }
   ): Promise<T[]> {
-    // Process all relations in parallel
+    const results = [...entities] as any[];
+
+    // 并行处理所有关联查询
     const relationPromises = Object.entries(include).map(
-      async ([key, callback]) => {
+      async ([propertyKey, callback]) => {
         try {
-          return { key, data: await callback(entities) };
+          const relationPromise = callback(entities);
+          // 检查是否有关联映射信息附加到 Promise 上
+          const relationMapping = (relationPromise as any).__relationMapping;
+          const relatedData = await relationPromise;
+          return { propertyKey, relatedData, relationMapping };
         } catch (error) {
-          this.log(`Error loading relation ${key}:`, error);
-          return { key, data: [] };
+          console.warn(`Failed to load relation ${propertyKey}:`, error);
+          return { propertyKey, relatedData: null, relationMapping: null };
         }
       }
     );
 
+    // 等待所有关联查询完成
     const relationResults = await Promise.all(relationPromises);
 
-    // Apply relation data to entities
-    return entities.map((entity) => {
-      const result = { ...entity } as any;
-      relationResults.forEach(({ key, data }) => {
-        result[key] = data;
-      });
-      return result;
+    // 将结果分配到对应的实体中
+    relationResults.forEach(({ propertyKey, relatedData, relationMapping }) => {
+      if (Array.isArray(relatedData)) {
+        // 如果返回的是数组，需要根据外键分组
+        results.forEach((entity) => {
+          // 优先使用 Promise 上的关联映射信息，然后是传入的映射信息，最后是默认逻辑
+          const mapping = relationMapping;
+          if (mapping) {
+            const localValue = entity[mapping.localField];
+            entity[propertyKey] = relatedData.filter((item: any) => {
+              return item[mapping.foreignField] === localValue;
+            });
+          } else {
+            entity[propertyKey] = relatedData;
+          }
+        });
+      } else {
+        // 如果返回的不是数组，直接分配
+        results.forEach((entity) => {
+          entity[propertyKey] = relatedData;
+        });
+      }
     });
+
+    return results;
   }
 
   // Static methods for global instance management
@@ -190,6 +215,33 @@ export class UnifyClient {
       source
     );
   }
+
+  // 静态 JoinRepo 方法
+  static joinRepo<F extends Record<string, any>, L extends Record<string, any>>(
+    entityName: string,
+    source: string,
+    relationMapping: RelationMapping<F, L>
+  ): Repository<F> {
+    const baseRepo = UnifyClient.repo<F>(entityName, source);
+
+    // 包装 repository，为返回的 Promise 添加关联映射信息
+    return new Proxy(baseRepo, {
+      get: (target, prop: string) => {
+        const originalMethod = (target as any)[prop];
+
+        if (prop === "findMany" || prop === "findOne") {
+          return (...args: any[]) => {
+            const resultPromise = originalMethod.apply(target, args);
+            // 为 Promise 添加关联映射信息
+            (resultPromise as any).__relationMapping = relationMapping;
+            return resultPromise;
+          };
+        }
+
+        return originalMethod;
+      },
+    });
+  }
 }
 
 // Export convenience function
@@ -198,4 +250,15 @@ export function repo<T extends Record<string, any>>(
   source: string
 ): Repository<T> {
   return UnifyClient.repo<T>(entityName, source);
+}
+
+export function joinRepo<
+  F extends Record<string, any> = Record<string, any>,
+  L extends Record<string, any> = Record<string, any>
+>(
+  entityName: string,
+  source: string,
+  relationMapping: RelationMapping<F, L>
+): Repository<F> {
+  return UnifyClient.joinRepo<F, L>(entityName, source, relationMapping);
 }
