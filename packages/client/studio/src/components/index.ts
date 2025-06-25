@@ -4,11 +4,19 @@ export { StudioHome } from './StudioHome';
 
 // Types
 export interface EntityData {
-  entity: string;
-  adapter: string;
+  entityName: string;
   data: any[];
   loading: boolean;
   error: string | null;
+}
+
+export interface EntitySchema {
+  name: string;
+  schema: {
+    type: string;
+    properties: Record<string, any>;
+    required: string[];
+  };
 }
 
 export interface EntitiesInfo {

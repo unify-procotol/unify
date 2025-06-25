@@ -10,17 +10,26 @@ import {
   registerAdapter,
   validateSource,
 } from "./utils";
-import { BaseEntity, DataSourceAdapter, Repository } from "@unilab/core";
+import {
+  DataSourceAdapter,
+  generateSchemas,
+  Repository,
+  SchemaObject,
+} from "@unilab/core";
 
 export interface UnifyConfig {
   app?: Hono;
+  entities?: Record<string, any>[];
+  adapters: AdapterRegistration[];
 }
 
 export class Unify {
   private static app: Hono;
+  private static entitySchemas: Record<string, SchemaObject> = {};
+  private static entitySources: Record<string, string[]> = {};
 
   // 静态初始化方法
-  static init(config: UnifyConfig = {}) {
+  static init(config: UnifyConfig) {
     // 如果传入了外部 app，使用它；否则创建新的 app
     if (config.app) {
       this.app = config.app;
@@ -32,17 +41,14 @@ export class Unify {
       this.app.onError((err, c) => handleError(err, c));
     }
 
-    return this.app;
-  }
-
-  // 静态注册适配器方法
-  static register(adapters: AdapterRegistration[]) {
-    // 如果 app 未初始化，使用默认配置初始化
-    if (!this.app) {
-      this.init();
+    if (config.entities) {
+      this.entitySchemas = generateSchemas(config.entities);
     }
 
-    adapters.forEach(({ source, adapter }) => {
+    // Analyze entity-source mapping from adapters configuration
+    this.entitySources = this.analyzeEntitySources(config.adapters, config.entities || []);
+
+    config.adapters.forEach(({ source, adapter }) => {
       registerAdapter(source, () => adapter);
     });
 
@@ -50,13 +56,15 @@ export class Unify {
     this.setupRoutes();
 
     console.log(
-      `✅ Registered adapters: ${adapters.map((a) => a.source).join(", ")}`
+      `✅ Registered adapters: ${config.adapters
+        .map((a) => a.source)
+        .join(", ")}`
     );
 
     return this.app;
   }
 
-  static repo<T extends BaseEntity>({
+  static repo<T extends Record<string, any>>({
     source,
     adapter,
   }: {
@@ -204,5 +212,52 @@ export class Unify {
   // 静态获取 app 实例方法
   static getApp() {
     return this.app;
+  }
+
+  // 静态获取实体模式方法
+  static getEntitySchemas(): Record<string, SchemaObject> {
+    return this.entitySchemas;
+  }
+
+  // 静态获取适配器信息方法
+  static getAdapters(): string[] {
+    return Array.from(adapterRegistry.keys());
+  }
+
+  // 静态获取实体源映射方法
+  static getEntitySources(): Record<string, string[]> {
+    return this.entitySources;
+  }
+
+  // 分析实体和源的映射关系
+  private static analyzeEntitySources(
+    adapters: AdapterRegistration[],
+    entities: Record<string, any>[]
+  ): Record<string, string[]> {
+    const entitySources: Record<string, string[]> = {};
+    
+    // 创建adapter类名到entity名的映射
+    const adapterToEntity: Record<string, string> = {};
+    
+    // 分析每个adapter对应的entity
+    adapters.forEach(({ source, adapter }) => {
+      const adapterClassName = adapter.constructor.name;
+      
+      // 跳过特殊的adapters (如EntityAdapter for _global)
+      if (adapterClassName === 'EntityAdapter' || source === '_global') {
+        return;
+      }
+      
+      // 根据adapter类名推断entity名 约定大于配置
+      // 例如: UserAdapter -> UserEntity, PostAdapter -> PostEntity
+      const entityName = adapterClassName.replace('Adapter', 'Entity');
+      
+      if (!entitySources[entityName]) {
+        entitySources[entityName] = [];
+      }
+      entitySources[entityName].push(source);
+    });
+    
+    return entitySources;
   }
 }

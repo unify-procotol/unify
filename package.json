@@ -17,7 +17,8 @@
     "build:client": "cd packages/client && bun run build",
     "dev:client": "cd packages/client && bun run dev",
     "build:uniweb3": "cd packages/uniweb3 && bun run build",
-    "dev:uniweb3": "cd packages/uniweb3 && bun run dev"
+    "dev:uniweb3": "cd packages/uniweb3 && bun run dev",
+    "build": "bun run build:core && bun run build:server && bun run build:httply && bun run build:client && bun run build:uniweb3"
   },
   "author": "osdodo",
   "license": "MIT",

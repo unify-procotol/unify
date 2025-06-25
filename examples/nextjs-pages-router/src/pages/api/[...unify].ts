@@ -12,11 +12,13 @@ export const config: PageConfig = {
 
 const app = new Hono().basePath("/api");
 
-Unify.init({ app });
-Unify.register([
-  { source: "solana", adapter: new SolanaAdapter() },
-  { source: "evm", adapter: new EVMAdapter() },
-]);
+Unify.init({
+  app,
+  adapters: [
+    { source: "solana", adapter: new SolanaAdapter() },
+    { source: "evm", adapter: new EVMAdapter() },
+  ],
+});
 
 app.get("/hello", (c) => {
   return c.json({

@@ -1,5 +1,4 @@
 import type {
-  BaseEntity,
   FindManyArgs,
   FindOneArgs,
   CreationArgs,
@@ -15,33 +14,33 @@ import type {
 } from "./types";
 
 export class UnifyClient {
-  private config: ClientConfig;
+  private enableDebug: boolean = false;
   private adapters: AdapterRegistry = new Map();
 
-  constructor(config: ClientConfig = {}) {
-    this.config = {
-      enableDebug: false,
-      namespace: "default",
-      ...config,
-    };
+  constructor(config: ClientConfig) {
+    this.enableDebug = config.enableDebug || false;
+    this.registerAdapters(config.adapters);
   }
 
   private log(...args: any[]): void {
-    if (this.config.enableDebug) {
+    if (this.enableDebug) {
       console.log("[UnifyClientLite]", ...args);
     }
   }
 
-  register<T extends BaseEntity>(
+  private registerAdapters<T extends Record<string, any>>(
     registrations: AdapterRegistration<T>[]
   ): void {
     for (const { source, adapter } of registrations) {
-      this.adapters.set(source, adapter as DataSourceAdapter<BaseEntity>);
+      this.adapters.set(
+        source,
+        adapter as DataSourceAdapter<Record<string, any>>
+      );
       this.log(`Registered adapter for source: ${source}`);
     }
   }
 
-  private getAdapter<T extends BaseEntity>(
+  private getAdapter<T extends Record<string, any>>(
     source: string
   ): DataSourceAdapter<T> {
     const adapter = this.adapters.get(source);
@@ -51,7 +50,7 @@ export class UnifyClient {
     return adapter as DataSourceAdapter<T>;
   }
 
-  createRepositoryProxy<T extends BaseEntity>(
+  createRepositoryProxy<T extends Record<string, any>>(
     entityName: string,
     source: string
   ): Repository<T> {
@@ -114,7 +113,7 @@ export class UnifyClient {
   }
 
   // Load relations for a single entity
-  private async loadRelations<T extends BaseEntity>(
+  private async loadRelations<T extends Record<string, any>>(
     entity: T,
     include: { [key: string]: (entity: T) => Promise<any> }
   ): Promise<T> {
@@ -138,7 +137,7 @@ export class UnifyClient {
   }
 
   // Load relations for multiple entities
-  private async loadRelationsForMany<T extends BaseEntity>(
+  private async loadRelationsForMany<T extends Record<string, any>>(
     entities: T[],
     include: { [key: string]: (entities: T[]) => Promise<any> }
   ): Promise<T[]> {
@@ -169,17 +168,8 @@ export class UnifyClient {
   // Static methods for global instance management
   private static globalClient: UnifyClient | null = null;
 
-  static init(config: ClientConfig = {}): void {
+  static init(config: ClientConfig): void {
     UnifyClient.globalClient = new UnifyClient(config);
-  }
-
-  static register(registrations: AdapterRegistration<any>[]): void {
-    if (!UnifyClient.globalClient) {
-      throw new Error(
-        "UnifyClient not initialized. Call UnifyClient.init() first."
-      );
-    }
-    UnifyClient.globalClient.register(registrations);
   }
 
   private static getGlobalClient(): UnifyClient {
@@ -191,7 +181,7 @@ export class UnifyClient {
     return UnifyClient.globalClient;
   }
 
-  static repo<T extends BaseEntity>(
+  static repo<T extends Record<string, any>>(
     entityName: string,
     source: string
   ): Repository<T> {
@@ -203,7 +193,7 @@ export class UnifyClient {
 }
 
 // Export convenience function
-export function repo<T extends BaseEntity>(
+export function repo<T extends Record<string, any>>(
   entityName: string,
   source: string
 ): Repository<T> {

@@ -1,23 +1,20 @@
-import { IsOptional, IsString, ValidateNested } from "class-validator";
-import { Type } from "class-transformer";
+import { Fields, Relations } from "@unilab/core";
 
 export class PostEntity {
-  @IsString()
+  @Fields.string()
   id = "";
 
-  @IsString()
+  @Fields.string()
   title = "";
 
-  @IsString()
+  @Fields.string()
   content = "";
 
-  @IsString()
+  @Fields.string()
   userId = "";
 
-  @IsOptional()
-  @ValidateNested()
-  @Type(() => {
-    return require("./user").UserEntity;
+  @Relations.toOne(() => require("./user").UserEntity, {
+    optional: true,
   })
   user?: any;
 }

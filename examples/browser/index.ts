@@ -6,18 +6,17 @@ import { PostAdapter } from "./adapters/post";
 
 UnifyClient.init({
   enableDebug: false,
+  adapters: [
+    {
+      source: "user",
+      adapter: new UserAdapter(),
+    },
+    {
+      source: "post",
+      adapter: new PostAdapter(),
+    },
+  ],
 });
-
-UnifyClient.register([
-  {
-    source: "user",
-    adapter: new UserAdapter(),
-  },
-  {
-    source: "post",
-    adapter: new PostAdapter(),
-  },
-]);
 
 const fetchUser = async () => {
   const data = await repo<UserEntity>("user", "user").findMany({

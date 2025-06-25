@@ -4,7 +4,9 @@ import { Layout, StudioHome } from "./components";
 function App() {
   return (
     <Layout>
-      <StudioHome />
+      {({ isConnected, baseUrl }) => (
+        <StudioHome isConnected={isConnected} baseUrl={baseUrl} />
+      )}
     </Layout>
   );
 }

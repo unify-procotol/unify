@@ -1,6 +1,7 @@
-import { SchemaObject } from "openapi3-ts";
+import { SchemaObject } from "@unilab/core";
 
 export class Entity {
   name: string = "";
-  schemas: Record<string, SchemaObject> = {};
+  schema: SchemaObject = {};
+  sources?: string[] = [];
 }

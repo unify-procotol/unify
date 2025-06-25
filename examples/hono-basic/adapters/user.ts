@@ -21,6 +21,18 @@ const userData = [
     email: "jane.smith@example.com",
     avatar: "https://example.com/avatar2.png",
   },
+  {
+    id: "3",
+    name: "Kris",
+    email: "Kris@example.com",
+    avatar: "https://example.com/avatar.png",
+  },
+  {
+    id: "4",
+    name: "Kris",
+    email: "Kris@example.com",
+    avatar: "https://example.com/avatar.png",
+  }
 ];
 
 class UserAdapter implements DataSourceAdapter<UserEntity> {

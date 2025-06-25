@@ -12,11 +12,13 @@ app.get("/custom", (c: Context) => {
   return c.json({ message: "This is a custom route!" });
 });
 
-Unify.init({ app });
-Unify.register([
-  { source: "solana", adapter: new SolanaAdapter() },
-  { source: "evm", adapter: new EVMAdapter() },
-]);
+Unify.init({
+  app,
+  adapters: [
+    { source: "solana", adapter: new SolanaAdapter() },
+    { source: "evm", adapter: new EVMAdapter() },
+  ],
+});
 
 app.get("/hello", (c: Context) => {
   return c.json({

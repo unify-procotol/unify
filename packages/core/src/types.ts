@@ -1,5 +1,3 @@
-export interface BaseEntity {}
-
 // 查询操作符类型
 export type QueryOperators<T> = {
   $gt?: T;
@@ -19,14 +17,15 @@ export type WhereCondition<T> = {
 
 // 关联查询回调函数类型 - 接收完整的实体对象
 export type RelationCallbackSingle<
-  T extends BaseEntity,
-  R extends BaseEntity
+  T extends Record<string, any>,
+  R extends Record<string, any>
 > = (entity: T) => Promise<R | null>;
-export type RelationCallbackMany<T extends BaseEntity, R extends BaseEntity> = (
-  entities: T[]
-) => Promise<R[]>;
+export type RelationCallbackMany<
+  T extends Record<string, any>,
+  R extends Record<string, any>
+> = (entities: T[]) => Promise<R[]>;
 
-export interface FindManyArgs<T extends BaseEntity> {
+export interface FindManyArgs<T extends Record<string, any>> {
   limit?: number;
   offset?: number;
   where?: WhereCondition<T>;
@@ -36,27 +35,27 @@ export interface FindManyArgs<T extends BaseEntity> {
   };
 }
 
-export interface FindOneArgs<T extends BaseEntity> {
+export interface FindOneArgs<T extends Record<string, any>> {
   where: WhereCondition<T>;
   include?: {
     [key: string]: RelationCallbackSingle<T, any>;
   };
 }
 
-export interface CreationArgs<T extends BaseEntity> {
+export interface CreationArgs<T extends Record<string, any>> {
   data: Partial<T>;
 }
 
-export interface UpdateArgs<T extends BaseEntity> {
+export interface UpdateArgs<T extends Record<string, any>> {
   where: WhereCondition<T>;
   data: Partial<T>;
 }
 
-export interface DeletionArgs<T extends BaseEntity> {
+export interface DeletionArgs<T extends Record<string, any>> {
   where: WhereCondition<T>;
 }
 
-export interface DataSourceAdapter<T extends BaseEntity> {
+export interface DataSourceAdapter<T extends Record<string, any>> {
   findMany(args?: FindManyArgs<T>): Promise<T[]>;
   findOne(args: FindOneArgs<T>): Promise<T | null>;
   create(args: CreationArgs<T>): Promise<T>;
