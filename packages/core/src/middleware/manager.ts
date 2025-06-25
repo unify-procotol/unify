@@ -1,7 +1,12 @@
-import { Middleware, MiddlewareContext, MiddlewareOptions } from "../types";
+import {
+  Middleware,
+  MiddlewareContext,
+  MiddlewareManagerInterface,
+  MiddlewareOptions,
+} from "../types";
 
 export class MiddlewareManager<T extends Record<string, any>>
-  implements MiddlewareManager<T>
+  implements MiddlewareManagerInterface<T>
 {
   private middlewares: Array<{
     middleware: Middleware<T>;

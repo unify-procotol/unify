@@ -14,7 +14,7 @@ export class EntityAdapter implements DataSourceAdapter<Entity> {
     const entitySources = Unify.getEntitySources();
     return entitySources[entityName] || [];
   }
-  
+
   async findMany(args?: FindManyArgs<Entity>): Promise<Entity[]> {
     const where = args?.where || {};
     const schemas = Unify.getEntitySchemas();
@@ -23,14 +23,19 @@ export class EntityAdapter implements DataSourceAdapter<Entity> {
     if (entityName) {
       const actualEntityName =
         typeof entityName === "string" ? entityName : entityName.$eq;
-      if (actualEntityName && schemas[actualEntityName]) {
-        return [
-          {
-            name: actualEntityName,
-            schema: schemas[actualEntityName],
-            sources: this.getSourcesForEntity(actualEntityName),
-          },
-        ];
+      if (actualEntityName) {
+        const schema = schemas[actualEntityName];
+        if (schema) {
+          return [
+            {
+              name: actualEntityName,
+              schema: schemas[actualEntityName],
+              sources: this.getSourcesForEntity(actualEntityName),
+            },
+          ];
+        } else {
+          return [];
+        }
       }
     }
 

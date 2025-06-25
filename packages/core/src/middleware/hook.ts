@@ -107,10 +107,9 @@ export class HookManager<T extends Record<string, any>> {
   async executeBefore(
     operation: string,
     args: any,
-    adapter: DataSourceAdapter<T>,
-    metadata?: Record<string, any>
+    adapter: DataSourceAdapter<T>
   ): Promise<void> {
-    const context = { adapter, operation, metadata };
+    const context = { adapter, operation };
 
     // 执行通用 before 钩子
     for (const hook of this.hooks.beforeAny) {
@@ -142,10 +141,9 @@ export class HookManager<T extends Record<string, any>> {
     operation: string,
     args: any,
     result: any,
-    adapter: DataSourceAdapter<T>,
-    metadata?: Record<string, any>
+    adapter: DataSourceAdapter<T>
   ): Promise<void> {
-    const context = { adapter, operation, metadata };
+    const context = { adapter, operation };
 
     // 执行具体操作的 after 钩子
     switch (operation) {
@@ -194,7 +192,6 @@ export class HookManager<T extends Record<string, any>> {
 
 // 创建 Hook 中间件的工厂函数
 export function createHookMiddleware<T extends Record<string, any>>(
-  adapter: DataSourceAdapter<T>,
   setupHooks?: (hookManager: HookManager<T>) => void
 ): Middleware<T> {
   const hookManager = new HookManager<T>();
@@ -204,13 +201,15 @@ export function createHookMiddleware<T extends Record<string, any>>(
     setupHooks(hookManager);
   }
 
-  return async (context: MiddlewareContext<T>, next: MiddlewareNext<T>) => {
+  const middleware = async (
+    context: MiddlewareContext<T>,
+    next: MiddlewareNext<T>
+  ) => {
     // 执行 before 钩子
     await hookManager.executeBefore(
       context.operation,
       context.args,
-      adapter,
-      context.metadata
+      context.adapter
     );
 
     // 执行主操作
@@ -221,12 +220,21 @@ export function createHookMiddleware<T extends Record<string, any>>(
       context.operation,
       context.args,
       result,
-      adapter,
-      context.metadata
+      context.adapter
     );
 
     return result;
   };
+
+  // 使用Object.defineProperty正确设置name属性
+  Object.defineProperty(middleware, "name", {
+    value: "HookMiddleware",
+    writable: false,
+    enumerable: false,
+    configurable: true,
+  });
+
+  return middleware;
 }
 
 // 便捷的钩子构建器
@@ -282,8 +290,8 @@ export class HookBuilder<T extends Record<string, any>> {
   }
 
   // 构建中间件
-  build(adapter: DataSourceAdapter<T>): Middleware<T> {
-    return createHookMiddleware(adapter, (hookManager) => {
+  build(): Middleware<T> {
+    return createHookMiddleware((hookManager) => {
       for (const setupFn of this.setupFunctions) {
         setupFn(hookManager);
       }

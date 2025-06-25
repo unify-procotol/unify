@@ -68,7 +68,7 @@ export type MiddlewareContext<T extends Record<string, any>> = {
   operation: "findMany" | "findOne" | "create" | "update" | "delete";
   args: any;
   result?: any;
-  metadata?: Record<string, any>;
+  adapter: DataSourceAdapter<T>;
 };
 
 export type MiddlewareNext<T extends Record<string, any>> = () => Promise<any>;
@@ -84,7 +84,7 @@ export type MiddlewareOptions = {
   name?: string;
 };
 
-export interface MiddlewareManager<T extends Record<string, any>> {
+export interface MiddlewareManagerInterface<T extends Record<string, any>> {
   use(middleware: Middleware<T>, options?: MiddlewareOptions): void;
   remove(name: string): boolean;
   clear(): void;
@@ -92,4 +92,15 @@ export interface MiddlewareManager<T extends Record<string, any>> {
     context: MiddlewareContext<T>,
     operation: () => Promise<any>
   ): Promise<any>;
+}
+
+export interface AdapterRegistration {
+  source: string;
+  entityName: string;
+  adapter: DataSourceAdapter<any>;
+}
+
+export interface Plugin {
+  entities?: Record<string, any>[];
+  adapters?: AdapterRegistration[];
 }

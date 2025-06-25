@@ -20,7 +20,6 @@ export class Repository<T extends Record<string, any>> {
     this.middlewareManager = new MiddlewareManager<T>();
   }
 
-  // Middleware management methods
   use(middleware: Middleware<T>, options?: MiddlewareOptions): this {
     this.middlewareManager.use(middleware, options);
     return this;
@@ -36,9 +35,9 @@ export class Repository<T extends Record<string, any>> {
 
   async findMany(args?: FindManyArgs<T>) {
     const context: MiddlewareContext<T> = {
-      operation: "findMany",
       args,
-      metadata: {},
+      operation: "findMany",
+      adapter: this.adapter,
     };
 
     return this.middlewareManager.execute(context, async () => {
@@ -48,9 +47,9 @@ export class Repository<T extends Record<string, any>> {
 
   async findOne(args: FindOneArgs<T>) {
     const context: MiddlewareContext<T> = {
-      operation: "findOne",
       args,
-      metadata: {},
+      operation: "findOne",
+      adapter: this.adapter,
     };
 
     return this.middlewareManager.execute(context, async () => {
@@ -60,9 +59,9 @@ export class Repository<T extends Record<string, any>> {
 
   async create(args: CreationArgs<T>) {
     const context: MiddlewareContext<T> = {
-      operation: "create",
       args,
-      metadata: {},
+      operation: "create",
+      adapter: this.adapter,
     };
 
     return this.middlewareManager.execute(context, async () => {
@@ -73,9 +72,9 @@ export class Repository<T extends Record<string, any>> {
 
   async update(args: UpdateArgs<T>) {
     const context: MiddlewareContext<T> = {
-      operation: "update",
       args,
-      metadata: {},
+      operation: "update",
+      adapter: this.adapter,
     };
 
     return this.middlewareManager.execute(context, async () => {
@@ -85,9 +84,9 @@ export class Repository<T extends Record<string, any>> {
 
   async delete(args: DeletionArgs<T>) {
     const context: MiddlewareContext<T> = {
-      operation: "delete",
       args,
-      metadata: {},
+      operation: "delete",
+      adapter: this.adapter,
     };
 
     return this.middlewareManager.execute(context, async () => {

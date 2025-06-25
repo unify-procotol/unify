@@ -3,7 +3,12 @@ import {
   createHookMiddleware,
   createHookBuilder,
 } from "@unilab/core/middleware";
-import type { DataSourceAdapter } from "@unilab/core";
+import type { 
+  DataSourceAdapter, 
+  CreationArgs, 
+  UpdateArgs, 
+  DeletionArgs 
+} from "@unilab/core";
 
 // 示例实体
 interface User {
@@ -116,9 +121,9 @@ export function createUserRepositoryWithHooks() {
   const repo = new Repository<User>(adapter);
 
   // 使用工厂函数创建 Hook 中间件
-  const hookMiddleware = createHookMiddleware<User>(adapter, (hookManager) => {
+  const hookMiddleware = createHookMiddleware<User>((hookManager) => {
     // 注册 beforeCreate 钩子
-    hookManager.beforeCreate(async (args, _, context) => {
+    hookManager.beforeCreate(async (args: CreationArgs<User>, _, context) => {
       console.log(
         "🚀 Before Create Hook: Validating and normalizing user data"
       );
@@ -134,7 +139,7 @@ export function createUserRepositoryWithHooks() {
     });
 
     // 注册 afterCreate 钩子
-    hookManager.afterCreate(async (args, result, context) => {
+    hookManager.afterCreate(async (args: CreationArgs<User>, result, context) => {
       console.log("✨ After Create Hook: User created successfully");
 
       if (result) {
@@ -154,13 +159,13 @@ export function createUserRepositoryWithHooks() {
     });
 
     // 注册 beforeDelete 钩子
-    hookManager.beforeDelete(async (args, _, context) => {
+    hookManager.beforeDelete(async (args: DeletionArgs<User>, _, context) => {
       console.log("🗑️ Before Delete Hook: Preparing to delete user");
       // 可以在这里检查权限等
     });
 
     // 注册 afterDelete 钩子
-    hookManager.afterDelete(async (args, result, context) => {
+    hookManager.afterDelete(async (args: DeletionArgs<User>, result, context) => {
       if (result) {
         console.log("💀 After Delete Hook: User deleted successfully");
 
@@ -177,13 +182,13 @@ export function createUserRepositoryWithHooks() {
     });
 
     // 注册通用钩子
-    hookManager.beforeAny(async (args, _, context) => {
+    hookManager.beforeAny(async (args: any, _, context) => {
       console.log(
         `🔄 Before Any Hook: ${context?.operation} operation starting`
       );
     });
 
-    hookManager.afterAny(async (args, result, context) => {
+    hookManager.afterAny(async (args: any, result: any, context) => {
       console.log(
         `✅ After Any Hook: ${context?.operation} operation completed`
       );
@@ -207,12 +212,12 @@ export function createUserRepositoryWithBuilder() {
 
   // 使用构建器模式
   const hookMiddleware = createHookBuilder<User>()
-    .beforeCreate(async (args, _, context) => {
+    .beforeCreate(async (args: CreationArgs<User>, _, context) => {
       console.log("🚀 Builder: Before Create Hook");
       UserService.validateUser(args.data);
       UserService.normalizeUser(args.data);
     })
-    .afterCreate(async (args, result, context) => {
+    .afterCreate(async (args: CreationArgs<User>, result, context) => {
       console.log("✨ Builder: After Create Hook");
       if (result) {
         await UserService.sendWelcomeEmail(result);
@@ -220,24 +225,24 @@ export function createUserRepositoryWithBuilder() {
         await UserService.indexUserForSearch(result);
       }
     })
-    .beforeUpdate(async (args, _, context) => {
+    .beforeUpdate(async (args: UpdateArgs<User>, _, context) => {
       console.log("🔄 Builder: Before Update Hook");
       if (args.data) {
         UserService.validateUser(args.data);
         UserService.normalizeUser(args.data);
       }
     })
-    .afterUpdate(async (args, result, context) => {
+    .afterUpdate(async (args: UpdateArgs<User>, result, context) => {
       console.log("✅ Builder: After Update Hook");
       if (result) {
         console.log(`Updated user: ${result.id}`);
       }
     })
-    .beforeDelete(async (args, _, context) => {
+    .beforeDelete(async (args: DeletionArgs<User>, _, context) => {
       console.log("🗑️ Builder: Before Delete Hook");
       // 权限检查等
     })
-    .afterDelete(async (args, result, context) => {
+    .afterDelete(async (args: DeletionArgs<User>, result, context) => {
       if (result) {
         console.log("💀 Builder: After Delete Hook");
         const userId =
@@ -250,13 +255,13 @@ export function createUserRepositoryWithBuilder() {
         }
       }
     })
-    .beforeAny(async (args, _, context) => {
+    .beforeAny(async (args: any, _, context) => {
       console.log(`🔄 Builder: Before Any - ${context?.operation}`);
     })
-    .afterAny(async (args, result, context) => {
+    .afterAny(async (args: any, result: any, context) => {
       console.log(`✅ Builder: After Any - ${context?.operation}`);
     })
-    .build(adapter);
+    .build();
 
   // 安装 Hook 中间件
   repo.use(hookMiddleware, {

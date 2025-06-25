@@ -3,25 +3,23 @@ import { PostEntity } from "./entities/post";
 import { joinRepo, repo, UnifyClient } from "@unilab/client";
 import { UserAdapter } from "./adapters/user";
 import { PostAdapter } from "./adapters/post";
-
-import { SolanaAdapter, EVMAdapter } from "@unilab/uniweb3";
+import { BalancePlugin } from "@unilab/uniweb3";
 import { WalletEntity } from "@unilab/uniweb3/entities";
+import { Plugin } from "@unilab/core";
+import { Logging } from "@unilab/core/middleware";
+
+const MyPlugin: Plugin = {
+  entities: [UserEntity, PostEntity],
+  adapters: [
+    { source: "user", entityName: "UserEntity", adapter: new UserAdapter() },
+    { source: "post", entityName: "PostEntity", adapter: new PostAdapter() },
+  ],
+};
 
 UnifyClient.init({
   enableDebug: true,
-  adapters: [
-    {
-      source: "user",
-      adapter: new UserAdapter(),
-    },
-    {
-      source: "post",
-      adapter: new PostAdapter(),
-    },
-
-    { source: "solana", adapter: new SolanaAdapter() },
-    { source: "evm", adapter: new EVMAdapter() },
-  ],
+  plugins: [MyPlugin, BalancePlugin],
+  middleware: [Logging()],
 });
 
 // const fetchUser = async () => {

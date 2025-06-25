@@ -1,5 +1,5 @@
 import { Unify } from "@unilab/server";
-import { SolanaAdapter, EVMAdapter } from "@unilab/uniweb3";
+import { BalancePlugin } from "@unilab/uniweb3";
 import { Hono, Context } from "hono";
 
 export const runtime = "nodejs";
@@ -14,10 +14,7 @@ app.get("/custom", (c: Context) => {
 
 Unify.init({
   app,
-  adapters: [
-    { source: "solana", adapter: new SolanaAdapter() },
-    { source: "evm", adapter: new EVMAdapter() },
-  ],
+  plugins: [BalancePlugin],
 });
 
 app.get("/hello", (c: Context) => {

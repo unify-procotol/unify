@@ -63,3 +63,17 @@ fetchUser();
 // };
 
 // fetchPost();
+
+
+const createUser = async () => {
+  const data = await repo<UserEntity>("user", "user").create({
+    data: {
+      name: "John Doe",
+      email: "john.doe@example.com",
+      avatar: "https://example.com/avatar.jpg",
+    },
+  });
+  console.log("createUser===>", JSON.stringify(data, null, 2));
+};
+
+createUser();

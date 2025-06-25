@@ -1,5 +1,5 @@
 import { Unify } from "@unilab/server";
-import { SolanaAdapter, EVMAdapter } from "@unilab/uniweb3";
+import { BalancePlugin } from "@unilab/uniweb3";
 import { Hono } from "hono";
 import { handle } from "@hono/node-server/vercel";
 import type { PageConfig } from "next";
@@ -14,10 +14,7 @@ const app = new Hono().basePath("/api");
 
 Unify.init({
   app,
-  adapters: [
-    { source: "solana", adapter: new SolanaAdapter() },
-    { source: "evm", adapter: new EVMAdapter() },
-  ],
+  plugins: [BalancePlugin],
 });
 
 app.get("/hello", (c) => {

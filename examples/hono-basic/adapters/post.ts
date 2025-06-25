@@ -54,31 +54,25 @@ class PostAdapter implements DataSourceAdapter<PostEntity> {
       if (typeof where.userId === "object") {
         // 处理操作符
         const userIdQuery = where.userId as any;
-        console.log("Processing userId query:", userIdQuery);
         if (userIdQuery.$eq) {
           const result = postData.filter(
             (post) => post.userId === userIdQuery.$eq
           );
-          console.log("$eq result:", result);
           return result;
         }
         if (userIdQuery.$in) {
           const result = postData.filter((post) =>
             userIdQuery.$in.includes(post.userId)
           );
-          console.log("$in result:", result);
           return result;
         }
         // 其他操作符可以继续添加
       } else {
         // 直接值比较
         const result = postData.filter((post) => post.userId === where.userId);
-        console.log("Direct userId comparison result:", result);
         return result;
       }
     }
-
-    console.log("No specific conditions, returning all posts:", postData);
     return postData;
   }
 

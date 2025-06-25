@@ -1,30 +1,30 @@
 import type { Context } from "hono";
-import type { DataSourceAdapter } from "@unilab/core";
+import { DataSourceAdapter, Repository } from "@unilab/core";
 
-// 适配器注册表
-export const adapterRegistry = new Map<string, () => DataSourceAdapter<any>>();
+const REPO_REGISTRY = new Map<string, Repository<any>>();
 
-// 注册适配器
 export function registerAdapter<T extends Record<string, any>>(
   source: string,
-  adapterFactory: () => DataSourceAdapter<T>
+  adapter: DataSourceAdapter<T>
 ) {
-  adapterRegistry.set(source, adapterFactory);
+  const repo = new Repository<T>(adapter);
+  REPO_REGISTRY.set(source, repo);
+  return repo;
 }
 
-// 获取适配器
-export function getAdapter<T extends Record<string, any>>(
-  source: string
-): DataSourceAdapter<T> {
-  const adapterFactory = adapterRegistry.get(source);
-  if (!adapterFactory) {
+export function getRepo(source: string) {
+  const repo = REPO_REGISTRY.get(source);
+  if (!repo) {
     throw new Error(`Unknown data source: ${source}`);
   }
-  return adapterFactory();
+  return repo;
 }
 
-// 解析查询参数
-export function parseQueryParams<T extends Record<string, any>>(c: Context) {
+export function getRepoRegistry() {
+  return REPO_REGISTRY;
+}
+
+export function parseQueryParams(c: Context) {
   const query = c.req.query();
   const params: any = {};
 
@@ -82,9 +82,4 @@ export function validateSource(source: string | undefined, c: Context) {
     return c.json({ error: "source parameter is required" }, 400);
   }
   return null;
-}
-
-export interface AdapterRegistration {
-  source: string;
-  adapter: DataSourceAdapter<any>;
 }

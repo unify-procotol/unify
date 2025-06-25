@@ -2,9 +2,8 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 import {
-  AdapterRegistration,
-  adapterRegistry,
-  getAdapter,
+  getRepo,
+  getRepoRegistry,
   handleError,
   parseQueryParams,
   registerAdapter,
@@ -15,12 +14,15 @@ import {
   generateSchemas,
   Repository,
   SchemaObject,
+  Middleware,
+  Plugin,
+  AdapterRegistration,
 } from "@unilab/core";
 
 export interface UnifyConfig {
   app?: Hono;
-  entities?: Record<string, any>[];
-  adapters: AdapterRegistration[];
+  plugins?: Plugin[];
+  middleware?: Middleware<any>[];
 }
 
 export class Unify {
@@ -41,27 +43,51 @@ export class Unify {
       this.app.onError((err, c) => handleError(err, c));
     }
 
-    if (config.entities) {
-      this.entitySchemas = generateSchemas(config.entities);
+    if (config.plugins) {
+      this.initFromPlugins(config.plugins);
     }
 
-    // Analyze entity-source mapping from adapters configuration
-    this.entitySources = this.analyzeEntitySources(config.adapters, config.entities || []);
+    if (config.middleware) {
+      this.applyMiddlewareToRepos(config.middleware);
+    }
 
-    config.adapters.forEach(({ source, adapter }) => {
-      registerAdapter(source, () => adapter);
-    });
-
-    // 创建 Unify 服务器路由
     this.setupRoutes();
 
+    return this.app;
+  }
+
+  // Initialize from plugins configuration
+  private static initFromPlugins(plugins: Plugin[]) {
+    // Collect all configuration from plugins using flatMap
+    const entities = plugins.flatMap((p) => p.entities || []);
+    const adapters = plugins.flatMap((p) => p.adapters || []);
+
+    // Generate schemas and analyze entity-source mapping
+    if (entities.length > 0) {
+      this.entitySchemas = generateSchemas(entities);
+    }
+    this.entitySources = this.analyzeEntitySources(adapters);
+
+    // Register adapters and apply middleware
+    adapters.forEach(({ source, adapter }) => registerAdapter(source, adapter));
+
     console.log(
-      `✅ Registered adapters: ${config.adapters
-        .map((a) => a.source)
+      `✅ Registered adapters: ${adapters
+        .map((a) => a.adapter.constructor.name)
         .join(", ")}`
     );
+  }
 
-    return this.app;
+  // Apply middleware to all registered repositories
+  private static applyMiddlewareToRepos(middleware: Middleware<any>[]) {
+    const repoRegistry = getRepoRegistry();
+    repoRegistry.forEach((repo) => {
+      middleware.forEach((m) => repo.use(m));
+    });
+
+    console.log(
+      `✅ Registered middleware: ${middleware.map((m) => m.name).join(", ")}`
+    );
   }
 
   static repo<T extends Record<string, any>>({
@@ -70,11 +96,13 @@ export class Unify {
   }: {
     source: string;
     adapter: DataSourceAdapter<T>;
-  }): Repository<T> {
-    if (!adapterRegistry.has(source)) {
-      registerAdapter(source, () => adapter);
+  }) {
+    try {
+      const repo = getRepo(source) as Repository<T>;
+      return repo;
+    } catch (error) {
+      return registerAdapter(source, adapter);
     }
-    return new Repository<T>(adapter);
   }
 
   // 静态设置路由方法
@@ -88,9 +116,9 @@ export class Unify {
         const sourceError = validateSource(source, c);
         if (sourceError) return sourceError;
 
-        const adapter = getAdapter(source!);
+        const repo = getRepo(source!);
         const params = parseQueryParams(c);
-        const result = await adapter.findMany(params);
+        const result = await repo.findMany(params);
 
         return c.json({ data: result, entity, source });
       } catch (error) {
@@ -112,8 +140,8 @@ export class Unify {
           return c.json({ error: "where parameter is required" }, 400);
         }
 
-        const adapter = getAdapter(source!);
-        const result = await adapter.findOne({
+        const repo = getRepo(source!);
+        const result = await repo.findOne({
           where: params.where,
         });
 
@@ -137,8 +165,8 @@ export class Unify {
           return c.json({ error: "data field is required" }, 400);
         }
 
-        const adapter = getAdapter(source!);
-        const result = await adapter.create({
+        const repo = getRepo(source!);
+        const result = await repo.create({
           data: body.data,
         });
 
@@ -162,8 +190,8 @@ export class Unify {
           return c.json({ error: "where and data fields are required" }, 400);
         }
 
-        const adapter = getAdapter(source!);
-        const result = await adapter.update({
+        const repo = getRepo(source!);
+        const result = await repo.update({
           where: body.where,
           data: body.data,
         });
@@ -188,8 +216,8 @@ export class Unify {
           return c.json({ error: "where parameter is required" }, 400);
         }
 
-        const adapter = getAdapter(source!);
-        const result = await adapter.delete({
+        const repo = getRepo(source!);
+        const result = await repo.delete({
           where: params.where,
         });
 
@@ -198,30 +226,18 @@ export class Unify {
         return handleError(error, c);
       }
     });
-
-    // 健康检查端点
-    this.app.get("/health", (c) => {
-      return c.json({
-        status: "ok",
-        timestamp: new Date().toISOString(),
-        adapters: Array.from(adapterRegistry.keys()),
-      });
-    });
   }
 
-  // 静态获取 app 实例方法
   static getApp() {
     return this.app;
   }
 
-  // 静态获取实体模式方法
   static getEntitySchemas(): Record<string, SchemaObject> {
     return this.entitySchemas;
   }
 
-  // 静态获取适配器信息方法
   static getAdapters(): string[] {
-    return Array.from(adapterRegistry.keys());
+    return Array.from(getRepoRegistry().keys());
   }
 
   // 静态获取实体源映射方法
@@ -231,33 +247,15 @@ export class Unify {
 
   // 分析实体和源的映射关系
   private static analyzeEntitySources(
-    adapters: AdapterRegistration[],
-    entities: Record<string, any>[]
+    adapters: AdapterRegistration[]
   ): Record<string, string[]> {
     const entitySources: Record<string, string[]> = {};
-    
-    // 创建adapter类名到entity名的映射
-    const adapterToEntity: Record<string, string> = {};
-    
-    // 分析每个adapter对应的entity
-    adapters.forEach(({ source, adapter }) => {
-      const adapterClassName = adapter.constructor.name;
-      
-      // 跳过特殊的adapters (如EntityAdapter for _global)
-      if (adapterClassName === 'EntityAdapter' || source === '_global') {
-        return;
-      }
-      
-      // 根据adapter类名推断entity名 约定大于配置
-      // 例如: UserAdapter -> UserEntity, PostAdapter -> PostEntity
-      const entityName = adapterClassName.replace('Adapter', 'Entity');
-      
+    adapters.forEach(({ source, entityName }) => {
       if (!entitySources[entityName]) {
         entitySources[entityName] = [];
       }
       entitySources[entityName].push(source);
     });
-    
     return entitySources;
   }
 }

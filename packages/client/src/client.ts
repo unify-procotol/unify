@@ -5,50 +5,76 @@ import type {
   UpdateArgs,
   DeletionArgs,
   Repository,
-  DataSourceAdapter,
-} from "@unilab/core";
-import type {
+  Plugin,
+  SchemaObject,
   AdapterRegistration,
-  AdapterRegistry,
-  ClientConfig,
-  RelationMapping,
-} from "./types";
+  Middleware,
+} from "@unilab/core";
+import { generateSchemas } from "@unilab/core";
+import type { ClientConfig, RelationMapping } from "./types";
+import { getRepo, getRepoRegistry, registerAdapter } from "./utils";
 
 export class UnifyClient {
   private enableDebug: boolean = false;
-  private adapters: AdapterRegistry = new Map();
+  private entitySchemas: Record<string, SchemaObject> = {};
+  private entitySources: Record<string, string[]> = {};
 
   constructor(config: ClientConfig) {
     this.enableDebug = config.enableDebug || false;
-    this.registerAdapters(config.adapters);
+    this.initFromPlugins(config.plugins);
+    this.applyMiddlewareToRepos(config.middleware);
   }
 
   private log(...args: any[]): void {
     if (this.enableDebug) {
-      console.log("[UnifyClientLite]", ...args);
+      console.log("[UnifyClient]", ...args);
     }
   }
 
-  private registerAdapters<T extends Record<string, any>>(
-    registrations: AdapterRegistration<T>[]
-  ): void {
-    for (const { source, adapter } of registrations) {
-      this.adapters.set(
-        source,
-        adapter as DataSourceAdapter<Record<string, any>>
+  private initFromPlugins(plugins: Plugin[]) {
+    const entities = plugins.flatMap((p) => p.entities || []);
+    const adapters = plugins.flatMap((p) => p.adapters || []);
+
+    // Generate schemas and analyze entity-source mapping
+    if (entities.length > 0) {
+      this.entitySchemas = generateSchemas(entities);
+    }
+    this.entitySources = this.analyzeEntitySources(adapters);
+
+    // Register adapters and apply middleware
+    adapters.forEach(({ source, adapter }) => registerAdapter(source, adapter));
+
+    console.log(
+      `✅ Registered adapters: ${adapters
+        .map((a) => a.adapter.constructor.name)
+        .join(", ")}`
+    );
+  }
+
+  // Apply middleware to all registered repositories
+  private applyMiddlewareToRepos(middleware: Middleware<any>[] = []) {
+    if (middleware.length > 0) {
+      const repoRegistry = getRepoRegistry();
+      repoRegistry.forEach((repo) => {
+        middleware.forEach((m) => repo.use(m));
+      });
+      console.log(
+        `✅ Registered middleware: ${middleware.map((m) => m.name).join(", ")}`
       );
-      this.log(`Registered adapter for source: ${source}`);
     }
   }
 
-  private getAdapter<T extends Record<string, any>>(
-    source: string
-  ): DataSourceAdapter<T> {
-    const adapter = this.adapters.get(source);
-    if (!adapter) {
-      throw new Error(`No adapter registered for source: ${source}`);
-    }
-    return adapter as DataSourceAdapter<T>;
+  private analyzeEntitySources(
+    adapters: AdapterRegistration[]
+  ): Record<string, string[]> {
+    const entitySources: Record<string, string[]> = {};
+    adapters.forEach(({ source, entityName }) => {
+      if (!entitySources[entityName]) {
+        entitySources[entityName] = [];
+      }
+      entitySources[entityName].push(source);
+    });
+    return entitySources;
   }
 
   createRepositoryProxy<T extends Record<string, any>>(
@@ -57,14 +83,14 @@ export class UnifyClient {
   ): Repository<T> {
     return new Proxy({} as Repository<T>, {
       get: (target, prop: string) => {
-        const adapter = this.getAdapter<T>(source);
+        const repo = getRepo(source!);
 
         switch (prop) {
           case "findMany":
             return async (args: FindManyArgs<T> = {}) => {
               this.log(`findMany called for ${entityName}:${source}`, args);
 
-              const result = await adapter.findMany(args);
+              const result = await repo.findMany(args);
 
               // Handle relations
               if (args.include && result && result.length > 0) {
@@ -78,7 +104,7 @@ export class UnifyClient {
             return async (args: FindOneArgs<T>) => {
               this.log(`findOne called for ${entityName}:${source}`, args);
 
-              const result = await adapter.findOne(args);
+              const result = await repo.findOne(args);
 
               // Handle relations
               if (args.include && result) {
@@ -91,19 +117,19 @@ export class UnifyClient {
           case "create":
             return async (args: CreationArgs<T>) => {
               this.log(`create called for ${entityName}:${source}`, args);
-              return adapter.create(args);
+              return repo.create(args);
             };
 
           case "update":
             return async (args: UpdateArgs<T>) => {
               this.log(`update called for ${entityName}:${source}`, args);
-              return adapter.update(args);
+              return repo.update(args);
             };
 
           case "delete":
             return async (args: DeletionArgs<T>) => {
               this.log(`delete called for ${entityName}:${source}`, args);
-              return adapter.delete(args);
+              return repo.delete(args);
             };
 
           default:
@@ -241,6 +267,18 @@ export class UnifyClient {
         return originalMethod;
       },
     });
+  }
+
+  static getEntitySchemas(): Record<string, SchemaObject> {
+    return UnifyClient.getGlobalClient().entitySchemas;
+  }
+
+  static getAdapters(): string[] {
+    return Array.from(getRepoRegistry().keys());
+  }
+
+  static getEntitySources(): Record<string, string[]> {
+    return UnifyClient.getGlobalClient().entitySources;
   }
 }
 
