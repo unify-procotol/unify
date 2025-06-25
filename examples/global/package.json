@@ -1,7 +1,7 @@
 {
   "name": "global-example",
   "version": "1.0.0",
-  "description": "Global example using @unilab/server and @unilab/client",
+  "description": "Global example using @unilab/server and @unilab/httply",
   "main": "server.ts",
   "scripts": {
     "dev": "bun run server.ts",

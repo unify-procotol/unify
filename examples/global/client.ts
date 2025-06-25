@@ -9,7 +9,9 @@ UnifyClient.init({
 const demo = async () => {
   // const res = await repo<Entity>("entity", "_global").findOne({
   //   where: {
-  //     name: "PostEntity",
+  //     name: {
+  //       $eq: "PostEntity",
+  //     }
   //   },
   // });
   const res = await repo<Entity>("entity", "_global").findMany();
