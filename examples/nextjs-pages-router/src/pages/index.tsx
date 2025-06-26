@@ -1,4 +1,4 @@
-import { repo, UnifyClient } from "@unilab/httply";
+import { repo, UnifyClient } from "@unilab/unify-client";
 import { WalletEntity } from "@unilab/uniweb3/entities";
 import { useEffect, useState } from "react";
 

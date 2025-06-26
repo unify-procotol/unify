@@ -1,6 +1,6 @@
 import { UserEntity } from "./entities/user";
 import { PostEntity } from "./entities/post";
-import { joinRepo, repo, UnifyClient } from "@unilab/client";
+import { joinRepo, repo, Unify } from "@unilab/unify";
 import { UserAdapter } from "./adapters/user";
 import { PostAdapter } from "./adapters/post";
 import { WalletPlugin } from "@unilab/uniweb3";
@@ -92,7 +92,7 @@ const HookMiddleware = createHookMiddleware((hookManager) => {
     });
 });
 
-UnifyClient.init({
+Unify.init({
   enableDebug: true,
   plugins: [MyPlugin, WalletPlugin],
   middleware: [HookMiddleware, Logging()],

@@ -16,7 +16,7 @@ description: UniWeb3 is a comprehensive blockchain plugin for Unify that provide
 Install the UniWeb3 plugin along with Unify dependencies:
 
 ```package-install
-@unilab/unify-hono @unilab/client @unilab/uniweb3
+@unilab/unify-hono @unilab/unify @unilab/uniweb3
 ```
 
 ## Server Setup
@@ -55,7 +55,7 @@ export default {
 ### Initializing the Client
 
 ```typescript
-import { repo, UnifyClient } from "@unilab/httply";
+import { repo, UnifyClient } from "@unilab/unify-client";
 import { WalletEntity } from "@unilab/uniweb3/entities";
 
 // Initialize the client
@@ -110,7 +110,7 @@ console.log("Solana Wallet:", solanaWallet);
 Here's a complete example showing how to use both adapters:
 
 ```typescript
-import { repo, UnifyClient } from "@unilab/httply";
+import { repo, UnifyClient } from "@unilab/unify-client";
 import { WalletEntity } from "@unilab/uniweb3/entities";
 
 // Initialize the client

@@ -132,7 +132,7 @@ class PostAdapter implements DataSourceAdapter<PostEntity> {
 For `findOne` queries, relation callbacks receive the single entity:
 
 ```typescript
-import { repo, UnifyClient } from "@unilab/client";
+import { repo, UnifyClient } from "@unilab/unify";
 import { PostEntity, UserEntity } from "./entities";
 
 // Query a post with its author
@@ -260,7 +260,7 @@ const posts = await repo<PostEntity>("post", "post").findMany({
 Initialize the Unify client as usual:
 
 ```typescript
-import { UnifyClient } from "@unilab/httply";
+import { UnifyClient } from "@unilab/unify-client";
 
 UnifyClient.init({
   baseUrl: "http://localhost:3000",

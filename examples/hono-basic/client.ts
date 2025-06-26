@@ -1,6 +1,6 @@
 import { UserEntity } from "./entities/user";
 import { PostEntity } from "./entities/post";
-import { repo, UnifyClient, joinRepo } from "@unilab/httply";
+import { repo, UnifyClient, joinRepo } from "@unilab/unify-client";
 
 UnifyClient.init({
   baseUrl: "http://localhost:3000",

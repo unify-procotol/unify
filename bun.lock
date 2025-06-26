@@ -11,8 +11,8 @@
       "name": "browser-example",
       "version": "1.0.0",
       "dependencies": {
-        "@unilab/client": "workspace:*",
         "@unilab/core": "workspace:*",
+        "@unilab/unify": "workspace:*",
       },
       "devDependencies": {
         "typescript": "^5.3.0",
@@ -24,7 +24,7 @@
       "dependencies": {
         "@hono/node-server": "^1.12.2",
         "@unilab/core": "workspace:*",
-        "@unilab/httply": "workspace:*",
+        "@unilab/unify-client": "workspace:*",
         "@unilab/unify-hono": "workspace:*",
         "hono": "^4.7.11",
       },
@@ -39,7 +39,7 @@
       "dependencies": {
         "@hono/node-server": "^1.12.2",
         "@unilab/core": "workspace:*",
-        "@unilab/httply": "workspace:*",
+        "@unilab/unify-client": "workspace:*",
         "@unilab/unify-hono": "workspace:*",
         "hono": "^4.7.11",
       },
@@ -62,7 +62,7 @@
       "name": "nextjs-app-router",
       "version": "0.1.0",
       "dependencies": {
-        "@unilab/httply": "workspace:*",
+        "@unilab/unify-client": "workspace:*",
         "@unilab/unify-hono": "workspace:*",
         "@unilab/uniweb3": "workspace:*",
         "hono": "^4.7.11",
@@ -84,7 +84,7 @@
       "version": "0.1.0",
       "dependencies": {
         "@hono/node-server": "^1.14.4",
-        "@unilab/httply": "workspace:*",
+        "@unilab/unify-client": "workspace:*",
         "@unilab/unify-hono": "workspace:*",
         "@unilab/uniweb3": "workspace:*",
         "hono": "^4.7.11",
@@ -101,14 +101,25 @@
         "typescript": "^5",
       },
     },
-    "packages/client": {
-      "name": "@unilab/client",
+    "packages/core": {
+      "name": "@unilab/core",
+      "version": "0.0.1",
+      "dependencies": {
+        "remult": "^3.0.5",
+      },
+      "devDependencies": {
+        "@types/node": "^20.10.0",
+        "typescript": "^5.3.0",
+      },
+    },
+    "packages/unify": {
+      "name": "@unilab/unify",
       "version": "0.0.1",
       "bin": {
         "unify-studio": "bin/unify-studio.js"
       },
       "dependencies": {
-        "@unilab/httply": "workspace:*",
+        "@unilab/unify-client": "workspace:*",
         "prism-react-renderer": "^2.4.1",
         "react": "^18.2.0",
         "react-dom": "^18.2.0",
@@ -127,19 +138,8 @@
         "vite": "^5.0.0",
       },
     },
-    "packages/core": {
-      "name": "@unilab/core",
-      "version": "0.0.1",
-      "dependencies": {
-        "remult": "^3.0.5",
-      },
-      "devDependencies": {
-        "@types/node": "^20.10.0",
-        "typescript": "^5.3.0",
-      },
-    },
-    "packages/httply": {
-      "name": "@unilab/httply",
+    "packages/unify-client": {
+      "name": "@unilab/unify-client",
       "version": "0.0.1",
       "dependencies": {
         "@unilab/core": "workspace:*",
@@ -484,11 +484,11 @@
 
     "@typescript-eslint/visitor-keys": ["@typescript-eslint/visitor-keys@8.35.0", "", { "dependencies": { "@typescript-eslint/types": "8.35.0", "eslint-visitor-keys": "^4.2.1" } }, "sha512-zTh2+1Y8ZpmeQaQVIc/ZZxsx8UzgKJyNg1PTvjzC7WMhPSVS8bfDX34k1SrwOf016qd5RU3az2UxUNue3IfQ5g=="],
 
-    "@unilab/client": ["@unilab/client@workspace:packages/client"],
-
     "@unilab/core": ["@unilab/core@workspace:packages/core"],
 
-    "@unilab/httply": ["@unilab/httply@workspace:packages/httply"],
+    "@unilab/unify": ["@unilab/unify@workspace:packages/unify"],
+
+    "@unilab/unify-client": ["@unilab/unify-client@workspace:packages/unify-client"],
 
     "@unilab/unify-hono": ["@unilab/unify-hono@workspace:packages/unify-hono"],
 

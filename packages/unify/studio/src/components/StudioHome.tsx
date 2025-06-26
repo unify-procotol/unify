@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { repo, UnifyClient } from "@unilab/httply";
+import { repo, UnifyClient } from "@unilab/unify-client";
 
 // Entity schema type based on the API response
 interface EntitySchema {

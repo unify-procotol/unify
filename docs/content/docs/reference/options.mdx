@@ -1,6 +1,6 @@
 ---
 title: API Reference
-description: Complete API reference for Unify packages including @unilab/core, @unilab/unify-hono, and @unilab/client.
+description: Complete API reference for Unify packages including @unilab/core, @unilab/unify-hono, and @unilab/unify.
 ---
 
 # @unilab/core
@@ -286,7 +286,7 @@ Validate that a required source parameter is provided.
 function validateSource(source: string | undefined, c: Context): Response | null
 ```
 
-# @unilab/httply
+# @unilab/unify-client
 
 Client-side components for consuming Unify APIs.
 
@@ -337,7 +337,7 @@ static init(config: ClientConfig): void
 
 **Example:**
 ```typescript
-import { UnifyClient } from "@unilab/httply";
+import { UnifyClient } from "@unilab/unify-client";
 
 UnifyClient.init({
   baseUrl: "http://localhost:3000",
@@ -361,7 +361,7 @@ static Repo<T extends Record<string, any>>(
 
 **Example:**
 ```typescript
-import { UnifyClient } from "@unilab/httply";
+import { UnifyClient } from "@unilab/unify-client";
 import { WalletEntity } from "@unilab/uniweb3/entities";
 
 const walletRepo = UnifyClient.repo<WalletEntity>("wallet", "evm");
@@ -427,7 +427,7 @@ function Repo<T extends Record<string, any>>(
 
 **Example:**
 ```typescript
-import { repo } from "@unilab/httply";
+import { repo } from "@unilab/unify-client";
 import { WalletEntity } from "@unilab/uniweb3/entities";
 
 // Initialize client first
@@ -575,7 +575,7 @@ export default {
 ### Basic Client Usage
 
 ```typescript
-import { UnifyClient, repo } from "@unilab/httply";
+import { UnifyClient, repo } from "@unilab/unify-client";
 import { WalletEntity } from "@unilab/uniweb3/entities";
 
 // Initialize client

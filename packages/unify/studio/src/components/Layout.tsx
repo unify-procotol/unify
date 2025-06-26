@@ -1,5 +1,5 @@
 import { ReactNode, useState, useEffect } from "react";
-import { UnifyClient } from "@unilab/httply";
+import { UnifyClient } from "@unilab/unify-client";
 
 interface LayoutProps {
   children: ReactNode | ((props: { isConnected: boolean; baseUrl: string }) => ReactNode);

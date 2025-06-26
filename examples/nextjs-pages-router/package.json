@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@hono/node-server": "^1.14.4",
-    "@unilab/httply": "workspace:*",
+    "@unilab/unify-client": "workspace:*",
     "@unilab/uniweb3": "workspace:*",
     "hono": "^4.7.11",
     "next": "15.3.3",
