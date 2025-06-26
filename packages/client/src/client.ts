@@ -10,7 +10,7 @@ import type {
   AdapterRegistration,
   Middleware,
 } from "@unilab/core";
-import { generateSchemas } from "@unilab/core";
+import { generateSchemas, useGlobalMiddleware } from "@unilab/core";
 import type { ClientConfig, RelationMapping } from "./types";
 import { getRepo, getRepoRegistry, registerAdapter } from "./utils";
 
@@ -54,10 +54,7 @@ export class UnifyClient {
   // Apply middleware to all registered repositories
   private applyMiddlewareToRepos(middleware: Middleware<any>[] = []) {
     if (middleware.length > 0) {
-      const repoRegistry = getRepoRegistry();
-      repoRegistry.forEach((repo) => {
-        middleware.forEach((m) => repo.use(m));
-      });
+      middleware.forEach((m) => useGlobalMiddleware(m));
       console.log(
         `✅ Registered middleware: ${middleware.map((m) => m.name).join(", ")}`
       );

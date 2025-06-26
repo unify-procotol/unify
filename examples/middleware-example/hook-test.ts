@@ -1,13 +1,13 @@
-import { Repository } from "@unilab/core";
+import { Repository, useGlobalMiddleware } from "@unilab/core";
 import {
   createHookMiddleware,
   createHookBuilder,
 } from "@unilab/core/middleware";
-import type { 
-  DataSourceAdapter, 
-  CreationArgs, 
-  UpdateArgs, 
-  DeletionArgs 
+import type {
+  DataSourceAdapter,
+  CreationArgs,
+  UpdateArgs,
+  DeletionArgs,
 } from "@unilab/core";
 
 // 示例实体
@@ -139,24 +139,26 @@ export function createUserRepositoryWithHooks() {
     });
 
     // 注册 afterCreate 钩子
-    hookManager.afterCreate(async (args: CreationArgs<User>, result, context) => {
-      console.log("✨ After Create Hook: User created successfully");
+    hookManager.afterCreate(
+      async (args: CreationArgs<User>, result, context) => {
+        console.log("✨ After Create Hook: User created successfully");
 
-      if (result) {
-        // 发送欢迎邮件
-        await UserService.sendWelcomeEmail(result);
+        if (result) {
+          // 发送欢迎邮件
+          await UserService.sendWelcomeEmail(result);
 
-        // 记录日志
-        await UserService.logUserCreation(result);
+          // 记录日志
+          await UserService.logUserCreation(result);
 
-        // 索引搜索
-        await UserService.indexUserForSearch(result);
+          // 索引搜索
+          await UserService.indexUserForSearch(result);
+        }
+
+        console.log(
+          `Operation: ${context?.operation}, Adapter: ${context?.adapter.constructor.name}`
+        );
       }
-
-      console.log(
-        `Operation: ${context?.operation}, Adapter: ${context?.adapter.constructor.name}`
-      );
-    });
+    );
 
     // 注册 beforeDelete 钩子
     hookManager.beforeDelete(async (args: DeletionArgs<User>, _, context) => {
@@ -165,21 +167,23 @@ export function createUserRepositoryWithHooks() {
     });
 
     // 注册 afterDelete 钩子
-    hookManager.afterDelete(async (args: DeletionArgs<User>, result, context) => {
-      if (result) {
-        console.log("💀 After Delete Hook: User deleted successfully");
+    hookManager.afterDelete(
+      async (args: DeletionArgs<User>, result, context) => {
+        if (result) {
+          console.log("💀 After Delete Hook: User deleted successfully");
 
-        // 提取用户 ID (处理复杂的查询条件)
-        const userId =
-          typeof args.where.id === "string"
-            ? args.where.id
-            : args.where.id?.$eq;
-        if (userId) {
-          await UserService.cleanupUserData(userId);
-          await UserService.removeUserFromCache(userId);
+          // 提取用户 ID (处理复杂的查询条件)
+          const userId =
+            typeof args.where.id === "string"
+              ? args.where.id
+              : args.where.id?.$eq;
+          if (userId) {
+            await UserService.cleanupUserData(userId);
+            await UserService.removeUserFromCache(userId);
+          }
         }
       }
-    });
+    );
 
     // 注册通用钩子
     hookManager.beforeAny(async (args: any, _, context) => {
@@ -196,7 +200,7 @@ export function createUserRepositoryWithHooks() {
   });
 
   // 安装 Hook 中间件
-  repo.use(hookMiddleware, {
+  useGlobalMiddleware(hookMiddleware, {
     name: "userHooks",
     position: "around",
     priority: 20,
@@ -264,7 +268,7 @@ export function createUserRepositoryWithBuilder() {
     .build();
 
   // 安装 Hook 中间件
-  repo.use(hookMiddleware, {
+  useGlobalMiddleware(hookMiddleware, {
     name: "userHooksBuilder",
     position: "around",
     priority: 20,

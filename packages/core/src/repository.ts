@@ -1,4 +1,4 @@
-import { MiddlewareManager } from "./middleware/manager";
+import { getGlobalMiddlewareManager } from "./middleware-manager";
 import type {
   CreationArgs,
   DataSourceAdapter,
@@ -6,31 +6,14 @@ import type {
   FindManyArgs,
   FindOneArgs,
   UpdateArgs,
-  Middleware,
-  MiddlewareOptions,
   MiddlewareContext,
 } from "./types";
 
 export class Repository<T extends Record<string, any>> {
   private adapter: DataSourceAdapter<T>;
-  private middlewareManager: MiddlewareManager<T>;
 
   constructor(adapter: DataSourceAdapter<T>) {
     this.adapter = adapter;
-    this.middlewareManager = new MiddlewareManager<T>();
-  }
-
-  use(middleware: Middleware<T>, options?: MiddlewareOptions): this {
-    this.middlewareManager.use(middleware, options);
-    return this;
-  }
-
-  removeMiddleware(name: string): boolean {
-    return this.middlewareManager.remove(name);
-  }
-
-  clearMiddlewares(): void {
-    this.middlewareManager.clear();
   }
 
   async findMany(args?: FindManyArgs<T>) {
@@ -40,7 +23,7 @@ export class Repository<T extends Record<string, any>> {
       adapter: this.adapter,
     };
 
-    return this.middlewareManager.execute(context, async () => {
+    return getGlobalMiddlewareManager().execute(context, async () => {
       return this.adapter.findMany(args);
     });
   }
@@ -52,7 +35,7 @@ export class Repository<T extends Record<string, any>> {
       adapter: this.adapter,
     };
 
-    return this.middlewareManager.execute(context, async () => {
+    return getGlobalMiddlewareManager().execute(context, async () => {
       return this.adapter.findOne(args);
     });
   }
@@ -64,7 +47,7 @@ export class Repository<T extends Record<string, any>> {
       adapter: this.adapter,
     };
 
-    return this.middlewareManager.execute(context, async () => {
+    return getGlobalMiddlewareManager().execute(context, async () => {
       const result = await this.adapter.create(args);
       return result;
     });
@@ -77,7 +60,7 @@ export class Repository<T extends Record<string, any>> {
       adapter: this.adapter,
     };
 
-    return this.middlewareManager.execute(context, async () => {
+    return getGlobalMiddlewareManager().execute(context, async () => {
       return this.adapter.update(args);
     });
   }
@@ -89,7 +72,7 @@ export class Repository<T extends Record<string, any>> {
       adapter: this.adapter,
     };
 
-    return this.middlewareManager.execute(context, async () => {
+    return getGlobalMiddlewareManager().execute(context, async () => {
       const result = await this.adapter.delete(args);
       return result;
     });

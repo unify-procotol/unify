@@ -1,4 +1,4 @@
-import { Repository } from "@unilab/core";
+import { Repository, useGlobalMiddleware } from "@unilab/core";
 import type { DataSourceAdapter } from "@unilab/core";
 import { Logging } from "@unilab/core/middleware";
 
@@ -133,7 +133,7 @@ async function testLoggingMiddleware() {
 
   // 使用默认的 console.log 日志中间件
   const defaultLoggingMiddleware = Logging<User>();
-  userRepository.use(defaultLoggingMiddleware, {
+  useGlobalMiddleware(defaultLoggingMiddleware, {
     name: "defaultLogger",
     priority: 1,
   });
@@ -142,7 +142,7 @@ async function testLoggingMiddleware() {
   const customLoggingMiddleware = Logging<User>((message, context) =>
     customLogger.log(`CUSTOM: ${message}`, context)
   );
-  userRepository.use(customLoggingMiddleware, {
+  useGlobalMiddleware(customLoggingMiddleware, {
     name: "customLogger",
     priority: 2,
   });

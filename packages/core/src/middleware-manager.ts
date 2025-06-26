@@ -3,9 +3,9 @@ import {
   MiddlewareContext,
   MiddlewareManagerInterface,
   MiddlewareOptions,
-} from "../types";
+} from "./types";
 
-export class MiddlewareManager<T extends Record<string, any>>
+class MiddlewareManager<T extends Record<string, any>>
   implements MiddlewareManagerInterface<T>
 {
   private middlewares: Array<{
@@ -88,4 +88,93 @@ export class MiddlewareManager<T extends Record<string, any>>
 
     return result;
   }
+}
+
+// 全局中间件管理器
+const globalMiddlewareManager = new MiddlewareManager<any>();
+
+/**
+ * 全局中间件管理器
+ * 提供统一的中间件注册和管理功能
+ */
+export class GlobalMiddleware {
+  /**
+   * 注册全局中间件
+   * @param middleware 中间件函数
+   * @param options 中间件选项
+   */
+  static use<T extends Record<string, any>>(
+    middleware: Middleware<T>,
+    options?: MiddlewareOptions
+  ): void {
+    globalMiddlewareManager.use(middleware, options);
+  }
+
+  /**
+   * 移除指定名称的全局中间件
+   * @param name 中间件名称
+   * @returns 是否成功移除
+   */
+  static remove(name: string): boolean {
+    return globalMiddlewareManager.remove(name);
+  }
+
+  /**
+   * 清空所有全局中间件
+   */
+  static clear(): void {
+    globalMiddlewareManager.clear();
+  }
+
+  /**
+   * 获取全局中间件管理器实例
+   * @returns 中间件管理器实例
+   */
+  static getManager() {
+    return globalMiddlewareManager;
+  }
+
+  /**
+   * 获取当前注册的中间件数量
+   * @returns 中间件数量
+   */
+  static getCount(): number {
+    return (globalMiddlewareManager as any).middlewares?.length || 0;
+  }
+}
+
+/**
+ * 获取全局中间件管理器实例
+ * @returns 全局中间件管理器
+ */
+export function getGlobalMiddlewareManager() {
+  return globalMiddlewareManager;
+}
+
+/**
+ * 注册全局中间件的便捷函数
+ * @param middleware 中间件函数
+ * @param options 中间件选项
+ */
+export function useGlobalMiddleware<T extends Record<string, any>>(
+  middleware: Middleware<T>,
+  options?: MiddlewareOptions
+): void {
+  GlobalMiddleware.use(middleware, options);
+}
+
+/**
+ * 移除全局中间件的便捷函数
+ * @param name 中间件名称
+ * @returns 是否成功移除
+ */
+export function removeGlobalMiddleware(name: string): boolean {
+  return GlobalMiddleware.remove(name);
+}
+
+/**
+ * 清空全局中间件的便捷函数
+ */
+export function clearGlobalMiddlewares(): void {
+  GlobalMiddleware.clear();
 }

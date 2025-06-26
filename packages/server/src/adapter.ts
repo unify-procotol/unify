@@ -17,6 +17,7 @@ import {
   Middleware,
   Plugin,
   AdapterRegistration,
+  useGlobalMiddleware,
 } from "@unilab/core";
 
 export interface UnifyConfig {
@@ -80,11 +81,7 @@ export class Unify {
 
   // Apply middleware to all registered repositories
   private static applyMiddlewareToRepos(middleware: Middleware<any>[]) {
-    const repoRegistry = getRepoRegistry();
-    repoRegistry.forEach((repo) => {
-      middleware.forEach((m) => repo.use(m));
-    });
-
+    middleware.forEach((m) => useGlobalMiddleware(m));
     console.log(
       `✅ Registered middleware: ${middleware.map((m) => m.name).join(", ")}`
     );
