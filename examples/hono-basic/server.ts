@@ -1,4 +1,4 @@
-import { Unify } from "@unilab/server";
+import { Unify } from "@unilab/unify-hono";
 import { UserAdapter } from "./adapters/user";
 import { PostAdapter } from "./adapters/post";
 import { UserEntity } from "./entities/user";

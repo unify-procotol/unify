@@ -16,7 +16,7 @@ description: UniWeb3 is a comprehensive blockchain plugin for Unify that provide
 Install the UniWeb3 plugin along with Unify dependencies:
 
 ```package-install
-@unilab/server @unilab/client @unilab/uniweb3
+@unilab/unify-hono @unilab/client @unilab/uniweb3
 ```
 
 ## Server Setup
@@ -26,7 +26,7 @@ Install the UniWeb3 plugin along with Unify dependencies:
 Register the UniWeb3 adapters in your Unify server:
 
 ```typescript
-import { Unify } from "@unilab/server";
+import { Unify } from "@unilab/unify-hono";
 import { SolanaAdapter, EVMAdapter } from "@unilab/uniweb3";
 
 // Register Web3 adapters

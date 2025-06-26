@@ -1,4 +1,4 @@
-import { Unify } from "@unilab/server";
+import { Unify } from "@unilab/unify-hono";
 import { WalletPlugin } from "@unilab/uniweb3";
 import { Hono, Context } from "hono";
 

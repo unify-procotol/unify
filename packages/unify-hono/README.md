@@ -1,4 +1,4 @@
-# @unilab/server
+# @unilab/unify-hono
 
 A simplified server package for building unified APIs with multiple data source adapters.
 
@@ -13,7 +13,7 @@ A simplified server package for building unified APIs with multiple data source 
 ## Installation
 
 ```bash
-npm install @unilab/server
+npm install @unilab/unify-hono
 # For Web3 adapters
 npm install @unilab/uniweb3
 ```
@@ -23,7 +23,7 @@ npm install @unilab/uniweb3
 ### Basic Usage
 
 ```typescript
-import { Unify } from "@unilab/server";
+import { Unify } from "@unilab/unify-hono";
 import { SolanaAdapter, EVMAdapter } from "@unilab/uniweb3";
 
 // Initialize Unify (creates internal Hono app)
@@ -45,7 +45,7 @@ export default {
 ### With Custom Hono App
 
 ```typescript
-import { Unify } from "@unilab/server";
+import { Unify } from "@unilab/unify-hono";
 import { SolanaAdapter, EVMAdapter } from "@unilab/uniweb3";
 import { Hono } from "hono";
 
@@ -74,7 +74,7 @@ export const POST = app.fetch;
 
 ```typescript
 // app/api/[...route]/route.ts
-import { Unify } from "@unilab/server";
+import { Unify } from "@unilab/unify-hono";
 import { SolanaAdapter, EVMAdapter } from "@unilab/uniweb3";
 import { Hono } from "hono";
 
@@ -173,7 +173,7 @@ curl "http://localhost:3000/health"
 
 **Before:**
 ```typescript
-import { Unify } from "@unilab/server";
+import { Unify } from "@unilab/unify-hono";
 import { SolanaAdapter, EVMAdapter } from "@unilab/uniweb3";
 
 const unify = new Unify();
@@ -186,7 +186,7 @@ const server = unify.register([
 
 **After:**
 ```typescript
-import { Unify } from "@unilab/server";
+import { Unify } from "@unilab/unify-hono";
 import { SolanaAdapter, EVMAdapter } from "@unilab/uniweb3";
 
 Unify.init({ app });

@@ -1,6 +1,6 @@
 ---
 title: API Reference
-description: Complete API reference for Unify packages including @unilab/core, @unilab/server, and @unilab/client.
+description: Complete API reference for Unify packages including @unilab/core, @unilab/unify-hono, and @unilab/client.
 ---
 
 # @unilab/core
@@ -144,7 +144,7 @@ function Repo<T extends Record<string, any>>(
 ): Repository<T>
 ```
 
-# @unilab/server
+# @unilab/unify-hono
 
 Server-side components for creating Unify API servers.
 
@@ -169,7 +169,7 @@ static init(config?: UnifyConfig): Hono
 
 **Example:**
 ```typescript
-import { Unify } from "@unilab/server";
+import { Unify } from "@unilab/unify-hono";
 import { Hono } from "hono";
 
 // Use default app
@@ -195,7 +195,7 @@ static register(adapters: AdapterRegistration[]): Hono
 
 **Example:**
 ```typescript
-import { Unify } from "@unilab/server";
+import { Unify } from "@unilab/unify-hono";
 import { SolanaAdapter, EVMAdapter } from "@unilab/uniweb3";
 
 const server = Unify.register([
@@ -557,7 +557,7 @@ Common HTTP status codes:
 ### Basic Server Setup
 
 ```typescript
-import { Unify } from "@unilab/server";
+import { Unify } from "@unilab/unify-hono";
 import { SolanaAdapter, EVMAdapter } from "@unilab/uniweb3";
 
 // Register adapters and start server

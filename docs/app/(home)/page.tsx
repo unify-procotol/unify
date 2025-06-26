@@ -181,7 +181,7 @@ export default function HomePage() {
 function CodeExample() {
   const [activeTab, setActiveTab] = useState<"server" | "client">("server");
 
-  const serverCode = `import { Unify } from "@unilab/server";
+  const serverCode = `import { Unify } from "@unilab/unify-hono";
 import { SolanaAdapter, EVMAdapter } from "@unilab/uniweb3";
 
 const app = Unify.register([

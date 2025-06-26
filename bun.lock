@@ -25,7 +25,7 @@
         "@hono/node-server": "^1.12.2",
         "@unilab/core": "workspace:*",
         "@unilab/httply": "workspace:*",
-        "@unilab/server": "workspace:*",
+        "@unilab/unify-hono": "workspace:*",
         "hono": "^4.7.11",
       },
       "devDependencies": {
@@ -40,7 +40,7 @@
         "@hono/node-server": "^1.12.2",
         "@unilab/core": "workspace:*",
         "@unilab/httply": "workspace:*",
-        "@unilab/server": "workspace:*",
+        "@unilab/unify-hono": "workspace:*",
         "hono": "^4.7.11",
       },
       "devDependencies": {
@@ -63,7 +63,7 @@
       "version": "0.1.0",
       "dependencies": {
         "@unilab/httply": "workspace:*",
-        "@unilab/server": "workspace:*",
+        "@unilab/unify-hono": "workspace:*",
         "@unilab/uniweb3": "workspace:*",
         "hono": "^4.7.11",
         "next": "15.3.3",
@@ -85,7 +85,7 @@
       "dependencies": {
         "@hono/node-server": "^1.14.4",
         "@unilab/httply": "workspace:*",
-        "@unilab/server": "workspace:*",
+        "@unilab/unify-hono": "workspace:*",
         "@unilab/uniweb3": "workspace:*",
         "hono": "^4.7.11",
         "next": "15.3.3",
@@ -149,8 +149,8 @@
         "typescript": "^5.3.0",
       },
     },
-    "packages/server": {
-      "name": "@unilab/server",
+    "packages/unify-hono": {
+      "name": "@unilab/unify-hono",
       "version": "0.0.1",
       "dependencies": {
         "@hono/node-server": "^1.12.2",
@@ -490,7 +490,7 @@
 
     "@unilab/httply": ["@unilab/httply@workspace:packages/httply"],
 
-    "@unilab/server": ["@unilab/server@workspace:packages/server"],
+    "@unilab/unify-hono": ["@unilab/unify-hono@workspace:packages/unify-hono"],
 
     "@unilab/uniweb3": ["@unilab/uniweb3@workspace:packages/uniweb3"],
 

@@ -8,7 +8,7 @@ description: Get started with Unify - installation guide and setup instructions
 Install the core Unify packages:
 
 ```package-install
-@unilab/server @unilab/client hono
+@unilab/unify-hono @unilab/client hono
 ```
 
 ## Web3 Support
@@ -40,7 +40,7 @@ Unify works with any framework that supports Hono. Check the [Integrations](/doc
 After installation, you can quickly set up a Web3-enabled server:
 
 ```typescript
-import { Unify } from "@unilab/server";
+import { Unify } from "@unilab/unify-hono";
 import { SolanaAdapter, EVMAdapter } from "@unilab/uniweb3";
 
 const server = Unify.register([

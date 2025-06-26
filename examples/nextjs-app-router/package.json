@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@unilab/server": "workspace:*",
+    "@unilab/unify-hono": "workspace:*",
     "@unilab/httply": "workspace:*",
     "@unilab/uniweb3": "workspace:*",
     "hono": "^4.7.11",
