@@ -1,12 +1,8 @@
 import { Repository, useGlobalMiddleware } from "@unilab/core";
-import {
-  createHookMiddleware,
-  createHookBuilder,
-} from "@unilab/core/middleware";
+import { createHookMiddleware } from "@unilab/core/middleware";
 import type {
   DataSourceAdapter,
   CreationArgs,
-  UpdateArgs,
   DeletionArgs,
 } from "@unilab/core";
 
@@ -209,74 +205,6 @@ export function createUserRepositoryWithHooks() {
   return repo;
 }
 
-// 方式二：使用构建器模式创建 Hook 中间件
-export function createUserRepositoryWithBuilder() {
-  const adapter = new UserAdapter();
-  const repo = new Repository<User>(adapter);
-
-  // 使用构建器模式
-  const hookMiddleware = createHookBuilder<User>()
-    .beforeCreate(async (args: CreationArgs<User>, _, context) => {
-      console.log("🚀 Builder: Before Create Hook");
-      UserService.validateUser(args.data);
-      UserService.normalizeUser(args.data);
-    })
-    .afterCreate(async (args: CreationArgs<User>, result, context) => {
-      console.log("✨ Builder: After Create Hook");
-      if (result) {
-        await UserService.sendWelcomeEmail(result);
-        await UserService.logUserCreation(result);
-        await UserService.indexUserForSearch(result);
-      }
-    })
-    .beforeUpdate(async (args: UpdateArgs<User>, _, context) => {
-      console.log("🔄 Builder: Before Update Hook");
-      if (args.data) {
-        UserService.validateUser(args.data);
-        UserService.normalizeUser(args.data);
-      }
-    })
-    .afterUpdate(async (args: UpdateArgs<User>, result, context) => {
-      console.log("✅ Builder: After Update Hook");
-      if (result) {
-        console.log(`Updated user: ${result.id}`);
-      }
-    })
-    .beforeDelete(async (args: DeletionArgs<User>, _, context) => {
-      console.log("🗑️ Builder: Before Delete Hook");
-      // 权限检查等
-    })
-    .afterDelete(async (args: DeletionArgs<User>, result, context) => {
-      if (result) {
-        console.log("💀 Builder: After Delete Hook");
-        const userId =
-          typeof args.where.id === "string"
-            ? args.where.id
-            : args.where.id?.$eq;
-        if (userId) {
-          await UserService.cleanupUserData(userId);
-          await UserService.removeUserFromCache(userId);
-        }
-      }
-    })
-    .beforeAny(async (args: any, _, context) => {
-      console.log(`🔄 Builder: Before Any - ${context?.operation}`);
-    })
-    .afterAny(async (args: any, result: any, context) => {
-      console.log(`✅ Builder: After Any - ${context?.operation}`);
-    })
-    .build();
-
-  // 安装 Hook 中间件
-  useGlobalMiddleware(hookMiddleware, {
-    name: "userHooksBuilder",
-    position: "around",
-    priority: 20,
-  });
-
-  return repo;
-}
-
 // 演示函数
 export async function demonstrateHookMiddleware() {
   console.log("🚀 Starting Hook Middleware Demonstration...\n");
@@ -306,35 +234,6 @@ export async function demonstrateHookMiddleware() {
   } catch (error) {
     console.error("Error:", error instanceof Error ? error.message : error);
   }
-
-  console.log("\n=== BUILDER PATTERN APPROACH ===");
-  const builderRepo = createUserRepositoryWithBuilder();
-
-  try {
-    const user2 = await builderRepo.create({
-      data: {
-        name: "李四",
-        email: "lisi@example.com",
-        age: 30,
-      },
-    });
-    console.log("User created:", user2);
-
-    await builderRepo.delete({ where: { id: user2.id } });
-    console.log("User deleted");
-  } catch (error) {
-    console.error("Error:", error instanceof Error ? error.message : error);
-  }
-
-  console.log("\n✨ Hook Middleware demonstration completed!");
-
-  console.log("\n📝 Benefits of this approach:");
-  console.log("• Complete separation of concerns");
-  console.log("• Business logic independent of data layer");
-  console.log("• Highly testable and reusable hooks");
-  console.log("• Access to adapter and context information");
-  console.log("• Flexible hook registration and management");
-  console.log("• Support for both generic and specific hooks");
 }
 
 demonstrateHookMiddleware();
