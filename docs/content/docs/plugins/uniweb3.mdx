@@ -15,39 +15,77 @@ description: UniWeb3 is a comprehensive blockchain plugin for Unify that provide
 
 Install the UniWeb3 plugin along with Unify dependencies:
 
+For Hono server:
 ```package-install
 @unilab/unify-hono @unilab/unify @unilab/uniweb3
 ```
 
+For Next.js Pages Router:
+```package-install
+@unilab/unify-next @unilab/unify-client @unilab/core @unilab/uniweb3 next react react-dom
+```
+
+Runs only in a browser or node environment:
+```package-install
+@unilab/unify @unilab/core @unilab/uniweb3
+```
+
 ## Server Setup
 
-### Basic Setup
+### Hono Server Setup
 
-Register the UniWeb3 adapters in your Unify server:
+Register the UniWeb3 plugin in your Hono server:
 
 ```typescript
 import { Unify } from "@unilab/unify-hono";
-import { SolanaAdapter, EVMAdapter } from "@unilab/uniweb3";
+import { WalletPlugin } from "@unilab/uniweb3";
+import { Logging } from "@unilab/core/middleware";
 
-// Register Web3 adapters
-const server = Unify.register([
-  { source: "solana", adapter: new SolanaAdapter() },
-  { source: "evm", adapter: new EVMAdapter() },
-]);
-
-console.log("🚀 Starting Unify server on port 3000");
-console.log("📊 Available endpoints:");
-console.log(
-  '  GET  /wallet/find_one?source=solana&where={"address":"wallet_address"} - Get Solana wallet balance'
-);
-console.log(
-  '  GET  /wallet/find_one?source=evm&where={"address":"wallet_address","network":"ethereum"} - Get EVM wallet balance'
-);
+// Register Web3 plugin
+const app = Unify.init({
+  plugins: [WalletPlugin],
+  middleware: [Logging()],
+});
 
 export default {
   port: 3000,
-  fetch: server.fetch,
+  fetch: app.fetch,
 };
+```
+
+### Next.js Pages Router Setup
+
+For Next.js with Pages Router, create an API route to handle UniWeb3 requests:
+
+```typescript
+// pages/api/[...unify].ts
+import { PagesUnify } from "@unilab/unify-next/pages-router";
+import { WalletPlugin } from "@unilab/uniweb3";
+import { Logging } from "@unilab/core/middleware";
+
+const handler = PagesUnify.init({
+  plugins: [WalletPlugin],
+  middleware: [Logging()],
+});
+
+export default handler;
+```
+
+### Runs only in a browser or node environment
+
+For browser environments, you can use UniWeb3 directly without a server:
+
+```typescript
+import { Unify } from "@unilab/unify";
+import { WalletPlugin } from "@unilab/uniweb3";
+import { Logging } from "@unilab/core/middleware";
+
+// Initialize Unify with Web3 plugin for browser or node.js
+Unify.init({
+  enableDebug: true,
+  plugins: [WalletPlugin],
+  middleware: [Logging()],
+});
 ```
 
 ## Client Usage
@@ -58,7 +96,7 @@ export default {
 import { repo, UnifyClient } from "@unilab/unify-client";
 import { WalletEntity } from "@unilab/uniweb3/entities";
 
-// Initialize the client
+// Initialize the client (for standalone server)
 UnifyClient.init({
   baseUrl: "http://localhost:3000",
   timeout: 10000,
@@ -107,13 +145,86 @@ console.log("Solana Wallet:", solanaWallet);
 
 ## Complete Example
 
-Here's a complete example showing how to use both adapters:
+### React Component Example (Next.js Pages Router)
+
+Here's a complete React component example that fetches wallet balances:
+
+```typescript
+import { repo, UnifyClient } from "@unilab/unify-client";
+import { WalletEntity } from "@unilab/uniweb3/entities";
+import { useEffect, useState } from "react";
+
+// Initialize the client for Next.js API routes
+UnifyClient.init({
+  baseUrl: "http://localhost:3000/api",
+  timeout: 10000,
+  headers: {
+    Authorization: "Bearer your-token-here",
+  },
+});
+
+export default function Home() {
+  const [evmBalanceData, setEvmBalanceData] = useState<any>(null);
+  const [solanaBalanceData, setSolanaBalanceData] = useState<any>(null);
+
+  useEffect(() => {
+    const fetchEvmBalance = async () => {
+      try {
+        const data = await repo<WalletEntity>("wallet", "evm").findOne({
+          where: {
+            address: "0x4f00D43b5aF0a0aAd62E9075D1bFa86a89CDb9aB",
+            network: "iotex",
+          },
+        });
+        if (data) {
+          setEvmBalanceData(data);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    const fetchSolanaBalance = async () => {
+      try {
+        const data = await repo<WalletEntity>("wallet", "solana").findOne({
+          where: {
+            address: "11111111111111111111111111111112",
+          },
+        });
+        if (data) {
+          setSolanaBalanceData(data);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchEvmBalance();
+    fetchSolanaBalance();
+  }, []);
+
+  return (
+    <div className="min-h-screen w-full flex flex-col items-center p-10">
+      {evmBalanceData && (
+        <pre>{JSON.stringify(evmBalanceData, null, 2)}</pre>
+      )}
+      {solanaBalanceData && (
+        <pre>{JSON.stringify(solanaBalanceData, null, 2)}</pre>
+      )}
+    </div>
+  );
+}
+```
+
+### Node.js/Server Example
+
+Here's a standalone Node.js example for querying balances:
 
 ```typescript
 import { repo, UnifyClient } from "@unilab/unify-client";
 import { WalletEntity } from "@unilab/uniweb3/entities";
 
-// Initialize the client
+// Initialize the client for standalone server
 UnifyClient.init({
   baseUrl: "http://localhost:3000",
   timeout: 10000,
@@ -196,9 +307,89 @@ Query balance for a Solana wallet address.
 
 The UniWeb3 plugin works seamlessly with various frameworks:
 
-- [Next.js Integration](/docs/integrations/next) - Complete Next.js setup guide
+- [Next.js App Router Integration](/docs/integrations/next) - Complete Next.js App Router setup guide
+- Next.js Pages Router - Covered in this documentation
+- [Hono Integration](/docs/integrations/hono) - Hono server setup guide
 - Express.js Integration - Coming soon
 - Fastify Integration - Coming soon
+
+### Setting up a Next.js Pages Router Project
+
+1. Create a new Next.js project:
+```bash
+npx create-next-app@latest my-web3-app --typescript --tailwind --src-dir
+cd my-web3-app
+```
+
+2. Install the required dependencies:
+```bash
+npm install @unilab/unify-next @unilab/unify-client @unilab/core @unilab/uniweb3
+```
+
+3. Create the API route at `pages/api/[...unify].ts`:
+```typescript
+import { PagesUnify } from "@unilab/unify-next/pages-router";
+import { WalletPlugin } from "@unilab/uniweb3";
+import { Logging } from "@unilab/core/middleware";
+
+const handler = PagesUnify.init({
+  plugins: [WalletPlugin],
+  middleware: [Logging()],
+});
+
+export default handler;
+```
+
+4. Use the client in your React components as shown in the examples above.
+
+## Next.js Pages Router Configuration
+
+### API Route Configuration
+
+The `[...unify].ts` API route in the `pages/api` directory will handle all UniWeb3 requests. The route uses dynamic routing to catch all paths under `/api/`.
+
+### Client Configuration
+
+When using UniWeb3 with Next.js Pages Router, make sure to:
+
+1. Initialize the client with the correct base URL pointing to your API route
+2. Include necessary headers for authentication if required
+3. Handle loading states and errors appropriately in your React components
+
+### TypeScript Configuration
+
+Ensure your `tsconfig.json` includes the proper paths for workspace dependencies:
+
+```json
+{
+  "compilerOptions": {
+    "target": "es5",
+    "lib": ["dom", "dom.iterable", "es6"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"]
+}
+```
 
 ## Best Practices
 
@@ -207,3 +398,5 @@ The UniWeb3 plugin works seamlessly with various frameworks:
 3. **Caching**: Consider implementing caching for frequently requested data
 4. **Address Validation**: Validate addresses before making requests
 5. **Network Selection**: Ensure you're using the correct network identifier for EVM queries
+6. **Loading States**: Implement loading states in React components for better UX
+7. **Environment Variables**: Store sensitive configuration in environment variables

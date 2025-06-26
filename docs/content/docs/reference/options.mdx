@@ -1,6 +1,6 @@
 ---
 title: API Reference
-description: Complete API reference for Unify packages including @unilab/core, @unilab/unify-hono, and @unilab/unify.
+description: Complete API reference for Unify packages including @unilab/core, @unilab/unify-hono, @unilab/unify-client, @unilab/unify-next, @unilab/unify, and @unilab/uniweb3.
 ---
 
 # @unilab/core
@@ -11,18 +11,33 @@ Core types and interfaces for the Unify framework.
 
 ### FindManyArgs
 
-Arguments for finding multiple records.
+Arguments for finding multiple records with advanced query operators.
 
 ```typescript
 interface FindManyArgs<T extends Record<string, any>> {
   limit?: number;
   offset?: number;
-  where?: Partial<T>;
+  where?: WhereCondition<T>;
   order_by?: Partial<Record<keyof T, "asc" | "desc">>;
   include?: {
     [key: string]: RelationCallbackMany<T, any>;
   };
 }
+
+type WhereCondition<T> = {
+  [K in keyof T]?: T[K] | QueryOperators<T[K]>;
+};
+
+type QueryOperators<T> = {
+  $gt?: T;
+  $gte?: T;
+  $lt?: T;
+  $lte?: T;
+  $eq?: T;
+  $ne?: T;
+  $in?: T[];
+  $nin?: T[];
+};
 
 export type RelationCallbackMany<T extends Record<string, any>, R extends Record<string, any>> = (
   entities: T[]
@@ -32,9 +47,19 @@ export type RelationCallbackMany<T extends Record<string, any>, R extends Record
 **Properties:**
 - `limit` - Maximum number of records to return
 - `offset` - Number of records to skip
-- `where` - Filter conditions
+- `where` - Filter conditions with query operators support
 - `order_by` - Sort order specification
-- `include` - Include related entities
+- `include` - Include related entities using callback functions
+
+**Query Operators:**
+- `$gt` - Greater than
+- `$gte` - Greater than or equal
+- `$lt` - Less than
+- `$lte` - Less than or equal
+- `$eq` - Equal to
+- `$ne` - Not equal to
+- `$in` - Value in array
+- `$nin` - Value not in array
 
 ### FindOneArgs
 
@@ -42,12 +67,20 @@ Arguments for finding a single record.
 
 ```typescript
 interface FindOneArgs<T extends Record<string, any>> {
-  where: Partial<T>;
+  where: WhereCondition<T>;
+  include?: {
+    [key: string]: RelationCallbackSingle<T, any>;
+  };
 }
+
+export type RelationCallbackSingle<T extends Record<string, any>, R extends Record<string, any>> = (
+  entity: T
+) => Promise<R | null>;
 ```
 
 **Properties:**
 - `where` - Filter conditions (required)
+- `include` - Include related entities using callback functions
 
 ### CreationArgs
 
@@ -68,7 +101,7 @@ Arguments for updating an existing record.
 
 ```typescript
 interface UpdateArgs<T extends Record<string, any>> {
-  where: Partial<T>;
+  where: WhereCondition<T>;
   data: Partial<T>;
 }
 ```
@@ -83,7 +116,7 @@ Arguments for deleting records.
 
 ```typescript
 interface DeletionArgs<T extends Record<string, any>> {
-  where: Partial<T>;
+  where: WhereCondition<T>;
 }
 ```
 
@@ -96,7 +129,7 @@ Interface that all data source adapters must implement.
 
 ```typescript
 interface DataSourceAdapter<T extends Record<string, any>> {
-  findMany(args: FindManyArgs<T>): Promise<T[]>;
+  findMany(args?: FindManyArgs<T>): Promise<T[]>;
   findOne(args: FindOneArgs<T>): Promise<T | null>;
   create(args: CreationArgs<T>): Promise<T>;
   update(args: UpdateArgs<T>): Promise<T>;
@@ -106,102 +139,141 @@ interface DataSourceAdapter<T extends Record<string, any>> {
 
 ## Repository
 
-Repository class for interacting with data sources.
+Repository class for interacting with data sources, includes built-in middleware support.
 
 ```typescript
 class Repository<T extends Record<string, any>> {
   constructor(adapter: DataSourceAdapter<T>);
   
   async findMany(args?: FindManyArgs<T>): Promise<T[]>;
-  async findOne(args?: FindOneArgs<T>): Promise<T | null>;
+  async findOne(args: FindOneArgs<T>): Promise<T | null>;
   async create(args: CreationArgs<T>): Promise<T>;
   async update(args: UpdateArgs<T>): Promise<T>;
   async delete(args: DeletionArgs<T>): Promise<boolean>;
 }
 ```
 
-## Utility Functions
+## Middleware System
 
-### registerAdapter
-
-Register a data source adapter.
+### Middleware Types
 
 ```typescript
-function registerAdapter<T extends Record<string, any>>(
-  name: string,
-  adapterFactory: () => DataSourceAdapter<T>
-): void
+type Middleware<T extends Record<string, any>> = (
+  context: MiddlewareContext<T>,
+  next: MiddlewareNext<T>
+) => Promise<any>;
+
+type MiddlewareContext<T extends Record<string, any>> = {
+  operation: "findMany" | "findOne" | "create" | "update" | "delete";
+  args: any;
+  result?: any;
+  adapter: DataSourceAdapter<T>;
+};
+
+type MiddlewareOptions = {
+  position?: "before" | "after" | "around";
+  priority?: number;
+  name?: string;
+};
 ```
 
-### Repo
+## Entity Schema System
 
-Create a repository instance for a specific entity and source.
+### Decorators
+
+Entity configuration using decorators for type-safe schema generation.
 
 ```typescript
-function Repo<T extends Record<string, any>>(
-  entityName: string,
-  source: string
-): Repository<T>
+// Field decorators
+const Fields = {
+  string: (options?: { optional?: boolean; description?: string }) => PropertyDecorator;
+  number: (options?: { optional?: boolean; description?: string }) => PropertyDecorator;
+  boolean: (options?: { optional?: boolean; description?: string }) => PropertyDecorator;
+  date: (options?: { optional?: boolean; description?: string }) => PropertyDecorator;
+  array: (target: () => any, options?: { optional?: boolean; description?: string }) => PropertyDecorator;
+  record: (target: () => any, options?: { optional?: boolean; description?: string }) => PropertyDecorator;
+};
+
+// Relation decorators
+const Relations = {
+  toOne: (target: () => any, options?: { optional?: boolean }) => PropertyDecorator;
+  toMany: (target: () => any, options?: { optional?: boolean }) => PropertyDecorator;
+};
+```
+
+### Schema Generation
+
+```typescript
+function generateSchema(entityClass: any): SchemaObject;
+function generateSchemas(entityClasses: any[]): Record<string, SchemaObject>;
+```
+
+## Plugin System
+
+### Plugin Interface
+
+```typescript
+interface Plugin {
+  entities?: Record<string, any>[];
+  adapters?: AdapterRegistration[];
+}
+
+interface AdapterRegistration {
+  source: string;
+  entityName: string;
+  adapter: DataSourceAdapter<any>;
+}
 ```
 
 # @unilab/unify-hono
 
-Server-side components for creating Unify API servers.
+Server-side components for creating Unify API servers using Hono framework.
 
 ## Unify
 
-Main class for creating and configuring Unify servers.
+Main class for creating and configuring Unify servers with plugin support.
 
 ### Static Methods
 
 #### init
 
-Initialize the Unify server with optional configuration.
+Initialize the Unify server with configuration including plugins and middleware.
 
 ```typescript
-static init(config?: UnifyConfig): Hono
+static init(config: UnifyConfig): Hono
 ```
 
 **Parameters:**
 - `config.app` - Optional external Hono app instance
+- `config.plugins` - Array of plugins to register
+- `config.middleware` - Array of global middleware to apply
 
-**Returns:** Hono app instance
-
-**Example:**
-```typescript
-import { Unify } from "@unilab/unify-hono";
-import { Hono } from "hono";
-
-// Use default app
-const app = Unify.init();
-
-// Use external app
-const customApp = new Hono();
-Unify.init({ app: customApp });
-```
-
-#### register
-
-Register data source adapters and create API routes.
-
-```typescript
-static register(adapters: AdapterRegistration[]): Hono
-```
-
-**Parameters:**
-- `adapters` - Array of adapter registrations
-
-**Returns:** Hono app instance with registered routes
+**Returns:** Hono app instance with all routes configured
 
 **Example:**
 ```typescript
 import { Unify } from "@unilab/unify-hono";
-import { SolanaAdapter, EVMAdapter } from "@unilab/uniweb3";
+import { WalletPlugin } from "@unilab/uniweb3";
+import { LoggingMiddleware } from "@unilab/core/middleware";
 
-const server = Unify.register([
-  { source: "solana", adapter: new SolanaAdapter() },
-  { source: "evm", adapter: new EVMAdapter() },
-]);
+const app = Unify.init({
+  plugins: [WalletPlugin],
+  middleware: [LoggingMiddleware]
+});
+```
+
+#### repo
+
+Get or create a repository for a specific data source.
+
+```typescript
+static repo<T extends Record<string, any>>({
+  source,
+  adapter,
+}: {
+  source: string;
+  adapter: DataSourceAdapter<T>;
+}): Repository<T>
 ```
 
 #### getApp
@@ -212,87 +284,68 @@ Get the current Hono app instance.
 static getApp(): Hono
 ```
 
+#### getEntitySchemas
+
+Get all registered entity schemas.
+
+```typescript
+static getEntitySchemas(): Record<string, SchemaObject>
+```
+
+#### getAdapters
+
+Get list of all registered adapter names.
+
+```typescript
+static getAdapters(): string[]
+```
+
+#### getEntitySources
+
+Get mapping of entities to their available data sources.
+
+```typescript
+static getEntitySources(): Record<string, string[]>
+```
+
 ## Configuration Interfaces
 
 ### UnifyConfig
 
-Configuration options for initializing Unify.
+Configuration options for initializing Unify server.
 
 ```typescript
 interface UnifyConfig {
   app?: Hono;
-}
-```
-
-### AdapterRegistration
-
-Registration configuration for data source adapters.
-
-```typescript
-interface AdapterRegistration {
-  source: string;
-  adapter: DataSourceAdapter<any>;
+  plugins?: Plugin[];
+  middleware?: Middleware<any>[];
 }
 ```
 
 **Properties:**
-- `source` - Unique identifier for the data source
-- `adapter` - Data source adapter instance
+- `app` - Optional external Hono app instance
+- `plugins` - Array of plugins containing entities and adapters
+- `middleware` - Array of global middleware to apply
 
-## Utility Functions
+## Automatic Route Generation
 
-### registerAdapter
+The Unify server automatically generates REST API endpoints based on registered plugins:
 
-Register a data source adapter in the global registry.
+- `GET /{entity}/list` - Find multiple records
+- `GET /{entity}/find_one` - Find single record  
+- `POST /{entity}/create` - Create new record
+- `PATCH /{entity}/update` - Update existing record
+- `DELETE /{entity}/delete` - Delete records
 
-```typescript
-function registerAdapter<T extends Record<string, any>>(
-  name: string,
-  adapterFactory: () => DataSourceAdapter<T>
-): void
-```
-
-### getAdapter
-
-Retrieve a registered adapter by name.
-
-```typescript
-function getAdapter<T extends Record<string, any>>(
-  source: string
-): DataSourceAdapter<T>
-```
-
-### parseQueryParams
-
-Parse HTTP query parameters into structured arguments.
-
-```typescript
-function parseQueryParams<T extends Record<string, any>>(c: Context): any
-```
-
-### handleError
-
-Handle and format errors for HTTP responses.
-
-```typescript
-function handleError(error: unknown, c: Context): Response
-```
-
-### validateSource
-
-Validate that a required source parameter is provided.
-
-```typescript
-function validateSource(source: string | undefined, c: Context): Response | null
-```
+All routes require a `source` query parameter to specify the data source.
 
 # @unilab/unify-client
 
-Client-side components for consuming Unify APIs.
+HTTP client library for consuming Unify APIs with relation support.
 
 ## UnifyClient
 
-Main client class for interacting with Unify APIs.
+Main client class for interacting with Unify APIs with automatic relation loading.
 
 ### Constructor
 
@@ -320,7 +373,7 @@ createRepositoryProxy<T extends Record<string, any>>(
 - `entityName` - Name of the entity
 - `source` - Data source identifier
 
-**Returns:** Repository instance for the specified entity
+**Returns:** Repository instance with client-side relation loading support
 
 ### Static Methods
 
@@ -348,12 +401,12 @@ UnifyClient.init({
 });
 ```
 
-#### Repo
+#### repo
 
 Create a repository instance using the global client.
 
 ```typescript
-static Repo<T extends Record<string, any>>(
+static repo<T extends Record<string, any>>(
   entityName: string,
   source: string
 ): Repository<T>
@@ -365,6 +418,18 @@ import { UnifyClient } from "@unilab/unify-client";
 import { WalletEntity } from "@unilab/uniweb3/entities";
 
 const walletRepo = UnifyClient.repo<WalletEntity>("wallet", "evm");
+```
+
+#### joinRepo
+
+Create a repository with relation mapping support.
+
+```typescript
+static joinRepo<F extends Record<string, any>, L extends Record<string, any>>(
+  entityName: string,
+  source: string,
+  relationMapping: RelationMapping<F, L>
+): Repository<F>
 ```
 
 ## Configuration Interfaces
@@ -385,6 +450,20 @@ interface ClientConfig {
 - `baseUrl` - Base URL of the Unify server (required)
 - `timeout` - Request timeout in milliseconds (default: 5000)
 - `headers` - Default headers to include with requests
+
+### RelationMapping
+
+Interface for defining entity relationships.
+
+```typescript
+interface RelationMapping<
+  T extends Record<string, any>,
+  F extends Record<string, any>
+> {
+  localField: keyof F;
+  foreignField: keyof T;
+}
+```
 
 ### HttpRequestOptions
 
@@ -414,15 +493,30 @@ interface ApiResponse<T = any> {
 
 ## Utility Functions
 
-### Repo
+### repo
 
 Global convenience function for creating repository instances.
 
 ```typescript
-function Repo<T extends Record<string, any>>(
+function repo<T extends Record<string, any>>(
   entityName: string,
   source: string
 ): Repository<T>
+```
+
+### joinRepo
+
+Global convenience function for creating repository instances with relation mapping.
+
+```typescript
+function joinRepo<
+  F extends Record<string, any> = Record<string, any>,
+  L extends Record<string, any> = Record<string, any>
+>(
+  entityName: string,
+  source: string,
+  relationMapping: RelationMapping<F, L>
+): Repository<F>
 ```
 
 **Example:**
@@ -435,9 +529,233 @@ UnifyClient.init({ baseUrl: "http://localhost:3000" });
 
 // Use the convenience function
 const walletRepo = repo<WalletEntity>("wallet", "solana");
-const wallet = await walletrepo.findOne({
+const wallet = await walletRepo.findOne({
   where: { address: "11111111111111111111111111111112" }
 });
+```
+
+## Client-Side Relations
+
+The client automatically handles relation loading by executing callback functions on the client side after fetching the main entity data. This allows for flexible relation definitions without server-side configuration.
+
+# @unilab/unify-next
+
+Next.js integration for Unify with support for both App Router and Pages Router.
+
+## AppUnify
+
+App Router integration (Next.js 13+).
+
+### Static Methods
+
+#### init
+
+Initialize the Unify API handlers for App Router.
+
+```typescript
+static init(config: UnifyConfig): UnifyAPI
+```
+
+**Parameters:**
+- `config.plugins` - Array of plugins to register
+- `config.middleware` - Array of global middleware to apply
+
+**Returns:** API handlers object with GET, POST, PATCH, DELETE methods
+
+**Example:**
+```typescript
+// app/api/[...unify]/route.ts
+import { AppUnify } from "@unilab/unify-next";
+import { WalletPlugin } from "@unilab/uniweb3";
+
+const api = AppUnify.init({
+  plugins: [WalletPlugin]
+});
+
+export const { GET, POST, PATCH, DELETE } = api;
+```
+
+#### repo
+
+Get or create a repository for a specific data source.
+
+```typescript
+static repo<T extends Record<string, any>>({
+  source,
+  adapter,
+}: {
+  source: string;
+  adapter: DataSourceAdapter<T>;
+}): Repository<T>
+```
+
+## PagesUnify
+
+Pages Router integration (Next.js 12+).
+
+### Static Methods
+
+#### init
+
+Initialize the Unify API handler for Pages Router.
+
+```typescript
+static init(config: UnifyConfig): (req: NextApiRequest, res: NextApiResponse) => Promise<void>
+```
+
+**Example:**
+```typescript
+// pages/api/[...unify].ts
+import { PagesUnify } from "@unilab/unify-next";
+import { WalletPlugin } from "@unilab/uniweb3";
+
+export default PagesUnify.init({
+  plugins: [WalletPlugin]
+});
+```
+
+## Configuration Interfaces
+
+### UnifyAPI
+
+Interface for App Router API handlers.
+
+```typescript
+interface UnifyAPI {
+  GET: RouteHandler;
+  POST: RouteHandler;
+  PATCH: RouteHandler;
+  DELETE: RouteHandler;
+}
+```
+
+### UnifyConfig
+
+Configuration options for Next.js integration.
+
+```typescript
+interface UnifyConfig {
+  plugins?: Plugin[];
+  middleware?: Middleware<any>[];
+}
+```
+
+# @unilab/unify
+
+Lightweight browser-only client library for Unify without HTTP functionality.
+
+## Unify
+
+Browser-optimized client for local data sources.
+
+### Static Methods
+
+#### repo
+
+Create a repository instance for browser environments.
+
+```typescript
+static repo<T extends Record<string, any>>(
+  source: string,
+  adapter: DataSourceAdapter<T>
+): Repository<T>
+```
+
+#### joinRepo
+
+Create a repository with relation mapping for browser environments.
+
+```typescript
+static joinRepo<F extends Record<string, any>, L extends Record<string, any>>(
+  source: string,
+  adapter: DataSourceAdapter<F>,
+  relationMapping: RelationMapping<F, L>
+): Repository<F>
+```
+
+## Utility Functions
+
+### repo
+
+Global convenience function for browser repository creation.
+
+```typescript
+function repo<T extends Record<string, any>>(
+  source: string,
+  adapter: DataSourceAdapter<T>
+): Repository<T>
+```
+
+### joinRepo
+
+Global convenience function for browser repository with relations.
+
+```typescript
+function joinRepo<F extends Record<string, any>, L extends Record<string, any>>(
+  source: string,
+  adapter: DataSourceAdapter<F>,
+  relationMapping: RelationMapping<F, L>
+): Repository<F>
+```
+
+# @unilab/uniweb3
+
+Unified blockchain data adapters and entities for Web3 integration.
+
+## Entities
+
+### WalletEntity
+
+Entity for blockchain wallet data.
+
+```typescript
+class WalletEntity {
+  address: string = "";
+  balance: string = "";
+  network: string = "";
+  token?: {
+    symbol: string;
+    decimals: number;
+  };
+}
+```
+
+## Adapters
+
+### EVMAdapter
+
+Ethereum Virtual Machine adapter for EVM-compatible chains.
+
+```typescript
+class EVMAdapter implements DataSourceAdapter<WalletEntity> {
+  // Implements all DataSourceAdapter methods for EVM chains
+}
+```
+
+### SolanaAdapter
+
+Solana blockchain adapter.
+
+```typescript
+class SolanaAdapter implements DataSourceAdapter<WalletEntity> {
+  // Implements all DataSourceAdapter methods for Solana
+}
+```
+
+## Plugins
+
+### WalletPlugin
+
+Complete plugin configuration for wallet functionality.
+
+```typescript
+const WalletPlugin: Plugin = {
+  entities: [WalletEntity],
+  adapters: [
+    { source: "evm", entityName: "wallet", adapter: new EVMAdapter() },
+    { source: "solana", entityName: "wallet", adapter: new SolanaAdapter() }
+  ]
+};
 ```
 
 ## API Routes
@@ -446,19 +764,18 @@ The Unify server automatically generates the following REST API endpoints when a
 
 ### GET /\{entity\}/list
 
-Find multiple records.
+Find multiple records with advanced filtering.
 
 **Query Parameters:**
 - `source` (required) - Data source identifier
 - `limit` - Maximum number of records to return
 - `offset` - Number of records to skip
-- `where` - JSON filter conditions
+- `where` - JSON filter conditions with query operators
 - `order_by` - JSON sort specification
-- `include` - Include related entities
 
 **Example:**
 ```bash
-GET /wallet/list?source=evm&limit=10&where={"network":"ethereum"}
+GET /wallet/list?source=evm&limit=10&where={"balance":{"$gt":"1000000000000000000"}}
 ```
 
 ### GET /\{entity\}/find_one
@@ -468,7 +785,6 @@ Find a single record.
 **Query Parameters:**
 - `source` (required) - Data source identifier
 - `where` (required) - JSON filter conditions
-- `include` - Include related entities
 
 **Example:**
 ```bash
@@ -486,8 +802,9 @@ Create a new record.
 ```json
 {
   "data": {
-    "field1": "value1",
-    "field2": "value2"
+    "address": "1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa",
+    "balance": "5000000000",
+    "network": "bitcoin"
   }
 }
 ```
@@ -503,10 +820,10 @@ Update an existing record.
 ```json
 {
   "where": {
-    "id": "record_id"
+    "address": "1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa"
   },
   "data": {
-    "field1": "new_value"
+    "balance": "6000000000"
   }
 }
 ```
@@ -521,20 +838,177 @@ Delete records.
 
 **Example:**
 ```bash
-DELETE /wallet/delete?source=evm&where={"id":"wallet_id"}
+DELETE /wallet/delete?source=evm&where={"balance":"0"}
 ```
 
-### GET /health
+## Usage Examples
 
-Health check endpoint.
+### Hono Server Setup
 
-**Response:**
-```json
-{
-  "status": "ok",
-  "timestamp": "2024-01-01T00:00:00.000Z",
-  "adapters": ["solana", "evm"]
+```typescript
+import { Unify } from "@unilab/unify-hono";
+import { WalletPlugin } from "@unilab/uniweb3";
+import { LoggingMiddleware } from "@unilab/core/middleware";
+
+const app = Unify.init({
+  plugins: [WalletPlugin],
+  middleware: [LoggingMiddleware]
+});
+
+export default {
+  port: 3000,
+  fetch: app.fetch,
+};
+```
+
+### Next.js App Router Setup
+
+```typescript
+// app/api/[...unify]/route.ts
+import { AppUnify } from "@unilab/unify-next";
+import { WalletPlugin } from "@unilab/uniweb3";
+
+const api = AppUnify.init({
+  plugins: [WalletPlugin]
+});
+
+export const { GET, POST, PATCH, DELETE } = api;
+```
+
+### Client Usage with Relations
+
+```typescript
+import { UnifyClient, repo } from "@unilab/unify-client";
+import { WalletEntity } from "@unilab/uniweb3/entities";
+
+// Initialize client
+UnifyClient.init({
+  baseUrl: "http://localhost:3000",
+  timeout: 10000,
+});
+
+// Query with relations
+const wallets = await repo<WalletEntity>("wallet", "solana").findMany({
+  where: { 
+    balance: { $gt: "1000000000000000000" } 
+  },
+  include: {
+    transactions: async (wallets) => {
+      // Load related transactions
+      return await repo("transaction", "solana").findMany({
+        where: { wallet_address: { $in: wallets.map(w => w.address) } }
+      });
+    }
+  }
+});
+```
+
+### Custom Entity and Adapter
+
+```typescript
+import { Fields, Relations, DataSourceAdapter } from "@unilab/core";
+
+// Define entity with decorators
+class UserEntity {
+  @Fields.string()
+  id = "";
+
+  @Fields.string()
+  name = "";
+
+  @Fields.string({ optional: true })
+  email = "";
+
+  @Relations.toMany(() => PostEntity)
+  posts?: PostEntity[];
 }
+
+// Implement custom adapter
+class DatabaseAdapter implements DataSourceAdapter<UserEntity> {
+  async findMany(args?: FindManyArgs<UserEntity>): Promise<UserEntity[]> {
+    // Database query implementation
+    return [];
+  }
+
+  async findOne(args: FindOneArgs<UserEntity>): Promise<UserEntity | null> {
+    // Database query implementation
+    return null;
+  }
+
+  async create(args: CreationArgs<UserEntity>): Promise<UserEntity> {
+    // Database insert implementation
+    return new UserEntity();
+  }
+
+  async update(args: UpdateArgs<UserEntity>): Promise<UserEntity> {
+    // Database update implementation
+    return new UserEntity();
+  }
+
+  async delete(args: DeletionArgs<UserEntity>): Promise<boolean> {
+    // Database delete implementation
+    return true;
+  }
+}
+
+// Create plugin
+const UserPlugin: Plugin = {
+  entities: [UserEntity],
+  adapters: [
+    { source: "database", entityName: "user", adapter: new DatabaseAdapter() }
+  ]
+};
+```
+
+### Browser-Only Usage
+
+```typescript
+import { repo } from "@unilab/unify";
+import { LocalStorageAdapter } from "./local-storage-adapter";
+
+// Browser-only repository without HTTP
+const localRepo = repo("todos", new LocalStorageAdapter());
+
+const todos = await localRepo.findMany({
+  where: { completed: false },
+  order_by: { created_at: "desc" }
+});
+```
+
+### Middleware Usage
+
+```typescript
+import { useGlobalMiddleware } from "@unilab/core";
+
+// Add logging middleware
+useGlobalMiddleware(async (context, next) => {
+  console.log(`${context.operation} started:`, context.args);
+  const result = await next();
+  console.log(`${context.operation} completed:`, result);
+  return result;
+}, {
+  name: "logger",
+  position: "around",
+  priority: 1
+});
+
+// Add caching middleware
+useGlobalMiddleware(async (context, next) => {
+  if (context.operation === "findMany") {
+    const cacheKey = JSON.stringify(context.args);
+    const cached = cache.get(cacheKey);
+    if (cached) return cached;
+    
+    const result = await next();
+    cache.set(cacheKey, result);
+    return result;
+  }
+  return next();
+}, {
+  name: "cache",
+  position: "around",
+  priority: 2
+});
 ```
 
 ## Error Handling
@@ -551,86 +1025,3 @@ Common HTTP status codes:
 - `400` - Bad Request (missing required parameters, invalid JSON)
 - `404` - Not Found (unknown entity or source)
 - `500` - Internal Server Error (adapter errors, database errors)
-
-## Usage Examples
-
-### Basic Server Setup
-
-```typescript
-import { Unify } from "@unilab/unify-hono";
-import { SolanaAdapter, EVMAdapter } from "@unilab/uniweb3";
-
-// Register adapters and start server
-const server = Unify.register([
-  { source: "solana", adapter: new SolanaAdapter() },
-  { source: "evm", adapter: new EVMAdapter() },
-]);
-
-export default {
-  port: 3000,
-  fetch: server.fetch,
-};
-```
-
-### Basic Client Usage
-
-```typescript
-import { UnifyClient, repo } from "@unilab/unify-client";
-import { WalletEntity } from "@unilab/uniweb3/entities";
-
-// Initialize client
-UnifyClient.init({
-  baseUrl: "http://localhost:3000",
-  timeout: 10000,
-});
-
-// Query wallet balance
-const wallet = await repo<WalletEntity>("wallet", "solana").findOne({
-  where: { address: "11111111111111111111111111111112" }
-});
-
-console.log("Wallet balance:", wallet?.balance);
-```
-
-### Custom Adapter Implementation
-
-```typescript
-import type { DataSourceAdapter } from "@unilab/core";
-
-interface CustomEntity extends Record<string, any> {
-  id: string;
-  name: string;
-}
-
-class CustomAdapter implements DataSourceAdapter<CustomEntity> {
-  async findMany(args: FindManyArgs<CustomEntity>): Promise<CustomEntity[]> {
-    // Implementation
-    return [];
-  }
-
-  async findOne(args: FindOneArgs<CustomEntity>): Promise<CustomEntity | null> {
-    // Implementation
-    return null;
-  }
-
-  async create(args: CreationArgs<CustomEntity>): Promise<CustomEntity> {
-    // Implementation
-    return { id: "1", name: "test" };
-  }
-
-  async update(args: UpdateArgs<CustomEntity>): Promise<CustomEntity> {
-    // Implementation
-    return { id: "1", name: "updated" };
-  }
-
-  async delete(args: DeletionArgs<CustomEntity>): Promise<boolean> {
-    // Implementation
-    return true;
-  }
-}
-
-// Register custom adapter
-const server = Unify.register([
-  { source: "custom", adapter: new CustomAdapter() },
-]);
-```

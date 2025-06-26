@@ -1,11 +1,8 @@
 ---
 title: Relations
-description: Learn how to use callback-based relation queries in Unify to create connected data models
+description: Relations in Unify allow you to define connections between different entities using flexible callback functions. This approach enables you to query related data in a single request with complete control over the relation logic.
+
 ---
-
-# Relations
-
-Relations in Unify allow you to define connections between different entities using flexible callback functions. This approach enables you to query related data in a single request with complete control over the relation logic.
 
 ## Overview
 
@@ -13,6 +10,7 @@ Unify supports flexible relation queries through callback functions:
 - **One-to-Many Relations**: Load multiple related entities for each main entity
 - **One-to-One Relations**: Load a single related entity for each main entity
 - **Custom Logic**: Define complex relation logic based on any entity properties
+- **Join Repository**: Use `joinRepo` for optimized relation mappings
 
 ## Key Concepts
 
@@ -39,49 +37,98 @@ include: {
 }
 ```
 
+### Join Repository
+
+The `joinRepo` function provides an optimized way to handle relations with explicit field mappings:
+
+```typescript
+import { joinRepo } from "@unilab/unify-client";
+
+joinRepo<PostEntity, UserEntity>("post", "post", {
+  localField: "id",      // Field from the parent entity (User)
+  foreignField: "userId" // Field from the related entity (Post)
+})
+```
+
 ## Entity Definition
 
-Entities no longer need relation decorators. Simply define your entity classes:
+Entities are defined with `@Fields` decorators but relations are handled via callback functions:
 
-**user.ts**
+**entities/user.ts**
 ```typescript
+import { Fields } from "@unilab/core";
+import { PostEntity } from "./post";
+
 export class UserEntity {
+  @Fields.string()
   id = "";
+
+  @Fields.string()
   name = "";
+
+  @Fields.string()
   email = "";
+
+  @Fields.string()
   avatar = "";
-  
-  // Relations are handled via callback functions in queries
+
+  @Fields.array(() => PostEntity, {
+    optional: true,
+  })
   posts?: PostEntity[];
 }
 ```
 
-**post.ts**
+**entities/post.ts**
 ```typescript
+import { Fields } from "@unilab/core";
+import type { UserEntity } from "./user";
+
 export class PostEntity {
+  @Fields.string()
   id = "";
+
+  @Fields.string()
   title = "";
+
+  @Fields.string()
   content = "";
+
+  @Fields.string()
   userId = "";
-  
-  // Relations are handled via callback functions in queries
+
+  @Fields.record(() => require("./user").UserEntity, {
+    optional: true,
+  })
   user?: UserEntity;
 }
 ```
 
 ## Server Setup
 
-Server setup remains the same - just register your adapters:
+Configure your server with the Unify framework and register your adapters:
 
 ```typescript
 import { Unify } from "@unilab/unify-hono";
 import { UserAdapter } from "./adapters/user";
 import { PostAdapter } from "./adapters/post";
+import { UserEntity } from "./entities/user";
+import { PostEntity } from "./entities/post";
+import { createHookMiddleware, Logging } from "@unilab/core/middleware";
+import { Plugin } from "@unilab/core";
 
-const app = Unify.register([
-  { source: "user", adapter: new UserAdapter() },
-  { source: "post", adapter: new PostAdapter() },
-]);
+const MyPlugin: Plugin = {
+  entities: [UserEntity, PostEntity],
+  adapters: [
+    { source: "user", entityName: "UserEntity", adapter: new UserAdapter() },
+    { source: "post", entityName: "PostEntity", adapter: new PostAdapter() },
+  ],
+};
+
+const app = Unify.init({
+  plugins: [MyPlugin],
+  middleware: [Logging()],
+});
 
 export default {
   port: 3000,
@@ -94,27 +141,31 @@ export default {
 Your adapters need to support query operators like `$in` for efficient relation queries:
 
 ```typescript
+import { DataSourceAdapter, FindManyArgs } from "@unilab/core";
+import { PostEntity } from "../entities/post";
+
 class PostAdapter implements DataSourceAdapter<PostEntity> {
   async findMany(args?: FindManyArgs<PostEntity>): Promise<PostEntity[]> {
     const where = args?.where || {};
     
-    // Support $in operator for relation queries
+    // Handle userId filtering with operators
     if (where.userId) {
-      if (typeof where.userId === 'object') {
+      if (typeof where.userId === "object") {
+        // Handle $in operator for batch queries
         if (where.userId.$in) {
-          return postData.filter((post) => 
+          return postData.filter((post) =>
             where.userId.$in.includes(post.userId)
           );
         }
+        // Handle $eq operator
         if (where.userId.$eq) {
-          return postData.filter((post) => 
-            post.userId === where.userId.$eq
+          return postData.filter(
+            (post) => post.userId === where.userId.$eq
           );
         }
       } else {
-        return postData.filter((post) => 
-          post.userId === where.userId
-        );
+        // Direct value comparison
+        return postData.filter((post) => post.userId === where.userId);
       }
     }
     
@@ -127,20 +178,73 @@ class PostAdapter implements DataSourceAdapter<PostEntity> {
 
 ## Querying Relations
 
+### Using Regular Repo for Simple Relations
+
+For straightforward relation queries where you have specific where conditions:
+
+```typescript
+import { repo, UnifyClient } from "@unilab/unify-client";
+import { PostEntity, UserEntity } from "./entities";
+
+// Query a post with its author
+const post = await repo<PostEntity>("post", "post").findOne({
+  where: { id: "1" },
+  include: {
+    user: (post) => {
+      const userId = post.userId;
+      return repo<UserEntity>("user", "user").findOne({
+        where: { id: userId },
+      });
+    },
+  },
+});
+```
+
+### Using joinRepo for Optimized Relations
+
+When you need optimized relation mapping, especially for queries without specific where conditions, use `joinRepo`:
+
+```typescript
+import { repo, UnifyClient, joinRepo } from "@unilab/unify-client";
+
+// Query users with their posts using joinRepo
+const fetchUser = async () => {
+  const data = await repo<UserEntity>("user", "user").findMany({
+    where: {
+      id: "2",
+    },
+    include: {
+      posts: (userList) => {
+        const ids = userList.map((user) => user.id);
+        
+        // Use joinRepo for optimized relation mapping
+        return joinRepo<PostEntity, UserEntity>("post", "post", {
+          localField: "id",        // User.id
+          foreignField: "userId",  // Post.userId
+        }).findMany({
+          where: {
+            userId: {
+              $in: ids,
+            },
+          },
+        });
+      },
+    },
+  });
+  console.log("Users with posts:", JSON.stringify(data, null, 2));
+};
+```
+
 ### One-to-One Relations (findOne)
 
 For `findOne` queries, relation callbacks receive the single entity:
 
 ```typescript
-import { repo, UnifyClient } from "@unilab/unify";
-import { PostEntity, UserEntity } from "./entities";
-
 // Query a post with its author
 const post = await repo<PostEntity>("post", "post").findOne({
   where: { id: "2" },
   include: {
     user: (post) => {
-      // Access any property of the post entity
       const userId = post.userId;
       return repo<UserEntity>("user", "user").findOne({
         where: { id: userId },
@@ -162,7 +266,6 @@ const users = await repo<UserEntity>("user", "user").findMany({
   where: { id: "1" },
   include: {
     posts: (userList) => {
-      // Extract IDs from the user list
       const ids = userList.map((user) => user.id);
       return repo<PostEntity>("post", "post").findMany({
         where: {
@@ -176,88 +279,22 @@ const users = await repo<UserEntity>("user", "user").findMany({
 console.log("Users with posts:", users);
 ```
 
-### Complex Relation Logic
+## When to Use joinRepo vs repo
 
-You can implement complex relation logic based on any entity properties:
+### Use `joinRepo` when:
+- You need explicit field mapping between entities
+- Working with queries that don't have specific where conditions
+- You want optimized relation handling
+- Building complex join operations
 
-```typescript
-// Load posts based on user's email domain
-const users = await repo<UserEntity>("user", "user").findMany({
-  include: {
-    posts: (userList) => {
-      // Filter users by email domain
-      const adminUsers = userList.filter(user => 
-        user.email.endsWith('@admin.com')
-      );
-      const adminIds = adminUsers.map(user => user.id);
-      
-      return repo<PostEntity>("post", "post").findMany({
-        where: {
-          userId: { $in: adminIds },
-          status: "published", // Additional filtering
-        },
-      });
-    },
-  },
-});
-```
-
-## Advanced Examples
-
-### Conditional Relations
-
-```typescript
-// Load different relations based on entity properties
-const posts = await repo<PostEntity>("post", "post").findMany({
-  include: {
-    author: (postList) => {
-      // Only load authors for published posts
-      const publishedPosts = postList.filter(post => 
-        post.status === 'published'
-      );
-      const authorIds = publishedPosts.map(post => post.authorId);
-      
-      return repo<UserEntity>("user", "user").findMany({
-        where: { id: { $in: authorIds } },
-      });
-    },
-  },
-});
-```
-
-### Nested Relations
-
-```typescript
-// Load posts with their authors and comments
-const posts = await repo<PostEntity>("post", "post").findMany({
-  include: {
-    author: (postList) => {
-      const authorIds = postList.map(post => post.authorId);
-      return repo<UserEntity>("user", "user").findMany({
-        where: { id: { $in: authorIds } },
-        include: {
-          profile: (users) => {
-            const userIds = users.map(user => user.id);
-            return repo<ProfileEntity>("profile", "profile").findMany({
-              where: { userId: { $in: userIds } },
-            });
-          },
-        },
-      });
-    },
-    comments: (postList) => {
-      const postIds = postList.map(post => post.id);
-      return repo<CommentEntity>("comment", "comment").findMany({
-        where: { postId: { $in: postIds } },
-      });
-    },
-  },
-});
-```
+### Use regular `repo` when:
+- You have specific where conditions in your queries
+- Simple, straightforward relation queries
+- Direct field access is sufficient
 
 ## Client Setup
 
-Initialize the Unify client as usual:
+Initialize the Unify client with your server configuration:
 
 ```typescript
 import { UnifyClient } from "@unilab/unify-client";
@@ -268,64 +305,82 @@ UnifyClient.init({
 });
 ```
 
+## Complete Example
+
+Here's a complete working example from the hono-basic implementation:
+
+```typescript
+import { UserEntity } from "./entities/user";
+import { PostEntity } from "./entities/post";
+import { repo, UnifyClient, joinRepo } from "@unilab/unify-client";
+
+UnifyClient.init({
+  baseUrl: "http://localhost:3000",
+  timeout: 10000,
+});
+
+const fetchUser = async () => {
+  const data = await repo<UserEntity>("user", "user").findMany({
+    where: {
+      id: "2",
+    },
+    include: {
+      posts: (userList) => {
+        const ids = userList.map((user) => user.id);
+        
+        // If you don't set the where parameter, you must use joinRepo, but in other cases you can use repo directly.
+        return joinRepo<PostEntity, UserEntity>("post", "post", {
+          localField: "id",
+          foreignField: "userId",
+        }).findMany({
+          where: {
+            userId: {
+              $in: ids,
+            },
+          },
+        });
+      },
+    },
+  });
+  console.log("fetchUser===>", JSON.stringify(data, null, 2));
+};
+
+const createUser = async () => {
+  const data = await repo<UserEntity>("user", "user").create({
+    data: {
+      name: "John Doe",
+      email: "john.doe@example.com",
+      avatar: "https://example.com/avatar.jpg",
+    },
+  });
+  console.log("createUser===>", JSON.stringify(data, null, 2));
+};
+
+// Execute the functions
+fetchUser();
+createUser();
+```
+
 ## Best Practices
 
-1. **Efficient Queries**: Use `$in` operator for batch loading related entities
-2. **Type Safety**: Let TypeScript infer callback parameter types
-3. **Flexible Logic**: Leverage full entity data for complex relation logic
-4. **Performance**: Consider using parallel queries for independent relations
+1. **Choose the Right Tool**: Use `joinRepo` for optimized relations, `repo` for simple queries
+2. **Efficient Queries**: Leverage `$in` operator for batch loading related entities
+3. **Type Safety**: Let TypeScript infer callback parameter types automatically
+4. **Field Mapping**: Use clear, descriptive field names in `joinRepo` mappings
 5. **Error Handling**: Wrap relation callbacks in try-catch blocks for robustness
+6. **Performance**: Consider parallel queries for independent relations
 
 ## Key Features
 
-- 🎯 **Flexible Relations**: Define relation logic at query time
+- 🎯 **Flexible Relations**: Define relation logic at query time with callbacks
 - 🚀 **Type Safe**: Full TypeScript support with automatic type inference
-- 📊 **Efficient**: Client-side parallel relation loading
-- 🔧 **Simple**: No decorators or pre-configuration needed
+- 📊 **Optimized Joins**: Use `joinRepo` for efficient relation mappings
+- 🔧 **Simple Setup**: Minimal configuration required
 - 💪 **Powerful**: Access to full entity data in relation callbacks
-
-## Migration from Decorator-Based Relations
-
-If you're migrating from the old decorator-based system:
-
-### Before (Deprecated)
-```typescript
-class UserEntity {
-  @Relations.toMany(() => PostEntity, {
-    fields: { id: "userId" }
-  })
-  posts?: PostEntity[];
-}
-
-// Usage
-const users = await repo.findMany({
-  include: { posts: true }
-});
-```
-
-### After (New Approach)
-```typescript
-class UserEntity {
-  id = "";
-  // No decorators needed
-  posts?: PostEntity[];
-}
-
-// Usage
-const users = await repo.findMany({
-  include: {
-    posts: (userList) => {
-      const ids = userList.map(user => user.id);
-      return repo<PostEntity>("post", "post").findMany({
-        where: { userId: { $in: ids } }
-      });
-    }
-  }
-});
-```
+- ⚡ **Performance**: Client-side parallel relation loading
 
 ## Next Steps
 
 - Explore [Basic Usage](/docs/basic-usage) for general Unify concepts
 - Learn about [Framework Integrations](/docs/integrations) for frontend usage
-- Check out the [complete example](https://github.com/your-repo/unify/tree/main/examples/hono-basic) in the repository
+- Check out the [complete hono-basic example](https://github.com/your-repo/unify/tree/main/examples/hono-basic) in the repository

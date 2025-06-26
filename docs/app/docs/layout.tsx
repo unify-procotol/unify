@@ -1,7 +1,14 @@
 import { DocsLayout } from "fumadocs-ui/layouts/docs";
 import type { ReactNode } from "react";
 import { baseOptions } from "@/app/layout.config";
-import { Book, Database, LayoutGrid, Plug, SquarePlay } from "lucide-react";
+import {
+  Book,
+  Database,
+  LayoutGrid,
+  Plug,
+  SquarePlay,
+  Webhook,
+} from "lucide-react";
 
 export default function Layout({ children }: { children: ReactNode }) {
   return (
@@ -18,7 +25,10 @@ export default function Layout({ children }: { children: ReactNode }) {
               "/docs/installation",
               "/docs/basic-usage",
               "/docs/integrations/next",
+              "/docs/integrations/hono",
               "/docs/plugins/uniweb3",
+              "/docs/middleware/hook",
+              "/docs/middleware/logging",
               "/docs/reference/options",
               "/docs/reference/contributing",
             ]),
@@ -66,6 +76,11 @@ export default function Layout({ children }: { children: ReactNode }) {
                 name: "Next",
                 url: "/docs/integrations/next",
               },
+              {
+                type: "page",
+                name: "Hono",
+                url: "/docs/integrations/hono",
+              },
             ],
             icon: <LayoutGrid />,
           },
@@ -80,6 +95,23 @@ export default function Layout({ children }: { children: ReactNode }) {
               },
             ],
             icon: <Plug />,
+          },
+          {
+            type: "folder",
+            name: "Middleware",
+            children: [
+              {
+                type: "page",
+                name: "Hook",
+                url: "/docs/middleware/hook",
+              },
+              {
+                type: "page",
+                name: "Logging",
+                url: "/docs/middleware/logging",
+              },
+            ],
+            icon: <Webhook />,
           },
           {
             type: "folder",

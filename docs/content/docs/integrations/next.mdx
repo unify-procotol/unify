@@ -9,7 +9,7 @@ description: Unify provides complete Next.js support, including both App Router 
 First, install the required dependency packages:
 
 ```package-install
-@unilab/unify-hono @unilab/unify @unilab/uniweb3 hono
+@unilab/unify-next @unilab/unify-client @unilab/core @unilab/uniweb3
 ```
 
 ### App Router Additional Dependencies
@@ -21,7 +21,7 @@ For App Router, no additional dependencies are required.
 For Pages Router, you need to additionally install:
 
 ```package-install
-@hono/node-server
+@hono/node-server hono
 ```
 
 ## App Router Integration
@@ -31,9 +31,10 @@ For Pages Router, you need to additionally install:
 ```
 nextjs-app-router/
 ├── src/
+│   ├── api.ts                    # API configuration
 │   └── app/
 │       ├── api/
-│       │   └── [...route]/
+│       │   └── [...unify]/
 │       │       └── route.ts      # API routes
 │       ├── globals.css
 │       ├── layout.tsx
@@ -43,43 +44,29 @@ nextjs-app-router/
 └── tsconfig.json
 ```
 
-### API Route Setup
+### API Configuration Setup
 
-Create API routes in `src/app/api/[...route]/route.ts`:
+Create API configuration in `src/api.ts`:
 
 ```typescript
-import { Unify } from "@unilab/unify-hono";
-import { SolanaAdapter, EVMAdapter } from "@unilab/uniweb3";
-import { Hono, Context } from "hono";
+import { Logging } from "@unilab/core/middleware";
+import { AppUnify } from "@unilab/unify-next/app-router";
+import { WalletPlugin } from "@unilab/uniweb3";
 
-export const runtime = "nodejs";
-
-// Create custom Hono app instance
-const app = new Hono().basePath("/api");
-
-// Add custom middleware or routes
-app.get("/custom", (c: Context) => {
-  return c.json({ message: "This is a custom route!" });
+export const api = AppUnify.init({
+  plugins: [WalletPlugin],
+  middleware: [Logging()],
 });
+```
 
-// Initialize Unify with the app
-Unify.init({ app });
+### API Route Setup
 
-// Register Web3 adapters
-Unify.register([
-  { source: "solana", adapter: new SolanaAdapter() },
-  { source: "evm", adapter: new EVMAdapter() },
-]);
+Create API routes in `src/app/api/[...unify]/route.ts`:
 
-// Add additional custom routes
-app.get("/hello", (c: Context) => {
-  return c.json({
-    message: "Hello from Hono!",
-  });
-});
+```typescript
+import { api } from "../../../api";
 
-export const GET = app.fetch;
-export const POST = app.fetch;
+export const { GET, POST, PATCH, DELETE } = api;
 ```
 
 ### Client Usage
@@ -89,25 +76,23 @@ Using Unify client in page components:
 ```tsx
 "use client";
 
-import { repo, UnifyClient } from "@unilab/unify";
+import { repo, UnifyClient } from "@unilab/unify-client";
 import { WalletEntity } from "@unilab/uniweb3/entities";
 import { useEffect, useState } from "react";
+
+UnifyClient.init({
+  baseUrl: "http://localhost:3000/api",
+  timeout: 10000,
+  headers: {
+    Authorization: "Bearer your-token-here",
+  },
+});
 
 export default function Home() {
   const [evmBalanceData, setEvmBalanceData] = useState<any>(null);
   const [solanaBalanceData, setSolanaBalanceData] = useState<any>(null);
 
   useEffect(() => {
-    // Initialize the client
-    UnifyClient.init({
-      baseUrl: "http://localhost:3000/api",
-      timeout: 10000,
-      headers: {
-        Authorization: "Bearer your-token-here",
-      },
-    });
-
-    // Fetch EVM wallet balance
     const fetchEvmBalance = async () => {
       try {
         const data = await repo<WalletEntity>("wallet", "evm").findOne({
@@ -124,7 +109,6 @@ export default function Home() {
       }
     };
 
-    // Fetch Solana wallet balance
     const fetchSolanaBalance = async () => {
       try {
         const data = await repo<WalletEntity>("wallet", "solana").findOne({
@@ -155,7 +139,6 @@ export default function Home() {
 
 ## Pages Router Integration
 
-
 ### Project Structure
 
 ```
@@ -179,37 +162,16 @@ nextjs-pages-router/
 Create API routes in `src/pages/api/[...unify].ts`:
 
 ```typescript
-import { Unify } from "@unilab/unify-hono";
-import { SolanaAdapter, EVMAdapter } from "@unilab/uniweb3";
-import { Hono } from "hono";
-import { handle } from "@hono/node-server/vercel";
-import type { PageConfig } from "next";
+import { PagesUnify } from "@unilab/unify-next/pages-router";
+import { WalletPlugin } from "@unilab/uniweb3";
+import { Logging } from "@unilab/core/middleware";
 
-export const config: PageConfig = {
-  api: {
-    bodyParser: false,
-  },
-};
-
-const app = new Hono().basePath("/api");
-
-// Initialize Unify
-Unify.init({ app });
-
-// Register Web3 adapters
-Unify.register([
-  { source: "solana", adapter: new SolanaAdapter() },
-  { source: "evm", adapter: new EVMAdapter() },
-]);
-
-// Add custom routes
-app.get("/hello", (c) => {
-  return c.json({
-    message: "Hello from Hono!",
-  });
+const handler = PagesUnify.init({
+  plugins: [WalletPlugin],
+  middleware: [Logging()],
 });
 
-export default handle(app);
+export default handler;
 ```
 
 ### Client Usage
@@ -217,23 +179,23 @@ export default handle(app);
 Using Unify client in page components:
 
 ```tsx
-import { repo, UnifyClient } from "@unilab/unify";
+import { repo, UnifyClient } from "@unilab/unify-client";
 import { WalletEntity } from "@unilab/uniweb3/entities";
 import { useEffect, useState } from "react";
+
+UnifyClient.init({
+  baseUrl: "http://localhost:3000/api",
+  timeout: 10000,
+  headers: {
+    Authorization: "Bearer your-token-here",
+  },
+});
 
 export default function Home() {
   const [evmBalanceData, setEvmBalanceData] = useState<any>(null);
   const [solanaBalanceData, setSolanaBalanceData] = useState<any>(null);
 
   useEffect(() => {
-    UnifyClient.init({
-      baseUrl: "http://localhost:3000/api",
-      timeout: 10000,
-      headers: {
-        Authorization: "Bearer your-token-here",
-      },
-    });
-
     const fetchEvmBalance = async () => {
       try {
         const data = await repo<WalletEntity>("wallet", "evm").findOne({
@@ -277,3 +239,29 @@ export default function Home() {
   );
 }
 ```
+
+## Key Features
+
+### Plugins and Middleware
+
+Both App Router and Pages Router support:
+
+- **Plugins**: Extend functionality with plugins like `WalletPlugin`
+- **Middleware**: Add cross-cutting concerns like logging with `Logging()`
+
+### HTTP Methods Support
+
+The integration supports all standard HTTP methods:
+- `GET` - For read operations
+- `POST` - For create operations
+- `PATCH` - For update operations
+- `DELETE` - For delete operations
+
+### Client Configuration
+
+The `UnifyClient` provides flexible configuration options:
+- **baseUrl**: API endpoint base URL
+- **timeout**: Request timeout in milliseconds
+- **headers**: Custom headers including authorization
+
+This integration provides a seamless way to use Unify in Next.js applications with both routing approaches.

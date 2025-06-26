@@ -182,12 +182,13 @@ function CodeExample() {
   const [activeTab, setActiveTab] = useState<"server" | "client">("server");
 
   const serverCode = `import { Unify } from "@unilab/unify-hono";
-import { SolanaAdapter, EVMAdapter } from "@unilab/uniweb3";
+import { WalletPlugin } from "@unilab/uniweb3";
+import { Logging } from "@unilab/core/middleware";
 
-const app = Unify.register([
-  { source: "solana", adapter: new SolanaAdapter() },
-  { source: "evm", adapter: new EVMAdapter() },
-]);
+const app = Unify.init({
+  plugins: [WalletPlugin],
+  middleware: [Logging()],
+});
 
 export default {
   port: 3000,
