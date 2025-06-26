@@ -2,19 +2,19 @@ import { repo, UnifyClient } from "@unilab/unify-client";
 import { WalletEntity } from "@unilab/uniweb3/entities";
 import { useEffect, useState } from "react";
 
+UnifyClient.init({
+  baseUrl: "http://localhost:3000/api",
+  timeout: 10000,
+  headers: {
+    Authorization: "Bearer your-token-here",
+  },
+});
+
 export default function Home() {
   const [evmBalanceData, setEvmBalanceData] = useState<any>(null);
   const [solanaBalanceData, setSolanaBalanceData] = useState<any>(null);
 
   useEffect(() => {
-    UnifyClient.init({
-      baseUrl: "http://localhost:3000/api",
-      timeout: 10000,
-      headers: {
-        Authorization: "Bearer your-token-here",
-      },
-    });
-
     const fetchEvmBalance = async () => {
       try {
         const data = await repo<WalletEntity>("wallet", "evm").findOne({

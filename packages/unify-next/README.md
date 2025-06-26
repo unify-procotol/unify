@@ -1,6 +1,6 @@
 # @unilab/unify-next
 
-A Next.js-based SDK that maps entity configurations to REST API endpoints, built on top of `@unilab/core`.
+Next.js adapter for Unify, supporting both App Router and Pages Router.
 
 ## Installation
 
@@ -16,64 +16,113 @@ bun add @unilab/unify-next
 
 ### App Router (Next.js 13+)
 
-Create a catch-all API route at `src/app/api/[...route]/route.ts`:
+For App Router, use `AppUnify` with `NextRequest`:
 
 ```typescript
-import { Unify } from "@unilab/unify-next";
-import { WalletPlugin } from "@unilab/uniweb3";
+// app/api/[...route]/route.ts
+import { NextRequest } from "next/server";
+import { AppUnify } from "@unilab/unify-next";
 
-// Initialize Unify with your plugins
-Unify.init({
-  plugins: [WalletPlugin],
+// Initialize with your configuration
+AppUnify.init({
+  plugins: [
+    // your plugins
+  ],
+  middleware: [
+    // your middleware
+  ],
 });
 
-// Export the handler for different HTTP methods
-export async function GET(request: Request, context: { params: { route: string[] } }) {
-  return Unify.handler(request, context);
+export async function GET(request: NextRequest, { params }: { params: { route: string[] } }) {
+  return AppUnify.handler(request, { params });
 }
 
-export async function POST(request: Request, context: { params: { route: string[] } }) {
-  return Unify.handler(request, context);
+export async function POST(request: NextRequest, { params }: { params: { route: string[] } }) {
+  return AppUnify.handler(request, { params });
 }
 
-export async function PATCH(request: Request, context: { params: { route: string[] } }) {
-  return Unify.handler(request, context);
+export async function PATCH(request: NextRequest, { params }: { params: { route: string[] } }) {
+  return AppUnify.handler(request, { params });
 }
 
-export async function DELETE(request: Request, context: { params: { route: string[] } }) {
-  return Unify.handler(request, context);
+export async function DELETE(request: NextRequest, { params }: { params: { route: string[] } }) {
+  return AppUnify.handler(request, { params });
 }
 ```
 
-### Pages Router (Next.js 12 and below)
+### Pages Router (Next.js 12+)
 
-Create a catch-all API route at `pages/api/[...route].ts`:
+For Pages Router, use `PagesUnify` with `NextApiRequest`:
 
 ```typescript
-import { Unify } from "@unilab/unify-next";
-import { WalletPlugin } from "@unilab/uniweb3";
+// pages/api/[...unify].ts
 import type { NextApiRequest, NextApiResponse } from "next";
+import { PagesUnify } from "@unilab/unify-next";
 
-// Initialize Unify with your plugins
-Unify.init({
-  plugins: [WalletPlugin],
+// Initialize with your configuration
+PagesUnify.init({
+  plugins: [
+    // your plugins
+  ],
+  middleware: [
+    // your middleware
+  ],
 });
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  // Convert Next.js API route to our format
-  const request = new Request(`http://localhost${req.url}`, {
-    method: req.method,
-    headers: req.headers as any,
-    body: req.method !== 'GET' ? JSON.stringify(req.body) : undefined,
-  });
-
-  const route = Array.isArray(req.query.route) ? req.query.route : [req.query.route];
-  const response = await Unify.handler(request, { params: { route } });
-  
-  const data = await response.json();
-  res.status(response.status).json(data);
+  return await PagesUnify.handler(req, res);
 }
 ```
+
+Or use the convenience function:
+
+```typescript
+// pages/api/[...unify].ts
+import { createPagesHandler, PagesUnify } from "@unilab/unify-next";
+
+// Initialize with your configuration
+PagesUnify.init({
+  plugins: [
+    // your plugins
+  ],
+  middleware: [
+    // your middleware
+  ],
+});
+
+export default createPagesHandler();
+```
+
+## API Differences
+
+### App Router (`AppUnify`)
+- Uses `NextRequest` and `NextResponse`
+- Handler returns `Promise<NextResponse>`
+- Route parameters come from the dynamic segment: `{ params: { route: string[] } }`
+- Query parameters accessed via `request.url` and `URLSearchParams`
+
+### Pages Router (`PagesUnify`)
+- Uses `NextApiRequest` and `NextApiResponse`
+- Handler returns `Promise<void>` (writes directly to response)
+- Route parameters come from `req.query.unify` or `req.query.route`
+- Query parameters accessed via `req.query`
+
+## Configuration
+
+Both handlers support the same configuration interface:
+
+```typescript
+interface UnifyConfig {
+  plugins?: Plugin[];
+  middleware?: Middleware<any>[];
+}
+```
+
+## Examples
+
+See the `examples/` directory for complete working examples:
+- `examples/nextjs-app-router/` - App Router example
+- `examples/nextjs-pages-router/` - Pages Router example
 
 ## API Endpoints
 
@@ -126,33 +175,6 @@ Content-Type: application/json
 ### Delete Record
 ```
 DELETE /api/{entity}/delete?source={source}&where={conditions}
-```
-
-## Configuration
-
-### Plugins
-
-The `Unify.init()` method accepts a configuration object with the following options:
-
-```typescript
-interface UnifyConfig {
-  plugins?: Plugin[];
-  middleware?: Middleware<any>[];
-}
-```
-
-### Middleware
-
-You can add global middleware that will be applied to all operations:
-
-```typescript
-import { Unify } from "@unilab/unify-next";
-import { loggingMiddleware } from "@unilab/core/middleware";
-
-Unify.init({
-  plugins: [/* your plugins */],
-  middleware: [loggingMiddleware],
-});
 ```
 
 ## Features

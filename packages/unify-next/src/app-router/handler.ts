@@ -1,13 +1,7 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import {
-  getRepo,
-  getRepoRegistry,
-  handleError,
-  parseQueryParams,
-  registerAdapter,
-  validateSource,
-} from "./utils";
+import { handleError, parseQueryParams, validateSource } from "./utils";
+import { registerAdapter, getRepo, getRepoRegistry } from "../repo";
 import {
   DataSourceAdapter,
   generateSchemas,
@@ -18,13 +12,10 @@ import {
   AdapterRegistration,
   useGlobalMiddleware,
 } from "@unilab/core";
+import { UnifyConfig } from "../type";
 
-export interface UnifyConfig {
-  plugins?: Plugin[];
-  middleware?: Middleware<any>[];
-}
 
-export class Unify {
+export class AppUnify {
   private static entitySchemas: Record<string, SchemaObject> = {};
   private static entitySources: Record<string, string[]> = {};
   private static initialized = false;
@@ -119,15 +110,15 @@ export class Unify {
 
       switch (`${method}:${action}`) {
         case "GET:list":
-          return await this.handleFindMany(request, repo, entity, source!);
+          return await AppUnify.handleFindMany(request, repo, entity, source!);
         case "GET:find_one":
-          return await this.handleFindOne(request, repo, entity, source!);
+          return await AppUnify.handleFindOne(request, repo, entity, source!);
         case "POST:create":
-          return await this.handleCreate(request, repo, entity, source!);
+          return await AppUnify.handleCreate(request, repo, entity, source!);
         case "PATCH:update":
-          return await this.handleUpdate(request, repo, entity, source!);
+          return await AppUnify.handleUpdate(request, repo, entity, source!);
         case "DELETE:delete":
-          return await this.handleDelete(request, repo, entity, source!);
+          return await AppUnify.handleDelete(request, repo, entity, source!);
         default:
           return NextResponse.json(
             { error: `Unsupported operation: ${method}:${action}` },
