@@ -12,6 +12,8 @@
     "dev:core": "cd packages/core && bun run dev",
     "build:unify-hono": "cd packages/unify-hono && bun run build",
     "dev:unify-hono": "cd packages/unify-hono && bun run dev",
+    "build:unify-next": "cd packages/unify-next && bun run build",
+    "dev:unify-next": "cd packages/unify-next && bun run dev",
     "build:unify-client": "cd packages/unify-client && bun run build",
     "dev:unify-client": "cd packages/unify-client && bun run dev",
     "build:unify": "cd packages/unify && bun run build",

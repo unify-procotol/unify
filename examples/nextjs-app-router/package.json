@@ -1,5 +1,5 @@
 {
-  "name": "nextjs-app-router",
+  "name": "nextjs-app-router-example",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -9,20 +9,21 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@unilab/unify-hono": "workspace:*",
+    "@unilab/unify-next": "workspace:*",
     "@unilab/unify-client": "workspace:*",
     "@unilab/uniweb3": "workspace:*",
-    "hono": "^4.7.11",
-    "next": "15.3.3",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "next": "14.2.5",
+    "react": "^18",
+    "react-dom": "^18"
   },
   "devDependencies": {
-    "typescript": "^5",
     "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "@tailwindcss/postcss": "^4",
-    "tailwindcss": "^4"
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "eslint": "^8",
+    "eslint-config-next": "14.2.5",
+    "postcss": "^8",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5"
   }
 }
