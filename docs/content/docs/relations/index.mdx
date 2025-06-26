@@ -217,7 +217,7 @@ const fetchUser = async () => {
       posts: (userList) => {
         const ids = userList.map((user) => user.id);
         
-        // Use joinRepo for optimized relation mapping
+        // Use joinRepo for optimized relation mapping, if you don't set the where parameter, you must use joinRepo, but in other cases you can use repo directly.
         return joinRepo<PostEntity, UserEntity>("post", "post", {
           localField: "id",        // User.id
           foreignField: "userId",  // Post.userId
@@ -342,7 +342,6 @@ const fetchUser = async () => {
       },
     },
   });
-  console.log("fetchUser===>", JSON.stringify(data, null, 2));
 };
 
 const createUser = async () => {
@@ -353,7 +352,6 @@ const createUser = async () => {
       avatar: "https://example.com/avatar.jpg",
     },
   });
-  console.log("createUser===>", JSON.stringify(data, null, 2));
 };
 
 // Execute the functions
