@@ -74,7 +74,12 @@ export class Unify {
 
     console.log(
       `✅ Registered adapters: ${adapters
-        .map((a) => a.adapter.constructor.name)
+        .map((a) => {
+          const adapterName =
+            (a.adapter.constructor as any).adapterName ||
+            a.adapter.constructor.name;
+          return `${adapterName}`;
+        })
         .join(", ")}`
     );
   }

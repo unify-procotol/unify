@@ -1,11 +1,10 @@
-import {
-  PagesUnify,
-  createPagesHandler,
-} from "@unilab/unify-next/pages-router";
+import { PagesUnify } from "@unilab/unify-next/pages-router";
 import { WalletPlugin } from "@unilab/uniweb3";
+import { Logging } from "@unilab/core/middleware";
 
-PagesUnify.init({
+const handler = PagesUnify.init({
   plugins: [WalletPlugin],
+  middleware: [Logging()],
 });
 
-export default createPagesHandler();
+export default handler;

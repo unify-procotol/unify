@@ -14,27 +14,44 @@ import {
 } from "@unilab/core";
 import { UnifyConfig } from "../type";
 
+// Handler function type that matches Next.js 15 expectations
+type RouteHandler = (
+  request: NextRequest,
+  context: { params: Promise<{ unify: string[] }> }
+) => Promise<NextResponse>;
+
+export interface UnifyAPI {
+  GET: RouteHandler;
+  POST: RouteHandler;
+  PATCH: RouteHandler;
+  DELETE: RouteHandler;
+}
 
 export class AppUnify {
   private static entitySchemas: Record<string, SchemaObject> = {};
   private static entitySources: Record<string, string[]> = {};
   private static initialized = false;
 
-  // Static initialization method
-  static init(config: UnifyConfig) {
-    if (this.initialized) {
-      return;
+  // Static initialization method that returns API handlers
+  static init(config: UnifyConfig): UnifyAPI {
+    if (!this.initialized) {
+      if (config.plugins) {
+        this.initFromPlugins(config.plugins);
+      }
+
+      if (config.middleware) {
+        this.applyMiddlewareToRepos(config.middleware);
+      }
+
+      this.initialized = true;
     }
 
-    if (config.plugins) {
-      this.initFromPlugins(config.plugins);
-    }
-
-    if (config.middleware) {
-      this.applyMiddlewareToRepos(config.middleware);
-    }
-
-    this.initialized = true;
+    return {
+      GET: this.handler,
+      POST: this.handler,
+      PATCH: this.handler,
+      DELETE: this.handler,
+    };
   }
 
   // Initialize from plugins configuration
@@ -54,7 +71,12 @@ export class AppUnify {
 
     console.log(
       `✅ Registered adapters: ${adapters
-        .map((a) => a.adapter.constructor.name)
+        .map((a) => {
+          const adapterName =
+            (a.adapter.constructor as any).adapterName ||
+            a.adapter.constructor.name;
+          return `${adapterName}`;
+        })
         .join(", ")}`
     );
   }
@@ -82,14 +104,22 @@ export class AppUnify {
     }
   }
 
+  // Helper function to resolve params
+  private static async resolveParams(
+    params: Promise<{ unify: string[] }>
+  ): Promise<{ unify: string[] }> {
+    return await params;
+  }
+
   // Main handler for Next.js API routes
   static async handler(
     request: NextRequest,
-    { params }: { params: { route: string[] } }
+    { params }: { params: Promise<{ unify: string[] }> }
   ): Promise<NextResponse> {
     try {
       const method = request.method;
-      const [entity, action] = params.route;
+      const resolvedParams = await AppUnify.resolveParams(params);
+      const [entity, action] = resolvedParams.unify;
 
       if (!entity || !action) {
         return NextResponse.json(

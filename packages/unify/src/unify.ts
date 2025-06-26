@@ -46,7 +46,12 @@ export class Unify {
 
     console.log(
       `✅ Registered adapters: ${adapters
-        .map((a) => a.adapter.constructor.name)
+        .map((a) => {
+          const adapterName =
+            (a.adapter.constructor as any).adapterName ||
+            a.adapter.constructor.name;
+          return `${adapterName}`;
+        })
         .join(", ")}`
     );
   }
@@ -222,9 +227,7 @@ export class Unify {
 
   private static getGlobalClient(): Unify {
     if (!Unify.globalClient) {
-      throw new Error(
-        "Unify not initialized. Call Unify.init() first."
-      );
+      throw new Error("Unify not initialized. Call Unify.init() first.");
     }
     return Unify.globalClient;
   }
@@ -233,10 +236,7 @@ export class Unify {
     entityName: string,
     source: string
   ): Repository<T> {
-    return Unify.getGlobalClient().createRepositoryProxy<T>(
-      entityName,
-      source
-    );
+    return Unify.getGlobalClient().createRepositoryProxy<T>(entityName, source);
   }
 
   // 静态 JoinRepo 方法

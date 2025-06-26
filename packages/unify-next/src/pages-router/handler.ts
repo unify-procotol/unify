@@ -38,6 +38,10 @@ export class PagesUnify {
     }
 
     this.initialized = true;
+
+    return async function handler(req: NextApiRequest, res: NextApiResponse) {
+      return await PagesUnify.handler(req, res);
+    };
   }
 
   // Initialize from plugins configuration
@@ -57,7 +61,12 @@ export class PagesUnify {
 
     console.log(
       `✅ Registered adapters: ${adapters
-        .map((a) => a.adapter.constructor.name)
+        .map((a) => {
+          const adapterName =
+            (a.adapter.constructor as any).adapterName ||
+            a.adapter.constructor.name;
+          return `${adapterName}`;
+        })
         .join(", ")}`
     );
   }
@@ -94,7 +103,7 @@ export class PagesUnify {
       const method = req.method || "GET";
 
       // Extract route parameters
-      const routeParams = req.query.unify || req.query.route;
+      const routeParams = req.query.unify;
       const route = Array.isArray(routeParams)
         ? (routeParams as string[])
         : [routeParams as string].filter(Boolean);
@@ -287,11 +296,4 @@ export class PagesUnify {
     });
     return entitySources;
   }
-}
-
-// Export a convenience function for creating the handler
-export function createPagesHandler() {
-  return async function handler(req: NextApiRequest, res: NextApiResponse) {
-    return await PagesUnify.handler(req, res);
-  };
 }

@@ -130,7 +130,7 @@ export function createUserRepositoryWithHooks() {
       // 数据标准化
       UserService.normalizeUser(args.data);
 
-      // 访问 adapter 信息
+      // 访问 adapter 信息 (注意：生产构建时类名会被压缩)
       console.log(`Using adapter: ${context?.adapter.constructor.name}`);
     });
 
@@ -151,7 +151,7 @@ export function createUserRepositoryWithHooks() {
         }
 
         console.log(
-          `Operation: ${context?.operation}, Adapter: ${context?.adapter.constructor.name}`
+          `Operation: ${context?.operation}, Adapter: ${context?.adapter.constructor.name} (注意：生产构建时类名会被压缩)`
         );
       }
     );
