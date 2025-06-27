@@ -1,0 +1,39 @@
+{
+  "name": "mimo-example",
+  "version": "1.0.0",
+  "description": "Mimo trading pair price example using @unilab/unify-client",
+  "main": "server.ts",
+  "scripts": {
+    "dev": "bun run server.ts",
+    "start": "bun run server.ts",
+    "client": "bun run client.ts",
+    "test-fetch": "bun run test-fetch.ts",
+    "test-simple": "bun run client-simple.ts"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.12.2",
+    "@unilab/unify-client": "workspace:*",
+    "@unilab/core": "workspace:*",
+    "@unilab/unify-hono": "workspace:*",
+    "@unilab/uniweb3": "workspace:*",
+    "hono": "^4.7.11"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.1.12",
+    "typescript": "^5.3.0"
+  },
+  "keywords": [
+    "mimo",
+    "trading",
+    "pair",
+    "price",
+    "dex",
+    "swap",
+    "iotex",
+    "unilab",
+    "api",
+    "example"
+  ],
+  "author": "osdodo",
+  "license": "MIT"
+} 

@@ -97,5 +97,6 @@ const app = Unify.init({
 
 export default {
   port: 3000,
+  timeout: 30000,
   fetch: app.fetch,
 };
