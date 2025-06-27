@@ -1,190 +1,79 @@
 ---
 title: Basic Usage
-description: This guide shows how to create a basic Unify server with custom entities and adapters.
+description: Learn how to set up Unify with plugins and middleware
 ---
-
 
 ## Server Setup
 
-Create entities, adapters, and server:
+### 1. Install Dependencies
 
-### 1. Define Entities
-
-```typescript
-// entities/user.ts
-import { Fields } from "@unilab/core";
-
-export class UserEntity {
-  @Fields.string()
-  id = "";
-
-  @Fields.string()
-  name = "";
-
-  @Fields.string()
-  email = "";
-
-  @Fields.string()
-  avatar = "";
-}
+```bash
+npm install @unilab/unify-hono @unilab/unify-client @unilab/core
 ```
 
-```typescript
-// entities/post.ts
-import { Fields } from "@unilab/core";
-
-export class PostEntity {
-  @Fields.string()
-  id = "";
-
-  @Fields.string()
-  title = "";
-
-  @Fields.string()
-  content = "";
-
-  @Fields.string()
-  userId = "";
-}
-```
-
-### 2. Create Adapters
-
-```typescript
-// adapters/user.ts
-import { DataSourceAdapter, FindManyArgs, FindOneArgs, CreationArgs } from "@unilab/core";
-import { UserEntity } from "../entities/user";
-
-const userData = [
-  { id: "1", name: "John Doe", email: "john.doe@example.com", avatar: "https://example.com/avatar.png" },
-  { id: "2", name: "Jane Smith", email: "jane.smith@example.com", avatar: "https://example.com/avatar2.png" }
-];
-
-export class UserAdapter implements DataSourceAdapter<UserEntity> {
-  async findMany(args?: FindManyArgs<UserEntity>): Promise<UserEntity[]> {
-    const where = args?.where || {};
-    if (where.id) {
-      return userData.filter(user => user.id === where.id);
-    }
-    return userData;
-  }
-
-  async findOne(args: FindOneArgs<UserEntity>): Promise<UserEntity | null> {
-    const { id } = args.where;
-    return userData.find(user => user.id === id) || null;
-  }
-
-  async create(args: CreationArgs<UserEntity>): Promise<UserEntity> {
-    const { name, email, avatar } = args.data;
-    const newUser = {
-      id: (userData.length + 1).toString(),
-      name, email, avatar
-    };
-    userData.push(newUser);
-    return newUser;
-  }
-
-  // ... implement update and delete methods
-}
-```
-
-### 3. Setup Server
+### 2. Create Server
 
 ```typescript
 // server.ts
 import { Unify } from "@unilab/unify-hono";
-import { UserAdapter } from "./adapters/user";
-import { PostAdapter } from "./adapters/post";
-import { UserEntity } from "./entities/user";
-import { PostEntity } from "./entities/post";
-
-const MyPlugin = {
-  entities: [UserEntity, PostEntity],
-  adapters: [
-    { source: "user", entityName: "UserEntity", adapter: new UserAdapter() },
-    { source: "post", entityName: "PostEntity", adapter: new PostAdapter() }
-  ]
-};
+import { WalletPlugin } from "@unilab/uniweb3";
+import { Logging } from "@unilab/core/middleware";
 
 const app = Unify.init({
-  plugins: [MyPlugin]
+  plugins: [WalletPlugin],
+  middleware: [Logging()],
 });
 
 export default {
   port: 3000,
-  fetch: app.fetch
+  fetch: app.fetch,
 };
 ```
 
-## Client Usage
+### 3. Client Usage
 
 ```typescript
 // client.ts
 import { repo, UnifyClient } from "@unilab/unify-client";
-import { UserEntity } from "./entities/user";
+import { WalletEntity } from "@unilab/uniweb3/entities";
 
 UnifyClient.init({
   baseUrl: "http://localhost:3000",
-  timeout: 10000
+  timeout: 10000,
 });
 
-// Create a user
-const createUser = async () => {
-  const user = await repo<UserEntity>("user", "user").create({
-    data: {
-      name: "John Doe",
-      email: "john.doe@example.com",
-      avatar: "https://example.com/avatar.jpg"
-    }
-  });
-  console.log("Created user:", user);
-};
+const evmBalanceRes = await repo<WalletEntity>("wallet", "evm").findOne({
+  where: {
+    address: "0x...",
+    network: "iotex",
+  },
+});
 
-// Find users
-const getUsers = async () => {
-  const users = await repo<UserEntity>("user", "user").findMany({
-    where: { name: "John Doe" }
-  });
-  console.log("Users:", users);
-};
-
-createUser();
+const solanaBalanceRes = await repo<WalletEntity>("wallet", "solana").findOne({
+  where: {
+    address: "11111111111111111111111111111112",
+  },
+});
 ```
 
-## Running the Example
+## Running the Server
 
-### 1. Start Server
 ```bash
-bun run server
+bun run server.ts
+# or
+node server.js
 ```
-
-### 2. Run Client
-```bash
-bun run client
-```
-
-### 3. Test with curl
-```bash
-# Get all users
-curl "http://localhost:3000/user/find_many"
-
-# Create a user
-curl -X POST "http://localhost:3000/user/create" \
-  -H "Content-Type: application/json" \
-  -d '{"name":"John","email":"john@example.com","avatar":"avatar.jpg"}'
-```
-
 
 ## Key Features
 
-- 🏗️ **Entity-based**: Define data structures with decorators
-- 🔌 **Adapter pattern**: Custom data source implementations  
-- 🚀 **Auto-generated APIs**: REST endpoints created automatically
+- 🔌 **Plugin System**: Easy integration with pre-built plugins
+- 📊 **Middleware**: Built-in logging and custom middleware support
+- 🌐 **Multi-chain**: Support for EVM and Solana networks
+- ⚡ **Auto APIs**: REST endpoints generated automatically
 - 📝 **Type-safe**: Full TypeScript support
-- ⚡ **Lightweight**: Minimal setup required
 
 ## Next Steps
 
-- Learn about [Next.js Integration](/docs/integrations/next)
-- Explore [Hono Integration](/docs/integrations/hono)
-- Check out [Middleware options](/docs/reference/options)
+- Explore [Plugin Development](/docs/plugins/creating-plugins)
+- Learn about [Middleware](/docs/middleware/logging)
+- Check [Integration Guides](/docs/integrations/next)

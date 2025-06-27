@@ -11,8 +11,8 @@ import { createHookMiddleware, Logging } from "@unilab/core/middleware";
 const MyPlugin: Plugin = {
   entities: [UserEntity, PostEntity],
   adapters: [
-    { source: "user", entityName: "UserEntity", adapter: new UserAdapter() },
-    { source: "post", entityName: "PostEntity", adapter: new PostAdapter() },
+    { source: "wordpress", entityName: "UserEntity", adapter: new UserAdapter() },
+    { source: "wordpress", entityName: "PostEntity", adapter: new PostAdapter() },
   ],
 };
 
@@ -95,45 +95,45 @@ const HookMiddleware = createHookMiddleware((hookManager) => {
 Unify.init({
   enableDebug: true,
   plugins: [MyPlugin, WalletPlugin],
-  middleware: [HookMiddleware, Logging()],
+  // middleware: [HookMiddleware, Logging()],
 });
 
-// const fetchUser = async () => {
-//   const data = await repo<UserEntity>("user", "user").findMany({
-//     // where: {
-//     //   id: "1",
-//     //   // email: "john.doe@example.com",
-//     // },
-//     include: {
-//       posts: (userList) => {
-//         const ids = userList.map((user) => user.id);
-//         return joinRepo<PostEntity, UserEntity>("post", "post", {
-//           localField: "id",
-//           foreignField: "userId",
-//         }).findMany({
-//           where: {
-//             userId: {
-//               $in: ids,
-//             },
-//           },
-//         });
-//       },
-//     },
-//   });
-//   console.log("fetchUser===>", JSON.stringify(data, null, 2));
-// };
+const fetchUser = async () => {
+  const data = await repo<UserEntity>("user", "wordpress").findMany({
+    // where: {
+    //   id: "1",
+    //   // email: "john.doe@example.com",
+    // },
+    include: {
+      posts: (userList) => {
+        const ids = userList.map((user) => user.id);
+        return joinRepo<PostEntity, UserEntity>("post", "wordpress", {
+          localField: "id",
+          foreignField: "userId",
+        }).findMany({
+          where: {
+            userId: {
+              $in: ids,
+            },
+          },
+        });
+      },
+    },
+  });
+  console.log("fetchUser===>", JSON.stringify(data, null, 2));
+};
 
-// fetchUser();
+fetchUser();
 
 // const fetchPost = async () => {
-//   const data = await repo<PostEntity>("post", "post").findOne({
+//   const data = await repo<PostEntity>("post", "wordpress").findOne({
 //     where: {
 //       id: "2",
 //     },
 //     include: {
 //       user: (post) => {
 //         const userId = post.userId;
-//         return repo<UserEntity>("user", "user").findOne({
+//         return repo<UserEntity>("user", "wordpress").findOne({
 //           where: {
 //             id: userId,
 //           },

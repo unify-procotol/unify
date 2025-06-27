@@ -114,8 +114,8 @@ import { Plugin } from "@unilab/core";
 const MyPlugin: Plugin = {
   entities: [UserEntity, PostEntity],
   adapters: [
-    { source: "user", entityName: "UserEntity", adapter: new UserAdapter() },
-    { source: "post", entityName: "PostEntity", adapter: new PostAdapter() },
+    { source: "wordpress", entityName: "UserEntity", adapter: new UserAdapter() },
+    { source: "wordpress", entityName: "PostEntity", adapter: new PostAdapter() },
   ],
 };
 
@@ -145,7 +145,7 @@ UnifyClient.init({
 
 // Create a user
 const createUser = async () => {
-  const data = await repo<UserEntity>("user", "user").create({
+  const data = await repo<UserEntity>("user", "wordpress").create({
     data: {
       name: "John Doe",
       email: "john.doe@example.com",
@@ -157,7 +157,7 @@ const createUser = async () => {
 
 // Find users
 const findUsers = async () => {
-  const data = await repo<UserEntity>("user", "user").findMany({
+  const data = await repo<UserEntity>("user", "wordpress").findMany({
     where: {
       name: "John Doe",
     },

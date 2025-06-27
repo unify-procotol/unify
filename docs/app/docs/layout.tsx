@@ -26,6 +26,7 @@ export default function Layout({ children }: { children: ReactNode }) {
               "/docs/basic-usage",
               "/docs/integrations/next",
               "/docs/integrations/hono",
+              "/docs/plugins/creating-plugins",
               "/docs/plugins/uniweb3",
               "/docs/middleware/hook",
               "/docs/middleware/logging",
@@ -88,6 +89,11 @@ export default function Layout({ children }: { children: ReactNode }) {
             type: "folder",
             name: "Plugins",
             children: [
+              {
+                type: "page",
+                name: "Creating Plugins",
+                url: "/docs/plugins/creating-plugins",
+              },
               {
                 type: "page",
                 name: "UniWeb3",

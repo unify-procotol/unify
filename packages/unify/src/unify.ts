@@ -10,9 +10,14 @@ import type {
   AdapterRegistration,
   Middleware,
 } from "@unilab/core";
-import { generateSchemas, useGlobalMiddleware } from "@unilab/core";
+import {
+  generateSchemas,
+  getRepo,
+  getRepoRegistry,
+  registerAdapter,
+  useGlobalMiddleware,
+} from "@unilab/core";
 import type { ClientConfig, RelationMapping } from "./types";
-import { getRepo, getRepoRegistry, registerAdapter } from "./utils";
 
 export class Unify {
   private enableDebug: boolean = false;
@@ -42,7 +47,9 @@ export class Unify {
     this.entitySources = this.analyzeEntitySources(adapters);
 
     // Register adapters and apply middleware
-    adapters.forEach(({ source, adapter }) => registerAdapter(source, adapter));
+    adapters.forEach(({ entityName, source, adapter }) =>
+      registerAdapter(entityName, source, adapter)
+    );
 
     console.log(
       `✅ Registered adapters: ${adapters
@@ -85,7 +92,7 @@ export class Unify {
   ): Repository<T> {
     return new Proxy({} as Repository<T>, {
       get: (target, prop: string) => {
-        const repo = getRepo(source!);
+        const repo = getRepo(entityName, source!);
 
         switch (prop) {
           case "findMany":

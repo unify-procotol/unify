@@ -69,8 +69,8 @@ import { createHookMiddleware, Logging } from "@unilab/core/middleware";
 const MyPlugin = {
   entities: [UserEntity, PostEntity],
   adapters: [
-    { source: "user", entityName: "UserEntity", adapter: new UserAdapter() },
-    { source: "post", entityName: "PostEntity", adapter: new PostAdapter() },
+    { source: "wordpress", entityName: "UserEntity", adapter: new UserAdapter() },
+    { source: "wordpress", entityName: "PostEntity", adapter: new PostAdapter() },
   ],
 };
 
@@ -80,7 +80,7 @@ Unify.init({
 });
 
 // Use repo for data operations
-const users = await repo("user", "user").findMany();
+const users = await repo("user", "wordpress").findMany();
 ```
 
 ### Hono Server
@@ -94,8 +94,8 @@ import { Logging } from "@unilab/core/middleware";
 const MyPlugin = {
   entities: [UserEntity, PostEntity],
   adapters: [
-    { source: "user", entityName: "UserEntity", adapter: new UserAdapter() },
-    { source: "post", entityName: "PostEntity", adapter: new PostAdapter() },
+    { source: "wordpress", entityName: "UserEntity", adapter: new UserAdapter() },
+    { source: "wordpress", entityName: "PostEntity", adapter: new PostAdapter() },
   ],
 };
 

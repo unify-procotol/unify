@@ -1,7 +1,7 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { handleError, parseQueryParams, validateSource } from "./utils";
-import { registerAdapter, getRepo, getRepoRegistry } from "../repo";
+import { registerAdapter, getRepo, getRepoRegistry } from "@unilab/core";
 import {
   DataSourceAdapter,
   generateSchemas,
@@ -67,7 +67,9 @@ export class Unify {
     this.entitySources = this.analyzeEntitySources(adapters);
 
     // Register adapters and apply middleware
-    adapters.forEach(({ source, adapter }) => registerAdapter(source, adapter));
+    adapters.forEach(({ entityName, source, adapter }) =>
+      registerAdapter(entityName, source, adapter)
+    );
 
     console.log(
       `✅ Registered adapters: ${adapters
@@ -90,17 +92,19 @@ export class Unify {
   }
 
   static repo<T extends Record<string, any>>({
+    entityName,
     source,
     adapter,
   }: {
+    entityName: string;
     source: string;
     adapter: DataSourceAdapter<T>;
   }) {
     try {
-      const repo = getRepo(source) as Repository<T>;
+      const repo = getRepo(entityName, source) as Repository<T>;
       return repo;
     } catch (error) {
-      return registerAdapter(source, adapter);
+      return registerAdapter(entityName, source, adapter);
     }
   }
 
@@ -136,7 +140,7 @@ export class Unify {
         return sourceError;
       }
 
-      const repo = getRepo(source!);
+      const repo = getRepo(entity, source!);
 
       switch (`${method}:${action}`) {
         case "GET:list":
