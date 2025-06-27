@@ -38,6 +38,6 @@ export class UserEntity {
   })
   click(name: string) {
     this.name = name;
-    console.log("click=====>", name);
+    console.log("click=>", this.name);
   }
 }
