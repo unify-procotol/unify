@@ -1,14 +1,7 @@
-import { Layout, StudioHome } from "./components";
-
+import Router from "./Router";
 
 function App() {
-  return (
-    <Layout>
-      {({ isConnected, baseUrl }) => (
-        <StudioHome isConnected={isConnected} baseUrl={baseUrl} />
-      )}
-    </Layout>
-  );
+  return <Router />;
 }
 
 export default App; 

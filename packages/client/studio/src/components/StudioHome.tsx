@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { repo, UnifyClient } from "@unilab/httply";
+import { UniRender, Entity, LayoutType, FieldConfig } from "./uniRender";
 
 // Entity schema type based on the API response
 interface EntitySchema {
@@ -30,7 +31,8 @@ export function StudioHome({ isConnected, baseUrl }: StudioHomeProps) {
   const [sourceDataList, setSourceDataList] = useState<SourceData[]>([]);
   const [selectedEntity, setSelectedEntity] = useState<EntitySchema | null>(null);
   const [selectedSource, setSelectedSource] = useState<string>("");
-  const [viewMode, setViewMode] = useState<'table' | 'json'>('table');
+  const [viewMode, setViewMode] = useState<'table' | 'json' | 'unirender'>('table');
+  const [uniRenderLayout, setUniRenderLayout] = useState<LayoutType>('table');
   const [collapsedEntities, setCollapsedEntities] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -81,9 +83,9 @@ export function StudioHome({ isConnected, baseUrl }: StudioHomeProps) {
       
       // Initialize source data state for each entity-source combination
       const initialSourceData: SourceData[] = [];
-      entitiesInfo.forEach(entity => {
+      entitiesInfo.forEach((entity: EntitySchema) => {
         if (entity.sources && entity.sources.length > 0) {
-          entity.sources.forEach(source => {
+          entity.sources.forEach((source: string) => {
             initialSourceData.push({
               entityName: entity.name,
               source: source,
@@ -314,6 +316,71 @@ export function StudioHome({ isConnected, baseUrl }: StudioHomeProps) {
       loadSingleSourceData(selectedEntity.name, selectedSource);
     }
   }, [selectedEntity, selectedSource]);
+
+  // Convert EntitySchema to UniRender Entity format
+  const convertToUniRenderEntity = (entitySchema: EntitySchema): Entity => {
+    const fields = entitySchema.schema && entitySchema.schema.properties 
+      ? Object.entries(entitySchema.schema.properties).map(([name, property]) => ({
+          name,
+          type: property.type || 'string',
+          required: entitySchema.schema.required.includes(name),
+          description: property.description
+        }))
+      : [];
+    
+    return {
+      name: entitySchema.name,
+      fields,
+      schema: entitySchema.schema
+    };
+  };
+
+  // Example field configuration with custom rendering and ordering
+  const getFieldConfig = (entityName: string): Record<string, FieldConfig> => {
+    // You can customize this based on different entities
+    const baseConfig: Record<string, FieldConfig> = {};
+    
+    // Example configurations for different field types
+    if (entityName.toLowerCase().includes('user')) {
+      return {
+        id: { order: 1, label: 'ID', width: '80px', align: 'center' },
+        name: { order: 2, label: 'Full Name', width: '150px' },
+        email: { 
+          order: 3, 
+          label: 'Email Address', 
+          render: (value) => (
+            <a href={`mailto:${value}`} className="text-blue-400 hover:underline">
+              {value}
+            </a>
+          )
+        },
+        age: { 
+          order: 4, 
+          label: 'Age', 
+          align: 'center',
+          render: (value) => (
+            <span className={`px-2 py-1 rounded text-xs ${
+              value >= 18 ? 'bg-green-600/20 text-green-400' : 'bg-yellow-600/20 text-yellow-400'
+            }`}>
+              {value}
+            </span>
+          )
+        },
+        createdAt: { 
+          order: 5, 
+          label: 'Created', 
+          render: (value) => (
+            <span className="text-cyan-400">
+              {new Date(value).toLocaleDateString()}
+            </span>
+          )
+        }
+      };
+    }
+    
+    // Default configuration for other entities
+    return baseConfig;
+  };
 
   const formatJsonValue = (value: any, depth = 0): JSX.Element => {
     const indent = "  ".repeat(depth);
@@ -565,6 +632,30 @@ export function StudioHome({ isConnected, baseUrl }: StudioHomeProps) {
               >
                 JSON
               </button>
+              <button
+                onClick={() => setViewMode('unirender')}
+                className={`px-3 py-1 text-xs rounded transition-colors ${
+                  viewMode === 'unirender' ? 'bg-violet-600 text-white' : 'text-gray-400 hover:text-white'
+                }`}
+              >
+                UniRender
+              </button>
+              
+              {/* UniRender Layout Selector */}
+              {viewMode === 'unirender' && (
+                <select
+                  value={uniRenderLayout}
+                  onChange={(e) => setUniRenderLayout(e.target.value as LayoutType)}
+                  className="bg-gray-800 border border-gray-700 rounded px-2 py-1 text-xs text-gray-300 focus:outline-none focus:ring-2 focus:ring-violet-500"
+                >
+                  <option value="table">Table</option>
+                  <option value="card">Card</option>
+                  <option value="grid">Grid</option>
+                  <option value="list">List</option>
+                  <option value="form">Form</option>
+                  <option value="dashboard">Dashboard</option>
+                </select>
+              )}
             </div>
           )}
         </div>
@@ -737,7 +828,7 @@ export function StudioHome({ isConnected, baseUrl }: StudioHomeProps) {
                     Showing {currentSourceData.data.length} records
                   </div>
                 </div>
-              ) : (
+              ) : viewMode === 'json' ? (
                 /* JSON View */
                 <div className="space-y-4">
                   {currentSourceData.data.map((item, index) => (
@@ -759,6 +850,16 @@ export function StudioHome({ isConnected, baseUrl }: StudioHomeProps) {
                     </div>
                   ))}
                 </div>
+              ) : (
+                /* UniRender View */
+                <UniRender
+                  entity={convertToUniRenderEntity(selectedEntity!)}
+                  data={currentSourceData.data}
+                  layout={uniRenderLayout}
+                  config={getFieldConfig(selectedEntity!.name)}
+                  loading={currentSourceData.loading}
+                  error={currentSourceData.error}
+                />
               )}
             </div>
           ) : (
