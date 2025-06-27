@@ -16,7 +16,7 @@ export class Repository<T extends Record<string, any>> {
     this.adapter = adapter;
   }
 
-  async findMany(args?: FindManyArgs<T>) {
+  async findMany(args?: FindManyArgs<T>): Promise<T[]> {
     const context: MiddlewareContext<T> = {
       args,
       operation: "findMany",
@@ -28,7 +28,7 @@ export class Repository<T extends Record<string, any>> {
     });
   }
 
-  async findOne(args: FindOneArgs<T>) {
+  async findOne(args: FindOneArgs<T>): Promise<T | null> {
     const context: MiddlewareContext<T> = {
       args,
       operation: "findOne",
@@ -40,7 +40,7 @@ export class Repository<T extends Record<string, any>> {
     });
   }
 
-  async create(args: CreationArgs<T>) {
+  async create(args: CreationArgs<T>): Promise<T> {
     const context: MiddlewareContext<T> = {
       args,
       operation: "create",
@@ -53,7 +53,7 @@ export class Repository<T extends Record<string, any>> {
     });
   }
 
-  async update(args: UpdateArgs<T>) {
+  async update(args: UpdateArgs<T>): Promise<T> {
     const context: MiddlewareContext<T> = {
       args,
       operation: "update",
@@ -65,7 +65,7 @@ export class Repository<T extends Record<string, any>> {
     });
   }
 
-  async delete(args: DeletionArgs<T>) {
+  async delete(args: DeletionArgs<T>): Promise<boolean> {
     const context: MiddlewareContext<T> = {
       args,
       operation: "delete",
