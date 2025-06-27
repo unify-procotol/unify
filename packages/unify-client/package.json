@@ -1,5 +1,5 @@
 {
-  "name": "@unilab/httply",
+  "name": "@unilab/unify-client",
   "version": "0.0.1",
   "description": "HTTP client library for Unify",
   "main": "dist/index.js",

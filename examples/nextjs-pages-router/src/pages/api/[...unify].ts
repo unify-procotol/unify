@@ -1,26 +1,10 @@
-import { Unify } from "@unilab/server";
+import { Unify } from "@unilab/unify-next/pages-router";
 import { WalletPlugin } from "@unilab/uniweb3";
-import { Hono } from "hono";
-import { handle } from "@hono/node-server/vercel";
-import type { PageConfig } from "next";
+import { Logging } from "@unilab/core/middleware";
 
-export const config: PageConfig = {
-  api: {
-    bodyParser: false,
-  },
-};
-
-const app = new Hono().basePath("/api");
-
-Unify.init({
-  app,
+const handler = Unify.init({
   plugins: [WalletPlugin],
+  middleware: [Logging()],
 });
 
-app.get("/hello", (c) => {
-  return c.json({
-    message: "Hello from Hono!",
-  });
-});
-
-export default handle(app);
+export default handler;

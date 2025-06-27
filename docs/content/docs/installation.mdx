@@ -3,59 +3,158 @@ title: Installation
 description: Get started with Unify - installation guide and setup instructions
 ---
 
-## Core Packages
+## Quick Start
 
-Install the core Unify packages:
+Choose the appropriate installation method based on your use case:
+
+### Runs only in a browser or node environment
+
+For client-side applications that need basic entity management functionality:
 
 ```package-install
-@unilab/server @unilab/client hono
+@unilab/unify @unilab/core
 ```
 
-## Web3 Support
+### Hono Server
 
-For Web3 functionality, install the UniWeb3 plugin:
+For server-side applications using the Hono framework:
+
+```package-install
+@unilab/unify-hono @unilab/core hono @hono/node-server
+```
+
+### Next.js
+
+```package-install
+@unilab/unify-next @unilab/unify-client @unilab/core
+```
+
+### Client Library
+
+For applications that need client-side API calling functionality:
+
+```package-install
+@unilab/unify-client
+```
+
+## Optional Packages
+
+### UniWeb3 Plugin
+
+Install when you need Web3 wallet functionality:
 
 ```package-install
 @unilab/uniweb3
 ```
 
-## Framework Integration
+### Middleware Support
 
-### Next.js
-
-For Next.js Pages Router, additionally install:
+Install when you need advanced middleware functionality:
 
 ```package-install
-@hono/node-server
+@unilab/core
 ```
 
-For Next.js App Router, no additional dependencies are required.
+## Usage Examples
 
-### Other Frameworks
-
-Unify works with any framework that supports Hono. Check the [Integrations](/docs/integrations) section for specific setup guides.
-
-## Quick Start
-
-After installation, you can quickly set up a Web3-enabled server:
+### Browser Environment
 
 ```typescript
-import { Unify } from "@unilab/server";
-import { SolanaAdapter, EVMAdapter } from "@unilab/uniweb3";
+import { UserEntity } from "./entities/user";
+import { PostEntity } from "./entities/post";
+import { Unify, repo } from "@unilab/unify";
+import { WalletPlugin } from "@unilab/uniweb3";
+import { createHookMiddleware, Logging } from "@unilab/core/middleware";
 
-const server = Unify.register([
-  { source: "solana", adapter: new SolanaAdapter() },
-  { source: "evm", adapter: new EVMAdapter() },
-]);
+const MyPlugin = {
+  entities: [UserEntity, PostEntity],
+  adapters: [
+    { source: "user", entityName: "UserEntity", adapter: new UserAdapter() },
+    { source: "post", entityName: "PostEntity", adapter: new PostAdapter() },
+  ],
+};
+
+Unify.init({
+  plugins: [MyPlugin, WalletPlugin],
+  middleware: [Logging()],
+});
+
+// Use repo for data operations
+const users = await repo("user", "user").findMany();
+```
+
+### Hono Server
+
+```typescript
+import { Unify } from "@unilab/unify-hono";
+import { UserAdapter } from "./adapters/user";
+import { PostAdapter } from "./adapters/post";
+import { Logging } from "@unilab/core/middleware";
+
+const MyPlugin = {
+  entities: [UserEntity, PostEntity],
+  adapters: [
+    { source: "user", entityName: "UserEntity", adapter: new UserAdapter() },
+    { source: "post", entityName: "PostEntity", adapter: new PostAdapter() },
+  ],
+};
+
+const app = Unify.init({
+  plugins: [MyPlugin],
+  middleware: [Logging()],
+});
 
 export default {
   port: 3000,
-  fetch: server.fetch,
+  fetch: app.fetch,
 };
 ```
 
+### Next.js App Router
+
+Create `src/api.ts`:
+
+```typescript
+import { Unify } from "@unilab/unify-next/app-router";
+import { WalletPlugin } from "@unilab/uniweb3";
+import { Logging } from "@unilab/core/middleware";
+
+export const api = Unify.init({
+  plugins: [WalletPlugin],
+  middleware: [Logging()],
+});
+```
+
+Create `src/app/api/[...unify]/route.ts`:
+
+```typescript
+import { api } from "../../../api";
+
+export const { GET, POST, PATCH, DELETE } = api;
+```
+
+### Next.js Pages Router
+
+Create `src/pages/api/[...unify].ts`:
+
+```typescript
+import { Unify } from "@unilab/unify-next/pages-router";
+import { WalletPlugin } from "@unilab/uniweb3";
+import { Logging } from "@unilab/core/middleware";
+
+const handler = Unify.init({
+  plugins: [WalletPlugin],
+  middleware: [Logging()],
+});
+
+export default handler;
+```
+
+
 ## Next Steps
 
-- Follow the [Basic Usage](/docs/basic-usage) guide to get started
-- Explore [Next.js Integration](/docs/integrations/next) for frontend setup
-- Check out the [Examples](/docs/examples) for complete implementations
+- Read the [Basic Usage](/docs/basic-usage) guide to understand core concepts
+- Explore [Next.js Integration](/docs/integrations/next) for frontend integration
+- Check out [Hono Integration](/docs/integrations/hono) for server-side integration
+- Browse [Example Projects](/docs/examples) for complete implementation references
+- Learn about [UniWeb3 Plugin](/docs/plugins/uniweb3) to add Web3 functionality

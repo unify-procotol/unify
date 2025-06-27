@@ -1,4 +1,4 @@
-import { repo, UnifyClient } from "@unilab/httply";
+import { repo, UnifyClient } from "@unilab/unify-client";
 import { Entity } from "./entities/entity";
 
 UnifyClient.init({

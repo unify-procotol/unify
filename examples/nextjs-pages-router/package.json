@@ -10,13 +10,14 @@
   },
   "dependencies": {
     "@hono/node-server": "^1.14.4",
-    "@unilab/httply": "workspace:*",
+    "@unilab/unify-client": "workspace:*",
+    "@unilab/core": "workspace:*",
     "@unilab/uniweb3": "workspace:*",
     "hono": "^4.7.11",
     "next": "15.3.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "@unilab/server": "workspace:*"
+    "@unilab/unify-next": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5",

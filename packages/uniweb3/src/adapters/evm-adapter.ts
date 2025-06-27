@@ -17,6 +17,8 @@ const evmHandlers: Record<EVMNetwork, EVMHandler> = {
 };
 
 export class EVMAdapter implements DataSourceAdapter<WalletEntity> {
+  static readonly adapterName = "EVMAdapter";
+
   async findMany(args: FindManyArgs<WalletEntity>): Promise<WalletEntity[]> {
     return [];
   }

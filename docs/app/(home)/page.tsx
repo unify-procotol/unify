@@ -181,20 +181,21 @@ export default function HomePage() {
 function CodeExample() {
   const [activeTab, setActiveTab] = useState<"server" | "client">("server");
 
-  const serverCode = `import { Unify } from "@unilab/server";
-import { SolanaAdapter, EVMAdapter } from "@unilab/uniweb3";
+  const serverCode = `import { Unify } from "@unilab/unify-hono";
+import { WalletPlugin } from "@unilab/uniweb3";
+import { Logging } from "@unilab/core/middleware";
 
-const app = Unify.register([
-  { source: "solana", adapter: new SolanaAdapter() },
-  { source: "evm", adapter: new EVMAdapter() },
-]);
+const app = Unify.init({
+  plugins: [WalletPlugin],
+  middleware: [Logging()],
+});
 
 export default {
   port: 3000,
   fetch: app.fetch,
 };`;
 
-  const clientCode = `import { repo, UnifyClient } from "@unilab/httply";
+  const clientCode = `import { repo, UnifyClient } from "@unilab/unify-client";
 import { WalletEntity } from "@unilab/uniweb3/entities";
 
 UnifyClient.init({

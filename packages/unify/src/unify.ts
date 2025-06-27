@@ -14,7 +14,7 @@ import { generateSchemas, useGlobalMiddleware } from "@unilab/core";
 import type { ClientConfig, RelationMapping } from "./types";
 import { getRepo, getRepoRegistry, registerAdapter } from "./utils";
 
-export class UnifyClient {
+export class Unify {
   private enableDebug: boolean = false;
   private entitySchemas: Record<string, SchemaObject> = {};
   private entitySources: Record<string, string[]> = {};
@@ -27,7 +27,7 @@ export class UnifyClient {
 
   private log(...args: any[]): void {
     if (this.enableDebug) {
-      console.log("[UnifyClient]", ...args);
+      console.log("[Unify]", ...args);
     }
   }
 
@@ -46,7 +46,12 @@ export class UnifyClient {
 
     console.log(
       `✅ Registered adapters: ${adapters
-        .map((a) => a.adapter.constructor.name)
+        .map((a) => {
+          const adapterName =
+            (a.adapter.constructor as any).adapterName ||
+            a.adapter.constructor.name;
+          return `${adapterName}`;
+        })
         .join(", ")}`
     );
   }
@@ -214,29 +219,24 @@ export class UnifyClient {
   }
 
   // Static methods for global instance management
-  private static globalClient: UnifyClient | null = null;
+  private static globalClient: Unify | null = null;
 
   static init(config: ClientConfig): void {
-    UnifyClient.globalClient = new UnifyClient(config);
+    Unify.globalClient = new Unify(config);
   }
 
-  private static getGlobalClient(): UnifyClient {
-    if (!UnifyClient.globalClient) {
-      throw new Error(
-        "UnifyClient not initialized. Call UnifyClient.init() first."
-      );
+  private static getGlobalClient(): Unify {
+    if (!Unify.globalClient) {
+      throw new Error("Unify not initialized. Call Unify.init() first.");
     }
-    return UnifyClient.globalClient;
+    return Unify.globalClient;
   }
 
   static repo<T extends Record<string, any>>(
     entityName: string,
     source: string
   ): Repository<T> {
-    return UnifyClient.getGlobalClient().createRepositoryProxy<T>(
-      entityName,
-      source
-    );
+    return Unify.getGlobalClient().createRepositoryProxy<T>(entityName, source);
   }
 
   // 静态 JoinRepo 方法
@@ -245,7 +245,7 @@ export class UnifyClient {
     source: string,
     relationMapping: RelationMapping<F, L>
   ): Repository<F> {
-    const baseRepo = UnifyClient.repo<F>(entityName, source);
+    const baseRepo = Unify.repo<F>(entityName, source);
 
     // 包装 repository，为返回的 Promise 添加关联映射信息
     return new Proxy(baseRepo, {
@@ -267,7 +267,7 @@ export class UnifyClient {
   }
 
   static getEntitySchemas(): Record<string, SchemaObject> {
-    return UnifyClient.getGlobalClient().entitySchemas;
+    return Unify.getGlobalClient().entitySchemas;
   }
 
   static getAdapters(): string[] {
@@ -275,7 +275,7 @@ export class UnifyClient {
   }
 
   static getEntitySources(): Record<string, string[]> {
-    return UnifyClient.getGlobalClient().entitySources;
+    return Unify.getGlobalClient().entitySources;
   }
 }
 
@@ -284,7 +284,7 @@ export function repo<T extends Record<string, any>>(
   entityName: string,
   source: string
 ): Repository<T> {
-  return UnifyClient.repo<T>(entityName, source);
+  return Unify.repo<T>(entityName, source);
 }
 
 export function joinRepo<
@@ -295,5 +295,5 @@ export function joinRepo<
   source: string,
   relationMapping: RelationMapping<F, L>
 ): Repository<F> {
-  return UnifyClient.joinRepo<F, L>(entityName, source, relationMapping);
+  return Unify.joinRepo<F, L>(entityName, source, relationMapping);
 }

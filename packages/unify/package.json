@@ -1,0 +1,32 @@
+{
+  "name": "@unilab/unify",
+  "version": "0.0.1",
+  "description": "Lightweight browser-only client library for Unify without HTTP functionality",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "bun test"
+  },
+  "keywords": [
+    "unify"
+  ],
+  "author": "osdodo",
+  "license": "MIT",
+  "dependencies": {
+    "@unilab/core": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.0"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/iotexproject/unify.git"
+  },
+  "browser": true
+}

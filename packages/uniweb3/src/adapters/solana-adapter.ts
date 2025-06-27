@@ -12,6 +12,8 @@ import { SolanaHandler } from "../handlers/solana";
 const handler = new SolanaHandler();
 
 export class SolanaAdapter implements DataSourceAdapter<WalletEntity> {
+  static readonly adapterName = "SolanaAdapter";
+
   async findMany(args: FindManyArgs<WalletEntity>): Promise<WalletEntity[]> {
     const { limit, offset, where, order_by } = args;
     return [];

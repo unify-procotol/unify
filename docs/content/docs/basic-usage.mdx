@@ -1,170 +1,190 @@
 ---
 title: Basic Usage
-description: This guide will walk you through the basic usage of Unify, showing you how to set up a server and client with Web3 functionality.
+description: This guide shows how to create a basic Unify server with custom entities and adapters.
 ---
 
-## Quick Start with Web3
-
-Unify provides built-in Web3 support for blockchain operations. Here's how to get started with a basic setup:
 
 ## Server Setup
 
-Create a `server.ts` file to set up your API server with Web3 adapters:
+Create entities, adapters, and server:
+
+### 1. Define Entities
 
 ```typescript
-import { Unify } from "@unilab/server";
-import { SolanaAdapter, EVMAdapter } from "@unilab/uniweb3";
+// entities/user.ts
+import { Fields } from "@unilab/core";
 
-// Register Web3 adapters
-const server = Unify.register([
-  { source: "solana", adapter: new SolanaAdapter() },
-  { source: "evm", adapter: new EVMAdapter() },
-]);
+export class UserEntity {
+  @Fields.string()
+  id = "";
 
-console.log("🚀 Starting Unify server on port 3000");
-console.log("📊 Available endpoints:");
-console.log(
-  '  GET  /wallet/find_one?source=solana&where={"address":"wallet_address"} - Get Solana wallet balance'
-);
-console.log(
-  '  GET  /wallet/find_one?source=evm&where={"address":"wallet_address","network":"ethereum"} - Get EVM wallet balance'
-);
+  @Fields.string()
+  name = "";
+
+  @Fields.string()
+  email = "";
+
+  @Fields.string()
+  avatar = "";
+}
+```
+
+```typescript
+// entities/post.ts
+import { Fields } from "@unilab/core";
+
+export class PostEntity {
+  @Fields.string()
+  id = "";
+
+  @Fields.string()
+  title = "";
+
+  @Fields.string()
+  content = "";
+
+  @Fields.string()
+  userId = "";
+}
+```
+
+### 2. Create Adapters
+
+```typescript
+// adapters/user.ts
+import { DataSourceAdapter, FindManyArgs, FindOneArgs, CreationArgs } from "@unilab/core";
+import { UserEntity } from "../entities/user";
+
+const userData = [
+  { id: "1", name: "John Doe", email: "john.doe@example.com", avatar: "https://example.com/avatar.png" },
+  { id: "2", name: "Jane Smith", email: "jane.smith@example.com", avatar: "https://example.com/avatar2.png" }
+];
+
+export class UserAdapter implements DataSourceAdapter<UserEntity> {
+  async findMany(args?: FindManyArgs<UserEntity>): Promise<UserEntity[]> {
+    const where = args?.where || {};
+    if (where.id) {
+      return userData.filter(user => user.id === where.id);
+    }
+    return userData;
+  }
+
+  async findOne(args: FindOneArgs<UserEntity>): Promise<UserEntity | null> {
+    const { id } = args.where;
+    return userData.find(user => user.id === id) || null;
+  }
+
+  async create(args: CreationArgs<UserEntity>): Promise<UserEntity> {
+    const { name, email, avatar } = args.data;
+    const newUser = {
+      id: (userData.length + 1).toString(),
+      name, email, avatar
+    };
+    userData.push(newUser);
+    return newUser;
+  }
+
+  // ... implement update and delete methods
+}
+```
+
+### 3. Setup Server
+
+```typescript
+// server.ts
+import { Unify } from "@unilab/unify-hono";
+import { UserAdapter } from "./adapters/user";
+import { PostAdapter } from "./adapters/post";
+import { UserEntity } from "./entities/user";
+import { PostEntity } from "./entities/post";
+
+const MyPlugin = {
+  entities: [UserEntity, PostEntity],
+  adapters: [
+    { source: "user", entityName: "UserEntity", adapter: new UserAdapter() },
+    { source: "post", entityName: "PostEntity", adapter: new PostAdapter() }
+  ]
+};
+
+const app = Unify.init({
+  plugins: [MyPlugin]
+});
 
 export default {
   port: 3000,
-  fetch: server.fetch,
+  fetch: app.fetch
 };
 ```
 
 ## Client Usage
 
-Create a `client.ts` file to consume your API:
-
 ```typescript
-import { repo, UnifyClient } from "@unilab/httply";
-import { WalletEntity } from "@unilab/uniweb3/entities";
+// client.ts
+import { repo, UnifyClient } from "@unilab/unify-client";
+import { UserEntity } from "./entities/user";
 
-// Initialize the client
 UnifyClient.init({
   baseUrl: "http://localhost:3000",
-  timeout: 10000,
+  timeout: 10000
 });
 
-async function demo() {
-  try {
-    // Query EVM wallet balance
-    const evmWallet = await repo<WalletEntity>("wallet", "evm").findOne({
-      where: {
-        address: "0x4f00D43b5aF0a0aAd62E9075D1bFa86a89CDb9aB",
-        network: "iotex",
-      },
-    });
-    console.log("EVM Wallet:", evmWallet);
+// Create a user
+const createUser = async () => {
+  const user = await repo<UserEntity>("user", "user").create({
+    data: {
+      name: "John Doe",
+      email: "john.doe@example.com",
+      avatar: "https://example.com/avatar.jpg"
+    }
+  });
+  console.log("Created user:", user);
+};
 
-    // Query Solana wallet balance
-    const solanaWallet = await repo<WalletEntity>("wallet", "solana").findOne({
-      where: {
-        address: "11111111111111111111111111111112",
-      },
-    });
-    console.log("Solana Wallet:", solanaWallet);
+// Find users
+const getUsers = async () => {
+  const users = await repo<UserEntity>("user", "user").findMany({
+    where: { name: "John Doe" }
+  });
+  console.log("Users:", users);
+};
 
-  } catch (error) {
-    console.error("❌ Error:", error.message);
-  }
-}
-
-demo();
+createUser();
 ```
 
 ## Running the Example
 
-### 1. Start the Server
-
+### 1. Start Server
 ```bash
-# Using Bun
 bun run server
-
-# Using Node.js
-node server.js
 ```
 
-### 2. Test with Client
-
-In another terminal:
-
+### 2. Run Client
 ```bash
-# Using Bun
 bun run client
-
-# Using Node.js  
-node client.js
 ```
 
-### 3. Manual Testing with curl
-
-You can also test the API manually:
-
+### 3. Test with curl
 ```bash
-# Get Solana wallet balance
-curl "http://localhost:3000/wallet/find_one?source=solana&where=%7B%22address%22%3A%2211111111111111111111111111111112%22%7D"
+# Get all users
+curl "http://localhost:3000/user/find_many"
 
-# Get EVM wallet balance
-curl "http://localhost:3000/wallet/find_one?source=evm&where=%7B%22address%22%3A%220x4f00D43b5aF0a0aAd62E9075D1bFa86a89CDb9aB%22%2C%22network%22%3A%22iotex%22%7D"
+# Create a user
+curl -X POST "http://localhost:3000/user/create" \
+  -H "Content-Type: application/json" \
+  -d '{"name":"John","email":"john@example.com","avatar":"avatar.jpg"}'
 ```
 
-## API Endpoints
-
-The server automatically generates Web3 API endpoints:
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/wallet/find_one?source=solana` | Get Solana wallet balance |
-| GET | `/wallet/find_one?source=evm` | Get EVM wallet balance |
-
-### Query Parameters
-
-#### Solana Wallet Query
-```
-/wallet/find_one?source=solana&where={"address":"wallet_address"}
-```
-
-#### EVM Wallet Query  
-```
-/wallet/find_one?source=evm&where={"address":"wallet_address","network":"network_name"}
-```
-
-**Supported EVM Networks:**
-- `ethereum` - Ethereum mainnet
-- `polygon` - Polygon
-- `bsc` - Binance Smart Chain
-- `iotex` - IoTeX
-- And more...
-
-### WalletEntity Interface
-
-```typescript
-interface WalletEntity {
-  address: string;
-  balance: string;
-  network: string;
-  token?: {
-    symbol: string;
-    decimals: number;
-  };
-}
-```
 
 ## Key Features
 
-- 🌐 **Multi-Blockchain Support**: Query balances from Solana and EVM-compatible chains
-- 🔒 **Type Safety**: Full TypeScript support with proper type inference
-- ⚡ **High Performance**: Optimized for fast blockchain queries
-- 🛠️ **Extensible**: Easy to add support for additional blockchains
-- 📊 **Real-time Data**: Live blockchain data queries
+- 🏗️ **Entity-based**: Define data structures with decorators
+- 🔌 **Adapter pattern**: Custom data source implementations  
+- 🚀 **Auto-generated APIs**: REST endpoints created automatically
+- 📝 **Type-safe**: Full TypeScript support
+- ⚡ **Lightweight**: Minimal setup required
 
 ## Next Steps
 
-- Explore [Next.js Integration](/docs/integrations/next) for frontend integration
-- Learn about [Web3 Plugin Configuration](/docs/plugins/uniweb3)
-- Check out [Framework Integrations](/docs/integrations) for other frameworks
+- Learn about [Next.js Integration](/docs/integrations/next)
+- Explore [Hono Integration](/docs/integrations/hono)
+- Check out [Middleware options](/docs/reference/options)

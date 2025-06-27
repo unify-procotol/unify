@@ -7,9 +7,11 @@ import {
   UpdateArgs,
 } from "@unilab/core";
 import { Entity } from "../entities/entity";
-import { Unify } from "@unilab/server";
+import { Unify } from "@unilab/unify-hono";
 
 export class EntityAdapter implements DataSourceAdapter<Entity> {
+  static readonly adapterName = "EntityAdapter";
+  
   private getSourcesForEntity(entityName: string): string[] {
     const entitySources = Unify.getEntitySources();
     return entitySources[entityName] || [];

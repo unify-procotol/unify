@@ -1,5 +1,5 @@
 {
-  "name": "@unilab/client",
+  "name": "unify-studio",
   "version": "0.0.1",
   "description": "Lightweight browser-only client library for Unify without HTTP functionality",
   "main": "dist/index.js",
@@ -8,13 +8,9 @@
     "unify-studio": "bin/unify-studio.js"
   },
   "scripts": {
-    "build": "tsc",
-    "dev": "tsc --watch",
-    "test": "bun test",
-    "prepublishOnly": "bun run build",
-    "studio": "cd studio && vite",
-    "studio:build": "cd studio && vite build",
-    "studio:preview": "cd studio && vite preview"
+    "studio": "vite",
+    "studio:build": "vite build",
+    "studio:preview": "vite preview"
   },
   "keywords": [
     "api",
@@ -27,7 +23,7 @@
   "author": "osdodo",
   "license": "MIT",
   "dependencies": {
-    "@unilab/httply": "workspace:*",
+    "@unilab/unify-client": "workspace:*",
     "prism-react-renderer": "^2.4.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

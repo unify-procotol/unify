@@ -1,7 +1,7 @@
 {
   "name": "hono-basic-example",
   "version": "1.0.0",
-  "description": "Basic Hono example using @unilab/server and @unilab/httply",
+  "description": "Basic Hono example using @unilab/unify-hono and @unilab/unify-client",
   "main": "server.ts",
   "scripts": {
     "dev": "bun run server.ts",
@@ -10,9 +10,9 @@
   },
   "dependencies": {
     "@hono/node-server": "^1.12.2",
-    "@unilab/httply": "workspace:*",
+    "@unilab/unify-client": "workspace:*",
     "@unilab/core": "workspace:*",
-    "@unilab/server": "workspace:*",
+    "@unilab/unify-hono": "workspace:*",
     "hono": "^4.7.11"
   },
   "devDependencies": {

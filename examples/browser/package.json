@@ -1,13 +1,13 @@
 {
   "name": "browser-example",
   "version": "1.0.0",
-  "description": "Basic browser example using @unilab/client",
+  "description": "Basic browser example using @unilab/unify",
   "main": "server.ts",
   "scripts": {
     "dev": "bun run index.ts"
   },
   "dependencies": {
-    "@unilab/client": "workspace:*",
+    "@unilab/unify": "workspace:*",
     "@unilab/core": "workspace:*"
   },
   "devDependencies": {
