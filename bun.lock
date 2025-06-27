@@ -18,6 +18,22 @@
         "typescript": "^5.3.0",
       },
     },
+    "examples/erc20-example": {
+      "name": "mimo-example",
+      "version": "1.0.0",
+      "dependencies": {
+        "@hono/node-server": "^1.12.2",
+        "@unilab/core": "workspace:*",
+        "@unilab/unify-client": "workspace:*",
+        "@unilab/unify-hono": "workspace:*",
+        "@unilab/uniweb3": "workspace:*",
+        "hono": "^4.7.11",
+      },
+      "devDependencies": {
+        "@types/bun": "^1.1.12",
+        "typescript": "^5.3.0",
+      },
+    },
     "examples/global": {
       "name": "global-example",
       "version": "1.0.0",
@@ -1079,6 +1095,8 @@
     "micromatch": ["micromatch@4.0.8", "", { "dependencies": { "braces": "^3.0.3", "picomatch": "^2.3.1" } }, "sha512-PXwfBhYu0hBCPw8Dn0E+WDYb7af3dSLVWKi3HGv84IdF4TyFoC0ysxFd0Goxw7nSv4T/PzEJQxsYsEiFCKo2BA=="],
 
     "middleware-example": ["middleware-example@workspace:examples/middleware-example"],
+
+    "mimo-example": ["mimo-example@workspace:examples/erc20-example"],
 
     "minimatch": ["minimatch@9.0.5", "", { "dependencies": { "brace-expansion": "^2.0.1" } }, "sha512-G6T0ZX48xgozx7587koeX9Ys2NYy6Gmv//P89sEte9V9whIapMNF4idKxnW2QtCcLiTWlb/wfCabAtAFWhhBow=="],
 
