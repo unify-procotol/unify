@@ -8,7 +8,7 @@ UnifyClient.init({
 });
 
 const fetchUser = async () => {
-  const data = await repo<UserEntity>("user", "user").findMany({
+  const data = await repo<UserEntity>("user", "wordpress").findMany({
     where: {
       id: "2",
       // email: "john.doe@example.com",
@@ -16,7 +16,7 @@ const fetchUser = async () => {
     include: {
       posts: (userList) => {
         const ids = userList.map((user) => user.id);
-        // return repo<PostEntity>("post", "post").findMany({
+        // return repo<PostEntity>("post", "wordpress").findMany({
         //   where: {
         //     userId: {
         //       $in: ids,
@@ -25,7 +25,7 @@ const fetchUser = async () => {
         // });
 
         // 没有设置where参数，则必须使用joinRepo，其他情况可以直接使用repo
-        return joinRepo<PostEntity, UserEntity>("post", "post", {
+        return joinRepo<PostEntity, UserEntity>("post", "wordpress", {
           localField: "id",
           foreignField: "userId",
         }).findMany({
@@ -44,14 +44,14 @@ const fetchUser = async () => {
 fetchUser();
 
 // const fetchPost = async () => {
-//   const data = await repo<PostEntity>("post", "post").findOne({
+//   const data = await repo<PostEntity>("post", "wordpress").findOne({
 //     where: {
 //       id: "1",
 //     },
 //     include: {
 //       user: (post) => {
 //         const userId = post.userId;
-//         return repo<UserEntity>("user", "user").findOne({
+//         return repo<UserEntity>("user", "wordpress").findOne({
 //           where: {
 //             id: userId,
 //           },
@@ -65,15 +65,15 @@ fetchUser();
 // fetchPost();
 
 
-const createUser = async () => {
-  const data = await repo<UserEntity>("user", "user").create({
-    data: {
-      name: "John Doe",
-      email: "john.doe@example.com",
-      avatar: "https://example.com/avatar.jpg",
-    },
-  });
-  console.log("createUser===>", JSON.stringify(data, null, 2));
-};
+// const createUser = async () => {
+//   const data = await repo<UserEntity>("user", "wordpress").create({
+//     data: {
+//       name: "John Doe",
+//       email: "john.doe@example.com",
+//       avatar: "https://example.com/avatar.jpg",
+//     },
+//   });
+//   console.log("createUser===>", JSON.stringify(data, null, 2));
+// };
 
-createUser();
+// createUser();
