@@ -115,11 +115,11 @@ export default {
 Create `src/api.ts`:
 
 ```typescript
-import { AppUnify } from "@unilab/unify-next/app-router";
+import { Unify } from "@unilab/unify-next/app-router";
 import { WalletPlugin } from "@unilab/uniweb3";
 import { Logging } from "@unilab/core/middleware";
 
-export const api = AppUnify.init({
+export const api = Unify.init({
   plugins: [WalletPlugin],
   middleware: [Logging()],
 });
@@ -138,11 +138,11 @@ export const { GET, POST, PATCH, DELETE } = api;
 Create `src/pages/api/[...unify].ts`:
 
 ```typescript
-import { PagesUnify } from "@unilab/unify-next/pages-router";
+import { Unify } from "@unilab/unify-next/pages-router";
 import { WalletPlugin } from "@unilab/uniweb3";
 import { Logging } from "@unilab/core/middleware";
 
-const handler = PagesUnify.init({
+const handler = Unify.init({
   plugins: [WalletPlugin],
   middleware: [Logging()],
 });

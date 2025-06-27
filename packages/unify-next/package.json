@@ -5,7 +5,6 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {
-    ".": "./dist/index.js",
     "./app-router": "./dist/app-router/handler.js",
     "./pages-router": "./dist/pages-router/handler.js"
   },

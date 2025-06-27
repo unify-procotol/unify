@@ -542,7 +542,7 @@ The client automatically handles relation loading by executing callback function
 
 Next.js integration for Unify with support for both App Router and Pages Router.
 
-## AppUnify
+## Unify
 
 App Router integration (Next.js 13+).
 
@@ -565,10 +565,10 @@ static init(config: UnifyConfig): UnifyAPI
 **Example:**
 ```typescript
 // app/api/[...unify]/route.ts
-import { AppUnify } from "@unilab/unify-next";
+import { Unify } from "@unilab/unify-next";
 import { WalletPlugin } from "@unilab/uniweb3";
 
-const api = AppUnify.init({
+const api = Unify.init({
   plugins: [WalletPlugin]
 });
 
@@ -589,7 +589,7 @@ static repo<T extends Record<string, any>>({
 }): Repository<T>
 ```
 
-## PagesUnify
+## Unify
 
 Pages Router integration (Next.js 12+).
 
@@ -606,10 +606,10 @@ static init(config: UnifyConfig): (req: NextApiRequest, res: NextApiResponse) =>
 **Example:**
 ```typescript
 // pages/api/[...unify].ts
-import { PagesUnify } from "@unilab/unify-next";
+import { Unify } from "@unilab/unify-next";
 import { WalletPlugin } from "@unilab/uniweb3";
 
-export default PagesUnify.init({
+export default Unify.init({
   plugins: [WalletPlugin]
 });
 ```
@@ -865,10 +865,10 @@ export default {
 
 ```typescript
 // app/api/[...unify]/route.ts
-import { AppUnify } from "@unilab/unify-next";
+import { Unify } from "@unilab/unify-next";
 import { WalletPlugin } from "@unilab/uniweb3";
 
-const api = AppUnify.init({
+const api = Unify.init({
   plugins: [WalletPlugin]
 });
 

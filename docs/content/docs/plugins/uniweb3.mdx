@@ -59,11 +59,11 @@ For Next.js with Pages Router, create an API route to handle UniWeb3 requests:
 
 ```typescript
 // pages/api/[...unify].ts
-import { PagesUnify } from "@unilab/unify-next/pages-router";
+import { Unify } from "@unilab/unify-next/pages-router";
 import { WalletPlugin } from "@unilab/uniweb3";
 import { Logging } from "@unilab/core/middleware";
 
-const handler = PagesUnify.init({
+const handler = Unify.init({
   plugins: [WalletPlugin],
   middleware: [Logging()],
 });
@@ -328,11 +328,11 @@ npm install @unilab/unify-next @unilab/unify-client @unilab/core @unilab/uniweb3
 
 3. Create the API route at `pages/api/[...unify].ts`:
 ```typescript
-import { PagesUnify } from "@unilab/unify-next/pages-router";
+import { Unify } from "@unilab/unify-next/pages-router";
 import { WalletPlugin } from "@unilab/uniweb3";
 import { Logging } from "@unilab/core/middleware";
 
-const handler = PagesUnify.init({
+const handler = Unify.init({
   plugins: [WalletPlugin],
   middleware: [Logging()],
 });

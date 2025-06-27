@@ -18,7 +18,7 @@ import {
 } from "@unilab/core";
 import { UnifyConfig } from "../type";
 
-export class PagesUnify {
+export class Unify {
   private static entitySchemas: Record<string, SchemaObject> = {};
   private static entitySources: Record<string, string[]> = {};
   private static initialized = false;
@@ -40,7 +40,7 @@ export class PagesUnify {
     this.initialized = true;
 
     return async function handler(req: NextApiRequest, res: NextApiResponse) {
-      return await PagesUnify.handler(req, res);
+      return await Unify.handler(req, res);
     };
   }
 

@@ -27,7 +27,7 @@ export interface UnifyAPI {
   DELETE: RouteHandler;
 }
 
-export class AppUnify {
+export class Unify {
   private static entitySchemas: Record<string, SchemaObject> = {};
   private static entitySources: Record<string, string[]> = {};
   private static initialized = false;
@@ -118,7 +118,7 @@ export class AppUnify {
   ): Promise<NextResponse> {
     try {
       const method = request.method;
-      const resolvedParams = await AppUnify.resolveParams(params);
+      const resolvedParams = await Unify.resolveParams(params);
       const [entity, action] = resolvedParams.unify;
 
       if (!entity || !action) {
@@ -140,15 +140,15 @@ export class AppUnify {
 
       switch (`${method}:${action}`) {
         case "GET:list":
-          return await AppUnify.handleFindMany(request, repo, entity, source!);
+          return await Unify.handleFindMany(request, repo, entity, source!);
         case "GET:find_one":
-          return await AppUnify.handleFindOne(request, repo, entity, source!);
+          return await Unify.handleFindOne(request, repo, entity, source!);
         case "POST:create":
-          return await AppUnify.handleCreate(request, repo, entity, source!);
+          return await Unify.handleCreate(request, repo, entity, source!);
         case "PATCH:update":
-          return await AppUnify.handleUpdate(request, repo, entity, source!);
+          return await Unify.handleUpdate(request, repo, entity, source!);
         case "DELETE:delete":
-          return await AppUnify.handleDelete(request, repo, entity, source!);
+          return await Unify.handleDelete(request, repo, entity, source!);
         default:
           return NextResponse.json(
             { error: `Unsupported operation: ${method}:${action}` },
