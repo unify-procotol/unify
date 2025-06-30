@@ -5,6 +5,7 @@ import type {
   FindManyArgs,
   FindOneArgs,
   UpdateArgs,
+  UpsertArgs,
 } from "@unilab/core";
 import type { WalletEntity } from "../entities/wallet";
 import { SolanaHandler } from "../handlers/solana";
@@ -15,25 +16,21 @@ export class SolanaAdapter implements DataSourceAdapter<WalletEntity> {
   static readonly adapterName = "SolanaAdapter";
 
   async findMany(args: FindManyArgs<WalletEntity>): Promise<WalletEntity[]> {
-    const { limit, offset, where, order_by } = args;
     return [];
   }
 
   async findOne(args: FindOneArgs<WalletEntity>): Promise<WalletEntity | null> {
     const { address } = args.where;
-    
-    // 提取实际的字符串值（处理 QueryOperators）
-    const addressValue = typeof address === 'string' ? address : address?.$eq;
-    
-    if (!addressValue) {
+
+    if (!address) {
       throw {
         status: 400,
         message: "Invalid arguments",
       };
     }
-    const balance = await handler.getBalance(addressValue);
+    const balance = await handler.getBalance(address);
     return {
-      address: addressValue,
+      address: address,
       balance: balance.toString(),
       network: "solana",
       token: {
@@ -44,33 +41,15 @@ export class SolanaAdapter implements DataSourceAdapter<WalletEntity> {
   }
 
   async create(args: CreationArgs<WalletEntity>): Promise<WalletEntity> {
-    const { address, balance, network } = args.data;
-    if (!address || !balance || !network) {
-      throw {
-        status: 400,
-        message: "Invalid arguments",
-      };
-    }
-    return {
-      address: address,
-      balance: balance,
-      network: network,
-    };
+    throw new Error("Not implemented");
   }
 
   async update(args: UpdateArgs<WalletEntity>): Promise<WalletEntity> {
-    const { address, balance, network } = args.data;
-    if (!address || !balance || !network) {
-      throw {
-        status: 400,
-        message: "Invalid arguments",
-      };
-    }
-    return {
-      address: address,
-      balance: balance,
-      network: network,
-    };
+    throw new Error("Not implemented");
+  }
+
+  async upsert(args: UpsertArgs<WalletEntity>): Promise<WalletEntity> {
+    throw new Error("Not implemented");
   }
 
   async delete(args: DeletionArgs<WalletEntity>): Promise<boolean> {

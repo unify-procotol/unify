@@ -7,6 +7,7 @@ import type {
   FindOneArgs,
   UpdateArgs,
   MiddlewareContext,
+  UpsertArgs,
 } from "./types";
 
 export class Repository<T extends Record<string, any>> {
@@ -62,6 +63,18 @@ export class Repository<T extends Record<string, any>> {
 
     return getGlobalMiddlewareManager().execute(context, async () => {
       return this.adapter.update(args);
+    });
+  }
+
+  async upsert(args: UpsertArgs<T>): Promise<T> {
+    const context: MiddlewareContext<T> = {
+      args,
+      operation: "upsert",
+      adapter: this.adapter,
+    };
+
+    return getGlobalMiddlewareManager().execute(context, async () => {
+      return this.adapter.upsert(args);
     });
   }
 

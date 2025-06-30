@@ -1,19 +1,85 @@
 import { UserEntity } from "./entities/user";
-import { entity } from "@unilab/unify";
+import { repo, getCacheStats } from "@unilab/store";
 
-function test() {
-  const obj = {
-    id: "1",
-    name: "test",
-    email: "test@test.com",
-    avatar: "test.png",
-  };
+async function test() {
+  console.log("🚀 Starting entity repository test...");
+  
+  // Create user
+  const user1 = await repo(UserEntity, "memory").create({
+    data: {
+      id: "1",
+      name: "test",
+      email: "test@test.com",
+      avatar: "test.png",
+    }
+  });
+  console.log("✅ Created user:", user1);
 
-  entity(UserEntity, obj).click("update name by click");
+  // Update user
+  const updatedUser = await repo(UserEntity, "memory").update({
+    where: { id: "1" },
+    data: { name: "test2" },
+  });
+  console.log("✅ Updated user:", updatedUser);
 
-  console.log("name:", entity(UserEntity, obj).name);
+  // Upsert user (should update existing)
+  const upsertedUser = await repo(UserEntity, "memory").upsert({
+    where: { id: "1" },
+    update: { name: "test2-updated" },
+    create: {
+      id: "2",
+      name: "test3",
+      email: "test3@test.com",
+      avatar: "test3.png",
+    },
+  });
+  console.log("✅ Upserted user (updated existing):", upsertedUser);
 
-  // 回收obj时，对应的entity instances条目会被自动清理
+  // Find one user
+  const foundUser = await repo(UserEntity, "memory").findOne({ where: { id: "1" } });
+  console.log("✅ Found user:", foundUser);
+
+  // Create more users to test LRU cache
+  for (let i = 2; i <= 7; i++) {
+    await repo(UserEntity, "memory").create({
+      data: {
+        id: i.toString(),
+        name: `user${i}`,
+        email: `user${i}@test.com`,
+        avatar: `user${i}.png`,
+      }
+    });
+  }
+
+  // Find many users
+  const allUsers = await repo(UserEntity, "memory").findMany();
+  console.log("✅ All users (should be max 5 due to LRU cache):", allUsers.length, "users");
+
+  // Count users
+  const userCount = await repo(UserEntity, "memory").count();
+  console.log("✅ User count:", userCount);
+
+  // Test cache stats
+  console.log("📊 Cache stats:", getCacheStats());
+
+  // Test delete functionality with a user that should exist
+  const userToDelete = await repo(UserEntity, "memory").findOne({ where: { id: "7" } });
+  console.log("🔍 User to delete:", userToDelete);
+  
+  const deleted = await repo(UserEntity, "memory").delete({
+    where: { id: "7" },
+  });
+  console.log("✅ Deleted user:", deleted);
+  
+  // Verify deletion
+  const deletedUser = await repo(UserEntity, "memory").findOne({ where: { id: "7" } });
+  console.log("🔍 User after deletion (should be null):", deletedUser);
+
+  // Final count
+  const finalCount = await repo(UserEntity, "memory").count();
+  console.log("✅ Final user count:", finalCount);
+
+  console.log("🎉 Test completed successfully!");
 }
 
-test();
+test().catch(console.error);

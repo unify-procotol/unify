@@ -10,9 +10,12 @@ export type QueryOperators<T> = {
   $nin?: T[];
 };
 
-// 扩展的查询条件类型
 export type WhereCondition<T> = {
-  [K in keyof T]?: T[K] | QueryOperators<T[K]>;
+  [K in keyof T]?: T[K];
+};
+
+export type WhereConditionWithOperators<T> = WhereCondition<T> & {
+  [K in keyof T]?: QueryOperators<T[K]>;
 };
 
 // 关联查询回调函数类型 - 接收完整的实体对象
@@ -28,7 +31,7 @@ export type RelationCallbackMany<
 export interface FindManyArgs<T extends Record<string, any>> {
   limit?: number;
   offset?: number;
-  where?: WhereCondition<T>;
+  where?: WhereConditionWithOperators<T>;
   order_by?: Partial<Record<keyof T, "asc" | "desc">>;
   include?: {
     [key: string]: RelationCallbackMany<T, any>;
@@ -51,6 +54,12 @@ export interface UpdateArgs<T extends Record<string, any>> {
   data: Partial<T>;
 }
 
+export interface UpsertArgs<T extends Record<string, any>> {
+  where: WhereCondition<T>;
+  update: Partial<T>;
+  create: Partial<T>;
+}
+
 export interface DeletionArgs<T extends Record<string, any>> {
   where: WhereCondition<T>;
 }
@@ -60,12 +69,13 @@ export interface DataSourceAdapter<T extends Record<string, any>> {
   findOne(args: FindOneArgs<T>): Promise<T | null>;
   create(args: CreationArgs<T>): Promise<T>;
   update(args: UpdateArgs<T>): Promise<T>;
+  upsert(args: UpsertArgs<T>): Promise<T>;
   delete(args: DeletionArgs<T>): Promise<boolean>;
 }
 
 // Middleware 相关类型定义
 export type MiddlewareContext<T extends Record<string, any>> = {
-  operation: "findMany" | "findOne" | "create" | "update" | "delete";
+  operation: "findMany" | "findOne" | "create" | "update" | "upsert" | "delete";
   args: any;
   result?: any;
   adapter: DataSourceAdapter<T>;
