@@ -14,9 +14,11 @@ export type WhereCondition<T> = {
   [K in keyof T]?: T[K];
 };
 
-export type WhereConditionWithOperators<T> = WhereCondition<T> & {
-  [K in keyof T]?: QueryOperators<T[K]>;
-};
+export type WhereConditionWithOperators<T> =
+  | WhereCondition<T>
+  | {
+      [K in keyof T]?: QueryOperators<T[K]>;
+    };
 
 // 关联查询回调函数类型 - 接收完整的实体对象
 export type RelationCallbackSingle<

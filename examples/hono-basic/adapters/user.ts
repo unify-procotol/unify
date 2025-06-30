@@ -5,6 +5,7 @@ import {
   FindManyArgs,
   FindOneArgs,
   UpdateArgs,
+  UpsertArgs,
 } from "@unilab/core";
 import { UserEntity } from "../entities/user";
 
@@ -81,12 +82,11 @@ class UserAdapter implements DataSourceAdapter<UserEntity> {
   }
 
   async update(args: UpdateArgs<UserEntity>): Promise<UserEntity> {
-    return {
-      id: "",
-      name: "",
-      email: "",
-      avatar: "",
-    };
+    throw new Error("Not implemented");
+  }
+
+  async upsert(args: UpsertArgs<UserEntity>): Promise<UserEntity> {
+    throw new Error("Not implemented");
   }
 
   async delete(args: DeletionArgs<UserEntity>): Promise<boolean> {

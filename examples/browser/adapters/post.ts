@@ -5,6 +5,7 @@ import {
   FindManyArgs,
   FindOneArgs,
   UpdateArgs,
+  UpsertArgs,
 } from "@unilab/core";
 import { PostEntity } from "../entities/post";
 
@@ -79,40 +80,29 @@ class PostAdapter implements DataSourceAdapter<PostEntity> {
 
   async findOne(args: FindOneArgs<PostEntity>): Promise<PostEntity | null> {
     const where = args.where;
+    const { id, userId } = where;
 
-    // 如果有 id 条件，按 id 查找
-    if (where.id) {
-      const idValue = typeof where.id === "object" ? where.id.$eq : where.id;
-      return postData.find((post) => post.id === idValue) || null;
+    if (id) {
+      return postData.find((post) => post.id === id) || null;
     }
 
-    // // 如果有 userId 条件，按 userId 查找第一个匹配的文章
-    if (where.userId) {
-      const userIdValue =
-        typeof where.userId === "object" ? where.userId.$eq : where.userId;
-      return postData.find((post) => post.userId === userIdValue) || null;
+    if (userId) {
+      return postData.find((post) => post.userId === userId) || null;
     }
 
-    // 如果没有特定条件，返回第一个文章
     return postData[0] || null;
   }
 
   async create(args: CreationArgs<PostEntity>): Promise<PostEntity> {
-    return {
-      id: "",
-      title: "",
-      content: "",
-      userId: "",
-    };
+    throw new Error("Not implemented");
   }
 
   async update(args: UpdateArgs<PostEntity>): Promise<PostEntity> {
-    return {
-      id: "",
-      title: "",
-      content: "",
-      userId: "",
-    };
+    throw new Error("Not implemented");
+  }
+
+  async upsert(args: UpsertArgs<PostEntity>): Promise<PostEntity> {
+    throw new Error("Not implemented");
   }
 
   async delete(args: DeletionArgs<PostEntity>): Promise<boolean> {

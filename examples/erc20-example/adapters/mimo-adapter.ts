@@ -5,6 +5,7 @@ import type {
   FindManyArgs,
   FindOneArgs,
   UpdateArgs,
+  UpsertArgs,
 } from "@unilab/core";
 import { PairEntity } from "../entities/pair";
 
@@ -65,8 +66,7 @@ export class MimoAdapter implements DataSourceAdapter<PairEntity> {
 
   async findOne(args: FindOneArgs<PairEntity>): Promise<PairEntity | null> {
     try {
-      const pairValue = args.where.pair;
-      const pairString = (typeof pairValue === "string" ? pairValue : pairValue?.$eq || "").toLowerCase();
+      const pairString = args.where.pair?.toLowerCase() || "";
       const [token0Symbol, token1Symbol] = pairString.split('/');
       
               if (!token0Symbol || !token1Symbol) {
@@ -211,13 +211,7 @@ export class MimoAdapter implements DataSourceAdapter<PairEntity> {
 
   // 支持批量查询 (虽然当前只需要findOne，但为了兼容性)
   async findMany(args: FindManyArgs<PairEntity>): Promise<PairEntity[]> {
-    // 这里可以根据需要实现批量查询逻辑
-    // 目前只是简单的单个查询包装
-    if (args.where && args.where.pair) {
-      const result = await this.findOne({ where: args.where });
-      return result ? [result] : [];
-    }
-    return [];
+    throw new Error("Not implemented");
   }
 
   async create(args: CreationArgs<PairEntity>): Promise<PairEntity> {
@@ -252,6 +246,10 @@ export class MimoAdapter implements DataSourceAdapter<PairEntity> {
       chainId: 4689,
       timestamp: "",
     };
+  }
+
+  async upsert(args: UpsertArgs<PairEntity>): Promise<PairEntity> {
+    throw new Error("Not implemented");
   }
 
   async delete(args: DeletionArgs<PairEntity>): Promise<boolean> {
