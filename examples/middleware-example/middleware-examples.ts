@@ -178,7 +178,7 @@ export function createAuditMiddleware<T extends Record<string, any>>(
 ): Middleware<T> {
   return async (context: MiddlewareContext<T>, next: MiddlewareNext<T>) => {
     const timestamp = new Date();
-    const userId = context.metadata?.userId;
+    const userId = context.args.userId;
 
     try {
       const result = await next();

@@ -52,6 +52,14 @@ class UserAdapter implements DataSourceAdapter<User> {
     throw new Error("User not found");
   }
 
+  async upsert(args: any) {
+    const user = await this.findOne(args);
+    if (user) {
+      return this.update(args);
+    }
+    return this.create(args);
+  }
+
   async delete(args: any) {
     const index = this.users.findIndex((user) => user.id === args.where.id);
     if (index !== -1) {
@@ -169,10 +177,7 @@ export function createUserRepositoryWithHooks() {
           console.log("💀 After Delete Hook: User deleted successfully");
 
           // 提取用户 ID (处理复杂的查询条件)
-          const userId =
-            typeof args.where.id === "string"
-              ? args.where.id
-              : args.where.id?.$eq;
+          const userId = args.where.id;
           if (userId) {
             await UserService.cleanupUserData(userId);
             await UserService.removeUserFromCache(userId);
