@@ -5,6 +5,7 @@ import type {
   UpdateArgs,
   DeletionArgs,
   WhereCondition,
+  WhereConditionWithOperators,
 } from "@unilab/core";
 
 export type EntityConstructor<T> = new (...args: any[]) => T;
@@ -15,7 +16,7 @@ export type EntityConstructor<T> = new (...args: any[]) => T;
  */
 export function matchesWhere<T extends Record<string, any>>(
   entity: T,
-  where: WhereCondition<T>
+  where: WhereConditionWithOperators<T>
 ): boolean {
   for (const [key, condition] of Object.entries(where)) {
     const entityValue = entity[key as keyof T];
@@ -37,10 +38,7 @@ export function matchesWhere<T extends Record<string, any>>(
         return false;
       if (operators.$in !== undefined && !operators.$in.includes(entityValue))
         return false;
-      if (
-        operators.$nin !== undefined &&
-        operators.$nin.includes(entityValue)
-      )
+      if (operators.$nin !== undefined && operators.$nin.includes(entityValue))
         return false;
     } else {
       // Direct value comparison
@@ -143,4 +141,4 @@ export async function performUpsert<T extends Record<string, any>>(
   } else {
     return create({ data: args.create });
   }
-} 
+}

@@ -75,7 +75,7 @@
         "typescript": "^5.3.0",
       },
     },
-    "examples/indexeddb-example": {
+    "examples/indexeddb": {
       "name": "indexeddb-example",
       "version": "1.0.0",
       "dependencies": {
@@ -999,7 +999,7 @@
 
     "imurmurhash": ["imurmurhash@0.1.4", "", {}, "sha512-JmXMZ6wuvDmLiHEml9ykzqO6lwFbof0GG4IkcGaENdCRDDmMVnny7s5HsIgHCbaq0w2MyPhDqkhTUgS2LU2PHA=="],
 
-    "indexeddb-example": ["indexeddb-example@workspace:examples/indexeddb-example"],
+    "indexeddb-example": ["indexeddb-example@workspace:examples/indexeddb"],
 
     "inflight": ["inflight@1.0.6", "", { "dependencies": { "once": "^1.3.0", "wrappy": "1" } }, "sha512-k92I/b08q4wvFscXCLvqfsHCrjrF7yiXsQuIVvVE7N82W3+aqpzuUdBbfhWcy/FZR3/4IgflMgKLOsvPDrGCJA=="],
 

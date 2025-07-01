@@ -3,7 +3,7 @@ import { repo, getCacheStats } from "@unilab/store";
 
 async function test() {
   console.log("🚀 Starting entity repository test...");
-  
+
   // Create user
   const user1 = await repo(UserEntity, "memory").create({
     data: {
@@ -11,9 +11,15 @@ async function test() {
       name: "test",
       email: "test@test.com",
       avatar: "test.png",
-    }
+    },
   });
   console.log("✅ Created user:", user1);
+  user1.click("test123");
+
+  console.log(
+    "✅ click:",
+    (await repo(UserEntity).findOne({ where: { id: "1" } }))?.name
+  );
 
   // Update user
   const updatedUser = await repo(UserEntity, "memory").update({
@@ -36,7 +42,9 @@ async function test() {
   console.log("✅ Upserted user (updated existing):", upsertedUser);
 
   // Find one user
-  const foundUser = await repo(UserEntity, "memory").findOne({ where: { id: "1" } });
+  const foundUser = await repo(UserEntity, "memory").findOne({
+    where: { id: "1" },
+  });
   console.log("✅ Found user:", foundUser);
 
   // Create more users to test LRU cache
@@ -47,13 +55,17 @@ async function test() {
         name: `user${i}`,
         email: `user${i}@test.com`,
         avatar: `user${i}.png`,
-      }
+      },
     });
   }
 
   // Find many users
   const allUsers = await repo(UserEntity, "memory").findMany();
-  console.log("✅ All users (should be max 5 due to LRU cache):", allUsers.length, "users");
+  console.log(
+    "✅ All users (should be max 5 due to LRU cache):",
+    allUsers.length,
+    "users"
+  );
 
   // Count users
   const userCount = await repo(UserEntity, "memory").count();
@@ -63,16 +75,20 @@ async function test() {
   console.log("📊 Cache stats:", getCacheStats());
 
   // Test delete functionality with a user that should exist
-  const userToDelete = await repo(UserEntity, "memory").findOne({ where: { id: "7" } });
+  const userToDelete = await repo(UserEntity, "memory").findOne({
+    where: { id: "7" },
+  });
   console.log("🔍 User to delete:", userToDelete);
-  
+
   const deleted = await repo(UserEntity, "memory").delete({
     where: { id: "7" },
   });
   console.log("✅ Deleted user:", deleted);
-  
+
   // Verify deletion
-  const deletedUser = await repo(UserEntity, "memory").findOne({ where: { id: "7" } });
+  const deletedUser = await repo(UserEntity, "memory").findOne({
+    where: { id: "7" },
+  });
   console.log("🔍 User after deletion (should be null):", deletedUser);
 
   // Final count
