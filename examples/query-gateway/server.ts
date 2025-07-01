@@ -2,6 +2,7 @@ import { Unify } from "@unilab/unify-hono";
 import { WeatherEntity } from "./entities/weather";
 import { Plugin } from "@unilab/core";
 import { WeatherAdapter } from "./adapters/open-meteo-weather";
+import { GeocodingAdapter } from "./adapters/geocoding";
 
 const MyPlugin: Plugin = {
   entities: [WeatherEntity],
@@ -10,6 +11,11 @@ const MyPlugin: Plugin = {
       source: "open-meteo",
       entityName: "WeatherEntity",
       adapter: new WeatherAdapter(),
+    },
+    {
+      source: "open-meteo",
+      entityName: "GeocodingEntity",
+      adapter: new GeocodingAdapter(),
     },
   ],
 };

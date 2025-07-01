@@ -25,14 +25,14 @@ export class WeatherEntity {
   })
   hourly = "temperature_2m,relative_humidity_2m,wind_speed_10m";
 
-  @Fields.record(() => Result, {
+  @Fields.record(() => WeatherQueryResult, {
     optional: true,
     description: "The result of the weather query",
   })
-  result = {};
+  result = new WeatherQueryResult();
 }
 
-export class Result {
+export class WeatherQueryResult {
   @Fields.number()
   latitude = 0;
 
@@ -55,16 +55,16 @@ export class Result {
   elevation = 30;
 
   @Fields.record(() => Current)
-  current = {};
+  current = new Current();
 
   @Fields.record(() => CurrentUnits)
-  current_units = {};
+  current_units = new CurrentUnits();
 
   @Fields.record(() => Hourly)
-  hourly = {};
+  hourly = new Hourly();
 
   @Fields.record(() => HourlyUnits)
-  hourly_units = {};
+  hourly_units = new HourlyUnits();
 }
 
 export class Current {

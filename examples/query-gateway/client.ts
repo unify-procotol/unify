@@ -4,37 +4,56 @@ import {
   CurrentUnits,
   Hourly,
   HourlyUnits,
-  Result,
+  WeatherQueryResult,
   WeatherEntity,
 } from "./entities/weather";
 import { generateSchemas } from "@unilab/core";
+import { GeocodingEntity } from "./entities/geocoding";
 
 UnifyClient.init({
   baseUrl: "http://localhost:3000",
   timeout: 10000,
 });
 
-const schemas = generateSchemas([
-  WeatherEntity,
-  Result,
-  Current,
-  CurrentUnits,
-  Hourly,
-  HourlyUnits,
-]);
-console.log("schemas=>", schemas);
+// const schemas = generateSchemas([
+//   WeatherEntity,
+//   WeatherQueryResult,
+//   Current,
+//   CurrentUnits,
+//   Hourly,
+//   HourlyUnits,
+//   GeocodingEntity,
+// ]);
+// console.log("schemas=>", schemas);
 
 async function test() {
-  const data = await repo<WeatherEntity>("weather", "open-meteo").findOne({
+  // get the latitude and longitude of a city
+  const data = await repo<GeocodingEntity>("geocoding", "open-meteo").findOne({
     where: {
-      latitude: 52.52,
-      longitude: 13.41,
+      name: "london",
+    },
+  });
+
+  console.log("data==>", data);
+
+  if (!data) {
+    throw new Error("No data found");
+  }
+
+  const latitude = data.result.latitude;
+  const longitude = data.result.longitude;
+
+  // get the weather of a city
+  const data2 = await repo<WeatherEntity>("weather", "open-meteo").findOne({
+    where: {
+      latitude: latitude,
+      longitude: longitude,
       current: "temperature_2m,wind_speed_10m",
       hourly: "temperature_2m,relative_humidity_2m,wind_speed_10m",
     },
   });
 
-  console.log("data==>", data);
+  console.log("data2==>", data2);
 }
 
 test();
