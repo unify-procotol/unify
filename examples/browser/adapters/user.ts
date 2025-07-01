@@ -1,11 +1,8 @@
 import {
+  BaseAdapter,
   CreationArgs,
-  DataSourceAdapter,
-  DeletionArgs,
   FindManyArgs,
   FindOneArgs,
-  UpdateArgs,
-  UpsertArgs,
 } from "@unilab/core";
 import { UserEntity } from "../entities/user";
 
@@ -24,7 +21,7 @@ const userData = [
   },
 ];
 
-class UserAdapter implements DataSourceAdapter<UserEntity> {
+class UserAdapter extends BaseAdapter<UserEntity> {
   async findMany(args: FindManyArgs<UserEntity>): Promise<UserEntity[]> {
     const where = args?.where || {};
     if (where.id) {
@@ -69,18 +66,6 @@ class UserAdapter implements DataSourceAdapter<UserEntity> {
     };
     userData.push(newUser);
     return newUser;
-  }
-
-  async update(args: UpdateArgs<UserEntity>): Promise<UserEntity> {
-    throw new Error("Not implemented");
-  }
-
-  async upsert(args: UpsertArgs<UserEntity>): Promise<UserEntity> {
-    throw new Error("Not implemented");
-  }
-
-  async delete(args: DeletionArgs<UserEntity>): Promise<boolean> {
-    return false;
   }
 }
 

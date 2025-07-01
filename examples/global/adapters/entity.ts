@@ -1,16 +1,8 @@
-import {
-  CreationArgs,
-  DataSourceAdapter,
-  DeletionArgs,
-  FindManyArgs,
-  FindOneArgs,
-  UpdateArgs,
-  UpsertArgs,
-} from "@unilab/core";
+import { BaseAdapter, FindManyArgs, FindOneArgs } from "@unilab/core";
 import { Entity } from "../entities/entity";
 import { Unify } from "@unilab/unify-hono";
 
-export class EntityAdapter implements DataSourceAdapter<Entity> {
+export class EntityAdapter extends BaseAdapter<Entity> {
   static readonly adapterName = "EntityAdapter";
 
   private getSourcesForEntity(entityName: string): string[] {
@@ -65,21 +57,5 @@ export class EntityAdapter implements DataSourceAdapter<Entity> {
       }
     }
     return null;
-  }
-
-  async create(args: CreationArgs<Entity>): Promise<Entity> {
-    throw new Error("Not implemented");
-  }
-
-  async update(args: UpdateArgs<Entity>): Promise<Entity> {
-    throw new Error("Not implemented");
-  }
-
-  async upsert(args: UpsertArgs<Entity>): Promise<Entity> {
-    throw new Error("Not implemented");
-  }
-
-  async delete(args: DeletionArgs<Entity>): Promise<boolean> {
-    throw new Error("Not implemented");
   }
 }

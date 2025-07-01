@@ -71,13 +71,12 @@ export interface DataSourceAdapter<T extends Record<string, any>> {
   findOne(args: FindOneArgs<T>): Promise<T | null>;
   create(args: CreationArgs<T>): Promise<T>;
   update(args: UpdateArgs<T>): Promise<T>;
-  upsert(args: UpsertArgs<T>): Promise<T>;
   delete(args: DeletionArgs<T>): Promise<boolean>;
 }
 
 // Middleware 相关类型定义
 export type MiddlewareContext<T extends Record<string, any>> = {
-  operation: "findMany" | "findOne" | "create" | "update" | "upsert" | "delete";
+  operation: "findMany" | "findOne" | "create" | "update" | "delete";
   args: any;
   result?: any;
   adapter: DataSourceAdapter<T>;

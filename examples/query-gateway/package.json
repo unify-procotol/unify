@@ -1,0 +1,31 @@
+{
+  "name": "query-gateway",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.ts",
+  "scripts": {
+    "dev": "bun run server.ts",
+    "start": "bun run server.ts",
+    "client": "bun run client.ts"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.12.2",
+    "@unilab/core": "workspace:*",
+    "@unilab/unify-hono": "workspace:*",
+    "@unilab/unify-client": "workspace:*",
+    "mastra": "^0.1.0",
+    "hono": "^4.7.11"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.1.12",
+    "typescript": "^5.8.3"
+  },
+  "keywords": [
+    "hono",
+    "unilab",
+    "api",
+    "example"
+  ],
+  "author": "osdodo",
+  "license": "MIT"
+}

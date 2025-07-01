@@ -1,12 +1,4 @@
-import {
-  CreationArgs,
-  DataSourceAdapter,
-  DeletionArgs,
-  FindManyArgs,
-  FindOneArgs,
-  UpdateArgs,
-  UpsertArgs,
-} from "@unilab/core";
+import { BaseAdapter, FindManyArgs, FindOneArgs } from "@unilab/core";
 import { PostEntity } from "../entities/post";
 
 const postData = [
@@ -36,7 +28,7 @@ const postData = [
   },
 ];
 
-class PostAdapter implements DataSourceAdapter<PostEntity> {
+class PostAdapter extends BaseAdapter<PostEntity> {
   async findMany(args?: FindManyArgs<PostEntity>): Promise<PostEntity[]> {
     const where = args?.where || {};
     console.log(
@@ -91,22 +83,6 @@ class PostAdapter implements DataSourceAdapter<PostEntity> {
     }
 
     return postData[0] || null;
-  }
-
-  async create(args: CreationArgs<PostEntity>): Promise<PostEntity> {
-    throw new Error("Not implemented");
-  }
-
-  async update(args: UpdateArgs<PostEntity>): Promise<PostEntity> {
-    throw new Error("Not implemented");
-  }
-
-  async upsert(args: UpsertArgs<PostEntity>): Promise<PostEntity> {
-    throw new Error("Not implemented");
-  }
-
-  async delete(args: DeletionArgs<PostEntity>): Promise<boolean> {
-    return false;
   }
 }
 

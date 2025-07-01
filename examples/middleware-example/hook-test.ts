@@ -52,14 +52,6 @@ class UserAdapter implements DataSourceAdapter<User> {
     throw new Error("User not found");
   }
 
-  async upsert(args: any) {
-    const user = await this.findOne(args);
-    if (user) {
-      return this.update(args);
-    }
-    return this.create(args);
-  }
-
   async delete(args: any) {
     const index = this.users.findIndex((user) => user.id === args.where.id);
     if (index !== -1) {

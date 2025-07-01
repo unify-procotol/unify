@@ -77,14 +77,6 @@ class InMemoryUserAdapter implements DataSourceAdapter<User> {
     return this.users[userIndex];
   }
 
-  async upsert(args: any): Promise<User> {
-    const user = await this.findOne(args);
-    if (user) {
-      return this.update(args);
-    }
-    return this.create(args);
-  }
-
   async delete(args: any): Promise<boolean> {
     console.log("InMemoryUserAdapter: Executing delete operation");
     const { where } = args;

@@ -1,23 +1,11 @@
-import type {
-  CreationArgs,
-  DataSourceAdapter,
-  DeletionArgs,
-  FindManyArgs,
-  FindOneArgs,
-  UpdateArgs,
-  UpsertArgs,
-} from "@unilab/core";
+import { BaseAdapter, type FindOneArgs } from "@unilab/core";
 import type { WalletEntity } from "../entities/wallet";
 import { SolanaHandler } from "../handlers/solana";
 
 const handler = new SolanaHandler();
 
-export class SolanaAdapter implements DataSourceAdapter<WalletEntity> {
+export class SolanaAdapter extends BaseAdapter<WalletEntity> {
   static readonly adapterName = "SolanaAdapter";
-
-  async findMany(args: FindManyArgs<WalletEntity>): Promise<WalletEntity[]> {
-    return [];
-  }
 
   async findOne(args: FindOneArgs<WalletEntity>): Promise<WalletEntity | null> {
     const { address } = args.where;
@@ -38,21 +26,5 @@ export class SolanaAdapter implements DataSourceAdapter<WalletEntity> {
         decimals: 9,
       },
     };
-  }
-
-  async create(args: CreationArgs<WalletEntity>): Promise<WalletEntity> {
-    throw new Error("Not implemented");
-  }
-
-  async update(args: UpdateArgs<WalletEntity>): Promise<WalletEntity> {
-    throw new Error("Not implemented");
-  }
-
-  async upsert(args: UpsertArgs<WalletEntity>): Promise<WalletEntity> {
-    throw new Error("Not implemented");
-  }
-
-  async delete(args: DeletionArgs<WalletEntity>): Promise<boolean> {
-    return true;
   }
 }

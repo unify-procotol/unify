@@ -7,7 +7,6 @@ import type {
   FindOneArgs,
   UpdateArgs,
   MiddlewareContext,
-  UpsertArgs,
 } from "./types";
 
 export class Repository<T extends Record<string, any>> {
@@ -66,18 +65,6 @@ export class Repository<T extends Record<string, any>> {
     });
   }
 
-  async upsert(args: UpsertArgs<T>): Promise<T> {
-    const context: MiddlewareContext<T> = {
-      args,
-      operation: "upsert",
-      adapter: this.adapter,
-    };
-
-    return getGlobalMiddlewareManager().execute(context, async () => {
-      return this.adapter.upsert(args);
-    });
-  }
-
   async delete(args: DeletionArgs<T>): Promise<boolean> {
     const context: MiddlewareContext<T> = {
       args,
@@ -89,5 +76,25 @@ export class Repository<T extends Record<string, any>> {
       const result = await this.adapter.delete(args);
       return result;
     });
+  }
+}
+
+export class BaseAdapter<T extends Record<string, any>>
+  implements DataSourceAdapter<T>
+{
+  async findMany(args?: FindManyArgs<T>): Promise<T[]> {
+    return [];
+  }
+  async findOne(args: FindOneArgs<T>): Promise<T | null> {
+    return null;
+  }
+  async create(args: CreationArgs<T>): Promise<T> {
+    throw new Error("Method not implemented.");
+  }
+  async update(args: UpdateArgs<T>): Promise<T> {
+    throw new Error("Method not implemented.");
+  }
+  async delete(args: DeletionArgs<T>): Promise<boolean> {
+    throw new Error("Method not implemented.");
   }
 }
