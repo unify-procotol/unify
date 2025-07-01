@@ -2,6 +2,9 @@ import React, { useState } from "react";
 import { LayoutProps } from "../types";
 import { getSortedFields, renderFieldValue } from "../utils";
 import { EditModal } from "./EditModal";
+import { Button } from "../../ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "../../ui/card";
+import { Badge } from "../../ui/badge";
 
 export const FormLayout: React.FC<LayoutProps> = ({ 
   entity, 
@@ -70,97 +73,98 @@ export const FormLayout: React.FC<LayoutProps> = ({
 
   if (!currentRecord) {
     return (
-      <div className="bg-gray-900 rounded-lg border border-gray-800 p-8 text-center">
-        <div className="text-gray-400">No records to display</div>
-      </div>
+      <Card className="p-8 text-center">
+        <div className="text-muted-foreground">No records to display</div>
+      </Card>
     );
   }
 
   return (
     <>
-      <div className="bg-gray-900 rounded-lg border border-gray-800 overflow-hidden">
-        {/* Header with navigation */}
-        <div className="bg-gray-800 px-6 py-4 border-b border-gray-700">
+      <Card className="overflow-hidden">
+        <CardHeader>
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <h2 className="text-lg font-semibold text-white">
+              <CardTitle>
                 {entity.name} Details
-              </h2>
-              <span className="text-sm text-gray-400">
+              </CardTitle>
+              <Badge variant="outline" className="text-sm">
                 Record {currentIndex + 1} of {data.length}
-              </span>
+              </Badge>
             </div>
             
             <div className="flex items-center space-x-2">
               {/* Navigation buttons */}
-              <button
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={goToPrevious}
                 disabled={currentIndex === 0}
-                className="p-2 text-gray-400 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
                 title="Previous"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"/>
                 </svg>
-              </button>
+              </Button>
               
-              <button
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={goToNext}
                 disabled={currentIndex === data.length - 1}
-                className="p-2 text-gray-400 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
                 title="Next"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"/>
                 </svg>
-              </button>
+              </Button>
 
               {/* Action buttons */}
               {canEdit && (
-                <button
+                <Button
                   onClick={handleEdit}
                   disabled={loading}
-                  className="px-3 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white rounded-lg text-sm font-medium transition-colors"
+                  size="sm"
                 >
                   Edit
-                </button>
+                </Button>
               )}
               
               {(generalConfig?.actions?.delete !== false && onDelete) && (
-                <button
+                <Button
                   onClick={handleDelete}
                   disabled={loading}
-                  className="px-3 py-2 bg-red-600 hover:bg-red-700 disabled:bg-gray-600 text-white rounded-lg text-sm font-medium transition-colors"
+                  size="sm"
+                  variant="destructive"
                 >
                   Delete
-                </button>
+                </Button>
               )}
             </div>
           </div>
-        </div>
+        </CardHeader>
 
-        {/* Form content */}
-        <div className="p-6">
+        <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {sortedFields.map(field => (
               <div key={field.name} className="space-y-2">
-                <label className="block text-sm font-medium text-gray-300">
+                <label className="block text-sm font-medium text-foreground">
                   {config?.[field.name]?.label || field.name}
-                  {field.required && <span className="text-red-400 ml-1">*</span>}
+                  {field.required && <span className="text-destructive ml-1">*</span>}
                 </label>
-                <div className="p-3 bg-gray-800 rounded-lg border border-gray-700">
-                  <div className="text-sm text-gray-300">
+                <Card className="p-3">
+                  <div className="text-sm text-foreground">
                     {renderFieldValue(currentRecord[field.name], field, currentRecord, currentIndex, config?.[field.name])}
                   </div>
-                </div>
+                </Card>
                 {field.description && (
-                  <p className="text-xs text-gray-500">{field.description}</p>
+                  <p className="text-xs text-muted-foreground">{field.description}</p>
                 )}
               </div>
             ))}
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
       {/* Edit Modal */}
       {isEditing && editingRecord && (

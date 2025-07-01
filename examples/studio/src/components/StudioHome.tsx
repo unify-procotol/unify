@@ -1,6 +1,17 @@
 import { useState, useEffect } from "react";
 import { repo, UnifyClient } from "@unilab/unify-client";
 import { UniRender, Entity, LayoutType, FieldConfig } from "./uniRender";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { Badge } from "./ui/badge";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
+import { ScrollArea } from "./ui/scroll-area";
+import { Separator } from "./ui/separator";
+import { cn } from "../lib/utils";
+
 
 // Entity schema type based on the API response
 interface EntitySchema {
@@ -385,22 +396,22 @@ export function StudioHome({ isConnected, baseUrl }: StudioHomeProps) {
   const formatJsonValue = (value: any, depth = 0): JSX.Element => {
     const indent = "  ".repeat(depth);
     
-    if (value === null) return <span className="text-gray-500">null</span>;
-    if (typeof value === "string") return <span className="text-green-400">"{value}"</span>;
-    if (typeof value === "number") return <span className="text-blue-400">{value}</span>;
-    if (typeof value === "boolean") return <span className="text-purple-400">{value.toString()}</span>;
+    if (value === null) return <span className="text-muted-foreground">null</span>;
+    if (typeof value === "string") return <span className="text-green-600 dark:text-green-400">"{value}"</span>;
+    if (typeof value === "number") return <span className="text-blue-600 dark:text-blue-400">{value}</span>;
+    if (typeof value === "boolean") return <span className="text-purple-600 dark:text-purple-400">{value.toString()}</span>;
     
     if (Array.isArray(value)) {
       return (
         <div>
-          <span className="text-gray-300">[</span>
+          <span className="text-foreground">[</span>
           {value.map((item, index) => (
             <div key={index} className="ml-4">
               {formatJsonValue(item, depth + 1)}
-              {index < value.length - 1 && <span className="text-gray-300">,</span>}
+              {index < value.length - 1 && <span className="text-foreground">,</span>}
             </div>
           ))}
-          <span className="text-gray-300">]</span>
+          <span className="text-foreground">]</span>
         </div>
       );
     }
@@ -409,30 +420,32 @@ export function StudioHome({ isConnected, baseUrl }: StudioHomeProps) {
       const entries = Object.entries(value);
       return (
         <div>
-          <span className="text-gray-300">{"{"}</span>
+          <span className="text-foreground">{"{"}</span>
           {entries.map(([key, val], index) => (
             <div key={key} className="ml-4">
-              <span className="text-orange-400">"{key}"</span>
-              <span className="text-gray-300">: </span>
+              <span className="text-orange-600 dark:text-orange-400">"{key}"</span>
+              <span className="text-foreground">: </span>
               {formatJsonValue(val, depth + 1)}
-              {index < entries.length - 1 && <span className="text-gray-300">,</span>}
+              {index < entries.length - 1 && <span className="text-foreground">,</span>}
             </div>
           ))}
-          <span className="text-gray-300">{"}"}</span>
+          <span className="text-foreground">{"}"}</span>
         </div>
       );
     }
     
-    return <span>{String(value)}</span>;
+    return <span className="text-foreground">{String(value)}</span>;
   };
 
   if (loading) {
     return (
       <div className="flex-1 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full mx-auto mb-3"></div>
-          <div className="text-gray-300">Loading entities...</div>
-        </div>
+        <Card className="p-6">
+          <div className="text-center">
+            <div className="w-8 h-8 animate-spin mx-auto mb-3 border-2 border-primary border-t-transparent rounded-full"></div>
+            <div className="text-muted-foreground">Loading entities...</div>
+          </div>
+        </Card>
       </div>
     );
   }
@@ -440,16 +453,15 @@ export function StudioHome({ isConnected, baseUrl }: StudioHomeProps) {
   if (error) {
     return (
       <div className="flex-1 flex items-center justify-center">
-        <div className="text-center max-w-md">
-          <div className="text-red-400 text-lg font-medium mb-2">Error</div>
-          <p className="text-gray-400 mb-4">{error}</p>
-          <button 
-            onClick={loadEntities}
-            className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded font-medium"
-          >
-            Retry
-          </button>
-        </div>
+        <Card className="p-6 max-w-md">
+          <div className="text-center">
+            <div className="text-destructive text-lg font-medium mb-2">Error</div>
+            <p className="text-muted-foreground mb-4">{error}</p>
+            <Button onClick={loadEntities} variant="default">
+              Retry
+            </Button>
+          </div>
+        </Card>
       </div>
     );
   }
@@ -459,21 +471,27 @@ export function StudioHome({ isConnected, baseUrl }: StudioHomeProps) {
   return (
     <div className="flex-1 flex overflow-hidden">
       {/* Left Sidebar */}
-      <div className="w-80 bg-gray-900 border-r border-gray-800 flex flex-col overflow-hidden">
+      <div className="w-80 border-r border-border flex flex-col overflow-hidden">
         {/* Entities and Data Sources Tree */}
         <div className="flex-1 overflow-auto">
-          <div className="h-10 bg-gray-800 border-b border-gray-700 flex items-center px-4">
-            <span className="text-sm font-medium text-gray-300">Database Explorer</span>
-          </div>
+          <Card className="h-10 rounded-none border-x-0 border-t-0 flex items-center px-4">
+            <div className="flex items-center space-x-2">
+              <svg className="w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 7v10c0 2.21 1.79 4 4 4h8c2.21 0 4-1.79 4-4V7c0-2.21-1.79-4-4-4H8c-2.21 0-4 1.79-4 4z"/>
+              </svg>
+              <span className="text-sm font-medium text-foreground">Database Explorer</span>
+            </div>
+          </Card>
           <div className="p-4">
             <div className="space-y-2">
               {entities.map(entity => {
                 const isCollapsed = isEntityCollapsed(entity.name);
                 const isSelected = selectedEntity?.name === entity.name;
                 return (
-                  <div key={entity.name} className="border border-gray-700 rounded-lg">
+                  <Card key={entity.name} className="overflow-hidden">
                     {/* Entity Header */}
-                    <button
+                    <Button
+                      variant={isSelected ? "default" : "ghost"}
                       onClick={() => {
                         if (isSelected) {
                           // If already selected, just toggle collapse
@@ -487,9 +505,10 @@ export function StudioHome({ isConnected, baseUrl }: StudioHomeProps) {
                           }
                         }
                       }}
-                      className={`w-full text-left px-3 py-2 ${isCollapsed ? 'rounded-lg' : 'rounded-t-lg'} transition-colors flex items-center justify-between ${
-                        isSelected ? "bg-violet-600 text-white" : "text-gray-300 hover:bg-gray-800"
-                      }`}
+                      className={cn(
+                        "w-full justify-between h-auto px-3 py-2",
+                        isCollapsed ? 'rounded-lg' : 'rounded-t-lg rounded-b-none'
+                      )}
                     >
                       <div className="flex items-center space-x-2">
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -505,22 +524,22 @@ export function StudioHome({ isConnected, baseUrl }: StudioHomeProps) {
                       >
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"/>
                       </svg>
-                    </button>
+                    </Button>
                     
                     {/* Entity Details and Data Sources */}
                     {!isCollapsed && (
-                      <div className="bg-gray-800 rounded-b-lg">
+                      <CardContent className="p-0 bg-muted/50 rounded-b-lg">
                         {/* Schema Info */}
-                        <div className="px-3 py-2 border-b border-gray-700">
-                          <div className="text-xs text-gray-400 mb-1">
+                        <div className="px-3 py-2 border-b border-border">
+                          <Badge variant="outline" className="text-xs">
                             Required: {entity.schema.required.join(', ')}
-                          </div>
+                          </Badge>
                         </div>
                         
                         {/* Data Sources */}
                         {entity.sources && entity.sources.length > 0 && (
                           <div className="px-3 py-2">
-                            <div className="text-xs text-gray-400 mb-2 flex items-center space-x-1">
+                            <div className="text-xs text-muted-foreground mb-2 flex items-center space-x-1">
                               <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 7v10c0 2.21 1.79 4 4 4h8c2.21 0 4-1.79 4-4V7c0-2.21-1.79-4-4-4H8c-2.21 0-4 1.79-4 4z"/>
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 11l3 3 4-4"/>
@@ -534,15 +553,15 @@ export function StudioHome({ isConnected, baseUrl }: StudioHomeProps) {
                                   item.entityName === entity.name && item.source === source
                                 );
                                 return (
-                                  <button
+                                  <Button
                                     key={source}
+                                    variant={isSourceActive ? "default" : "ghost"}
+                                    size="sm"
                                     onClick={() => {
                                       setSelectedEntity(entity);
                                       setSelectedSource(source);
                                     }}
-                                    className={`w-full text-left px-2 py-1.5 rounded text-xs transition-colors flex items-center justify-between ${
-                                      isSourceActive ? "bg-orange-600 text-white" : "text-gray-400 hover:bg-gray-700 hover:text-white"
-                                    }`}
+                                    className="w-full justify-between h-8 px-3 py-1 text-xs"
                                   >
                                     <div className="flex items-center space-x-2">
                                       <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -550,19 +569,21 @@ export function StudioHome({ isConnected, baseUrl }: StudioHomeProps) {
                                       </svg>
                                       <span className="capitalize">{source}</span>
                                     </div>
-                                    <div className={`w-1.5 h-1.5 rounded-full ${
-                                      sourceStatus?.loading ? 'bg-yellow-400' :
-                                      sourceStatus?.error ? 'bg-red-400' : 'bg-green-400'
-                                    }`}></div>
-                                  </button>
+                                    <div className={cn(
+                                      "w-1.5 h-1.5 rounded-full",
+                                      sourceStatus?.loading && "bg-yellow-400",
+                                      sourceStatus?.error && "bg-destructive",
+                                      !sourceStatus?.loading && !sourceStatus?.error && "bg-green-500"
+                                    )}></div>
+                                  </Button>
                                 );
                               })}
                             </div>
                           </div>
                         )}
-                      </div>
+                      </CardContent>
                     )}
-                  </div>
+                  </Card>
                 );
               })}
             </div>
@@ -573,80 +594,75 @@ export function StudioHome({ isConnected, baseUrl }: StudioHomeProps) {
       {/* Right Panel - Data View */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Entity Tabs */}
-        <div className="h-12 bg-gray-900 border-b border-gray-800 flex items-center px-4">
+        <Card className="h-12 rounded-none border-x-0 border-t-0 flex items-center px-4">
           <div className="flex items-center space-x-1 overflow-x-auto">
             {entities.map((entity) => (
-              <button
+              <Button
                 key={entity.name}
+                variant={selectedEntity?.name === entity.name ? "default" : "ghost"}
+                size="sm"
                 onClick={() => {
                   setSelectedEntity(entity);
                   if (entity.sources && entity.sources.length > 0) {
                     setSelectedSource(entity.sources[0]);
                   }
                 }}
-                className={`px-3 py-1.5 rounded text-sm font-medium transition-colors flex items-center space-x-2 whitespace-nowrap ${
-                  selectedEntity?.name === entity.name
-                    ? "bg-orange-600 text-white"
-                    : "text-gray-400 hover:text-white hover:bg-gray-800"
-                }`}
+                className="whitespace-nowrap"
               >
-                <span>{entity.name}</span>
-              </button>
+                {entity.name}
+              </Button>
             ))}
           </div>
-        </div>
+        </Card>
 
         {/* Breadcrumb and View Controls */}
-        <div className="h-10 bg-gray-850 border-b border-gray-800 flex items-center justify-between px-4 text-sm text-gray-400">
-          <div className="flex items-center space-x-1">
+        <Card className="h-10 rounded-none border-x-0 border-t-0 flex items-center justify-between px-4">
+          <div className="flex items-center space-x-1 text-sm text-muted-foreground">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 7v10c0 2.21 1.79 4 4 4h8c2.21 0 4-1.79 4-4V7c0-2.21-1.79-4-4-4H8c-2.21 0-4 1.79-4 4z"/>
             </svg>
-            <span className="text-gray-500">Database</span>
-            <span className="text-gray-600">/</span>
-            <span className="text-gray-300">{selectedEntity?.name || "Select Entity"}</span>
+            <span>Database</span>
+            <span>/</span>
+            <span className="text-foreground">{selectedEntity?.name || "Select Entity"}</span>
             {selectedSource && (
               <>
-                <span className="text-gray-600">/</span>
-                <span className="text-orange-400 font-medium">{selectedSource}</span>
+                <span>/</span>
+                <Badge variant="secondary">{selectedSource}</Badge>
               </>
             )}
           </div>
           
           {/* View Mode Toggle */}
-          {currentSourceData && !currentSourceData.loading && !currentSourceData.error && currentSourceData.data.length > 0 && (
+          {currentSourceData && !currentSourceData.loading && !currentSourceData.error && currentSourceData.data && currentSourceData.data.length > 0 && (
             <div className="flex items-center space-x-2">
-              <button
+              <Button
+                variant={viewMode === 'table' ? 'default' : 'outline'}
+                size="sm"
                 onClick={() => setViewMode('table')}
-                className={`px-3 py-1 text-xs rounded transition-colors ${
-                  viewMode === 'table' ? 'bg-violet-600 text-white' : 'text-gray-400 hover:text-white'
-                }`}
               >
                 Table
-              </button>
-              <button
+              </Button>
+              <Button
+                variant={viewMode === 'json' ? 'default' : 'outline'}
+                size="sm"
                 onClick={() => setViewMode('json')}
-                className={`px-3 py-1 text-xs rounded transition-colors ${
-                  viewMode === 'json' ? 'bg-violet-600 text-white' : 'text-gray-400 hover:text-white'
-                }`}
               >
                 JSON
-              </button>
-              <button
+              </Button>
+              <Button
+                variant={viewMode === 'unirender' ? 'default' : 'outline'}
+                size="sm"
                 onClick={() => setViewMode('unirender')}
-                className={`px-3 py-1 text-xs rounded transition-colors ${
-                  viewMode === 'unirender' ? 'bg-violet-600 text-white' : 'text-gray-400 hover:text-white'
-                }`}
               >
                 UniRender
-              </button>
+              </Button>
               
               {/* UniRender Layout Selector */}
               {viewMode === 'unirender' && (
                 <select
                   value={uniRenderLayout}
                   onChange={(e) => setUniRenderLayout(e.target.value as LayoutType)}
-                  className="bg-gray-800 border border-gray-700 rounded px-2 py-1 text-xs text-gray-300 focus:outline-none focus:ring-2 focus:ring-violet-500"
+                  className="h-8 bg-background border border-input rounded px-2 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                 >
                   <option value="table">Table</option>
                   <option value="card">Card</option>
@@ -658,21 +674,21 @@ export function StudioHome({ isConnected, baseUrl }: StudioHomeProps) {
               )}
             </div>
           )}
-        </div>
+        </Card>
 
         {/* Data Content */}
         <div className="flex-1 flex flex-col overflow-hidden">
           {/* Filter Bar */}
           {currentSourceData && !currentSourceData.loading && !currentSourceData.error && (
-            <div className="bg-gray-900 border-b border-gray-800 p-4">
+            <Card className="rounded-none border-x-0 border-t-0 p-4">
               <div className="flex items-center space-x-4">
                 {/* Field Selector */}
                 <div className="flex items-center space-x-2">
-                  <span className="text-sm text-gray-400">Field:</span>
+                  <span className="text-sm text-muted-foreground">Field:</span>
                   <select
                     value={searchField}
                     onChange={(e) => setSearchField(e.target.value)}
-                    className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-300 focus:outline-none focus:ring-2 focus:ring-violet-500"
+                    className="bg-background border border-input rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                   >
                     <option value="">Select Field</option>
                     {getAvailableFields().map(field => (
@@ -683,11 +699,11 @@ export function StudioHome({ isConnected, baseUrl }: StudioHomeProps) {
 
                 {/* Operator Selector */}
                 <div className="flex items-center space-x-2">
-                  <span className="text-sm text-gray-400">Operator:</span>
+                  <span className="text-sm text-muted-foreground">Operator:</span>
                   <select
                     value={searchOperator}
                     onChange={(e) => setSearchOperator(e.target.value as any)}
-                    className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-300 focus:outline-none focus:ring-2 focus:ring-violet-500"
+                    className="bg-background border border-input rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                   >
                     <option value="contains">Contains</option>
                     <option value="equals">Equals</option>
@@ -702,34 +718,41 @@ export function StudioHome({ isConnected, baseUrl }: StudioHomeProps) {
 
                 {/* Search Value Input */}
                 <div className="flex-1 max-w-md">
-                  <input
+                  <Input
                     type="text"
                     placeholder="Enter search value..."
                     value={searchValue}
                     onChange={(e) => setSearchValue(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && executeSearch()}
-                    className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-sm text-gray-300 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+                    className="text-sm"
                   />
                 </div>
 
                 {/* Search Button */}
-                <button
+                <Button
                   onClick={executeSearch}
                   disabled={isSearching || !searchField}
-                  className="px-4 py-2 bg-violet-600 hover:bg-violet-700 disabled:bg-gray-600 text-white rounded-lg transition-colors text-sm font-medium"
+                  size="sm"
                 >
                   {isSearching ? (
                     <div className="flex items-center space-x-2">
-                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
                       <span>Searching...</span>
                     </div>
                   ) : (
-                    "Search"
+                    <>
+                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                      </svg>
+                      Search
+                    </>
                   )}
-                </button>
+                </Button>
 
                 {/* Clear Button */}
-                <button
+                <Button
+                  variant="outline"
+                  size="sm"
                   onClick={() => {
                     setSearchField("");
                     setSearchValue("");
@@ -737,117 +760,125 @@ export function StudioHome({ isConnected, baseUrl }: StudioHomeProps) {
                       loadSingleSourceData(selectedEntity.name, selectedSource);
                     }
                   }}
-                  className="px-3 py-2 text-sm bg-gray-700 hover:bg-gray-600 text-gray-300 rounded-lg transition-colors"
                 >
                   Clear
-                </button>
+                </Button>
 
                 {/* Add Row Button */}
-                <button
+                <Button
                   onClick={handleAddRow}
-                  className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors text-sm font-medium flex items-center space-x-2"
+                  size="sm"
+                  className="bg-green-600 hover:bg-green-700"
                 >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4"/>
                   </svg>
-                  <span>Add Row</span>
-                </button>
+                  Add Row
+                </Button>
 
                 {/* Results Count */}
-                <div className="text-sm text-gray-400">
+                <Badge variant="outline" className="text-sm">
                   {currentSourceData.data ? currentSourceData.data.length : 0} records
-                </div>
+                </Badge>
               </div>
-            </div>
+            </Card>
           )}
 
           {/* Data Display Area */}
           <div className="flex-1 overflow-auto">
             {currentSourceData?.loading ? (
             <div className="flex items-center justify-center h-64">
-              <div className="text-center">
-                <div className="animate-spin w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full mx-auto mb-2"></div>
-                <div className="text-gray-400">Loading data...</div>
-              </div>
+              <Card className="p-6">
+                <div className="text-center">
+                  <div className="animate-spin w-6 h-6 border-2 border-primary border-t-transparent rounded-full mx-auto mb-2"></div>
+                  <div className="text-muted-foreground">Loading data...</div>
+                </div>
+              </Card>
             </div>
           ) : currentSourceData?.error ? (
             <div className="flex items-center justify-center h-64">
-              <div className="text-center">
-                <div className="text-red-400 mb-2">Error loading data</div>
-                <div className="text-gray-500 text-sm">{currentSourceData.error}</div>
-              </div>
+              <Card className="p-6">
+                <div className="text-center">
+                  <div className="text-destructive mb-2">Error loading data</div>
+                  <div className="text-muted-foreground text-sm">{currentSourceData.error}</div>
+                </div>
+              </Card>
             </div>
           ) : currentSourceData?.data && currentSourceData.data.length > 0 ? (
             <div className="p-4">
               {viewMode === 'table' ? (
                 /* Table View */
-                <div className="bg-gray-900 rounded-lg border border-gray-800 overflow-hidden">
+                <Card className="overflow-hidden">
                   <div className="overflow-x-auto">
-                    <table className="w-full min-w-full">
-                      <thead className="bg-gray-800">
-                        <tr>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider border-b border-gray-700">
-                            #
-                          </th>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="w-12">#</TableHead>
                           {Object.keys(currentSourceData.data[0]).map(key => (
-                            <th key={key} className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider border-b border-gray-700">
-                              {key}
-                            </th>
+                            <TableHead key={key}>{key}</TableHead>
                           ))}
-                        </tr>
-                      </thead>
-                      <tbody className="bg-gray-900 divide-y divide-gray-800">
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
                         {currentSourceData.data.map((item, index) => (
-                          <tr key={index} className="hover:bg-gray-800/50">
-                            <td className="px-4 py-3 text-sm text-gray-400 border-b border-gray-800 font-mono">
+                          <TableRow key={index}>
+                            <TableCell className="font-mono text-muted-foreground">
                               {index + 1}
-                            </td>
+                            </TableCell>
                             {Object.entries(item).map(([key, value]) => (
-                              <td key={key} className="px-4 py-3 text-sm text-gray-300 border-b border-gray-800">
+                              <TableCell key={key}>
                                 <div className="font-mono text-xs max-w-xs truncate" title={JSON.stringify(value)}>
                                   {typeof value === 'string' ? (
-                                    <span className="text-green-400">"{value}"</span>
+                                    <span className="text-green-600 dark:text-green-400">"{value}"</span>
                                   ) : typeof value === 'number' ? (
-                                    <span className="text-blue-400">{value}</span>
+                                    <span className="text-blue-600 dark:text-blue-400">{value}</span>
                                   ) : typeof value === 'boolean' ? (
-                                    <span className="text-purple-400">{value.toString()}</span>
+                                    <span className="text-purple-600 dark:text-purple-400">{value.toString()}</span>
                                   ) : value === null ? (
-                                    <span className="text-gray-500">null</span>
+                                    <span className="text-muted-foreground">null</span>
                                   ) : (
-                                    <span className="text-orange-400">{JSON.stringify(value)}</span>
+                                    <span className="text-orange-600 dark:text-orange-400">{JSON.stringify(value)}</span>
                                   )}
                                 </div>
-                              </td>
+                              </TableCell>
                             ))}
-                          </tr>
+                          </TableRow>
                         ))}
-                      </tbody>
-                    </table>
+                      </TableBody>
+                    </Table>
                   </div>
-                  <div className="px-4 py-3 bg-gray-800 border-t border-gray-700 text-sm text-gray-400">
-                    Showing {currentSourceData.data.length} records
-                  </div>
-                </div>
+                  <Card className="rounded-none border-x-0 border-b-0 px-4 py-3">
+                    <div className="text-sm text-muted-foreground">
+                      Showing {currentSourceData.data.length} records
+                    </div>
+                  </Card>
+                </Card>
               ) : viewMode === 'json' ? (
                 /* JSON View */
                 <div className="space-y-4">
                   {currentSourceData.data.map((item, index) => (
-                    <div key={index} className="bg-gray-900 rounded-lg p-4 border border-gray-800">
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center space-x-2">
-                          <span className="text-gray-400 text-sm">({index + 1})</span>
-                          <span className="text-gray-500 text-sm font-mono">
-                            id: {item.id || `Document_${index + 1}`}
-                          </span>
+                    <Card key={index} className="p-4">
+                      <CardHeader className="p-0 pb-3">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-2">
+                            <Badge variant="outline" className="text-xs">({index + 1})</Badge>
+                            <span className="text-muted-foreground text-sm font-mono">
+                              id: {item.id || `Document_${index + 1}`}
+                            </span>
+                          </div>
+                          <Badge variant="secondary" className="text-xs">
+                            {Object.keys(item).length} fields
+                          </Badge>
                         </div>
-                        <div className="text-xs text-gray-500">
-                          {Object.keys(item).length} fields
-                        </div>
-                      </div>
-                      <div className="font-mono text-sm bg-gray-800 rounded p-3 overflow-auto">
-                        {formatJsonValue(item)}
-                      </div>
-                    </div>
+                      </CardHeader>
+                      <CardContent className="p-0">
+                        <Card className="bg-muted p-3 overflow-auto">
+                          <div className="font-mono text-sm">
+                            {formatJsonValue(item)}
+                          </div>
+                        </Card>
+                      </CardContent>
+                    </Card>
                   ))}
                 </div>
               ) : (
@@ -864,15 +895,17 @@ export function StudioHome({ isConnected, baseUrl }: StudioHomeProps) {
             </div>
           ) : (
             <div className="flex items-center justify-center h-64">
-              <div className="text-center">
-                <div className="text-gray-400">No data available</div>
-                <div className="text-gray-500 text-sm mt-1">
-                  {selectedEntity && selectedSource 
-                    ? `No records found in ${selectedSource} for ${selectedEntity.name}`
-                    : "Select an entity and source to view data"
-                  }
+              <Card className="p-6">
+                <div className="text-center">
+                  <div className="text-muted-foreground">No data available</div>
+                  <div className="text-muted-foreground text-sm mt-1">
+                    {selectedEntity && selectedSource 
+                      ? `No records found in ${selectedSource} for ${selectedEntity.name}`
+                      : "Select an entity and source to view data"
+                    }
+                  </div>
                 </div>
-              </div>
+              </Card>
             </div>
           )}
           </div>
@@ -882,86 +915,89 @@ export function StudioHome({ isConnected, baseUrl }: StudioHomeProps) {
       {/* Add Row Modal */}
       {showAddForm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-gray-900 rounded-lg border border-gray-800 p-6 w-full max-w-2xl max-h-[80vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold text-white">Add New Row</h2>
-              <button
-                onClick={handleCancelAdd}
-                className="text-gray-400 hover:text-white"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"/>
-                </svg>
-              </button>
-            </div>
+          <Card className="w-full max-w-2xl max-h-[80vh] overflow-y-auto m-4">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle>Add New Row</CardTitle>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleCancelAdd}
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"/>
+                  </svg>
+                </Button>
+              </div>
+            </CardHeader>
 
-            <div className="space-y-4">
-              {selectedEntity?.schema?.properties && Object.entries(selectedEntity.schema.properties).map(([field, property]) => (
-                <div key={field} className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-300">
-                    {field}
-                    {selectedEntity.schema.required.includes(field) && (
-                      <span className="text-red-400 ml-1">*</span>
+            <CardContent>
+              <div className="space-y-4">
+                {selectedEntity?.schema?.properties && Object.entries(selectedEntity.schema.properties).map(([field, property]) => (
+                  <div key={field} className="space-y-2">
+                    <label className="block text-sm font-medium text-foreground">
+                      {field}
+                      {selectedEntity.schema.required.includes(field) && (
+                        <span className="text-destructive ml-1">*</span>
+                      )}
+                    </label>
+                    
+                    {property.type === 'boolean' ? (
+                      <select
+                        value={newRowData[field] ? 'true' : 'false'}
+                        onChange={(e) => handleInputChange(field, e.target.value === 'true')}
+                        className="w-full px-3 py-2 bg-background border border-input rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                      >
+                        <option value="false">False</option>
+                        <option value="true">True</option>
+                      </select>
+                    ) : property.type === 'number' ? (
+                      <Input
+                        type="number"
+                        value={newRowData[field] || ''}
+                        onChange={(e) => handleInputChange(field, e.target.value ? Number(e.target.value) : 0)}
+                        placeholder={`Enter ${field}...`}
+                      />
+                    ) : (
+                      <Input
+                        type="text"
+                        value={newRowData[field] || ''}
+                        onChange={(e) => handleInputChange(field, e.target.value)}
+                        placeholder={`Enter ${field}...`}
+                      />
                     )}
-                  </label>
-                  
-                  {property.type === 'boolean' ? (
-                    <select
-                      value={newRowData[field] ? 'true' : 'false'}
-                      onChange={(e) => handleInputChange(field, e.target.value === 'true')}
-                      className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500"
-                    >
-                      <option value="false">False</option>
-                      <option value="true">True</option>
-                    </select>
-                  ) : property.type === 'number' ? (
-                    <input
-                      type="number"
-                      value={newRowData[field] || ''}
-                      onChange={(e) => handleInputChange(field, e.target.value ? Number(e.target.value) : 0)}
-                      className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-gray-300 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500"
-                      placeholder={`Enter ${field}...`}
-                    />
-                  ) : (
-                    <input
-                      type="text"
-                      value={newRowData[field] || ''}
-                      onChange={(e) => handleInputChange(field, e.target.value)}
-                      className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-gray-300 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500"
-                      placeholder={`Enter ${field}...`}
-                    />
-                  )}
-                  
-                  {property.description && (
-                    <p className="text-xs text-gray-500">{property.description}</p>
-                  )}
-                </div>
-              ))}
-            </div>
-
-            <div className="flex items-center justify-end space-x-3 mt-6 pt-4 border-t border-gray-800">
-              <button
-                onClick={handleCancelAdd}
-                className="px-4 py-2 text-gray-400 hover:text-white transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSaveRow}
-                disabled={addLoading}
-                className="px-6 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-600 text-white rounded-lg transition-colors font-medium"
-              >
-                {addLoading ? (
-                  <div className="flex items-center space-x-2">
-                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                    <span>Saving...</span>
+                    
+                    {property.description && (
+                      <p className="text-xs text-muted-foreground">{property.description}</p>
+                    )}
                   </div>
-                ) : (
-                  "Save Row"
-                )}
-              </button>
-            </div>
-          </div>
+                ))}
+              </div>
+
+              <div className="flex items-center justify-end space-x-3 mt-6 pt-4 border-t border-border">
+                <Button
+                  variant="outline"
+                  onClick={handleCancelAdd}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleSaveRow}
+                  disabled={addLoading}
+                  className="bg-green-600 hover:bg-green-700"
+                >
+                  {addLoading ? (
+                    <div className="flex items-center space-x-2">
+                      <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
+                      <span>Saving...</span>
+                    </div>
+                  ) : (
+                    "Save Row"
+                  )}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       )}
     </div>

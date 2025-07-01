@@ -1,5 +1,9 @@
 import React, { useState } from 'react';
 import { UniRender, Entity, FieldConfig, LayoutType, GeneralConfig } from './uniRender';
+import { Button } from './ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
+import { Badge } from './ui/badge';
+import { cn } from '../lib/utils';
 
 // Sample entities for different use cases
 const userEntity: Entity = {
@@ -111,9 +115,9 @@ const userFieldConfig: Record<string, FieldConfig> = {
     width: '80px', 
     align: 'center',
     render: (value) => (
-      <span className="px-2 py-1 bg-blue-600/20 text-blue-400 rounded text-xs font-mono">
+      <Badge variant="outline" className="text-xs font-mono">
         #{value}
-      </span>
+      </Badge>
     )
   },
   name: { 
@@ -121,14 +125,14 @@ const userFieldConfig: Record<string, FieldConfig> = {
     label: 'Full Name', 
     width: '200px',
     render: (value) => (
-      <span className="font-semibold text-gray-200">{value}</span>
+      <span className="font-semibold text-foreground">{value}</span>
     )
   },
   email: { 
     order: 3, 
     label: 'Email Address',
     render: (value) => (
-      <a href={`mailto:${value}`} className="text-blue-400 hover:underline">
+      <a href={`mailto:${value}`} className="text-primary hover:underline">
         {value}
       </a>
     )
@@ -138,13 +142,17 @@ const userFieldConfig: Record<string, FieldConfig> = {
     label: 'Age', 
     align: 'center',
     render: (value) => (
-      <span className={`px-2 py-1 rounded text-xs font-semibold ${
-        value >= 18 
-          ? 'bg-green-600/20 text-green-400' 
-          : 'bg-yellow-600/20 text-yellow-400'
-      }`}>
+      <Badge 
+        variant={value >= 18 ? "secondary" : "outline"}
+        className={cn(
+          "text-xs font-semibold",
+          value >= 18 
+            ? 'text-green-600 dark:text-green-400' 
+            : 'text-yellow-600 dark:text-yellow-400'
+        )}
+      >
         {value} {value >= 18 ? '(Adult)' : '(Minor)'}
-      </span>
+      </Badge>
     )
   },
   isActive: { 
@@ -152,13 +160,12 @@ const userFieldConfig: Record<string, FieldConfig> = {
     label: 'Status', 
     align: 'center',
     render: (value) => (
-      <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-        value 
-          ? 'bg-green-600/20 text-green-400' 
-          : 'bg-red-600/20 text-red-400'
-      }`}>
+      <Badge 
+        variant={value ? "secondary" : "destructive"}
+        className="text-xs font-semibold"
+      >
         {value ? '● Active' : '● Inactive'}
-      </span>
+      </Badge>
     )
   },
   createdAt: { 
@@ -166,10 +173,10 @@ const userFieldConfig: Record<string, FieldConfig> = {
     label: 'Created Date',
     render: (value) => (
       <div className="text-xs">
-        <div className="text-cyan-400 font-mono">
+        <div className="text-primary font-mono">
           {new Date(value).toLocaleDateString()}
         </div>
-        <div className="text-gray-500">
+        <div className="text-muted-foreground">
           {new Date(value).toLocaleTimeString()}
         </div>
       </div>
@@ -180,8 +187,8 @@ const userFieldConfig: Record<string, FieldConfig> = {
     label: 'Location',
     render: (value) => (
       <div className="text-xs">
-        <div className="text-gray-300">{value.city}</div>
-        <div className="text-gray-500">{value.country}</div>
+        <div className="text-foreground">{value.city}</div>
+        <div className="text-muted-foreground">{value.country}</div>
       </div>
     )
   },
@@ -191,9 +198,9 @@ const userFieldConfig: Record<string, FieldConfig> = {
     render: (value) => (
       <div className="flex flex-wrap gap-1">
         {value.map((tag: string, index: number) => (
-          <span key={index} className="px-2 py-1 bg-purple-600/20 text-purple-400 rounded text-xs">
+          <Badge key={index} variant="outline" className="text-xs">
             {tag}
-          </span>
+          </Badge>
         ))}
       </div>
     )
@@ -211,7 +218,7 @@ const productFieldConfig: Record<string, FieldConfig> = {
     order: 2, 
     label: 'Product Name',
     render: (value) => (
-      <span className="font-semibold text-gray-200">{value}</span>
+      <span className="font-semibold text-foreground">{value}</span>
     )
   },
   price: { 
@@ -219,7 +226,7 @@ const productFieldConfig: Record<string, FieldConfig> = {
     label: 'Price', 
     align: 'right',
     render: (value) => (
-      <span className="text-green-400 font-mono">
+      <span className="text-green-600 dark:text-green-400 font-mono">
         ${value.toLocaleString()}
       </span>
     )
@@ -228,9 +235,9 @@ const productFieldConfig: Record<string, FieldConfig> = {
     order: 4, 
     label: 'Category',
     render: (value) => (
-      <span className="px-2 py-1 bg-gray-600/20 text-gray-300 rounded text-xs">
+      <Badge variant="secondary" className="text-xs">
         {value}
-      </span>
+      </Badge>
     )
   },
   inStock: { 
@@ -238,13 +245,12 @@ const productFieldConfig: Record<string, FieldConfig> = {
     label: 'Stock', 
     align: 'center',
     render: (value) => (
-      <span className={`px-2 py-1 rounded text-xs font-semibold ${
-        value 
-          ? 'bg-green-600/20 text-green-400' 
-          : 'bg-red-600/20 text-red-400'
-      }`}>
+      <Badge 
+        variant={value ? "secondary" : "destructive"}
+        className="text-xs font-semibold"
+      >
         {value ? '✓ In Stock' : '✗ Out of Stock'}
-      </span>
+      </Badge>
     )
   },
   rating: { 
@@ -253,8 +259,8 @@ const productFieldConfig: Record<string, FieldConfig> = {
     align: 'center',
     render: (value) => (
       <div className="flex items-center space-x-1">
-        <span className="text-yellow-400">★</span>
-        <span className="text-gray-300">{value}</span>
+        <span className="text-yellow-500 dark:text-yellow-400">★</span>
+        <span className="text-foreground">{value}</span>
       </div>
     )
   },
@@ -262,7 +268,7 @@ const productFieldConfig: Record<string, FieldConfig> = {
     order: 7, 
     label: 'Description',
     render: (value) => (
-      <span className="text-gray-400 text-sm">{value}</span>
+      <span className="text-muted-foreground text-sm">{value}</span>
     )
   }
 };
@@ -468,44 +474,48 @@ export const StoryPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-950 text-gray-100 flex">
+    <div className="min-h-screen bg-background text-foreground flex">
       {/* Sidebar */}
-      <div className={`${sidebarOpen ? 'w-80' : 'w-16'} bg-gray-900 border-r border-gray-800 transition-all duration-300 flex flex-col`}>
+      <div className={cn(
+        "border-r border-border transition-all duration-300 flex flex-col",
+        sidebarOpen ? 'w-80' : 'w-16'
+      )}>
         {/* Header */}
-        <div className="h-16 bg-gradient-to-r from-gray-800 to-gray-900 border-b border-gray-700/50 flex items-center justify-between px-4 shadow-lg">
-          <div className={`flex items-center space-x-3 ${!sidebarOpen && 'hidden'}`}>
+        <Card className="h-16 rounded-none border-x-0 border-t-0 flex items-center justify-between px-4">
+          <div className={cn("flex items-center space-x-3", !sidebarOpen && 'hidden')}>
             <div className="relative">
-              <div className="w-9 h-9 bg-gradient-to-br from-orange-500 via-red-500 to-pink-500 rounded-xl flex items-center justify-center shadow-lg">
-                <span className="text-white font-bold text-sm">US</span>
+              <div className="w-9 h-9 bg-primary rounded-xl flex items-center justify-center shadow-lg">
+                <span className="text-primary-foreground font-bold text-sm">US</span>
               </div>
-              <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-gray-800 animate-pulse"></div>
+              <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-background animate-pulse"></div>
             </div>
             <div>
-              <h1 className="text-lg font-bold text-white tracking-tight">UniRender</h1>
-              <p className="text-xs text-gray-400 font-medium">Storybook Studio</p>
+              <h1 className="text-lg font-bold text-foreground tracking-tight">UniRender</h1>
+              <p className="text-xs text-muted-foreground font-medium">Storybook Studio</p>
             </div>
           </div>
-          <button
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="p-2 hover:bg-gray-700/50 rounded-xl transition-all duration-200 hover:scale-105 group"
           >
-            <svg className="w-5 h-5 text-gray-400 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={sidebarOpen ? "M11 19l-7-7 7-7m8 14l-7-7 7-7" : "M13 5l7 7-7 7M5 5l7 7-7 7"} />
             </svg>
-          </button>
-        </div>
+          </Button>
+        </Card>
 
         {/* Story List */}
         <div className="flex-1 overflow-y-auto">
           {sidebarOpen ? (
             <div className="p-4">
               <div className="flex items-center space-x-2 mb-6">
-                <div className="w-6 h-6 bg-gradient-to-r from-blue-500 to-purple-600 rounded-md flex items-center justify-center">
-                  <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-6 h-6 bg-primary rounded-md flex items-center justify-center">
+                  <svg className="w-3 h-3 text-primary-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 008 10.172V5L8 4z"/>
                   </svg>
                 </div>
-                <div className="text-sm font-semibold text-gray-200 uppercase tracking-wider">Stories</div>
+                <div className="text-sm font-semibold text-foreground uppercase tracking-wider">Stories</div>
               </div>
               
               {/* Group stories by category */}
@@ -513,68 +523,59 @@ export const StoryPage: React.FC = () => {
                 {/* User Stories */}
                 <div>
                   <div className="flex items-center space-x-2 mb-3">
-                    <div className="w-4 h-4 bg-blue-500 rounded-sm flex items-center justify-center">
-                      <svg className="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <Badge variant="secondary" className="w-4 h-4 p-0 flex items-center justify-center">
+                      <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                       </svg>
-                    </div>
-                    <div className="text-xs font-medium text-gray-400 uppercase tracking-wider">User Entity</div>
+                    </Badge>
+                    <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">User Entity</div>
                   </div>
                   <div className="space-y-1 ml-6">
                     {stories.filter(story => story.id.includes('user')).map((story) => (
-                      <button
+                      <Card 
                         key={story.id}
+                        className={cn(
+                          "cursor-pointer transition-all duration-200 hover:shadow-md",
+                          selectedStory.id === story.id 
+                            ? "border-primary bg-primary/5 shadow-lg" 
+                            : "hover:bg-muted/30"
+                        )}
                         onClick={() => setSelectedStory(story)}
-                        className={`w-full text-left p-3 rounded-xl transition-all duration-200 group ${
-                          selectedStory.id === story.id
-                            ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg shadow-orange-500/25 transform scale-[1.02]'
-                            : 'text-gray-300 hover:bg-gray-800/50 hover:text-white hover:transform hover:scale-[1.01]'
-                        }`}
                       >
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <div className="font-semibold text-sm mb-1">{story.title}</div>
-                            <div className={`text-xs leading-relaxed ${
-                              selectedStory.id === story.id ? 'text-orange-100' : 'text-gray-400 group-hover:text-gray-300'
-                            }`}>
-                              {story.description}
+                        <CardContent className="p-3">
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <div className="font-semibold text-sm mb-1 text-foreground">{story.title}</div>
+                              <div className="text-xs leading-relaxed text-muted-foreground">
+                                {story.description}
+                              </div>
                             </div>
+                            {selectedStory.id === story.id && (
+                              <div className="flex-shrink-0 ml-2">
+                                <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
+                              </div>
+                            )}
                           </div>
-                          {selectedStory.id === story.id && (
-                            <div className="flex-shrink-0 ml-2">
-                              <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
-                            </div>
-                          )}
-                        </div>
-                        <div className="flex items-center justify-between mt-3">
-                          <div className="flex items-center space-x-2">
-                            <span className={`px-2 py-1 rounded-md text-xs font-medium ${
-                              selectedStory.id === story.id
-                                ? 'bg-white/20 text-white'
-                                : 'bg-gray-700/50 text-gray-300 group-hover:bg-gray-600'
-                            }`}>
-                              {story.layout}
-                            </span>
-                            <span className={`text-xs ${
-                              selectedStory.id === story.id ? 'text-orange-200' : 'text-gray-500 group-hover:text-gray-400'
-                            }`}>
-                              {story.data.length} records
-                            </span>
-                          </div>
-                          {story.id.includes('editable') && (
-                            <div className="flex items-center space-x-1">
-                              <div className={`w-1.5 h-1.5 rounded-full ${
-                                selectedStory.id === story.id ? 'bg-green-300' : 'bg-green-500'
-                              }`}></div>
-                              <span className={`text-xs ${
-                                selectedStory.id === story.id ? 'text-green-200' : 'text-green-400'
-                              }`}>
-                                Interactive
+                          <div className="flex items-center justify-between mt-3">
+                            <div className="flex items-center space-x-2">
+                              <Badge variant="outline" className="text-xs">
+                                {story.layout}
+                              </Badge>
+                              <span className="text-xs text-muted-foreground">
+                                {story.data.length} records
                               </span>
                             </div>
-                          )}
-                        </div>
-                      </button>
+                            {story.id.includes('editable') && (
+                              <div className="flex items-center space-x-1">
+                                <div className="w-1.5 h-1.5 rounded-full bg-green-500"></div>
+                                <span className="text-xs text-green-600 dark:text-green-400">
+                                  Interactive
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        </CardContent>
+                      </Card>
                     ))}
                   </div>
                 </div>
@@ -587,51 +588,46 @@ export const StoryPage: React.FC = () => {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
                       </svg>
                     </div>
-                    <div className="text-xs font-medium text-gray-400 uppercase tracking-wider">Product Entity</div>
+                    <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Product Entity</div>
                   </div>
                   <div className="space-y-1 ml-6">
                     {stories.filter(story => story.id.includes('product')).map((story) => (
-                      <button
+                      <Card 
                         key={story.id}
+                        className={cn(
+                          "cursor-pointer transition-all duration-200 hover:shadow-md",
+                          selectedStory.id === story.id 
+                            ? "border-primary bg-primary/5 shadow-lg" 
+                            : "hover:bg-muted/30"
+                        )}
                         onClick={() => setSelectedStory(story)}
-                        className={`w-full text-left p-3 rounded-xl transition-all duration-200 group ${
-                          selectedStory.id === story.id
-                            ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg shadow-orange-500/25 transform scale-[1.02]'
-                            : 'text-gray-300 hover:bg-gray-800/50 hover:text-white hover:transform hover:scale-[1.01]'
-                        }`}
                       >
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <div className="font-semibold text-sm mb-1">{story.title}</div>
-                            <div className={`text-xs leading-relaxed ${
-                              selectedStory.id === story.id ? 'text-orange-100' : 'text-gray-400 group-hover:text-gray-300'
-                            }`}>
-                              {story.description}
+                        <CardContent className="p-3">
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <div className="font-semibold text-sm mb-1 text-foreground">{story.title}</div>
+                              <div className="text-xs leading-relaxed text-muted-foreground">
+                                {story.description}
+                              </div>
+                            </div>
+                            {selectedStory.id === story.id && (
+                              <div className="flex-shrink-0 ml-2">
+                                <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex items-center justify-between mt-3">
+                            <div className="flex items-center space-x-2">
+                              <Badge variant="outline" className="text-xs">
+                                {story.layout}
+                              </Badge>
+                              <span className="text-xs text-muted-foreground">
+                                {story.data.length} records
+                              </span>
                             </div>
                           </div>
-                          {selectedStory.id === story.id && (
-                            <div className="flex-shrink-0 ml-2">
-                              <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
-                            </div>
-                          )}
-                        </div>
-                        <div className="flex items-center justify-between mt-3">
-                          <div className="flex items-center space-x-2">
-                            <span className={`px-2 py-1 rounded-md text-xs font-medium ${
-                              selectedStory.id === story.id
-                                ? 'bg-white/20 text-white'
-                                : 'bg-gray-700/50 text-gray-300 group-hover:bg-gray-600'
-                            }`}>
-                              {story.layout}
-                            </span>
-                            <span className={`text-xs ${
-                              selectedStory.id === story.id ? 'text-orange-200' : 'text-gray-500 group-hover:text-gray-400'
-                            }`}>
-                              {story.data.length} records
-                            </span>
-                          </div>
-                        </div>
-                      </button>
+                        </CardContent>
+                      </Card>
                     ))}
                   </div>
                 </div>
@@ -644,82 +640,67 @@ export const StoryPage: React.FC = () => {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
                       </svg>
                     </div>
-                    <div className="text-xs font-medium text-gray-400 uppercase tracking-wider">Special States</div>
+                    <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Special States</div>
                   </div>
                   <div className="space-y-1 ml-6">
                     {stories.filter(story => story.id.includes('loading') || story.id.includes('error') || story.id.includes('empty')).map((story) => (
-                      <button
+                      <Card 
                         key={story.id}
+                        className={cn(
+                          "cursor-pointer transition-all duration-200 hover:shadow-md",
+                          selectedStory.id === story.id 
+                            ? "border-primary bg-primary/5 shadow-lg" 
+                            : "hover:bg-muted/30"
+                        )}
                         onClick={() => setSelectedStory(story)}
-                        className={`w-full text-left p-3 rounded-xl transition-all duration-200 group ${
-                          selectedStory.id === story.id
-                            ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg shadow-orange-500/25 transform scale-[1.02]'
-                            : 'text-gray-300 hover:bg-gray-800/50 hover:text-white hover:transform hover:scale-[1.01]'
-                        }`}
                       >
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <div className="font-semibold text-sm mb-1">{story.title}</div>
-                            <div className={`text-xs leading-relaxed ${
-                              selectedStory.id === story.id ? 'text-orange-100' : 'text-gray-400 group-hover:text-gray-300'
-                            }`}>
-                              {story.description}
-                            </div>
-                          </div>
-                          {selectedStory.id === story.id && (
-                            <div className="flex-shrink-0 ml-2">
-                              <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
-                            </div>
-                          )}
-                        </div>
-                        <div className="flex items-center justify-between mt-3">
-                          <div className="flex items-center space-x-2">
-                            <span className={`px-2 py-1 rounded-md text-xs font-medium ${
-                              selectedStory.id === story.id
-                                ? 'bg-white/20 text-white'
-                                : 'bg-gray-700/50 text-gray-300 group-hover:bg-gray-600'
-                            }`}>
-                              {story.layout}
-                            </span>
-                            {story.loading && (
-                              <div className="flex items-center space-x-1">
-                                <div className={`w-1.5 h-1.5 rounded-full ${
-                                  selectedStory.id === story.id ? 'bg-yellow-300' : 'bg-yellow-500'
-                                } animate-pulse`}></div>
-                                <span className={`text-xs ${
-                                  selectedStory.id === story.id ? 'text-yellow-200' : 'text-yellow-400'
-                                }`}>
-                                  Loading
-                                </span>
+                        <CardContent className="p-3">
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <div className="font-semibold text-sm mb-1 text-foreground">{story.title}</div>
+                              <div className="text-xs leading-relaxed text-muted-foreground">
+                                {story.description}
                               </div>
-                            )}
-                            {story.error && (
-                              <div className="flex items-center space-x-1">
-                                <div className={`w-1.5 h-1.5 rounded-full ${
-                                  selectedStory.id === story.id ? 'bg-red-300' : 'bg-red-500'
-                                }`}></div>
-                                <span className={`text-xs ${
-                                  selectedStory.id === story.id ? 'text-red-200' : 'text-red-400'
-                                }`}>
-                                  Error
-                                </span>
-                              </div>
-                            )}
-                            {story.data.length === 0 && !story.loading && !story.error && (
-                              <div className="flex items-center space-x-1">
-                                <div className={`w-1.5 h-1.5 rounded-full ${
-                                  selectedStory.id === story.id ? 'bg-gray-300' : 'bg-gray-500'
-                                }`}></div>
-                                <span className={`text-xs ${
-                                  selectedStory.id === story.id ? 'text-gray-200' : 'text-gray-400'
-                                }`}>
-                                  Empty
-                                </span>
+                            </div>
+                            {selectedStory.id === story.id && (
+                              <div className="flex-shrink-0 ml-2">
+                                <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
                               </div>
                             )}
                           </div>
-                        </div>
-                      </button>
+                          <div className="flex items-center justify-between mt-3">
+                            <div className="flex items-center space-x-2">
+                              <Badge variant="outline" className="text-xs">
+                                {story.layout}
+                              </Badge>
+                              {story.loading && (
+                                <div className="flex items-center space-x-1">
+                                  <div className="w-1.5 h-1.5 rounded-full bg-yellow-500 animate-pulse"></div>
+                                  <span className="text-xs text-yellow-600 dark:text-yellow-400">
+                                    Loading
+                                  </span>
+                                </div>
+                              )}
+                              {story.error && (
+                                <div className="flex items-center space-x-1">
+                                  <div className="w-1.5 h-1.5 rounded-full bg-destructive"></div>
+                                  <span className="text-xs text-destructive">
+                                    Error
+                                  </span>
+                                </div>
+                              )}
+                              {story.data.length === 0 && !story.loading && !story.error && (
+                                <div className="flex items-center space-x-1">
+                                  <div className="w-1.5 h-1.5 rounded-full bg-muted-foreground"></div>
+                                  <span className="text-xs text-muted-foreground">
+                                    Empty
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
                     ))}
                   </div>
                 </div>
@@ -728,18 +709,18 @@ export const StoryPage: React.FC = () => {
           ) : (
             /* Collapsed sidebar indicators */
             <div className="p-2 space-y-2">
-              <div className="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center mx-auto">
-                <svg className="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center mx-auto">
+                <svg className="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                 </svg>
               </div>
-              <div className="w-8 h-8 bg-green-500/20 rounded-lg flex items-center justify-center mx-auto">
-                <svg className="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-8 h-8 bg-green-500/10 rounded-lg flex items-center justify-center mx-auto">
+                <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
                 </svg>
               </div>
-              <div className="w-8 h-8 bg-purple-500/20 rounded-lg flex items-center justify-center mx-auto">
-                <svg className="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-8 h-8 bg-purple-500/10 rounded-lg flex items-center justify-center mx-auto">
+                <svg className="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
                 </svg>
               </div>
@@ -751,20 +732,20 @@ export const StoryPage: React.FC = () => {
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top Bar */}
-        <div className="h-16 bg-gray-900 border-b border-gray-800 flex items-center justify-between px-6">
+        <Card className="h-16 rounded-none border-x-0 border-t-0 flex items-center justify-between px-6">
           <div>
-            <h2 className="text-xl font-semibold text-gray-200">{selectedStory.title}</h2>
-            <p className="text-sm text-gray-400">{selectedStory.description}</p>
+            <h2 className="text-xl font-semibold text-foreground">{selectedStory.title}</h2>
+            <p className="text-sm text-muted-foreground">{selectedStory.description}</p>
           </div>
           <div className="flex items-center space-x-4">
-            <div className="text-sm text-gray-500">
-              Layout: <span className="text-orange-400 font-medium">{selectedStory.layout}</span>
+            <div className="text-sm text-muted-foreground">
+              Layout: <Badge variant="secondary" className="ml-1">{selectedStory.layout}</Badge>
             </div>
-            <div className="text-sm text-gray-500">
-              Records: <span className="text-gray-300">{selectedStory.data.length}</span>
+            <div className="text-sm text-muted-foreground">
+              Records: <span className="text-foreground font-medium">{selectedStory.data.length}</span>
             </div>
           </div>
-        </div>
+        </Card>
 
         {/* Story Content */}
         <div className="flex-1 overflow-auto p-6" style={{ maxHeight: 'calc(100vh - 16rem - 180px)' }}>
@@ -785,14 +766,34 @@ export const StoryPage: React.FC = () => {
         </div>
 
         {/* Code Preview - Fixed Height */}
-        <div className="h-44 bg-gray-900 border-t border-gray-800 p-4 flex-shrink-0">
-          <div className="flex items-center justify-between mb-2">
-            <div className="text-sm font-medium text-gray-300">Code Preview</div>
-            <button className="px-3 py-1 bg-gray-700 hover:bg-gray-600 text-gray-300 rounded text-xs transition-colors">
-              Copy Code
-            </button>
-          </div>
-          <pre className="bg-gray-800 rounded p-3 text-xs text-green-400 overflow-auto h-32">
+        <Card className="h-44 rounded-none border-x-0 border-b-0 p-4 flex-shrink-0">
+          <CardHeader className="p-0 mb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-sm font-medium text-foreground">Code Preview</CardTitle>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="h-7 px-3 text-xs"
+                onClick={() => {
+                  const code = `<UniRender
+  entity={${selectedStory.entity.name.toLowerCase()}}
+  data={${selectedStory.data.length > 0 ? `${selectedStory.entity.name.toLowerCase()}Data` : '[]'}}
+  layout="${selectedStory.layout}"${selectedStory.config ? `
+  config={${selectedStory.entity.name.toLowerCase()}FieldConfig}` : ''}${selectedStory.loading ? `
+  loading={true}` : ''}${selectedStory.error ? `
+  error="${selectedStory.error}"` : ''}
+/>`;
+                  navigator.clipboard.writeText(code);
+                }}
+              >
+                Copy Code
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent className="p-0">
+            <Card className="bg-muted/30 border-muted">
+              <CardContent className="p-3">
+                <pre className="text-xs text-foreground overflow-auto h-28 font-mono leading-relaxed">
 {`<UniRender
   entity={${selectedStory.entity.name.toLowerCase()}}
   data={${selectedStory.data.length > 0 ? `${selectedStory.entity.name.toLowerCase()}Data` : '[]'}}
@@ -801,8 +802,11 @@ export const StoryPage: React.FC = () => {
   loading={true}` : ''}${selectedStory.error ? `
   error="${selectedStory.error}"` : ''}
 />`}
-          </pre>
-        </div>
+                </pre>
+              </CardContent>
+            </Card>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
