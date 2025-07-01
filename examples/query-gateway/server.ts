@@ -1,13 +1,13 @@
 import { Unify } from "@unilab/unify-hono";
 import { WeatherEntity } from "./entities/weather";
 import { Plugin } from "@unilab/core";
-import { WeatherAdapter } from "./adapters/weather";
+import { WeatherAdapter } from "./adapters/open-meteo-weather";
 
 const MyPlugin: Plugin = {
   entities: [WeatherEntity],
   adapters: [
     {
-      source: "weather",
+      source: "open-meteo",
       entityName: "WeatherEntity",
       adapter: new WeatherAdapter(),
     },

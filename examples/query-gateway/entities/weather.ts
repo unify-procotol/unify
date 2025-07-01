@@ -1,121 +1,124 @@
 import { Fields } from "@unilab/core";
 
-// Location information
-class LocationEntity {
-  @Fields.string()
-  city = "";
-
-  @Fields.string()
-  region = "";
-
-  @Fields.string()
-  woeid = "";
-
-  @Fields.string()
-  country = "";
-
-  @Fields.string()
-  lat = "";
-
-  @Fields.string()
-  long = "";
-
-  @Fields.string()
-  timezone_id = "";
-}
-
-// Wind information
-class WindEntity {
-  @Fields.number()
-  chill = 0;
-
-  @Fields.string()
-  direction = "";
-
-  @Fields.number()
-  speed = 0;
-}
-
-// Atmosphere information
-class AtmosphereEntity {
-  @Fields.number()
-  humidity = 0;
-
-  @Fields.number()
-  visibility = 0;
-
-  @Fields.number()
-  pressure = 0;
-}
-
-// Astronomy information
-class AstronomyEntity {
-  @Fields.string()
-  sunrise = "";
-
-  @Fields.string()
-  sunset = "";
-}
-
-// Weather condition
-class ConditionEntity {
-  @Fields.number()
-  temperature = 0;
-
-  @Fields.string()
-  text = "";
-
-  @Fields.number()
-  code = 0;
-}
-
-// Current observation
-class CurrentObservationEntity {
-  @Fields.number()
-  pubDate = 0;
-
-  @Fields.record(() => WindEntity)
-  wind = new WindEntity();
-
-  @Fields.record(() => AtmosphereEntity)
-  atmosphere = new AtmosphereEntity();
-
-  @Fields.record(() => AstronomyEntity)
-  astronomy = new AstronomyEntity();
-
-  @Fields.record(() => ConditionEntity)
-  condition = new ConditionEntity();
-}
-
-// Weather forecast
-class ForecastEntity {
-  @Fields.string()
-  day = "";
-
-  @Fields.number()
-  date = 0;
-
-  @Fields.number()
-  high = 0;
-
-  @Fields.number()
-  low = 0;
-
-  @Fields.string()
-  text = "";
-
-  @Fields.number()
-  code = 0;
-}
-
-// Main weather entity
 export class WeatherEntity {
-  @Fields.record(() => LocationEntity)
-  location = new LocationEntity();
+  @Fields.number({
+    description: "Latitude",
+  })
+  latitude = 0;
 
-  @Fields.record(() => CurrentObservationEntity)
-  current_observation = new CurrentObservationEntity();
+  @Fields.number({
+    description: "Longitude",
+  })
+  longitude = 0;
 
-  @Fields.array(() => ForecastEntity)
-  forecasts: ForecastEntity[] = [];
+  @Fields.string({
+    optional: true,
+    description:
+      "A list of weather variables to get current conditions, separated by commas, e.g. temperature_2m,wind_speed_10m",
+  })
+  current = "temperature_2m,wind_speed_10m";
+
+  @Fields.string({
+    optional: true,
+    description:
+      "A list of weather variables which should be returned. Values can be comma separated, or multiple &hourly= parameter in the URL can be used. e.g. temperature_2m,relative_humidity_2m,wind_speed_10m",
+  })
+  hourly = "temperature_2m,relative_humidity_2m,wind_speed_10m";
+
+  @Fields.record(() => Result, {
+    optional: true,
+    description: "The result of the weather query",
+  })
+  result = {};
+}
+
+export class Result {
+  @Fields.number()
+  latitude = 0;
+
+  @Fields.number()
+  longitude = 0;
+
+  @Fields.number()
+  generationtime_ms = 0;
+
+  @Fields.number()
+  utc_offset_seconds = 0;
+
+  @Fields.string()
+  timezone = "GMT";
+
+  @Fields.string()
+  timezone_abbreviation = "GMT";
+
+  @Fields.number()
+  elevation = 30;
+
+  @Fields.record(() => Current)
+  current = {};
+
+  @Fields.record(() => CurrentUnits)
+  current_units = {};
+
+  @Fields.record(() => Hourly)
+  hourly = {};
+
+  @Fields.record(() => HourlyUnits)
+  hourly_units = {};
+}
+
+export class Current {
+  @Fields.string()
+  time = "";
+
+  @Fields.number()
+  interval = 0;
+
+  @Fields.number()
+  temperature_2m = 0;
+
+  @Fields.number()
+  wind_speed_10m = 0;
+}
+
+export class CurrentUnits {
+  @Fields.string()
+  time = "iso8601";
+
+  @Fields.string()
+  interval = "seconds";
+
+  @Fields.string()
+  temperature_2m = "°C";
+
+  @Fields.string()
+  wind_speed_10m = "km/h";
+}
+
+export class Hourly {
+  @Fields.array(() => String)
+  time = [];
+
+  @Fields.array(() => Number)
+  temperature_2m = [];
+
+  @Fields.array(() => Number)
+  relative_humidity_2m = [];
+
+  @Fields.array(() => Number)
+  wind_speed_10m = [];
+}
+
+export class HourlyUnits {
+  @Fields.string()
+  time = "iso8601";
+
+  @Fields.string()
+  temperature_2m = "°C";
+
+  @Fields.string()
+  relative_humidity_2m = "%";
+
+  @Fields.string()
+  wind_speed_10m = "km/h";
 }
