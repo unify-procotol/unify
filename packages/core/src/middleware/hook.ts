@@ -8,7 +8,6 @@ import type {
   DataSourceAdapter,
 } from "../types";
 
-// Hook 函数类型定义
 export type HookFunction<
   T extends Record<string, any>,
   TArgs = any,
@@ -23,26 +22,20 @@ export type HookFunction<
   }
 ) => Promise<void> | void;
 
-// Hook 注册表类型
 export interface HookRegistry<T extends Record<string, any>> {
-  // Create 相关钩子
   beforeCreate: HookFunction<T, CreationArgs<T>>[];
   afterCreate: HookFunction<T, CreationArgs<T>, T>[];
 
-  // Update 相关钩子
   beforeUpdate: HookFunction<T, UpdateArgs<T>>[];
   afterUpdate: HookFunction<T, UpdateArgs<T>, T>[];
 
-  // Delete 相关钩子
   beforeDelete: HookFunction<T, DeletionArgs<T>>[];
   afterDelete: HookFunction<T, DeletionArgs<T>, boolean>[];
 
-  // 通用钩子
   beforeAny: HookFunction<T, any>[];
   afterAny: HookFunction<T, any, any>[];
 }
 
-// Hook 管理器
 export class HookManager<T extends Record<string, any>> {
   private hooks: HookRegistry<T> = {
     beforeCreate: [],
@@ -55,55 +48,46 @@ export class HookManager<T extends Record<string, any>> {
     afterAny: [],
   };
 
-  // 注册 beforeCreate 钩子
   beforeCreate(hook: HookFunction<T, CreationArgs<T>>): this {
     this.hooks.beforeCreate.push(hook);
     return this;
   }
 
-  // 注册 afterCreate 钩子
   afterCreate(hook: HookFunction<T, CreationArgs<T>, T>): this {
     this.hooks.afterCreate.push(hook);
     return this;
   }
 
-  // 注册 beforeUpdate 钩子
   beforeUpdate(hook: HookFunction<T, UpdateArgs<T>>): this {
     this.hooks.beforeUpdate.push(hook);
     return this;
   }
 
-  // 注册 afterUpdate 钩子
   afterUpdate(hook: HookFunction<T, UpdateArgs<T>, T>): this {
     this.hooks.afterUpdate.push(hook);
     return this;
   }
 
-  // 注册 beforeDelete 钩子
   beforeDelete(hook: HookFunction<T, DeletionArgs<T>>): this {
     this.hooks.beforeDelete.push(hook);
     return this;
   }
 
-  // 注册 afterDelete 钩子
   afterDelete(hook: HookFunction<T, DeletionArgs<T>, boolean>): this {
     this.hooks.afterDelete.push(hook);
     return this;
   }
 
-  // 注册通用 before 钩子
   beforeAny(hook: HookFunction<T, any>): this {
     this.hooks.beforeAny.push(hook);
     return this;
   }
 
-  // 注册通用 after 钩子
   afterAny(hook: HookFunction<T, any, any>): this {
     this.hooks.afterAny.push(hook);
     return this;
   }
 
-  // 执行 before 钩子
   async executeBefore(
     operation: string,
     args: any,
@@ -111,12 +95,10 @@ export class HookManager<T extends Record<string, any>> {
   ): Promise<void> {
     const context = { adapter, operation };
 
-    // 执行通用 before 钩子
     for (const hook of this.hooks.beforeAny) {
       await hook(args, undefined, context);
     }
 
-    // 执行具体操作的 before 钩子
     switch (operation) {
       case "create":
         for (const hook of this.hooks.beforeCreate) {
@@ -136,7 +118,6 @@ export class HookManager<T extends Record<string, any>> {
     }
   }
 
-  // 执行 after 钩子
   async executeAfter(
     operation: string,
     args: any,
@@ -145,7 +126,6 @@ export class HookManager<T extends Record<string, any>> {
   ): Promise<void> {
     const context = { adapter, operation };
 
-    // 执行具体操作的 after 钩子
     switch (operation) {
       case "create":
         for (const hook of this.hooks.afterCreate) {
@@ -164,13 +144,11 @@ export class HookManager<T extends Record<string, any>> {
         break;
     }
 
-    // 执行通用 after 钩子
     for (const hook of this.hooks.afterAny) {
       await hook(args, result, context);
     }
   }
 
-  // 清除所有钩子
   clear(): void {
     this.hooks = {
       beforeCreate: [],
@@ -184,19 +162,16 @@ export class HookManager<T extends Record<string, any>> {
     };
   }
 
-  // 清除特定类型的钩子
   clearType(type: keyof HookRegistry<T>): void {
     this.hooks[type] = [];
   }
 }
 
-// 创建 Hook 中间件的工厂函数
 export function createHookMiddleware<T extends Record<string, any>>(
   setupHooks?: (hookManager: HookManager<T>) => void
 ): Middleware<T> {
   const hookManager = new HookManager<T>();
 
-  // 如果提供了钩子设置函数，则执行
   if (setupHooks) {
     setupHooks(hookManager);
   }
@@ -205,17 +180,14 @@ export function createHookMiddleware<T extends Record<string, any>>(
     context: MiddlewareContext<T>,
     next: MiddlewareNext<T>
   ) => {
-    // 执行 before 钩子
     await hookManager.executeBefore(
       context.operation,
       context.args,
       context.adapter
     );
 
-    // 执行主操作
     const result = await next();
 
-    // 执行 after 钩子
     await hookManager.executeAfter(
       context.operation,
       context.args,
@@ -226,7 +198,7 @@ export function createHookMiddleware<T extends Record<string, any>>(
     return result;
   };
 
-  // 使用Object.defineProperty正确设置name属性
+  // The name attribute needs to be set
   Object.defineProperty(middleware, "name", {
     value: "HookMiddleware",
     writable: false,

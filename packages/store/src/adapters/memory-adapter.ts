@@ -16,10 +16,6 @@ import {
   performUpsert,
 } from "../utils";
 
-/**
- * Memory adapter using LRU Cache for entity instance management
- * 基于 LRU Cache 的内存适配器，防止内存泄露
- */
 export class MemoryAdapter<T extends Record<string, any>>
   implements DataSourceAdapter<T>
 {
@@ -98,7 +94,6 @@ export class MemoryAdapter<T extends Record<string, any>>
     return deleted;
   }
 
-  // Additional utility methods
   async count(args?: { where?: WhereCondition<T> }): Promise<number> {
     if (!args?.where) {
       return this.cache.size();
@@ -118,7 +113,6 @@ export class MemoryAdapter<T extends Record<string, any>>
     );
   }
 
-  // Cache management methods
   getCacheSize(): number {
     return this.cache.size();
   }

@@ -1,4 +1,3 @@
-// Custom schema object type definition (replaces openapi3-ts dependency)
 export interface SchemaObject {
   type?: string | string[];
   properties?: Record<string, SchemaObject>;
@@ -33,7 +32,6 @@ export interface SchemaObject {
   pattern?: string;
 }
 
-// Schema metadata storage
 const schemaMetadata = new Map<any, Map<string, FieldMetadata>>();
 const relationMetadata = new Map<any, Map<string, RelationMetadata>>();
 
@@ -296,7 +294,6 @@ export function generateSchema(entityClass: any): SchemaObject {
   };
 }
 
-// Convert multiple entity classes to schemas
 export function generateSchemas(
   entityClasses: any[]
 ): Record<string, SchemaObject> {

@@ -1,3 +1,4 @@
+import { UnifyError } from "@unilab/core";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
@@ -5,7 +6,6 @@ export function parseQueryParams(request: NextRequest) {
   const url = new URL(request.url);
   const params: any = {};
 
-  // Parse JSON parameters
   const jsonParams = ["where", "order_by", "include"];
   for (const param of jsonParams) {
     const value = url.searchParams.get(param);
@@ -13,7 +13,6 @@ export function parseQueryParams(request: NextRequest) {
       try {
         params[param] = JSON.parse(value);
       } catch (e) {
-        // Special handling for order_by simple format
         if (param === "order_by") {
           const [field, direction] = value.split(":");
           if (field && (direction === "asc" || direction === "desc")) {
@@ -26,7 +25,6 @@ export function parseQueryParams(request: NextRequest) {
     }
   }
 
-  // Parse numeric parameters
   const limitParam = url.searchParams.get("limit");
   if (limitParam) {
     const limit = parseInt(limitParam, 10);
@@ -48,15 +46,19 @@ export function parseQueryParams(request: NextRequest) {
   return params;
 }
 
-// Generic error handling
 export function handleError(error: unknown): NextResponse {
+  if (error instanceof UnifyError) {
+    return NextResponse.json(
+      { error: error.message },
+      { status: error.code }
+    );
+  }
   return NextResponse.json(
     { error: error instanceof Error ? error.message : "Unknown error" },
     { status: 500 }
   );
 }
 
-// Validate required parameters
 export function validateSource(source: string | null): NextResponse | null {
   if (!source) {
     return NextResponse.json(

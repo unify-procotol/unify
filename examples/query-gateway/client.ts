@@ -37,7 +37,7 @@ async function test() {
     },
   });
 
-  console.log("data==>", data);
+  console.log("[1] =>", data);
 
   if (!data) {
     throw new Error("No data found");
@@ -59,7 +59,7 @@ async function test() {
     },
   });
 
-  console.log("data2==>", data2);
+  console.log("[2] =>", data2);
 }
 
 test();

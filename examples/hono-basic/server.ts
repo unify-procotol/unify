@@ -92,7 +92,7 @@ const MyPlugin: Plugin = {
 
 const app = Unify.init({
   plugins: [MyPlugin],
-  middleware: [HookMiddleware, Logging()],
+  // middleware: [HookMiddleware, Logging()],
 });
 
 export default {

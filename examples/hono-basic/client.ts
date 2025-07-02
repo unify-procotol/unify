@@ -51,32 +51,32 @@ const fetchUser = async () => {
 
 fetchUser();
 
-const fetchPost = async () => {
-  const data = await repo<PostEntity>({
-    entityName: "post",
-    source: "wordpress",
-  }).findOne({
-    where: {
-      id: "1",
-    },
-    include: {
-      user: (post) => {
-        const userId = post.userId;
-        return repo<UserEntity>({
-          entityName: "user",
-          source: "wordpress",
-        }).findOne({
-          where: {
-            id: userId,
-          },
-        });
-      },
-    },
-  });
-  console.log("[2] =>", JSON.stringify(data, null, 2));
-};
+// const fetchPost = async () => {
+//   const data = await repo<PostEntity>({
+//     entityName: "post",
+//     source: "wordpress",
+//   }).findOne({
+//     where: {
+//       id: "1",
+//     },
+//     include: {
+//       user: (post) => {
+//         const userId = post.userId;
+//         return repo<UserEntity>({
+//           entityName: "user",
+//           source: "wordpress",
+//         }).findOne({
+//           where: {
+//             id: userId,
+//           },
+//         });
+//       },
+//     },
+//   });
+//   console.log("[2] =>", JSON.stringify(data, null, 2));
+// };
 
-fetchPost();
+// fetchPost();
 
 // const createUser = async () => {
 //   const data = await repo<UserEntity>({

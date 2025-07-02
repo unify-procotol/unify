@@ -15,10 +15,6 @@ import {
   performUpsert,
 } from "../utils";
 
-/**
- * IndexedDB adapter for browser persistent storage
- * 基于 IndexedDB 的浏览器持久化存储适配器
- */
 export class IndexedDBAdapter<T extends Record<string, any>>
   implements DataSourceAdapter<T>
 {
