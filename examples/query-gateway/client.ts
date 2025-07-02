@@ -49,7 +49,7 @@ async function test() {
       latitude: latitude,
       longitude: longitude,
       current: "temperature_2m,wind_speed_10m",
-      hourly: "temperature_2m,relative_humidity_2m,wind_speed_10m",
+      hourly: "temperature_2m,wind_speed_10m",
     },
   });
 

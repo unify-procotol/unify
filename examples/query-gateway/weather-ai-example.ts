@@ -14,51 +14,13 @@ UnifyClient.init({
   timeout: 10000,
 });
 
-const getLocationTool = createTool({
-  id: "get_location",
-  description: "Get the latitude and longitude coordinates for a city name",
+const weatherTool = createTool({
+  id: "get_city_weather",
+  description: "Get current weather information for a city by name",
   inputSchema: z.object({
     cityName: z
       .string()
-      .describe("The name of the city to get coordinates for"),
-  }),
-  outputSchema: z.object({
-    city: z.string(),
-    latitude: z.number(),
-    longitude: z.number(),
-  }),
-  execute: async ({ context }) => {
-    console.log(`🔍 Looking up coordinates for: ${context.cityName}`);
-
-    const data = await repo<GeocodingEntity>("geocoding", "open-meteo").findOne(
-      {
-        where: {
-          name: context.cityName.toLowerCase(),
-        },
-      }
-    );
-
-    if (!data) {
-      throw new Error(`No location data found for ${context.cityName}`);
-    }
-
-    const result = {
-      city: context.cityName,
-      latitude: data.result.latitude,
-      longitude: data.result.longitude,
-    };
-
-    console.log(`📍 Found coordinates:`, result);
-    return result;
-  },
-});
-
-const getWeatherTool = createTool({
-  id: "get_weather",
-  description: "Get current weather information for given coordinates",
-  inputSchema: z.object({
-    latitude: z.number().describe("The latitude coordinate"),
-    longitude: z.number().describe("The longitude coordinate"),
+      .describe("The name of the city to get weather information for"),
     current: z
       .string()
       .default("temperature_2m,wind_speed_10m")
@@ -67,12 +29,13 @@ const getWeatherTool = createTool({
       ),
     hourly: z
       .string()
-      .default("temperature_2m,relative_humidity_2m,wind_speed_10m")
+      .default("temperature_2m,wind_speed_10m")
       .describe(
         "A list of weather variables which should be returned. Values can be comma separated, or multiple &hourly= parameter in the URL can be used. e.g. temperature_2m,relative_humidity_2m,wind_speed_10m"
       ),
   }),
   outputSchema: z.object({
+    city: z.string(),
     location: z.object({
       latitude: z.number(),
       longitude: z.number(),
@@ -85,34 +48,59 @@ const getWeatherTool = createTool({
     timezone: z.string(),
   }),
   execute: async ({ context }) => {
-    console.log(
-      `🌤️ Getting weather for coordinates: ${context.latitude}, ${context.longitude}`
-    );
+    console.log(`🔍 Looking up weather for city: ${context.cityName}`);
 
-    const data = await repo<WeatherEntity>("weather", "open-meteo").findOne({
+    // Step 1: Get location coordinates
+    const locationData = await repo<GeocodingEntity>(
+      "geocoding",
+      "open-meteo"
+    ).findOne({
       where: {
-        latitude: context.latitude,
-        longitude: context.longitude,
+        name: context.cityName.toLowerCase(),
+      },
+    });
+
+    if (!locationData) {
+      throw new Error(`No location data found for ${context.cityName}`);
+    }
+
+    const latitude = locationData.result.latitude;
+    const longitude = locationData.result.longitude;
+
+    console.log(`📍 Found coordinates: ${latitude}, ${longitude}`);
+
+    // Step 2: Get weather data using coordinates
+    const weatherData = await repo<WeatherEntity>(
+      "weather",
+      "open-meteo"
+    ).findOne({
+      where: {
+        latitude,
+        longitude,
         current: context.current,
         hourly: context.hourly,
       },
     });
 
-    if (!data) {
+    if (!weatherData) {
       throw new Error("No weather data found");
     }
 
     const result = {
-      location: { latitude: context.latitude, longitude: context.longitude },
+      city: context.cityName,
+      location: { latitude, longitude },
       current: {
-        temperature: `${data.result.current.temperature_2m}${data.result.current_units.temperature_2m}`,
-        windSpeed: `${data.result.current.wind_speed_10m}${data.result.current_units.wind_speed_10m}`,
-        time: data.result.current.time,
+        temperature: `${weatherData.result.current.temperature_2m}${weatherData.result.current_units.temperature_2m}`,
+        windSpeed: `${weatherData.result.current.wind_speed_10m}${weatherData.result.current_units.wind_speed_10m}`,
+        time: weatherData.result.current.time,
       },
-      timezone: data.result.timezone,
+      timezone: weatherData.result.timezone,
     };
 
-    console.log(`☁️ Weather data retrieved:`, result.current);
+    console.log(
+      `☁️ Weather data retrieved for ${context.cityName}:`,
+      result.current
+    );
     return result;
   },
 });
@@ -122,9 +110,8 @@ const weatherAgent = new Agent({
   instructions: `
     You are a helpful and friendly weather assistant. When users ask about weather in a specific location:
     
-    1. First use the get_location tool to find the coordinates for the city they mentioned
-    2. Then use the get_weather tool to get current weather information for those coordinates
-    3. Provide a conversational and informative response about the weather conditions
+    1. Use the get_city_weather tool to get current weather information for the city they mentioned
+    2. Provide a conversational and informative response about the weather conditions
     
     Always include:
     - Current temperature
@@ -138,7 +125,7 @@ const weatherAgent = new Agent({
   model: createOpenRouter({
     apiKey: process.env.OPENROUTER_API_KEY!,
   }).chat("openai/gpt-4o-mini"),
-  tools: { getLocationTool, getWeatherTool },
+  tools: { weatherTool },
 });
 
 // Main function to demonstrate the AI weather assistant
@@ -173,7 +160,7 @@ async function runWeatherAIDemo() {
   // // Example 2: Different phrasing
   // await askWeatherAI("How's the weather in paris today?");
 
-  // // Example 3: More specific question
+  // Example 3: More specific question
   // await askWeatherAI("Is it windy in new york right now?");
 }
 
