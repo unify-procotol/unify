@@ -9,6 +9,8 @@ import type {
   SchemaObject,
   AdapterRegistration,
   Middleware,
+  RepoOptions,
+  JoinRepoOptions,
 } from "@unilab/core";
 import {
   generateSchemas,
@@ -17,7 +19,7 @@ import {
   registerAdapter,
   useGlobalMiddleware,
 } from "@unilab/core";
-import type { ClientConfig, RelationMapping } from "./types";
+import type { ClientConfig } from "./types";
 
 export class Unify {
   private enableDebug: boolean = false;
@@ -87,11 +89,11 @@ export class Unify {
   }
 
   createRepositoryProxy<T extends Record<string, any>>(
-    entityName: string,
-    source: string
+    options: RepoOptions
   ): Repository<T> {
     return new Proxy({} as Repository<T>, {
       get: (target, prop: string) => {
+        const { entityName, source } = options;
         const repo = getRepo(entityName, source!);
 
         switch (prop) {
@@ -240,19 +242,16 @@ export class Unify {
   }
 
   static repo<T extends Record<string, any>>(
-    entityName: string,
-    source: string
+    options: RepoOptions
   ): Repository<T> {
-    return Unify.getGlobalClient().createRepositoryProxy<T>(entityName, source);
+    return Unify.getGlobalClient().createRepositoryProxy<T>(options);
   }
 
   // 静态 JoinRepo 方法
   static joinRepo<F extends Record<string, any>, L extends Record<string, any>>(
-    entityName: string,
-    source: string,
-    relationMapping: RelationMapping<F, L>
+    options: JoinRepoOptions<F, L>
   ): Repository<F> {
-    const baseRepo = Unify.repo<F>(entityName, source);
+    const baseRepo = Unify.repo<F>(options);
 
     // 包装 repository，为返回的 Promise 添加关联映射信息
     return new Proxy(baseRepo, {
@@ -263,7 +262,10 @@ export class Unify {
           return (...args: any[]) => {
             const resultPromise = originalMethod.apply(target, args);
             // 为 Promise 添加关联映射信息
-            (resultPromise as any).__relationMapping = relationMapping;
+            (resultPromise as any).__relationMapping = {
+              localField: options.localField,
+              foreignField: options.foreignField,
+            };
             return resultPromise;
           };
         }
@@ -288,19 +290,14 @@ export class Unify {
 
 // Export convenience function
 export function repo<T extends Record<string, any>>(
-  entityName: string,
-  source: string
+  options: RepoOptions
 ): Repository<T> {
-  return Unify.repo<T>(entityName, source);
+  return Unify.repo<T>(options);
 }
 
 export function joinRepo<
   F extends Record<string, any> = Record<string, any>,
   L extends Record<string, any> = Record<string, any>
->(
-  entityName: string,
-  source: string,
-  relationMapping: RelationMapping<F, L>
-): Repository<F> {
-  return Unify.joinRepo<F, L>(entityName, source, relationMapping);
+>(options: JoinRepoOptions<F, L>): Repository<F> {
+  return Unify.joinRepo<F, L>(options);
 }

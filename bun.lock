@@ -151,6 +151,7 @@
         "@mastra/core": "^0.10.8",
         "@openrouter/ai-sdk-provider": "^0.7.2",
         "@unilab/core": "workspace:*",
+        "@unilab/unify": "workspace:*",
         "@unilab/unify-client": "workspace:*",
         "@unilab/unify-hono": "workspace:*",
         "dotenv": "^17.0.0",

@@ -17,7 +17,10 @@ export default function Home() {
   useEffect(() => {
     const fetchEvmBalance = async () => {
       try {
-        const data = await repo<WalletEntity>("wallet", "evm").findOne({
+        const data = await repo<WalletEntity>({
+          entityName: "wallet",
+          source: "evm",
+        }).findOne({
           where: {
             address: "0x4f00D43b5aF0a0aAd62E9075D1bFa86a89CDb9aB",
             network: "iotex",
@@ -33,7 +36,10 @@ export default function Home() {
 
     const fetchSolanaBalance = async () => {
       try {
-        const data = await repo<WalletEntity>("wallet", "solana").findOne({
+        const data = await repo<WalletEntity>({
+          entityName: "wallet",
+          source: "solana",
+        }).findOne({
           where: {
             address: "11111111111111111111111111111112",
           },

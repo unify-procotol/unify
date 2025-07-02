@@ -5,12 +5,10 @@ import type {
   UpdateArgs,
   DeletionArgs,
   Repository,
+  RepoOptions,
+  JoinRepoOptions,
 } from "@unilab/core";
-import type {
-  ClientConfig,
-  HttpRequestOptions,
-  RelationMapping,
-} from "./types";
+import type { ClientConfig, HttpRequestOptions } from "./types";
 
 export class UnifyClient {
   private config: ClientConfig;
@@ -98,11 +96,12 @@ export class UnifyClient {
   }
 
   createRepositoryProxy<T extends Record<string, any>>(
-    entityName: string,
-    source: string
+    options: RepoOptions
   ): Repository<T> {
     return new Proxy({} as Repository<T>, {
       get: (target, prop: string) => {
+        const { entityName, source } = options;
+        const entity = entityName.replace(/Entity$/i, "").toLowerCase();
         switch (prop) {
           case "findMany":
             return async (args: FindManyArgs<T> = {}) => {
@@ -116,7 +115,7 @@ export class UnifyClient {
               // 不发送include到服务器，在客户端处理
               const result = await this.request<T[]>({
                 method: "GET",
-                url: `/${entityName}/list`,
+                url: `/${entity}/list`,
                 params,
               });
 
@@ -137,7 +136,7 @@ export class UnifyClient {
               // 不发送include到服务器，在客户端处理
               const result = await this.request<T | null>({
                 method: "GET",
-                url: `/${entityName}/find_one`,
+                url: `/${entity}/find_one`,
                 params,
               });
 
@@ -153,7 +152,7 @@ export class UnifyClient {
             return async (args: CreationArgs<T>) => {
               return this.request<T>({
                 method: "POST",
-                url: `/${entityName}/create`,
+                url: `/${entity}/create`,
                 params: { source },
                 data: { data: args.data },
               });
@@ -163,7 +162,7 @@ export class UnifyClient {
             return async (args: UpdateArgs<T>) => {
               return this.request<T>({
                 method: "PATCH",
-                url: `/${entityName}/update`,
+                url: `/${entity}/update`,
                 params: { source },
                 data: {
                   where: args.where,
@@ -176,7 +175,7 @@ export class UnifyClient {
             return async (args: DeletionArgs<T>) => {
               const result = await this.request<{ success: boolean }>({
                 method: "DELETE",
-                url: `/${entityName}/delete`,
+                url: `/${entity}/delete`,
                 params: {
                   source,
                   where: args.where,
@@ -295,21 +294,15 @@ export class UnifyClient {
   }
 
   static repo<T extends Record<string, any>>(
-    entityName: string,
-    source: string
+    options: RepoOptions
   ): Repository<T> {
-    return UnifyClient.getGlobalClient().createRepositoryProxy<T>(
-      entityName,
-      source
-    );
+    return UnifyClient.getGlobalClient().createRepositoryProxy<T>(options);
   }
 
   static joinRepo<F extends Record<string, any>, L extends Record<string, any>>(
-    entityName: string,
-    source: string,
-    relationMapping: RelationMapping<F, L>
+    options: JoinRepoOptions<F, L>
   ): Repository<F> {
-    const baseRepo = UnifyClient.repo<F>(entityName, source);
+    const baseRepo = UnifyClient.repo<F>(options);
 
     // 包装 repository，为返回的 Promise 添加关联映射信息
     return new Proxy(baseRepo, {
@@ -320,7 +313,10 @@ export class UnifyClient {
           return (...args: any[]) => {
             const resultPromise = originalMethod.apply(target, args);
             // 为 Promise 添加关联映射信息
-            (resultPromise as any).__relationMapping = relationMapping;
+            (resultPromise as any).__relationMapping = {
+              localField: options.localField,
+              foreignField: options.foreignField,
+            };
             return resultPromise;
           };
         }
@@ -332,19 +328,14 @@ export class UnifyClient {
 }
 
 export function repo<T extends Record<string, any>>(
-  entityName: string,
-  source: string
+  options: RepoOptions
 ): Repository<T> {
-  return UnifyClient.repo<T>(entityName, source);
+  return UnifyClient.repo<T>(options);
 }
 
 export function joinRepo<
   F extends Record<string, any> = Record<string, any>,
   L extends Record<string, any> = Record<string, any>
->(
-  entityName: string,
-  source: string,
-  relationMapping: RelationMapping<F, L>
-): Repository<F> {
-  return UnifyClient.joinRepo<F, L>(entityName, source, relationMapping);
+>(options: JoinRepoOptions<F, L>): Repository<F> {
+  return UnifyClient.joinRepo<F, L>(options);
 }

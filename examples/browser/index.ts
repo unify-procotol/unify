@@ -11,8 +11,16 @@ import { createHookMiddleware, Logging } from "@unilab/core/middleware";
 const MyPlugin: Plugin = {
   entities: [UserEntity, PostEntity],
   adapters: [
-    { source: "wordpress", entityName: "UserEntity", adapter: new UserAdapter() },
-    { source: "wordpress", entityName: "PostEntity", adapter: new PostAdapter() },
+    {
+      source: "wordpress",
+      entityName: "UserEntity",
+      adapter: new UserAdapter(),
+    },
+    {
+      source: "wordpress",
+      entityName: "PostEntity",
+      adapter: new PostAdapter(),
+    },
   ],
 };
 
@@ -99,7 +107,10 @@ Unify.init({
 });
 
 const fetchUser = async () => {
-  const data = await repo<UserEntity>("user", "wordpress").findMany({
+  const data = await repo<UserEntity>({
+    entityName: "user",
+    source: "wordpress",
+  }).findMany({
     // where: {
     //   id: "1",
     //   // email: "john.doe@example.com",
@@ -107,7 +118,9 @@ const fetchUser = async () => {
     include: {
       posts: (userList) => {
         const ids = userList.map((user) => user.id);
-        return joinRepo<PostEntity, UserEntity>("post", "wordpress", {
+        return joinRepo<PostEntity, UserEntity>({
+          entityName: "post",
+          source: "wordpress",
           localField: "id",
           foreignField: "userId",
         }).findMany({
@@ -120,20 +133,26 @@ const fetchUser = async () => {
       },
     },
   });
-  console.log("fetchUser===>", JSON.stringify(data, null, 2));
+  console.log("[1] =>", JSON.stringify(data, null, 2));
 };
 
 fetchUser();
 
 // const fetchPost = async () => {
-//   const data = await repo<PostEntity>("post", "wordpress").findOne({
+//   const data = await repo<PostEntity>({
+//     entityName: "post",
+//     source: "wordpress",
+//   }).findOne({
 //     where: {
 //       id: "2",
 //     },
 //     include: {
 //       user: (post) => {
 //         const userId = post.userId;
-//         return repo<UserEntity>("user", "wordpress").findOne({
+//         return repo<UserEntity>({
+//           entityName: "user",
+//           source: "wordpress",
+//         }).findOne({
 //           where: {
 //             id: userId,
 //           },
@@ -141,19 +160,22 @@ fetchUser();
 //       },
 //     },
 //   });
-//   console.log("fetchPost===>", JSON.stringify(data, null, 2));
+//   console.log("[2] =>", JSON.stringify(data, null, 2));
 // };
 
 // fetchPost();
 
-const fetchEvmBalance = async () => {
-  const data = await repo<WalletEntity>("wallet", "evm").findOne({
-    where: {
-      address: "0x4f00D43b5aF0a0aAd62E9075D1bFa86a89CDb9aB",
-      network: "iotex",
-    },
-  });
-  console.log("fetchEvmBalance===>", JSON.stringify(data, null, 2));
-};
+// const fetchEvmBalance = async () => {
+//   const data = await repo<WalletEntity>({
+//     entityName: "wallet",
+//     source: "evm",
+//   }).findOne({
+//     where: {
+//       address: "0x4f00D43b5aF0a0aAd62E9075D1bFa86a89CDb9aB",
+//       network: "iotex",
+//     },
+//   });
+//   console.log("[3] =>", JSON.stringify(data, null, 2));
+// };
 
-fetchEvmBalance();
+// fetchEvmBalance();

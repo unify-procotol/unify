@@ -115,3 +115,21 @@ export interface Plugin {
   entities?: Record<string, any>[];
   adapters?: AdapterRegistration[];
 }
+
+export interface RelationMapping<
+  T extends Record<string, any>,
+  F extends Record<string, any>
+> {
+  localField: keyof F;
+  foreignField: keyof T;
+}
+
+export interface RepoOptions {
+  entityName: string;
+  source: string;
+}
+
+export type JoinRepoOptions<
+  F extends Record<string, any> = Record<string, any>,
+  L extends Record<string, any> = Record<string, any>
+> = RepoOptions & RelationMapping<F, L>;
