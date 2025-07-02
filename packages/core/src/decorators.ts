@@ -44,10 +44,13 @@ export interface FieldMetadata {
     | "boolean"
     | "date"
     | "array"
-    | "record";
+    | "record"
+    | "action";
   optional?: boolean;
   description?: string;
   target?: () => any; // For array and record types that reference other entities
+  params?: Record<string, any>; // For action parameters
+  returns?: any; // For action return type
 }
 
 export interface RelationMetadata {
@@ -122,6 +125,22 @@ export const Fields = {
         target,
         optional: options?.optional,
         description: options?.description,
+      });
+    };
+  },
+
+  action: (options: {
+    name: string;
+    description?: string;
+    params?: Record<string, any>;
+    returns?: any;
+  }) => {
+    return (target: any, propertyKey: string) => {
+      setFieldMetadata(target.constructor, propertyKey, {
+        type: "action",
+        description: options.description,
+        params: options.params,
+        returns: options.returns,
       });
     };
   },

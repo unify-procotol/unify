@@ -20,7 +20,9 @@
     "dev:unify": "cd packages/unify && bun run dev",
     "build:uniweb3": "cd packages/uniweb3 && bun run build",
     "dev:uniweb3": "cd packages/uniweb3 && bun run dev",
-    "build": "bun run build:core && bun run build:unify-hono && bun run build:unify-client && bun run build:unify && bun run build:uniweb3"
+    "build:store": "cd packages/store && bun run build",
+    "dev:store": "cd packages/store && bun run dev",
+    "build": "bun run build:core && bun run build:store && bun run build:unify-hono && bun run build:unify-client && bun run build:unify && bun run build:uniweb3"
   },
   "author": "osdodo",
   "license": "MIT",

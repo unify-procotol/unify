@@ -1,10 +1,8 @@
 import {
+  BaseAdapter,
   CreationArgs,
-  DataSourceAdapter,
-  DeletionArgs,
   FindManyArgs,
   FindOneArgs,
-  UpdateArgs,
 } from "@unilab/core";
 import { UserEntity } from "../entities/user";
 
@@ -32,22 +30,24 @@ const userData = [
     name: "Kris",
     email: "Kris@example.com",
     avatar: "https://example.com/avatar.png",
-  }
+  },
 ];
 
-class UserAdapter implements DataSourceAdapter<UserEntity> {
+class UserAdapter extends BaseAdapter<UserEntity> {
   async findMany(args: FindManyArgs<UserEntity>): Promise<UserEntity[]> {
-    const where = args?.where || {}; 
+    const where = args?.where || {};
     if (where.id) {
-      const idValue = typeof where.id === 'object' ? where.id.$eq : where.id;
+      const idValue = typeof where.id === "object" ? where.id.$eq : where.id;
       return userData.filter((user) => user.id === idValue);
     }
     if (where.name) {
-      const nameValue = typeof where.name === 'object' ? where.name.$eq : where.name;
+      const nameValue =
+        typeof where.name === "object" ? where.name.$eq : where.name;
       return userData.filter((user) => user.name === nameValue);
     }
     if (where.email) {
-      const emailValue = typeof where.email === 'object' ? where.email.$eq : where.email;
+      const emailValue =
+        typeof where.email === "object" ? where.email.$eq : where.email;
       return userData.filter((user) => user.email === emailValue);
     }
     return userData;
@@ -78,19 +78,6 @@ class UserAdapter implements DataSourceAdapter<UserEntity> {
     };
     userData.push(newUser);
     return newUser;
-  }
-
-  async update(args: UpdateArgs<UserEntity>): Promise<UserEntity> {
-    return {
-      id: "",
-      name: "",
-      email: "",
-      avatar: "",
-    };
-  }
-
-  async delete(args: DeletionArgs<UserEntity>): Promise<boolean> {
-    return false;
   }
 }
 

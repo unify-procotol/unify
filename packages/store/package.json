@@ -1,0 +1,23 @@
+{
+  "name": "@unilab/store",
+  "version": "1.0.0",
+  "description": "Repository for managing entity instances",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "bun test"
+  },
+  "dependencies": {
+    "@unilab/core": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "tsup": "^8.0.0"
+  },
+  "peerDependencies": {
+    "@unilab/core": "*"
+  }
+} 

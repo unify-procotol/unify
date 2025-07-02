@@ -169,10 +169,7 @@ export function createUserRepositoryWithHooks() {
           console.log("💀 After Delete Hook: User deleted successfully");
 
           // 提取用户 ID (处理复杂的查询条件)
-          const userId =
-            typeof args.where.id === "string"
-              ? args.where.id
-              : args.where.id?.$eq;
+          const userId = args.where.id;
           if (userId) {
             await UserService.cleanupUserData(userId);
             await UserService.removeUserFromCache(userId);

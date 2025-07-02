@@ -1,11 +1,4 @@
-import {
-  CreationArgs,
-  DataSourceAdapter,
-  DeletionArgs,
-  FindManyArgs,
-  FindOneArgs,
-  UpdateArgs,
-} from "@unilab/core";
+import { BaseAdapter, FindManyArgs, FindOneArgs } from "@unilab/core";
 import { PostEntity } from "../entities/post";
 
 const postData = [
@@ -35,7 +28,7 @@ const postData = [
   },
 ];
 
-class PostAdapter implements DataSourceAdapter<PostEntity> {
+class PostAdapter extends BaseAdapter<PostEntity> {
   async findMany(args?: FindManyArgs<PostEntity>): Promise<PostEntity[]> {
     const where = args?.where || {};
     console.log(
@@ -79,43 +72,20 @@ class PostAdapter implements DataSourceAdapter<PostEntity> {
   async findOne(args: FindOneArgs<PostEntity>): Promise<PostEntity | null> {
     const where = args.where;
 
+    const { id, userId } = where;
+
     // 如果有 id 条件，按 id 查找
-    if (where.id) {
-      const idValue = typeof where.id === "object" ? where.id.$eq : where.id;
-      return postData.find((post) => post.id === idValue) || null;
+    if (id) {
+      return postData.find((post) => post.id === id) || null;
     }
 
     // // 如果有 userId 条件，按 userId 查找第一个匹配的文章
-    if (where.userId) {
-      const userIdValue =
-        typeof where.userId === "object" ? where.userId.$eq : where.userId;
-      return postData.find((post) => post.userId === userIdValue) || null;
+    if (userId) {
+      return postData.find((post) => post.userId === userId) || null;
     }
 
     // 如果没有特定条件，返回第一个文章
     return postData[0] || null;
-  }
-
-  async create(args: CreationArgs<PostEntity>): Promise<PostEntity> {
-    return {
-      id: "",
-      title: "",
-      content: "",
-      userId: "",
-    };
-  }
-
-  async update(args: UpdateArgs<PostEntity>): Promise<PostEntity> {
-    return {
-      id: "",
-      title: "",
-      content: "",
-      userId: "",
-    };
-  }
-
-  async delete(args: DeletionArgs<PostEntity>): Promise<boolean> {
-    return false;
   }
 }
 

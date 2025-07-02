@@ -1,17 +1,10 @@
-import {
-  CreationArgs,
-  DataSourceAdapter,
-  DeletionArgs,
-  FindManyArgs,
-  FindOneArgs,
-  UpdateArgs,
-} from "@unilab/core";
+import { BaseAdapter, FindManyArgs, FindOneArgs } from "@unilab/core";
 import { Entity } from "../entities/entity";
 import { Unify } from "@unilab/unify-hono";
 
-export class EntityAdapter implements DataSourceAdapter<Entity> {
+export class EntityAdapter extends BaseAdapter<Entity> {
   static readonly adapterName = "EntityAdapter";
-  
+
   private getSourcesForEntity(entityName: string): string[] {
     const entitySources = Unify.getEntitySources();
     return entitySources[entityName] || [];
@@ -55,28 +48,14 @@ export class EntityAdapter implements DataSourceAdapter<Entity> {
     const schemas = Unify.getEntitySchemas();
     const entityName = where.name;
     if (entityName) {
-      const actualEntityName =
-        typeof entityName === "string" ? entityName : entityName.$eq;
-      if (actualEntityName && schemas[actualEntityName]) {
+      if (entityName && schemas[entityName]) {
         return {
-          name: actualEntityName,
-          schema: schemas[actualEntityName],
-          sources: this.getSourcesForEntity(actualEntityName),
+          name: entityName,
+          schema: schemas[entityName],
+          sources: this.getSourcesForEntity(entityName),
         };
       }
     }
     return null;
-  }
-
-  async create(args: CreationArgs<Entity>): Promise<Entity> {
-    throw new Error("Not implemented");
-  }
-
-  async update(args: UpdateArgs<Entity>): Promise<Entity> {
-    throw new Error("Not implemented");
-  }
-
-  async delete(args: DeletionArgs<Entity>): Promise<boolean> {
-    throw new Error("Not implemented");
   }
 }
