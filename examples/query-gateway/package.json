@@ -7,7 +7,8 @@
     "dev": "bun run server.ts",
     "start": "bun run server.ts",
     "client": "bun run client.ts",
-    "ai-weather": "bunx tsx weather-ai-example.ts"
+    "ai-weather": "bunx tsx weather-ai-example.ts",
+    "ai-weather-without-server": "bunx tsx without-server.ts"
   },
   "dependencies": {
     "@hono/node-server": "^1.12.2",
@@ -16,6 +17,7 @@
     "@unilab/core": "workspace:*",
     "@unilab/unify-client": "workspace:*",
     "@unilab/unify-hono": "workspace:*",
+    "@unilab/unify": "workspace:*",
     "dotenv": "^17.0.0",
     "hono": "^4.7.11",
     "zod": "^3.25.67"
