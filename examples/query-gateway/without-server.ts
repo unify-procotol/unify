@@ -70,10 +70,10 @@ const weatherTool = createTool({
     console.log(`🔍 Looking up weather for city: ${context.cityName}`);
 
     // Step 1: Get location coordinates
-    const locationData = await repo<GeocodingEntity>(
-      "geocoding",
-      "open-meteo"
-    ).findOne({
+    const locationData = await repo<GeocodingEntity>({
+      entityName: "geocoding",
+      source: "open-meteo",
+    }).findOne({
       where: {
         name: context.cityName.toLowerCase(),
       },
@@ -89,10 +89,10 @@ const weatherTool = createTool({
     console.log(`📍 Found coordinates: ${latitude}, ${longitude}`);
 
     // Step 2: Get weather data using coordinates
-    const weatherData = await repo<WeatherEntity>(
-      "weather",
-      "open-meteo"
-    ).findOne({
+    const weatherData = await repo<WeatherEntity>({
+      entityName: "weather",
+      source: "open-meteo",
+    }).findOne({
       where: {
         latitude,
         longitude,

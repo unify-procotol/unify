@@ -18,9 +18,8 @@ export class WalletEntity {
   @Fields.string()
   network = "";
 
-  @Fields.record(() => TokenEntity)
-  token?: {
-    symbol: string;
-    decimals: number;
-  };
+  @Fields.record(() => TokenEntity, {
+    optional: true,
+  })
+  token?: TokenEntity = new TokenEntity();
 }

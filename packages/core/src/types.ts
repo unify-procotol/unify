@@ -1,4 +1,3 @@
-// 查询操作符类型
 export type QueryOperators<T> = {
   $gt?: T;
   $gte?: T;
@@ -14,17 +13,15 @@ export type WhereCondition<T> = {
   [K in keyof T]?: T[K];
 };
 
-export type WhereConditionWithOperators<T> =
-  | WhereCondition<T>
-  | {
-      [K in keyof T]?: QueryOperators<T[K]>;
-    };
+export type WhereConditionWithOperators<T> = {
+  [K in keyof T]?: T[K] | QueryOperators<T[K]>;
+};
 
-// 关联查询回调函数类型 - 接收完整的实体对象
 export type RelationCallbackSingle<
   T extends Record<string, any>,
   R extends Record<string, any>
 > = (entity: T) => Promise<R | null>;
+
 export type RelationCallbackMany<
   T extends Record<string, any>,
   R extends Record<string, any>
@@ -74,7 +71,6 @@ export interface DataSourceAdapter<T extends Record<string, any>> {
   delete(args: DeletionArgs<T>): Promise<boolean>;
 }
 
-// Middleware 相关类型定义
 export type MiddlewareContext<T extends Record<string, any>> = {
   operation: "findMany" | "findOne" | "create" | "update" | "delete";
   args: any;
@@ -115,3 +111,22 @@ export interface Plugin {
   entities?: Record<string, any>[];
   adapters?: AdapterRegistration[];
 }
+
+export interface RelationMapping<
+  T extends Record<string, any>,
+  F extends Record<string, any>
+> {
+  localField: keyof F;
+  foreignField: keyof T;
+}
+
+export interface RepoOptions {
+  entityName: string;
+  source: string;
+}
+
+export type JoinRepoOptions<
+  F extends Record<string, any> = Record<string, any>,
+  L extends Record<string, any> = Record<string, any>
+> = RepoOptions & RelationMapping<F, L>;
+

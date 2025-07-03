@@ -25,7 +25,7 @@ export function Logging<T extends Record<string, any>>(
     }
   };
 
-  // 使用Object.defineProperty正确设置name属性
+  // The name attribute needs to be set
   Object.defineProperty(middleware, "name", {
     value: "LoggingMiddleware",
     writable: false,

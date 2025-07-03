@@ -1,5 +1,5 @@
 import { Unify } from "@unilab/unify-hono";
-import { EntityAdapter } from "./adapters/entity";
+import { SchemaAdapter } from "./adapters/schema";
 import { UserEntity } from "./entities/user";
 import { PostEntity } from "./entities/post";
 import { UserAdapter } from "../hono-basic/adapters/user";
@@ -9,7 +9,7 @@ import { Plugin } from "@unilab/core";
 const MyPlugin: Plugin = {
   entities: [UserEntity, PostEntity],
   adapters: [
-    { source: "_global", entityName: "Entity", adapter: new EntityAdapter() },
+    { source: "_global", entityName: "SchemaEntity", adapter: new SchemaAdapter() },
     { source: "google", entityName: "UserEntity", adapter: new UserAdapter() },
     { source: "github", entityName: "UserEntity", adapter: new UserAdapter() },
     { source: "wordpress", entityName: "PostEntity", adapter: new PostAdapter() },

@@ -11,24 +11,6 @@ import { MemoryAdapter, IndexedDBAdapter } from "./adapters";
 
 type EntityConstructor<T> = new (...args: any[]) => T;
 
-/**
- * Repository interface for entity operations
- * 实体操作的统一接口
- */
-export interface Repository<T extends Record<string, any>> {
-  create(args: CreationArgs<T>): Promise<T>;
-  update(args: UpdateArgs<T>): Promise<T>;
-  upsert(args: UpsertArgs<T>): Promise<T>;
-  findOne(args: FindOneArgs<T>): Promise<T | null>;
-  findMany(args?: FindManyArgs<T>): Promise<T[]>;
-  delete(args: DeletionArgs<T>): Promise<boolean>;
-  count(args?: { where?: WhereCondition<T> }): Promise<number>;
-}
-
-/**
- * Global registry for adapters
- * 全局适配器注册表
- */
 const adapterRegistry = new Map<
   string,
   MemoryAdapter<any> | IndexedDBAdapter<any>
@@ -36,7 +18,6 @@ const adapterRegistry = new Map<
 
 /**
  * Create or get repository for entity with specified adapter type
- * 为实体创建或获取指定适配器类型的 repository
  *
  * @param EntityClass - Entity class constructor
  * @param adapterType - Adapter type (currently supports "memory")
@@ -52,7 +33,7 @@ export function repo<T extends Record<string, any>>(
     storeName?: string;
     version?: number;
   } = {}
-): Repository<T> {
+) {
   const entityName = EntityClass.name;
   const registryKey = `${entityName}-${adapterType}`;
 
@@ -77,7 +58,6 @@ export function repo<T extends Record<string, any>>(
     }
   }
 
-  // Return repository interface
   return {
     async create(args: CreationArgs<T>): Promise<T> {
       return adapter.create(args);
@@ -111,7 +91,6 @@ export function repo<T extends Record<string, any>>(
 
 /**
  * Clear all cached adapters
- * 清除所有缓存的适配器
  */
 export function clearAllRepositories(): void {
   adapterRegistry.forEach((adapter) => {
@@ -124,7 +103,6 @@ export function clearAllRepositories(): void {
 
 /**
  * Get cache statistics for debugging
- * 获取缓存统计信息用于调试
  */
 export function getCacheStats(): Record<string, number> {
   const stats: Record<string, number> = {};

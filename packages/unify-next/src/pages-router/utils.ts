@@ -1,10 +1,9 @@
+import { UnifyError } from "@unilab/core";
 import type { NextApiRequest, NextApiResponse } from "next";
 
-// Parse query parameters for NextApiRequest
 export function parseQueryParams(request: NextApiRequest) {
   const params: any = {};
 
-  // Parse JSON parameters
   const jsonParams = ["where", "order_by", "include"];
   for (const param of jsonParams) {
     const value = Array.isArray(request.query[param])
@@ -15,7 +14,6 @@ export function parseQueryParams(request: NextApiRequest) {
       try {
         params[param] = JSON.parse(value);
       } catch (e) {
-        // Special handling for order_by simple format
         if (param === "order_by") {
           const [field, direction] = value.split(":");
           if (field && (direction === "asc" || direction === "desc")) {
@@ -28,7 +26,6 @@ export function parseQueryParams(request: NextApiRequest) {
     }
   }
 
-  // Parse numeric parameters
   const limitParam = Array.isArray(request.query.limit)
     ? request.query.limit[0]
     : request.query.limit;
@@ -56,14 +53,17 @@ export function parseQueryParams(request: NextApiRequest) {
   return params;
 }
 
-// Generic error response for Pages Router
 export function handleError(error: unknown, res: NextApiResponse) {
+  if (error instanceof UnifyError) {
+    return res.status(error.code).json({
+      error: error.message,
+    });
+  }
   return res.status(500).json({
     error: error instanceof Error ? error.message : "Unknown error",
   });
 }
 
-// Validate required parameters for Pages Router
 export function validateSource(
   source: string | null | undefined,
   res: NextApiResponse
@@ -77,7 +77,6 @@ export function validateSource(
   return true;
 }
 
-// Get source from query parameters
 export function getSourceFromQuery(request: NextApiRequest): string | null {
   const source = Array.isArray(request.query.source)
     ? request.query.source[0]

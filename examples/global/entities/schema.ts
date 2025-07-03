@@ -1,6 +1,6 @@
 import { SchemaObject } from "@unilab/core";
 
-export class Entity {
+export class SchemaEntity {
   name: string = "";
   schema: SchemaObject = {};
   sources?: string[] = [];

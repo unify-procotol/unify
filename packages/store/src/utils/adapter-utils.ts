@@ -10,10 +10,6 @@ import type {
 
 export type EntityConstructor<T> = new (...args: any[]) => T;
 
-/**
- * Check if an entity matches the given where conditions
- * 检查实体是否匹配给定的条件
- */
 export function matchesWhere<T extends Record<string, any>>(
   entity: T,
   where: WhereConditionWithOperators<T>
@@ -48,10 +44,6 @@ export function matchesWhere<T extends Record<string, any>>(
   return true;
 }
 
-/**
- * Apply sorting to an array of entities
- * 对实体数组应用排序
- */
 export function applySorting<T extends Record<string, any>>(
   entities: T[],
   orderBy: Partial<Record<keyof T, "asc" | "desc">>
@@ -73,10 +65,6 @@ export function applySorting<T extends Record<string, any>>(
   });
 }
 
-/**
- * Apply pagination to an array of entities
- * 对实体数组应用分页
- */
 export function applyPagination<T>(
   entities: T[],
   offset?: number,
@@ -94,10 +82,6 @@ export function applyPagination<T>(
   return result;
 }
 
-/**
- * Process findMany arguments on a collection of entities
- * 对实体集合处理 findMany 参数
- */
 export function processFindManyArgs<T extends Record<string, any>>(
   entities: T[],
   args?: FindManyArgs<T>
@@ -120,10 +104,6 @@ export function processFindManyArgs<T extends Record<string, any>>(
   return result;
 }
 
-/**
- * Generic upsert implementation
- * 通用的 upsert 实现
- */
 export async function performUpsert<T extends Record<string, any>>(
   args: {
     where: WhereCondition<T>;

@@ -1,7 +1,3 @@
-/**
- * LRU (Least Recently Used) Cache implementation
- * 用于防止恶意创建多个实例导致内存泄露
- */
 export class LRUCache<K, V> {
   private capacity: number;
   private cache: Map<K, V>;
@@ -58,4 +54,4 @@ export class LRUCache<K, V> {
   values(): IterableIterator<V> {
     return this.cache.values();
   }
-} 
+}

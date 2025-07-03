@@ -1,16 +1,16 @@
 import { BaseAdapter, FindManyArgs, FindOneArgs } from "@unilab/core";
-import { Entity } from "../entities/entity";
+import { SchemaEntity } from "../entities/schema";
 import { Unify } from "@unilab/unify-hono";
 
-export class EntityAdapter extends BaseAdapter<Entity> {
-  static readonly adapterName = "EntityAdapter";
+export class SchemaAdapter extends BaseAdapter<SchemaEntity> {
+  static readonly adapterName = "SchemaAdapter";
 
   private getSourcesForEntity(entityName: string): string[] {
     const entitySources = Unify.getEntitySources();
     return entitySources[entityName] || [];
   }
 
-  async findMany(args?: FindManyArgs<Entity>): Promise<Entity[]> {
+  async findMany(args?: FindManyArgs<SchemaEntity>): Promise<SchemaEntity[]> {
     const where = args?.where || {};
     const schemas = Unify.getEntitySchemas();
     const entityName = where.name;
@@ -43,7 +43,7 @@ export class EntityAdapter extends BaseAdapter<Entity> {
     });
   }
 
-  async findOne(args: FindOneArgs<Entity>): Promise<Entity | null> {
+  async findOne(args: FindOneArgs<SchemaEntity>): Promise<SchemaEntity | null> {
     const where = args.where;
     const schemas = Unify.getEntitySchemas();
     const entityName = where.name;

@@ -1,5 +1,5 @@
 import { repo, UnifyClient } from "@unilab/unify-client";
-import { Entity } from "./entities/entity";
+import { SchemaEntity } from "./entities/schema";
 
 UnifyClient.init({
   baseUrl: "http://localhost:3000",
@@ -9,12 +9,18 @@ UnifyClient.init({
 const demo = async () => {
   // Test findMany - should return all entities with their adapters
   console.log("=== Testing findMany ===");
-  const allEntities = await repo<Entity>("entity", "_global").findMany();
+  const allEntities = await repo<SchemaEntity>({
+    entityName: "schema",
+    source: "_global",
+  }).findMany();
   console.log("All entities:", JSON.stringify(allEntities, null, 2));
   
   // Test findOne - should return specific entity with adapters
   console.log("\n=== Testing findOne ===");
-  const singleEntity = await repo<Entity>("entity", "_global").findOne({
+  const singleEntity = await repo<SchemaEntity>({
+    entityName: "schema",
+    source: "_global",
+  }).findOne({
     where: {
       name: "UserEntity",
     },

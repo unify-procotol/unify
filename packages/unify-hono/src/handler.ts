@@ -1,6 +1,4 @@
 import { Hono } from "hono";
-import { cors } from "hono/cors";
-import { logger } from "hono/logger";
 import { handleError, parseQueryParams, validateSource } from "./utils";
 import { registerAdapter, getRepo, getRepoRegistry } from "@unilab/core";
 import {
@@ -25,16 +23,11 @@ export class Unify {
   private static entitySchemas: Record<string, SchemaObject> = {};
   private static entitySources: Record<string, string[]> = {};
 
-  // 静态初始化方法
   static init(config: UnifyConfig) {
-    // 如果传入了外部 app，使用它；否则创建新的 app
     if (config.app) {
       this.app = config.app;
     } else {
       this.app = new Hono();
-      // 只在使用内部 app 时才添加默认中间件
-      this.app.use("*", cors());
-      this.app.use("*", logger());
       this.app.onError((err, c) => handleError(err, c));
     }
 
@@ -51,19 +44,15 @@ export class Unify {
     return this.app;
   }
 
-  // Initialize from plugins configuration
   private static initFromPlugins(plugins: Plugin[]) {
-    // Collect all configuration from plugins using flatMap
     const entities = plugins.flatMap((p) => p.entities || []);
     const adapters = plugins.flatMap((p) => p.adapters || []);
 
-    // Generate schemas and analyze entity-source mapping
     if (entities.length > 0) {
       this.entitySchemas = generateSchemas(entities);
     }
     this.entitySources = this.analyzeEntitySources(adapters);
 
-    // Register adapters and apply middleware
     adapters.forEach(({ entityName, source, adapter }) =>
       registerAdapter(entityName, source, adapter)
     );
@@ -80,7 +69,6 @@ export class Unify {
     );
   }
 
-  // Apply middleware to all registered repositories
   private static applyMiddlewareToRepos(middleware: Middleware<any>[]) {
     middleware.forEach((m) => useGlobalMiddleware(m));
     console.log(
@@ -105,9 +93,7 @@ export class Unify {
     }
   }
 
-  // 静态设置路由方法
   private static setupRoutes() {
-    // GET /{entity}/list - Find multiple records
     this.app.get("/:entity/list", async (c) => {
       try {
         const entity = c.req.param("entity");
@@ -126,7 +112,6 @@ export class Unify {
       }
     });
 
-    // GET /{entity}/find_one - Find single record
     this.app.get("/:entity/find_one", async (c) => {
       try {
         const entity = c.req.param("entity");
@@ -151,7 +136,6 @@ export class Unify {
       }
     });
 
-    // POST /{entity}/create - Create new record
     this.app.post("/:entity/create", async (c) => {
       try {
         const entity = c.req.param("entity");
@@ -176,7 +160,6 @@ export class Unify {
       }
     });
 
-    // PATCH /{entity}/update - Update record
     this.app.patch("/:entity/update", async (c) => {
       try {
         const entity = c.req.param("entity");
@@ -202,7 +185,6 @@ export class Unify {
       }
     });
 
-    // DELETE /{entity}/delete - Delete record
     this.app.delete("/:entity/delete", async (c) => {
       try {
         const entity = c.req.param("entity");
@@ -240,12 +222,10 @@ export class Unify {
     return Array.from(getRepoRegistry().keys());
   }
 
-  // 静态获取实体源映射方法
   static getEntitySources(): Record<string, string[]> {
     return this.entitySources;
   }
 
-  // 分析实体和源的映射关系
   private static analyzeEntitySources(
     adapters: AdapterRegistration[]
   ): Record<string, string[]> {

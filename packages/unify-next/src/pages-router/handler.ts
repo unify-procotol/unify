@@ -23,7 +23,6 @@ export class Unify {
   private static entitySources: Record<string, string[]> = {};
   private static initialized = false;
 
-  // Static initialization method
   static init(config: UnifyConfig) {
     if (this.initialized) {
       return;
@@ -44,19 +43,15 @@ export class Unify {
     };
   }
 
-  // Initialize from plugins configuration
   private static initFromPlugins(plugins: Plugin[]) {
-    // Collect all configuration from plugins using flatMap
     const entities = plugins.flatMap((p) => p.entities || []);
     const adapters = plugins.flatMap((p) => p.adapters || []);
 
-    // Generate schemas and analyze entity-source mapping
     if (entities.length > 0) {
       this.entitySchemas = generateSchemas(entities);
     }
     this.entitySources = this.analyzeEntitySources(adapters);
 
-    // Register adapters and apply middleware
     adapters.forEach(({ entityName, source, adapter }) =>
       registerAdapter(entityName, source, adapter)
     );
@@ -73,7 +68,6 @@ export class Unify {
     );
   }
 
-  // Apply middleware to all registered repositories
   private static applyMiddlewareToRepos(middleware: Middleware<any>[]) {
     middleware.forEach((m) => useGlobalMiddleware(m));
     console.log(
@@ -98,7 +92,6 @@ export class Unify {
     }
   }
 
-  // Main handler for Next.js Pages Router API routes
   static async handler(
     req: NextApiRequest,
     res: NextApiResponse
@@ -106,7 +99,6 @@ export class Unify {
     try {
       const method = req.method || "GET";
 
-      // Extract route parameters
       const routeParams = req.query.unify;
       const route = Array.isArray(routeParams)
         ? (routeParams as string[])
@@ -149,7 +141,6 @@ export class Unify {
     }
   }
 
-  // Handle findMany operation
   private static async handleFindMany(
     req: NextApiRequest,
     res: NextApiResponse,
@@ -167,7 +158,6 @@ export class Unify {
     }
   }
 
-  // Handle findOne operation
   private static async handleFindOne(
     req: NextApiRequest,
     res: NextApiResponse,
@@ -193,7 +183,6 @@ export class Unify {
     }
   }
 
-  // Handle create operation
   private static async handleCreate(
     req: NextApiRequest,
     res: NextApiResponse,
@@ -219,7 +208,6 @@ export class Unify {
     }
   }
 
-  // Handle update operation
   private static async handleUpdate(
     req: NextApiRequest,
     res: NextApiResponse,
@@ -246,7 +234,6 @@ export class Unify {
     }
   }
 
-  // Handle delete operation
   private static async handleDelete(
     req: NextApiRequest,
     res: NextApiResponse,
@@ -282,12 +269,10 @@ export class Unify {
     return Array.from(getRepoRegistry().keys());
   }
 
-  // Static method to get entity-source mapping
   static getEntitySources(): Record<string, string[]> {
     return this.entitySources;
   }
 
-  // Analyze entity-source mapping relationships
   private static analyzeEntitySources(
     adapters: AdapterRegistration[]
   ): Record<string, string[]> {

@@ -28,13 +28,16 @@ UnifyClient.init({
 
 async function test() {
   // get the latitude and longitude of a city
-  const data = await repo<GeocodingEntity>("geocoding", "open-meteo").findOne({
+  const data = await repo<GeocodingEntity>({
+    entityName: "geocoding",
+    source: "open-meteo",
+  }).findOne({
     where: {
       name: "london",
     },
   });
 
-  console.log("data==>", data);
+  console.log("[1] =>", data);
 
   if (!data) {
     throw new Error("No data found");
@@ -44,7 +47,10 @@ async function test() {
   const longitude = data.result.longitude;
 
   // get the weather of a city
-  const data2 = await repo<WeatherEntity>("weather", "open-meteo").findOne({
+  const data2 = await repo<WeatherEntity>({
+    entityName: "weather",
+    source: "open-meteo",
+  }).findOne({
     where: {
       latitude: latitude,
       longitude: longitude,
@@ -53,7 +59,7 @@ async function test() {
     },
   });
 
-  console.log("data2==>", data2);
+  console.log("[2] =>", data2);
 }
 
 test();

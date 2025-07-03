@@ -14,7 +14,6 @@ import {
 } from "@unilab/core";
 import { UnifyConfig } from "../type";
 
-// Handler function type that matches Next.js 15 expectations
 type RouteHandler = (
   request: NextRequest,
   context: { params: Promise<{ unify: string[] }> }
@@ -32,7 +31,6 @@ export class Unify {
   private static entitySources: Record<string, string[]> = {};
   private static initialized = false;
 
-  // Static initialization method that returns API handlers
   static init(config: UnifyConfig): UnifyAPI {
     if (!this.initialized) {
       if (config.plugins) {
@@ -54,19 +52,15 @@ export class Unify {
     };
   }
 
-  // Initialize from plugins configuration
   private static initFromPlugins(plugins: Plugin[]) {
-    // Collect all configuration from plugins using flatMap
     const entities = plugins.flatMap((p) => p.entities || []);
     const adapters = plugins.flatMap((p) => p.adapters || []);
 
-    // Generate schemas and analyze entity-source mapping
     if (entities.length > 0) {
       this.entitySchemas = generateSchemas(entities);
     }
     this.entitySources = this.analyzeEntitySources(adapters);
 
-    // Register adapters and apply middleware
     adapters.forEach(({ entityName, source, adapter }) =>
       registerAdapter(entityName, source, adapter)
     );
@@ -83,7 +77,6 @@ export class Unify {
     );
   }
 
-  // Apply middleware to all registered repositories
   private static applyMiddlewareToRepos(middleware: Middleware<any>[]) {
     middleware.forEach((m) => useGlobalMiddleware(m));
     console.log(
@@ -108,14 +101,12 @@ export class Unify {
     }
   }
 
-  // Helper function to resolve params
   private static async resolveParams(
     params: Promise<{ unify: string[] }>
   ): Promise<{ unify: string[] }> {
     return await params;
   }
 
-  // Main handler for Next.js API routes
   static async handler(
     request: NextRequest,
     { params }: { params: Promise<{ unify: string[] }> }
@@ -164,7 +155,6 @@ export class Unify {
     }
   }
 
-  // Handle findMany operation
   private static async handleFindMany(
     request: NextRequest,
     repo: Repository<any>,
@@ -181,7 +171,6 @@ export class Unify {
     }
   }
 
-  // Handle findOne operation
   private static async handleFindOne(
     request: NextRequest,
     repo: Repository<any>,
@@ -207,7 +196,6 @@ export class Unify {
     }
   }
 
-  // Handle create operation
   private static async handleCreate(
     request: NextRequest,
     repo: Repository<any>,
@@ -236,7 +224,6 @@ export class Unify {
     }
   }
 
-  // Handle update operation
   private static async handleUpdate(
     request: NextRequest,
     repo: Repository<any>,
@@ -263,7 +250,6 @@ export class Unify {
     }
   }
 
-  // Handle delete operation
   private static async handleDelete(
     request: NextRequest,
     repo: Repository<any>,
@@ -297,12 +283,10 @@ export class Unify {
     return Array.from(getRepoRegistry().keys());
   }
 
-  // Static method to get entity-source mapping
   static getEntitySources(): Record<string, string[]> {
     return this.entitySources;
   }
 
-  // Analyze entity-source mapping relationships
   private static analyzeEntitySources(
     adapters: AdapterRegistration[]
   ): Record<string, string[]> {

@@ -9,6 +9,8 @@ import type {
   SchemaObject,
   AdapterRegistration,
   Middleware,
+  RepoOptions,
+  JoinRepoOptions,
 } from "@unilab/core";
 import {
   generateSchemas,
@@ -17,7 +19,7 @@ import {
   registerAdapter,
   useGlobalMiddleware,
 } from "@unilab/core";
-import type { ClientConfig, RelationMapping } from "./types";
+import type { ClientConfig } from "./types";
 
 export class Unify {
   private enableDebug: boolean = false;
@@ -40,13 +42,11 @@ export class Unify {
     const entities = plugins.flatMap((p) => p.entities || []);
     const adapters = plugins.flatMap((p) => p.adapters || []);
 
-    // Generate schemas and analyze entity-source mapping
     if (entities.length > 0) {
       this.entitySchemas = generateSchemas(entities);
     }
     this.entitySources = this.analyzeEntitySources(adapters);
 
-    // Register adapters and apply middleware
     adapters.forEach(({ entityName, source, adapter }) =>
       registerAdapter(entityName, source, adapter)
     );
@@ -63,7 +63,6 @@ export class Unify {
     );
   }
 
-  // Apply middleware to all registered repositories
   private applyMiddlewareToRepos(middleware: Middleware<any>[] = []) {
     if (middleware.length > 0) {
       middleware.forEach((m) => useGlobalMiddleware(m));
@@ -87,11 +86,11 @@ export class Unify {
   }
 
   createRepositoryProxy<T extends Record<string, any>>(
-    entityName: string,
-    source: string
+    options: RepoOptions
   ): Repository<T> {
     return new Proxy({} as Repository<T>, {
       get: (target, prop: string) => {
+        const { entityName, source } = options;
         const repo = getRepo(entityName, source!);
 
         switch (prop) {
@@ -101,7 +100,6 @@ export class Unify {
 
               const result = await repo.findMany(args);
 
-              // Handle relations
               if (args.include && result && result.length > 0) {
                 return await this.loadRelationsForMany(result, args.include);
               }
@@ -115,7 +113,6 @@ export class Unify {
 
               const result = await repo.findOne(args);
 
-              // Handle relations
               if (args.include && result) {
                 return await this.loadRelations(result, args.include);
               }
@@ -148,14 +145,11 @@ export class Unify {
     });
   }
 
-  // Load relations for a single entity
   private async loadRelations<T extends Record<string, any>>(
     entity: T,
     include: { [key: string]: (entity: T) => Promise<any> }
   ): Promise<T> {
     const result = { ...entity } as any;
-
-    // Process all relations in parallel
     const relationPromises = Object.entries(include).map(
       async ([key, callback]) => {
         try {
@@ -167,24 +161,19 @@ export class Unify {
         }
       }
     );
-
     await Promise.all(relationPromises);
     return result;
   }
 
-  // Load relations for multiple entities
   private async loadRelationsForMany<T extends Record<string, any>>(
     entities: T[],
     include: { [key: string]: (entities: T[]) => Promise<any> }
   ): Promise<T[]> {
     const results = [...entities] as any[];
-
-    // 并行处理所有关联查询
     const relationPromises = Object.entries(include).map(
       async ([propertyKey, callback]) => {
         try {
           const relationPromise = callback(entities);
-          // 检查是否有关联映射信息附加到 Promise 上
           const relationMapping = (relationPromise as any).__relationMapping;
           const relatedData = await relationPromise;
           return { propertyKey, relatedData, relationMapping };
@@ -194,16 +183,10 @@ export class Unify {
         }
       }
     );
-
-    // 等待所有关联查询完成
     const relationResults = await Promise.all(relationPromises);
-
-    // 将结果分配到对应的实体中
     relationResults.forEach(({ propertyKey, relatedData, relationMapping }) => {
       if (Array.isArray(relatedData)) {
-        // 如果返回的是数组，需要根据外键分组
         results.forEach((entity) => {
-          // 优先使用 Promise 上的关联映射信息，然后是传入的映射信息，最后是默认逻辑
           const mapping = relationMapping;
           if (mapping) {
             const localValue = entity[mapping.localField];
@@ -215,7 +198,6 @@ export class Unify {
           }
         });
       } else {
-        // 如果返回的不是数组，直接分配
         results.forEach((entity) => {
           entity[propertyKey] = relatedData;
         });
@@ -225,7 +207,6 @@ export class Unify {
     return results;
   }
 
-  // Static methods for global instance management
   private static globalClient: Unify | null = null;
 
   static init(config: ClientConfig): void {
@@ -240,34 +221,28 @@ export class Unify {
   }
 
   static repo<T extends Record<string, any>>(
-    entityName: string,
-    source: string
+    options: RepoOptions
   ): Repository<T> {
-    return Unify.getGlobalClient().createRepositoryProxy<T>(entityName, source);
+    return Unify.getGlobalClient().createRepositoryProxy<T>(options);
   }
 
-  // 静态 JoinRepo 方法
   static joinRepo<F extends Record<string, any>, L extends Record<string, any>>(
-    entityName: string,
-    source: string,
-    relationMapping: RelationMapping<F, L>
+    options: JoinRepoOptions<F, L>
   ): Repository<F> {
-    const baseRepo = Unify.repo<F>(entityName, source);
-
-    // 包装 repository，为返回的 Promise 添加关联映射信息
+    const baseRepo = Unify.repo<F>(options);
     return new Proxy(baseRepo, {
       get: (target, prop: string) => {
         const originalMethod = (target as any)[prop];
-
         if (prop === "findMany" || prop === "findOne") {
           return (...args: any[]) => {
             const resultPromise = originalMethod.apply(target, args);
-            // 为 Promise 添加关联映射信息
-            (resultPromise as any).__relationMapping = relationMapping;
+            (resultPromise as any).__relationMapping = {
+              localField: options.localField,
+              foreignField: options.foreignField,
+            };
             return resultPromise;
           };
         }
-
         return originalMethod;
       },
     });
@@ -286,21 +261,15 @@ export class Unify {
   }
 }
 
-// Export convenience function
 export function repo<T extends Record<string, any>>(
-  entityName: string,
-  source: string
+  options: RepoOptions
 ): Repository<T> {
-  return Unify.repo<T>(entityName, source);
+  return Unify.repo<T>(options);
 }
 
 export function joinRepo<
   F extends Record<string, any> = Record<string, any>,
   L extends Record<string, any> = Record<string, any>
->(
-  entityName: string,
-  source: string,
-  relationMapping: RelationMapping<F, L>
-): Repository<F> {
-  return Unify.joinRepo<F, L>(entityName, source, relationMapping);
+>(options: JoinRepoOptions<F, L>): Repository<F> {
+  return Unify.joinRepo<F, L>(options);
 }

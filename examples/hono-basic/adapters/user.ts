@@ -3,6 +3,8 @@ import {
   CreationArgs,
   FindManyArgs,
   FindOneArgs,
+  UnifyError,
+  ErrorCodes,
 } from "@unilab/core";
 import { UserEntity } from "../entities/user";
 
@@ -65,10 +67,7 @@ class UserAdapter extends BaseAdapter<UserEntity> {
   async create(args: CreationArgs<UserEntity>): Promise<UserEntity> {
     const { name, email, avatar } = args.data;
     if (!name || !email || !avatar) {
-      throw {
-        status: 400,
-        message: "Invalid arguments",
-      };
+      throw new UnifyError(ErrorCodes.BAD_REQUEST, "Invalid arguments");
     }
     const newUser = {
       id: (userData.length + 1).toString(),
