@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { UniRender, Entity, FieldConfig, LayoutType } from '@unify/ui';
+import { UniRender, Entity, FieldConfig, LayoutType } from '@unilab/unify-ui';
 
 // Sample entities for demonstration
 const userEntity: Entity = {

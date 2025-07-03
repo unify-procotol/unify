@@ -23,7 +23,7 @@
     "build:store": "cd packages/store && bun run build",
     "dev:store": "cd packages/store && bun run dev",
     "build:unify-ui": "cd packages/unify-ui && bun run build",
-    "build": "bun run build:core && bun run build:store && bun run build:unify-hono && bun run build:unify-client && bun run build:unify && bun run build:uniweb3 && bun run build:unify-ui"
+    "build": "bun run build:core && bun run build:store && bun run build:unify-hono && bun run build:unify-next &&  bun run build:unify-client && bun run build:unify && bun run build:uniweb3 && bun run build:unify-ui"
   },
   "author": "osdodo",
   "license": "MIT",

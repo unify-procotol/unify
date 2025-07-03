@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { repo, UnifyClient } from "@unilab/unify-client";
-import { UniRender, Entity, LayoutType, FieldConfig } from "@unify/ui";
+import { UniRender, Entity, LayoutType, FieldConfig } from "@unilab/unify-ui";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";

@@ -1,4 +1,4 @@
-# @unify/ui
+# @unilab/unify-ui
 
 A flexible and elegant UI rendering library for dynamic data visualization with multiple layout options.
 
@@ -7,7 +7,7 @@ A flexible and elegant UI rendering library for dynamic data visualization with 
 ### 1. Install Dependencies
 
 ```bash
-npm install @unify/ui
+npm install @unilab/unify-ui
 # Install peer dependencies
 npm install -D tailwindcss postcss autoprefixer
 npx tailwindcss init -p
@@ -22,8 +22,8 @@ Update your `tailwind.config.js`:
 module.exports = {
   content: [
     "./src/**/*.{js,ts,jsx,tsx,mdx}",
-    // 📦 Include @unify/ui components
-    "./node_modules/@unify/ui/**/*.{js,ts,jsx,tsx}",
+    // 📦 Include @unilab/unify-ui components
+    "./node_modules/@unilab/unify-ui/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
     extend: {
@@ -140,7 +140,7 @@ Create or update your CSS file (globals.css):
 
 ```jsx
 import './globals.css';
-import { UniRender } from '@unify/ui';
+import { UniRender } from '@unilab/unify-ui';
 
 // 🎉 Works immediately with beautiful default colors!
 function App() {
