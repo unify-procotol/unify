@@ -7,5 +7,5 @@ interface LayoutProps {
 }
 
 export default function Layout({ children }: LayoutProps) {
-  return <HomeLayout {...baseOptions}>{children as any}</HomeLayout>;
+  return <HomeLayout {...baseOptions}>{children}</HomeLayout>;
 }

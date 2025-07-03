@@ -165,7 +165,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       }}
       {...baseOptions}
     >
-      {children as any}
+      {children}
     </DocsLayout>
   );
 }
