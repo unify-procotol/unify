@@ -14,5 +14,5 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     Accordion,
     Accordions,
     ...components,
-  };
+  } as any;
 }

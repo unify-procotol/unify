@@ -1,5 +1,5 @@
 import { DocsLayout } from "fumadocs-ui/layouts/docs";
-import type { ReactNode } from "react";
+import React from "react";
 import { baseOptions } from "@/app/layout.config";
 import {
   Book,
@@ -10,7 +10,7 @@ import {
   Webhook,
 } from "lucide-react";
 
-export default function Layout({ children }: { children: ReactNode }) {
+export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <DocsLayout
       sidebar={{
@@ -165,7 +165,7 @@ export default function Layout({ children }: { children: ReactNode }) {
       }}
       {...baseOptions}
     >
-      {children}
+      {children as any}
     </DocsLayout>
   );
 }

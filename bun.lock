@@ -12,7 +12,7 @@
       "version": "0.0.0",
       "dependencies": {
         "@shikijs/transformers": "^1.24.2",
-        "@unilab/unify-ui": "workspace:*",
+        "@unilab/unify-ui": "^0.0.1",
         "fumadocs-core": "15.5.2",
         "fumadocs-docgen": "^2.0.1",
         "fumadocs-mdx": "11.6.8",
@@ -237,7 +237,7 @@
     },
     "packages/store": {
       "name": "@unilab/store",
-      "version": "0.0.2",
+      "version": "0.0.3",
       "dependencies": {
         "@unilab/core": "workspace:*",
       },
@@ -251,7 +251,7 @@
     },
     "packages/unify": {
       "name": "@unilab/unify",
-      "version": "0.0.1",
+      "version": "0.0.2",
       "dependencies": {
         "@unilab/core": "workspace:*",
       },
@@ -261,7 +261,7 @@
     },
     "packages/unify-client": {
       "name": "@unilab/unify-client",
-      "version": "0.0.2",
+      "version": "0.0.3",
       "dependencies": {
         "@unilab/core": "workspace:*",
         "zod": "^3.25.57",
@@ -272,7 +272,7 @@
     },
     "packages/unify-hono": {
       "name": "@unilab/unify-hono",
-      "version": "0.0.2",
+      "version": "0.0.3",
       "dependencies": {
         "@hono/node-server": "^1.12.2",
         "@unilab/core": "workspace:*",
@@ -285,7 +285,7 @@
     },
     "packages/unify-next": {
       "name": "@unilab/unify-next",
-      "version": "0.0.2",
+      "version": "0.0.3",
       "dependencies": {
         "@unilab/core": "workspace:*",
         "next": "^14.0.0",
@@ -300,7 +300,7 @@
     },
     "packages/unify-ui": {
       "name": "@unilab/unify-ui",
-      "version": "0.1.0",
+      "version": "0.0.1",
       "dependencies": {
         "clsx": "^2.0.0",
       },
@@ -317,7 +317,7 @@
     },
     "packages/uniweb3": {
       "name": "@unilab/uniweb3",
-      "version": "0.0.3",
+      "version": "0.0.4",
       "dependencies": {
         "@solana/web3.js": "^1.95.2",
         "@unilab/core": "workspace:*",

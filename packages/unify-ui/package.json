@@ -1,10 +1,13 @@
 {
   "name": "@unilab/unify-ui",
-  "version": "0.1.0",
+  "version": "0.0.1",
   "description": "A flexible and elegant UI rendering library for dynamic data visualization with multiple layout options",
   "main": "dist/index.js",
   "module": "dist/esm/index.js",
   "types": "dist/index.d.ts",
+  "publishConfig": {
+    "access": "public"
+  },
   "files": [
     "dist",
     "src"

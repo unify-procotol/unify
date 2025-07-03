@@ -9,7 +9,7 @@ export const source = loader({
   baseUrl: "/docs",
   icon(icon) {
     if (icon && icon in icons)
-      return createElement(icons[icon as keyof typeof icons]);
+      return createElement(icons[icon as keyof typeof icons]) as any;
   },
   source: docs.toFumadocsSource(),
   pageTree: {
