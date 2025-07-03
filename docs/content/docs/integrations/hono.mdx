@@ -60,17 +60,10 @@ export class UserEntity {
 Create adapters to handle data operations:
 
 ```typescript
-import {
-  CreationArgs,
-  DataSourceAdapter,
-  DeletionArgs,
-  FindManyArgs,
-  FindOneArgs,
-  UpdateArgs,
-} from "@unilab/core";
+import { BaseAdapter, FindManyArgs, FindOneArgs } from "@unilab/core";
 import { UserEntity } from "../entities/user";
 
-export class UserAdapter implements DataSourceAdapter<UserEntity> {
+export class UserAdapter extends BaseAdapter<UserEntity> {
   async findMany(args: FindManyArgs<UserEntity>): Promise<UserEntity[]> {
     // Implementation logic
     return [];
@@ -79,21 +72,6 @@ export class UserAdapter implements DataSourceAdapter<UserEntity> {
   async findOne(args: FindOneArgs<UserEntity>): Promise<UserEntity | null> {
     // Implementation logic
     return null;
-  }
-
-  async create(args: CreationArgs<UserEntity>): Promise<UserEntity> {
-    // Implementation logic
-    return new UserEntity();
-  }
-
-  async update(args: UpdateArgs<UserEntity>): Promise<UserEntity> {
-    // Implementation logic
-    return new UserEntity();
-  }
-
-  async delete(args: DeletionArgs<UserEntity>): Promise<boolean> {
-    // Implementation logic
-    return false;
   }
 }
 ```
@@ -145,7 +123,10 @@ UnifyClient.init({
 
 // Create a user
 const createUser = async () => {
-  const data = await repo<UserEntity>("user", "wordpress").create({
+  const data = await repo<UserEntity>({
+    entityName: "user",
+    source: "wordpress",
+  }).create({
     data: {
       name: "John Doe",
       email: "john.doe@example.com",
@@ -157,7 +138,10 @@ const createUser = async () => {
 
 // Find users
 const findUsers = async () => {
-  const data = await repo<UserEntity>("user", "wordpress").findMany({
+  const data = await repo<UserEntity>({
+    entityName: "user",
+    source: "wordpress",
+  }).findMany({
     where: {
       name: "John Doe",
     },

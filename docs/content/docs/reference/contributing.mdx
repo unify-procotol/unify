@@ -74,9 +74,9 @@ To add support for a new blockchain or data source:
 
 1. **Create a new adapter class:**
    ```typescript
-   import type { DataSourceAdapter } from "@unilab/core";
+   import { BaseAdapter, FindManyArgs, FindOneArgs } from "@unilab/core";
 
-   class YourAdapter implements DataSourceAdapter<YourEntity> {
+   class YourAdapter extends BaseAdapter<YourEntity> {
      async findMany(args: FindManyArgs<YourEntity>): Promise<YourEntity[]> {
        // Implementation
      }

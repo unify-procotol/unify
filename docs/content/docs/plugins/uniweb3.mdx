@@ -109,7 +109,10 @@ Query account balances on EVM-compatible networks:
 
 ```typescript
 // Get balance for a specific address on IoTeX network
-const evmWallet = await repo<WalletEntity>("wallet", "evm").findOne({
+const evmWallet = await repo<WalletEntity>({
+  entityName: "wallet",
+  source: "evm",
+}).findOne({
   where: {
     address: "0x4f00D43b5aF0a0aAd62E9075D1bFa86a89CDb9aB",
     network: "iotex",
@@ -134,7 +137,10 @@ Query account balances on Solana:
 
 ```typescript
 // Get balance for a Solana address
-const solanaWallet = await repo<WalletEntity>("wallet", "solana").findOne({
+const solanaWallet = await repo<WalletEntity>({
+  entityName: "wallet",
+  source: "solana",
+}).findOne({
   where: {
     address: "11111111111111111111111111111112",
   },
@@ -170,7 +176,10 @@ export default function Home() {
   useEffect(() => {
     const fetchEvmBalance = async () => {
       try {
-        const data = await repo<WalletEntity>("wallet", "evm").findOne({
+        const data = await repo<WalletEntity>({
+          entityName: "wallet",
+          source: "evm",
+        }).findOne({
           where: {
             address: "0x4f00D43b5aF0a0aAd62E9075D1bFa86a89CDb9aB",
             network: "iotex",
@@ -186,7 +195,10 @@ export default function Home() {
 
     const fetchSolanaBalance = async () => {
       try {
-        const data = await repo<WalletEntity>("wallet", "solana").findOne({
+        const data = await repo<WalletEntity>({
+          entityName: "wallet",
+          source: "solana",
+        }).findOne({
           where: {
             address: "11111111111111111111111111111112",
           },
@@ -233,7 +245,10 @@ UnifyClient.init({
 async function queryBalances() {
   try {
     // Query EVM wallet balance
-    const evmWallet = await repo<WalletEntity>("wallet", "evm").findOne({
+    const evmWallet = await repo<WalletEntity>({
+      entityName: "wallet",
+      source: "evm",
+    }).findOne({
       where: {
         address: "0x4f00D43b5aF0a0aAd62E9075D1bFa86a89CDb9aB",
         network: "iotex",
@@ -245,7 +260,10 @@ async function queryBalances() {
     }
 
     // Query Solana wallet balance
-    const solanaWallet = await repo<WalletEntity>("wallet", "solana").findOne({
+    const solanaWallet = await repo<WalletEntity>({
+      entityName: "wallet",
+      source: "solana",
+    }).findOne({
       where: {
         address: "11111111111111111111111111111112",
       },
@@ -280,7 +298,7 @@ interface WalletEntity  {
 
 ### EVM Adapter
 
-#### `repo<WalletEntity>("wallet", "evm").findOne(options)`
+#### `repo<WalletEntity>({ entityName: "wallet", source: "evm" }).findOne(options)`
 
 Query balance for an EVM wallet address.
 
@@ -293,7 +311,7 @@ Query balance for an EVM wallet address.
 
 ### Solana Adapter
 
-#### `repo<WalletEntity>("wallet", "solana").findOne(options)`
+#### `repo<WalletEntity>({ entityName: "wallet", source: "solana" }).findOne(options)`
 
 Query balance for a Solana wallet address.
 

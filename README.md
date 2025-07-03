@@ -8,14 +8,11 @@ Unify is a powerful and flexible SDK built on top of the high-performance [Hono]
 
 ## Features
 
-- 🚀 **High Performance**: Built on [Hono](https://hono.dev/) web framework
-- 📦 **Automatic Mapping**: Automatically maps entity methods to REST API endpoints
-- 🔧 **Query Support**: Built-in support for query parameters (limit, offset, select, where, order_by)
+- 🔧 **Flexible Querying**: Support for complex query parameters and filtering
 - 🛡️ **Error Handling**: Built-in error handling and response standardization
-- 📚 **OpenAPI Documentation**: Automatic OpenAPI documentation generation
-- 🔌 **Middleware Support**: Support for custom middleware
-- 💪 **TypeScript**: Full TypeScript support
-- 🗄️ **CRUD Operations**: Support for table configuration and built-in CRUD methods
+- 🔌 **Extensible**: Easy to add custom adapters and middleware
+- 💪 **TypeScript**: Full TypeScript support with type safety
+- 🔗 **Framework Integration**: Seamless integration with Next.js, Hono and other frameworks
 
 ## License
 

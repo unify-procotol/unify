@@ -4,7 +4,6 @@ import { joinRepo, repo, Unify } from "@unilab/unify";
 import { UserAdapter } from "./adapters/user";
 import { PostAdapter } from "./adapters/post";
 import { WalletPlugin } from "@unilab/uniweb3";
-import { WalletEntity } from "@unilab/uniweb3/entities";
 import { Plugin } from "@unilab/core";
 import { createHookMiddleware, Logging } from "@unilab/core/middleware";
 

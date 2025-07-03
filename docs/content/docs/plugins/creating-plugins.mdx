@@ -19,9 +19,9 @@ A typical plugin has the following structure:
 my-plugin/
 ├── src/
 │   ├── entities/
-│   │   └── my-entity.ts
+│   │   └── user.ts
 │   ├── adapters/
-│   │   └── my-adapter.ts
+│   │   └── user-adapter.ts
 │   ├── plugins/
 │   │   └── index.ts
 │   └── index.ts
@@ -36,10 +36,10 @@ my-plugin/
 Entities define the structure of your data. Use decorators from `@unilab/core` to specify field types:
 
 ```typescript
-// src/entities/product.ts
+// src/entities/user.ts
 import { Fields } from "@unilab/core";
 
-export class ProductEntity {
+export class UserEntity {
   @Fields.string()
   id = "";
 
@@ -47,149 +47,89 @@ export class ProductEntity {
   name = "";
 
   @Fields.string()
-  description = "";
-
-  @Fields.number()
-  price = 0;
+  email = "";
 
   @Fields.string()
-  category = "";
-
-  @Fields.boolean()
-  inStock = true;
-
-  @Fields.date()
-  createdAt = new Date();
+  avatar = "";
 }
 ```
 
 ### 2. Create Data Source Adapter
 
-Adapters implement the `DataSourceAdapter` interface to handle CRUD operations:
+Adapters implement the `BaseAdapter` class to handle CRUD operations:
 
 ```typescript
-// src/adapters/product-adapter.ts
-import { 
-  DataSourceAdapter, 
-  FindManyArgs, 
-  FindOneArgs, 
-  CreationArgs, 
-  UpdateArgs, 
-  DeletionArgs 
+// src/adapters/user-adapter.ts
+import {
+  BaseAdapter,
+  CreationArgs,
+  FindManyArgs,
+  FindOneArgs,
+  UnifyError,
+  ErrorCodes,
 } from "@unilab/core";
-import { ProductEntity } from "../entities/product";
+import { UserEntity } from "../entities/user";
 
 // Mock data for demonstration
-const productData: ProductEntity[] = [
+const userData = [
   {
     id: "1",
-    name: "Laptop",
-    description: "High-performance laptop",
-    price: 999.99,
-    category: "Electronics",
-    inStock: true,
-    createdAt: new Date("2024-01-01")
+    name: "John Doe",
+    email: "john.doe@example.com",
+    avatar: "https://example.com/avatar.png",
   },
   {
     id: "2",
-    name: "Coffee Mug",
-    description: "Ceramic coffee mug",
-    price: 12.99,
-    category: "Kitchen",
-    inStock: true,
-    createdAt: new Date("2024-01-02")
-  }
+    name: "Jane Smith",
+    email: "jane.smith@example.com",
+    avatar: "https://example.com/avatar2.png",
+  },
 ];
 
-export class ProductAdapter implements DataSourceAdapter<ProductEntity> {
-  async findMany(args?: FindManyArgs<ProductEntity>): Promise<ProductEntity[]> {
-    let results = [...productData];
+export class UserAdapter extends BaseAdapter<UserEntity> {
+  async findMany(args: FindManyArgs<UserEntity>): Promise<UserEntity[]> {
+    const where = args?.where || {};
     
-    // Apply filtering
-    if (args?.where) {
-      results = results.filter(product => {
-        return Object.entries(args.where!).every(([key, value]) => {
-          const productValue = product[key as keyof ProductEntity];
-          return productValue === value;
-        });
-      });
+    if (where.id) {
+      const idValue = typeof where.id === "object" ? where.id.$eq : where.id;
+      return userData.filter((user) => user.id === idValue);
     }
     
-    // Apply ordering
-    if (args?.order_by) {
-      const [field, direction] = Object.entries(args.order_by)[0];
-      results.sort((a, b) => {
-        const aVal = a[field as keyof ProductEntity];
-        const bVal = b[field as keyof ProductEntity];
-        const modifier = direction === "desc" ? -1 : 1;
-        return aVal > bVal ? modifier : aVal < bVal ? -modifier : 0;
-      });
+    if (where.name) {
+      const nameValue = typeof where.name === "object" ? where.name.$eq : where.name;
+      return userData.filter((user) => user.name === nameValue);
     }
     
-    // Apply pagination
-    if (args?.offset) {
-      results = results.slice(args.offset);
-    }
-    if (args?.limit) {
-      results = results.slice(0, args.limit);
+    if (where.email) {
+      const emailValue = typeof where.email === "object" ? where.email.$eq : where.email;
+      return userData.filter((user) => user.email === emailValue);
     }
     
-    return results;
+    return userData;
   }
 
-  async findOne(args: FindOneArgs<ProductEntity>): Promise<ProductEntity | null> {
-    const product = productData.find(p => {
-      return Object.entries(args.where).every(([key, value]) => {
-        return p[key as keyof ProductEntity] === value;
-      });
-    });
-    
-    return product || null;
+  async findOne(args: FindOneArgs<UserEntity>): Promise<UserEntity | null> {
+    const { id } = args.where;
+    if (!id) {
+      return null;
+    }
+    return userData.find((user) => user.id === id) || null;
   }
 
-  async create(args: CreationArgs<ProductEntity>): Promise<ProductEntity> {
-    const newProduct: ProductEntity = {
-      id: (productData.length + 1).toString(),
-      name: args.data.name || "",
-      description: args.data.description || "",
-      price: args.data.price || 0,
-      category: args.data.category || "",
-      inStock: args.data.inStock ?? true,
-      createdAt: new Date()
+  async create(args: CreationArgs<UserEntity>): Promise<UserEntity> {
+    const { name, email, avatar } = args.data;
+    if (!name || !email || !avatar) {
+      throw new UnifyError(ErrorCodes.BAD_REQUEST, "Invalid arguments");
+    }
+    
+    const newUser = {
+      id: (userData.length + 1).toString(),
+      name,
+      email,
+      avatar,
     };
-    
-    productData.push(newProduct);
-    return newProduct;
-  }
-
-  async update(args: UpdateArgs<ProductEntity>): Promise<ProductEntity> {
-    const index = productData.findIndex(p => {
-      return Object.entries(args.where).every(([key, value]) => {
-        return p[key as keyof ProductEntity] === value;
-      });
-    });
-    
-    if (index === -1) {
-      throw new Error("Product not found");
-    }
-    
-    productData[index] = { ...productData[index], ...args.data };
-    return productData[index];
-  }
-
-  async delete(args: DeletionArgs<ProductEntity>): Promise<boolean> {
-    const index = productData.findIndex(p => {
-      return Object.entries(args.where).every(([key, value]) => {
-        return p[key as keyof ProductEntity] === value;
-      });
-    });
-    
-    if (index === -1) {
-      return false;
-    }
-    
-    productData.splice(index, 1);
-    return true;
+    userData.push(newUser);
+    return newUser;
   }
 }
 ```
@@ -201,16 +141,16 @@ Define your plugin by combining entities and adapters:
 ```typescript
 // src/plugins/index.ts
 import { Plugin } from "@unilab/core";
-import { ProductEntity } from "../entities/product";
-import { ProductAdapter } from "../adapters/product-adapter";
+import { UserEntity } from "../entities/user";
+import { UserAdapter } from "../adapters/user-adapter";
 
-export const ProductPlugin: Plugin = {
-  entities: [ProductEntity],
+export const UserPlugin: Plugin = {
+  entities: [UserEntity],
   adapters: [
     {
-      source: "product",
-      entityName: "ProductEntity",
-      adapter: new ProductAdapter()
+      source: "wordpress", 
+      entityName: "UserEntity",
+      adapter: new UserAdapter()
     }
   ]
 };
@@ -222,70 +162,41 @@ Create the main entry point for your plugin:
 
 ```typescript
 // src/index.ts
-export * from "./entities/product";
-export * from "./adapters/product-adapter";
+export * from "./entities/user";
+export * from "./adapters/user-adapter";
 export * from "./plugins";
 ```
 
-## Advanced Features
+## Entity Relationships
 
-### Multiple Data Sources
-
-You can create multiple adapters for the same entity to support different data sources:
+Define entities with relationships using field decorators:
 
 ```typescript
-// src/adapters/database-product-adapter.ts
-export class DatabaseProductAdapter implements DataSourceAdapter<ProductEntity> {
-  // Implementation for database operations
-  async findMany(args?: FindManyArgs<ProductEntity>): Promise<ProductEntity[]> {
-    // Connect to database and query products
-    // ... database implementation
-  }
-  
-  // ... other methods
+// src/entities/post.ts
+import { Fields } from "@unilab/core";
+import type { UserEntity } from "./user";
+
+export class PostEntity {
+  @Fields.string()
+  id = "";
+
+  @Fields.string()
+  title = "";
+
+  @Fields.string()
+  content = "";
+
+  @Fields.string()
+  userId = "";
+
+  @Fields.record(() => require("./user").UserEntity, {
+    optional: true,
+  })
+  user?: UserEntity;
 }
 
-// src/adapters/api-product-adapter.ts
-export class APIProductAdapter implements DataSourceAdapter<ProductEntity> {
-  // Implementation for API operations
-  async findMany(args?: FindManyArgs<ProductEntity>): Promise<ProductEntity[]> {
-    // Make HTTP requests to external API
-    // ... API implementation
-  }
-  
-  // ... other methods
-}
-
-// Updated plugin definition
-export const ProductPlugin: Plugin = {
-  entities: [ProductEntity],
-  adapters: [
-    {
-      source: "memory",
-      entityName: "ProductEntity",
-      adapter: new ProductAdapter()
-    },
-    {
-      source: "database",
-      entityName: "ProductEntity",
-      adapter: new DatabaseProductAdapter()
-    },
-    {
-      source: "api",
-      entityName: "ProductEntity",
-      adapter: new APIProductAdapter()
-    }
-  ]
-};
-```
-
-### Complex Entity Relationships
-
-Define entities with relationships using custom field types:
-
-```typescript
-// src/entities/category.ts
-export class CategoryEntity {
+// Updated user entity with posts relationship
+export class UserEntity {
   @Fields.string()
   id = "";
 
@@ -293,34 +204,15 @@ export class CategoryEntity {
   name = "";
 
   @Fields.string()
-  description = "";
-}
-
-// Updated product entity with relationship
-export class ProductEntity {
-  @Fields.string()
-  id = "";
+  email = "";
 
   @Fields.string()
-  name = "";
+  avatar = "";
 
-  @Fields.string()
-  description = "";
-
-  @Fields.number()
-  price = 0;
-
-  @Fields.string()
-  categoryId = "";
-
-  // Relationship field (handled in adapter)
-  category?: CategoryEntity;
-
-  @Fields.boolean()
-  inStock = true;
-
-  @Fields.date()
-  createdAt = new Date();
+  @Fields.array(() => PostEntity, {
+    optional: true,
+  })
+  posts?: PostEntity[];
 }
 ```
 
@@ -333,10 +225,10 @@ Register your plugin in a Unify server:
 ```typescript
 // server.ts
 import { Unify } from "@unilab/unify-hono";
-import { ProductPlugin } from "./my-plugin";
+import { UserPlugin } from "./my-plugin";
 
 const app = Unify.init({
-  plugins: [ProductPlugin]
+  plugins: [UserPlugin]
 });
 
 export default {
@@ -352,90 +244,54 @@ Use your plugin entities from the client:
 ```typescript
 // client.ts
 import { repo, UnifyClient } from "@unilab/unify-client";
-import { ProductEntity } from "./my-plugin";
+import { UserEntity } from "./my-plugin";
 
 UnifyClient.init({
   baseUrl: "http://localhost:3000",
   timeout: 10000
 });
 
-// Create a product
-const createProduct = async () => {
-  const product = await repo<ProductEntity>("product", "memory").create({
+// Create a user
+const createUser = async () => {
+  const user = await repo<UserEntity>({
+    entityName: "user",
+    source: "wordpress",
+  }).create({
     data: {
-      name: "New Product",
-      description: "A great product",
-      price: 29.99,
-      category: "General",
-      inStock: true
+      name: "Alice Johnson",
+      email: "alice@example.com",
+      avatar: "https://example.com/avatar3.png"
     }
   });
-  console.log("Created product:", product);
+  console.log("Created user:", user);
 };
 
-// Find products
-const getProducts = async () => {
-  const products = await repo<ProductEntity>("product", "memory").findMany({
-    where: { category: "Electronics" },
-    limit: 10,
-    order_by: { price: "desc" }
+// Find users
+const getUsers = async () => {
+  const users = await repo<UserEntity>({
+    entityName: "user",
+    source: "wordpress",
+  }).findMany({
+    where: { name: "John Doe" }
   });
-  console.log("Products:", products);
+  console.log("Users:", users);
 };
 
-// Update a product
-const updateProduct = async () => {
-  const updated = await repo<ProductEntity>("product", "memory").update({
+// Update a user
+const updateUser = async () => {
+  const updated = await repo<UserEntity>({
+    entityName: "user",
+    source: "wordpress",
+  }).update({
     where: { id: "1" },
-    data: { price: 899.99 }
+    data: { email: "john.updated@example.com" }
   });
-  console.log("Updated product:", updated);
+  console.log("Updated user:", updated);
 };
 
-createProduct();
-getProducts();
-updateProduct();
-```
-
-## Testing Your Plugin
-
-Create tests for your plugin components:
-
-```typescript
-// tests/product-adapter.test.ts
-import { ProductAdapter } from "../src/adapters/product-adapter";
-import { ProductEntity } from "../src/entities/product";
-
-describe("ProductAdapter", () => {
-  let adapter: ProductAdapter;
-
-  beforeEach(() => {
-    adapter = new ProductAdapter();
-  });
-
-  test("should find all products", async () => {
-    const products = await adapter.findMany();
-    expect(products).toHaveLength(2);
-  });
-
-  test("should find product by id", async () => {
-    const product = await adapter.findOne({ where: { id: "1" } });
-    expect(product).toBeTruthy();
-    expect(product?.name).toBe("Laptop");
-  });
-
-  test("should create new product", async () => {
-    const newProduct = await adapter.create({
-      data: {
-        name: "Test Product",
-        price: 19.99,
-        category: "Test"
-      }
-    });
-    expect(newProduct.id).toBeTruthy();
-    expect(newProduct.name).toBe("Test Product");
-  });
-});
+createUser();
+getUsers();
+updateUser();
 ```
 
 ## Package Configuration
@@ -444,9 +300,9 @@ Create a proper `package.json` for your plugin:
 
 ```json
 {
-  "name": "@mycompany/unify-product-plugin",
+  "name": "@mycompany/unify-user-plugin",
   "version": "1.0.0",
-  "description": "Product management plugin for Unify",
+  "description": "User management plugin for Unify",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {

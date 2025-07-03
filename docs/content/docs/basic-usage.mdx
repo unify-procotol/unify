@@ -42,14 +42,20 @@ UnifyClient.init({
   timeout: 10000,
 });
 
-const evmBalanceRes = await repo<WalletEntity>("wallet", "evm").findOne({
+const evmBalanceRes = await repo<WalletEntity>({
+  entityName: "wallet",
+  source: "evm",
+}).findOne({
   where: {
     address: "0x...",
     network: "iotex",
   },
 });
 
-const solanaBalanceRes = await repo<WalletEntity>("wallet", "solana").findOne({
+const solanaBalanceRes = await repo<WalletEntity>({
+  entityName: "wallet",
+  source: "solana",
+}).findOne({
   where: {
     address: "11111111111111111111111111111112",
   },

@@ -80,7 +80,10 @@ Unify.init({
 });
 
 // Use repo for data operations
-const users = await repo("user", "wordpress").findMany();
+const users = await repo({
+  entityName: "user",
+  source: "wordpress",
+}).findMany();
 ```
 
 ### Hono Server

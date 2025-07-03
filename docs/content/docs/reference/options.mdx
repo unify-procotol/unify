@@ -17,7 +17,7 @@ Arguments for finding multiple records with advanced query operators.
 interface FindManyArgs<T extends Record<string, any>> {
   limit?: number;
   offset?: number;
-  where?: WhereCondition<T>;
+  where?: WhereConditionWithOperators<T>;
   order_by?: Partial<Record<keyof T, "asc" | "desc">>;
   include?: {
     [key: string]: RelationCallbackMany<T, any>;
@@ -25,10 +25,14 @@ interface FindManyArgs<T extends Record<string, any>> {
 }
 
 type WhereCondition<T> = {
+  [K in keyof T]?: T[K];
+};
+
+type WhereConditionWithOperators<T> = {
   [K in keyof T]?: T[K] | QueryOperators<T[K]>;
 };
 
-type QueryOperators<T> = {
+ type QueryOperators<T> = {
   $gt?: T;
   $gte?: T;
   $lt?: T;
@@ -39,9 +43,10 @@ type QueryOperators<T> = {
   $nin?: T[];
 };
 
-export type RelationCallbackMany<T extends Record<string, any>, R extends Record<string, any>> = (
-  entities: T[]
-) => Promise<R[]>;
+export type RelationCallbackMany<
+  T extends Record<string, any>,
+  R extends Record<string, any>
+> = (entities: T[]) => Promise<R[]>;
 ```
 
 **Properties:**
@@ -406,9 +411,13 @@ UnifyClient.init({
 Create a repository instance using the global client.
 
 ```typescript
+interface RepoOptions {
+  entityName: string;
+  source: string;
+}
+
 static repo<T extends Record<string, any>>(
-  entityName: string,
-  source: string
+  options: RepoOptions
 ): Repository<T>
 ```
 
@@ -417,7 +426,10 @@ static repo<T extends Record<string, any>>(
 import { UnifyClient } from "@unilab/unify-client";
 import { WalletEntity } from "@unilab/uniweb3/entities";
 
-const walletRepo = UnifyClient.repo<WalletEntity>("wallet", "evm");
+const walletRepo = UnifyClient.repo<WalletEntity>({
+  entityName: "wallet",
+  source: "evm",
+});
 ```
 
 #### joinRepo
@@ -425,10 +437,13 @@ const walletRepo = UnifyClient.repo<WalletEntity>("wallet", "evm");
 Create a repository with relation mapping support.
 
 ```typescript
+type JoinRepoOptions<
+  F extends Record<string, any> = Record<string, any>,
+  L extends Record<string, any> = Record<string, any>
+> = RepoOptions & RelationMapping<F, L>
+
 static joinRepo<F extends Record<string, any>, L extends Record<string, any>>(
-  entityName: string,
-  source: string,
-  relationMapping: RelationMapping<F, L>
+  options: JoinRepoOptions<F, L>
 ): Repository<F>
 ```
 
@@ -499,8 +514,7 @@ Global convenience function for creating repository instances.
 
 ```typescript
 function repo<T extends Record<string, any>>(
-  entityName: string,
-  source: string
+  options: RepoOptions
 ): Repository<T>
 ```
 
@@ -513,9 +527,7 @@ function joinRepo<
   F extends Record<string, any> = Record<string, any>,
   L extends Record<string, any> = Record<string, any>
 >(
-  entityName: string,
-  source: string,
-  relationMapping: RelationMapping<F, L>
+  options: JoinRepoOptions<F, L>
 ): Repository<F>
 ```
 
@@ -528,7 +540,10 @@ import { WalletEntity } from "@unilab/uniweb3/entities";
 UnifyClient.init({ baseUrl: "http://localhost:3000" });
 
 // Use the convenience function
-const walletRepo = repo<WalletEntity>("wallet", "solana");
+const walletRepo = repo<WalletEntity>({
+  entityName: "wallet",
+  source: "solana",
+});
 const wallet = await walletRepo.findOne({
   where: { address: "11111111111111111111111111111112" }
 });
@@ -656,8 +671,7 @@ Create a repository instance for browser environments.
 
 ```typescript
 static repo<T extends Record<string, any>>(
-  source: string,
-  adapter: DataSourceAdapter<T>
+  options: RepoOptions
 ): Repository<T>
 ```
 
@@ -667,9 +681,7 @@ Create a repository with relation mapping for browser environments.
 
 ```typescript
 static joinRepo<F extends Record<string, any>, L extends Record<string, any>>(
-  source: string,
-  adapter: DataSourceAdapter<F>,
-  relationMapping: RelationMapping<F, L>
+  options: JoinRepoOptions<F, L>
 ): Repository<F>
 ```
 
@@ -681,8 +693,7 @@ Global convenience function for browser repository creation.
 
 ```typescript
 function repo<T extends Record<string, any>>(
-  source: string,
-  adapter: DataSourceAdapter<T>
+  options: RepoOptions
 ): Repository<T>
 ```
 
@@ -692,9 +703,7 @@ Global convenience function for browser repository with relations.
 
 ```typescript
 function joinRepo<F extends Record<string, any>, L extends Record<string, any>>(
-  source: string,
-  adapter: DataSourceAdapter<F>,
-  relationMapping: RelationMapping<F, L>
+  options: JoinRepoOptions<F, L>
 ): Repository<F>
 ```
 
@@ -709,14 +718,30 @@ Unified blockchain data adapters and entities for Web3 integration.
 Entity for blockchain wallet data.
 
 ```typescript
-class WalletEntity {
-  address: string = "";
-  balance: string = "";
-  network: string = "";
-  token?: {
-    symbol: string;
-    decimals: number;
-  };
+import { Fields } from "@unilab/core";
+
+class TokenEntity {
+  @Fields.string()
+  symbol = "";
+
+  @Fields.number()
+  decimals = 0;
+}
+
+export class WalletEntity {
+  @Fields.string()
+  address = "";
+
+  @Fields.string()
+  balance = "";
+
+  @Fields.string()
+  network = "";
+
+  @Fields.record(() => TokenEntity, {
+    optional: true,
+  })
+  token?: TokenEntity = new TokenEntity();
 }
 ```
 
@@ -727,7 +752,7 @@ class WalletEntity {
 Ethereum Virtual Machine adapter for EVM-compatible chains.
 
 ```typescript
-class EVMAdapter implements DataSourceAdapter<WalletEntity> {
+class EVMAdapter extends BaseAdapter<WalletEntity> {
   // Implements all DataSourceAdapter methods for EVM chains
 }
 ```
@@ -737,7 +762,7 @@ class EVMAdapter implements DataSourceAdapter<WalletEntity> {
 Solana blockchain adapter.
 
 ```typescript
-class SolanaAdapter implements DataSourceAdapter<WalletEntity> {
+class SolanaAdapter extends BaseAdapter<WalletEntity> {
   // Implements all DataSourceAdapter methods for Solana
 }
 ```
@@ -888,7 +913,10 @@ UnifyClient.init({
 });
 
 // Query with relations
-const wallets = await repo<WalletEntity>("wallet", "solana").findMany({
+const wallets = await repo<WalletEntity>({
+  entityName: "wallet",
+  source: "solana",
+}).findMany({
   where: { 
     balance: { $gt: "1000000000000000000" } 
   },
@@ -924,7 +952,7 @@ class UserEntity {
 }
 
 // Implement custom adapter
-class DatabaseAdapter implements DataSourceAdapter<UserEntity> {
+class DatabaseAdapter extends BaseAdapter<UserEntity> {
   async findMany(args?: FindManyArgs<UserEntity>): Promise<UserEntity[]> {
     // Database query implementation
     return [];
@@ -933,21 +961,6 @@ class DatabaseAdapter implements DataSourceAdapter<UserEntity> {
   async findOne(args: FindOneArgs<UserEntity>): Promise<UserEntity | null> {
     // Database query implementation
     return null;
-  }
-
-  async create(args: CreationArgs<UserEntity>): Promise<UserEntity> {
-    // Database insert implementation
-    return new UserEntity();
-  }
-
-  async update(args: UpdateArgs<UserEntity>): Promise<UserEntity> {
-    // Database update implementation
-    return new UserEntity();
-  }
-
-  async delete(args: DeletionArgs<UserEntity>): Promise<boolean> {
-    // Database delete implementation
-    return true;
   }
 }
 
