@@ -8,6 +8,9 @@
     ".": "./dist/index.js",
     "./entities": "./dist/entities/index.js"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch"

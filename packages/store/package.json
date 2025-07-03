@@ -1,10 +1,13 @@
 {
   "name": "@unilab/store",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "Repository for managing entity instances",
   "main": "dist/index.js",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",

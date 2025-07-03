@@ -4,6 +4,9 @@
   "description": "A Hono-based SDK that maps entity configurations to REST API endpoints",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",

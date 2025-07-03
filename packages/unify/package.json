@@ -4,6 +4,9 @@
   "description": "Lightweight browser-only client library for Unify without HTTP functionality",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",

@@ -4,6 +4,9 @@
   "description": "A Next.js-based SDK that maps entity configurations to REST API endpoints",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "publishConfig": {
+    "access": "public"
+  },
   "exports": {
     "./app-router": "./dist/app-router/handler.js",
     "./pages-router": "./dist/pages-router/handler.js"
