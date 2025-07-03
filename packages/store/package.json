@@ -19,5 +19,13 @@
   },
   "peerDependencies": {
     "@unilab/core": "*"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/unifi-lab/unify.git"
   }
 } 

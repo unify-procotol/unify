@@ -20,7 +20,7 @@
     "types",
     "utilities"
   ],
-  "author": "osdodo",
+  "author": "",
   "license": "MIT",
   "dependencies": {
     "remult": "^3.0.5"
@@ -35,7 +35,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/iotexproject/unify.git",
+    "url": "git+https://github.com/unifi-lab/unify.git",
     "directory": "packages/core"
   }
 }

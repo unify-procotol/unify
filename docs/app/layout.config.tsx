@@ -9,7 +9,7 @@ import { BookIcon } from "lucide-react";
  * Docs Layout: app/docs/layout.tsx
  */
 export const baseOptions: BaseLayoutProps = {
-  githubUrl: "https://github.com/iotexproject/unify",
+  githubUrl: "https://github.com/unifi-lab/unify",
   nav: {
     title: (
       <>
