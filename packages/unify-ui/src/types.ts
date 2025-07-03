@@ -1,0 +1,156 @@
+import { ReactNode } from "react";
+
+/**
+ * Available layout types for rendering data
+ */
+export type LayoutType = 'table' | 'form' | 'card' | 'grid' | 'list' | 'dashboard';
+
+/**
+ * Configuration for individual fields
+ */
+export interface FieldConfig {
+  /** Display order of the field (lower numbers appear first) */
+  order?: number;
+  /** Custom label for the field */
+  label?: string;
+  /** Whether to hide this field from display */
+  hidden?: boolean;
+  /** Custom render function for the field value */
+  render?: (value: any, record: any, index: number) => ReactNode;
+  /** Whether the field can be edited */
+  editable?: boolean;
+  /** Whether the field is required */
+  required?: boolean;
+  /** Width of the field column */
+  width?: string | number;
+  /** Text alignment for the field */
+  align?: 'left' | 'center' | 'right';
+  /** Input type for editing */
+  type?: 'text' | 'number' | 'email' | 'password' | 'textarea' | 'select' | 'checkbox' | 'date';
+  /** Options for select type fields */
+  options?: string[];
+}
+
+/**
+ * Entity field schema definition
+ */
+export interface EntityField {
+  /** Field name */
+  name: string;
+  /** Field data type */
+  type: string;
+  /** Whether the field is required */
+  required?: boolean;
+  /** Field description */
+  description?: string;
+}
+
+/**
+ * Entity schema interface
+ */
+export interface Entity {
+  /** Entity name */
+  name: string;
+  /** Array of field definitions */
+  fields: EntityField[];
+  /** JSON schema for validation (optional) */
+  schema?: {
+    type: string;
+    properties: Record<string, any>;
+    required: string[];
+  };
+}
+
+/**
+ * General configuration for the renderer
+ */
+export interface GeneralConfig {
+  /** Whether records can be edited */
+  editable?: boolean;
+  /** Whether to show action buttons */
+  showActions?: boolean;
+  /** Action button configuration */
+  actions?: {
+    /** Whether to show edit action */
+    edit?: boolean;
+    /** Whether to show delete action */
+    delete?: boolean;
+    /** Custom actions */
+    custom?: Array<{
+      label: string;
+      icon?: ReactNode;
+      onClick: (record: any, index: number) => void;
+      className?: string;
+    }>;
+  };
+}
+
+/**
+ * Main props interface for UniRender component
+ */
+export interface UniRenderProps {
+  /** Entity schema definition */
+  entity: Entity;
+  /** Array of data records to display */
+  data: any[];
+  /** Layout type for rendering */
+  layout: LayoutType;
+  /** Field-specific configuration */
+  config?: Record<string, FieldConfig>;
+  /** General configuration */
+  generalConfig?: GeneralConfig;
+  /** Loading state */
+  loading?: boolean;
+  /** Error message */
+  error?: string | null;
+  /** Callback when adding a new record */
+  onAdd?: (record: any) => Promise<void> | void;
+  /** Callback when editing a record */
+  onEdit?: (record: any, index: number) => Promise<void> | void;
+  /** Callback when deleting a record */
+  onDelete?: (record: any, index: number) => Promise<void> | void;
+  /** Callback when saving changes */
+  onSave?: (record: any, index: number) => Promise<void> | void;
+  /** Additional CSS class names */
+  className?: string;
+}
+
+/**
+ * Props interface for layout components
+ */
+export interface LayoutProps {
+  /** Entity schema definition */
+  entity: Entity;
+  /** Array of data records to display */
+  data: any[];
+  /** Field-specific configuration */
+  config?: Record<string, FieldConfig>;
+  /** General configuration */
+  generalConfig?: GeneralConfig;
+  /** Callback when editing a record */
+  onEdit?: (record: any, index: number) => Promise<void> | void;
+  /** Callback when deleting a record */
+  onDelete?: (record: any, index: number) => Promise<void> | void;
+  /** Callback when saving changes */
+  onSave?: (record: any, index: number) => Promise<void> | void;
+}
+
+/**
+ * Props interface for EditModal component
+ */
+export interface EditModalProps {
+  /** Whether the modal is open */
+  isOpen: boolean;
+  /** Callback to close the modal */
+  onClose: () => void;
+  /** Record to edit */
+  record: any;
+  /** Entity schema definition */
+  entity: Entity;
+  /** Field-specific configuration */
+  config?: Record<string, FieldConfig>;
+  /** Callback when saving changes */
+  onSave?: (record: any, index: number) => Promise<void> | void;
+  /** Index of the record being edited */
+  index: number;
+} 

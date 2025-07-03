@@ -2,7 +2,7 @@
 export { Layout } from './Layout';
 export { StudioHome } from './StudioHome';
 export { default as StoryPage } from './StoryPage';
-export { UniRender } from './uniRender';
+export { UniRender } from '@unify/ui';
 
 // Types
 export interface EntityData {

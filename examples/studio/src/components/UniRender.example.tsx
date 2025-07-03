@@ -1,5 +1,5 @@
 import React from 'react';
-import { UniRender, Entity, FieldConfig } from './uniRender';
+import { UniRender, Entity, FieldConfig } from '@unify/ui';
 
 // Example usage of UniRender component
 export const UniRenderExample = () => {
