@@ -1,6 +1,6 @@
 {
   "name": "@unilab/uniweb3",
-  "version": "0.0.2",
+  "version": "0.0.4",
   "description": "Unified source plugins for blockchain data",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -13,7 +13,8 @@
   },
   "scripts": {
     "build": "tsc",
-    "dev": "tsc --watch"
+    "dev": "tsc --watch",
+    "prepublishOnly": "bun run build"
   },
   "keywords": [
     "blockchain",
@@ -23,7 +24,7 @@
     "plugin"
   ],
   "dependencies": {
-    "@unilab/core": "workspace:*",
+    "@unilab/core": "^0.0.1",
     "@solana/web3.js": "^1.95.2",
     "ethers": "^6.13.2"
   },

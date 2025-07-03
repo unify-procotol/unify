@@ -1,6 +1,6 @@
 {
   "name": "@unilab/unify-hono",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "description": "A Hono-based SDK that maps entity configurations to REST API endpoints",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -10,7 +10,6 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-    "test": "bun test",
     "prepublishOnly": "bun run build"
   },
   "keywords": [
@@ -22,7 +21,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@unilab/core": "workspace:*",
+    "@unilab/core": "^0.0.1",
     "hono": "^4.7.11",
     "@hono/node-server": "^1.12.2"
   },

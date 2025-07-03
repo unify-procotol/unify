@@ -1,6 +1,6 @@
 {
   "name": "@unilab/store",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "description": "Repository for managing entity instances",
   "main": "dist/index.js",
   "module": "dist/index.js",
@@ -11,10 +11,10 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-    "test": "bun test"
+    "prepublishOnly": "bun run build"
   },
   "dependencies": {
-    "@unilab/core": "workspace:*"
+    "@unilab/core": "^0.0.1"
   },
   "devDependencies": {
     "typescript": "^5.0.0",
@@ -31,4 +31,4 @@
     "type": "git",
     "url": "git+https://github.com/unifi-lab/unify.git"
   }
-} 
+}

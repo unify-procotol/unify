@@ -1,6 +1,6 @@
 {
   "name": "@unilab/unify-next",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "description": "A Next.js-based SDK that maps entity configurations to REST API endpoints",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -26,7 +26,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@unilab/core": "workspace:*",
+    "@unilab/core": "^0.0.1",
     "next": "^14.0.0"
   },
   "devDependencies": {
@@ -45,4 +45,4 @@
     "url": "git+https://github.com/unifi-lab/unify.git",
     "directory": "packages/unify-next"
   }
-} 
+}

@@ -1,6 +1,6 @@
 {
   "name": "@unilab/unify-client",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "description": "HTTP client library for Unify",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -10,7 +10,6 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-    "test": "bun test",
     "prepublishOnly": "bun run build"
   },
   "keywords": [
@@ -23,7 +22,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@unilab/core": "workspace:*",
+    "@unilab/core": "^0.0.1",
     "zod": "^3.25.57"
   },
   "devDependencies": {

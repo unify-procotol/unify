@@ -1,6 +1,6 @@
 {
   "name": "@unilab/unify",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Lightweight browser-only client library for Unify without HTTP functionality",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -10,7 +10,7 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-    "test": "bun test"
+    "prepublishOnly": "bun run build"
   },
   "keywords": [
     "unify"
@@ -18,7 +18,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@unilab/core": "workspace:*"
+    "@unilab/core": "^0.0.1"
   },
   "devDependencies": {
     "typescript": "^5.3.0"
