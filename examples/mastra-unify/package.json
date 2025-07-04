@@ -1,22 +1,15 @@
 {
-  "name": "query-gateway",
+  "name": "mastra-unify",
   "version": "1.0.0",
   "description": "",
   "main": "server.ts",
   "scripts": {
-    "dev": "bun run server.ts",
-    "start": "bun run server.ts",
-    "client": "bun run client.ts",
-    "ai-weather": "bunx tsx weather-ai-example.ts",
-    "ai-weather-without-server": "bunx tsx without-server.ts"
+    "dev": "bunx tsx index.ts"
   },
   "dependencies": {
-    "@hono/node-server": "^1.12.2",
     "@mastra/core": "^0.10.8",
     "@openrouter/ai-sdk-provider": "^0.7.2",
     "@unilab/core": "workspace:*",
-    "@unilab/unify-client": "workspace:*",
-    "@unilab/unify-hono": "workspace:*",
     "@unilab/unify": "workspace:*",
     "dotenv": "^17.0.0",
     "hono": "^4.7.11",

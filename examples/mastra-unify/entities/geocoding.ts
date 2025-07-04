@@ -6,14 +6,21 @@ export class GeocodingEntity {
   })
   name = "";
 
-  @Fields.record(() => GeocodingQueryResult)
+  @Fields.record(() => GeocodingQueryResult, {
+    optional: true,
+    description: "The result of the geocoding query",
+  })
   result = new GeocodingQueryResult();
 }
 
 export class GeocodingQueryResult {
-  @Fields.number()
+  @Fields.number({
+    description: "The latitude of the city",
+  })
   latitude = 0;
 
-  @Fields.number()
+  @Fields.number({
+    description: "The longitude of the city",
+  })
   longitude = 0;
 }
