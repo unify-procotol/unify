@@ -27,7 +27,7 @@ export default function HomePage() {
                   </div>
 
                   <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-cyan-600 dark:from-blue-400 dark:via-purple-400 dark:to-cyan-400 bg-clip-text text-transparent mb-6 leading-tight">
-                    Unify
+                    URPC
                   </h1>
 
                   <div className="relative">
@@ -38,9 +38,10 @@ export default function HomePage() {
                   </div>
 
                   <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 mb-10 leading-relaxed max-w-xl mx-auto lg:mx-0 relative">
-                    A protocol focused on entity-first abstraction, aimed at resolving 
-                    same-domain, cross-source complexity. Kill switch-case hell in 
-                    multi-protocol apps with unified entity models.
+                    A protocol focused on entity-first abstraction, aimed at
+                    resolving same-domain, cross-source complexity. Kill
+                    switch-case hell in multi-protocol apps with unified entity
+                    models.
                   </p>
 
                   <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
@@ -71,11 +72,11 @@ export default function HomePage() {
 function CodeExample() {
   const [activeTab, setActiveTab] = useState<"server" | "client">("server");
 
-  const serverCode = `import { Unify } from "@unilab/urpc-hono";
+  const serverCode = `import { URPC } from "@unilab/urpc-hono";
 import { WalletPlugin } from "@unilab/uniweb3";
 import { Logging } from "@unilab/urpc-core/middleware";
 
-const app = Unify.init({
+const app = URPC.init({
   plugins: [WalletPlugin],
   middleware: [Logging()],
 });
@@ -85,10 +86,10 @@ export default {
   fetch: app.fetch,
 };`;
 
-  const clientCode = `import { repo, UnifyClient } from "@unilab/urpc-client";
+  const clientCode = `import { repo, URPC } from "@unilab/urpc-client";
 import { WalletEntity } from "@unilab/uniweb3/entities";
 
-UnifyClient.init({
+URPC.init({
   baseUrl: "http://localhost:3000",
   timeout: 10000,
 });

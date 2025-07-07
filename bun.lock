@@ -233,7 +233,7 @@
     },
     "packages/uniweb3": {
       "name": "@unilab/uniweb3",
-      "version": "0.0.4",
+      "version": "0.0.5",
       "dependencies": {
         "@solana/web3.js": "^1.95.2",
         "@unilab/urpc-core": "workspace:*",

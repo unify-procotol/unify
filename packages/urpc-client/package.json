@@ -22,7 +22,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@unilab/urpc-core": "workspace:*",
+    "@unilab/urpc-core": "^0.0.1",
     "zod": "^3.25.57"
   },
   "devDependencies": {

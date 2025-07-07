@@ -1,6 +1,6 @@
 {
   "name": "@unilab/uniweb3",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Unified source plugins for blockchain data",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -24,7 +24,7 @@
     "plugin"
   ],
   "dependencies": {
-    "@unilab/urpc-core": "workspace:*",
+    "@unilab/urpc-core": "^0.0.1",
     "@solana/web3.js": "^1.95.2",
     "ethers": "^6.13.2"
   },
