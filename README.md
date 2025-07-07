@@ -35,7 +35,7 @@ Device Agnostic IoT
 repo<SensorData>({ source: "mqtt" }).create({...});  
 repo<SensorData>({ source: "http-api" }).create({...}});  
 ```
-
+Analytics & Logging Aggregation
 ```ts
 // Query events from Datadog
 repo<LogEntry>({ entityName: "event", source: "datadog" }).find({ where: { type: "error", timestamp: { gte: "..." } } });
