@@ -153,12 +153,10 @@
       "name": "nextjs-pages-router",
       "version": "0.1.0",
       "dependencies": {
-        "@hono/node-server": "^1.14.4",
-        "@unilab/uniweb3": "workspace:*",
-        "@unilab/urpc-client": "workspace:*",
-        "@unilab/urpc-core": "workspace:*",
-        "@unilab/urpc-next": "workspace:*",
-        "hono": "^4.7.11",
+        "@unilab/uniweb3": "^0.0.5",
+        "@unilab/urpc-client": "^0.0.1",
+        "@unilab/urpc-core": "^0.0.1",
+        "@unilab/urpc-next": "^0.0.1",
         "next": "15.3.3",
         "react": "^19.0.0",
         "react-dom": "^19.0.0",
@@ -236,7 +234,7 @@
       "version": "0.0.5",
       "dependencies": {
         "@solana/web3.js": "^1.95.2",
-        "@unilab/urpc-core": "workspace:*",
+        "@unilab/urpc-core": "^0.0.1",
         "ethers": "^6.13.2",
       },
       "devDependencies": {
@@ -257,7 +255,7 @@
       "name": "@unilab/urpc-client",
       "version": "0.0.1",
       "dependencies": {
-        "@unilab/urpc-core": "workspace:*",
+        "@unilab/urpc-core": "^0.0.1",
         "zod": "^3.25.57",
       },
       "devDependencies": {
@@ -287,9 +285,9 @@
     },
     "packages/urpc-next": {
       "name": "@unilab/urpc-next",
-      "version": "0.0.1",
+      "version": "0.0.2",
       "dependencies": {
-        "@unilab/urpc-core": "workspace:*",
+        "@unilab/urpc-core": "^0.0.1",
         "next": "^14.0.0",
       },
       "devDependencies": {

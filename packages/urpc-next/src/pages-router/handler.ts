@@ -99,7 +99,7 @@ export class URPC {
     try {
       const method = req.method || "GET";
 
-      const routeParams = req.query.URPC;
+      const routeParams = req.query.urpc;
       const route = Array.isArray(routeParams)
         ? (routeParams as string[])
         : [routeParams as string].filter(Boolean);

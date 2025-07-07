@@ -16,7 +16,7 @@ import { URPCConfig } from "../type";
 
 type RouteHandler = (
   request: NextRequest,
-  context: { params: Promise<{ URPC: string[] }> }
+  context: { params: Promise<{ urpc: string[] }> }
 ) => Promise<NextResponse>;
 
 export interface URPCAPI {
@@ -102,19 +102,19 @@ export class URPC {
   }
 
   private static async resolveParams(
-    params: Promise<{ URPC: string[] }>
-  ): Promise<{ URPC: string[] }> {
+    params: Promise<{ urpc: string[] }>
+  ): Promise<{ urpc: string[] }> {
     return await params;
   }
 
   static async handler(
     request: NextRequest,
-    { params }: { params: Promise<{ URPC: string[] }> }
+    { params }: { params: Promise<{ urpc: string[] }> }
   ): Promise<NextResponse> {
     try {
       const method = request.method;
       const resolvedParams = await URPC.resolveParams(params);
-      const [entity, action] = resolvedParams.URPC;
+      const [entity, action] = resolvedParams.urpc;
 
       if (!entity || !action) {
         return NextResponse.json(

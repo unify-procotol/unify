@@ -24,7 +24,7 @@ export default function Home() {
           source: "evm",
         }).findOne({
           where: {
-            address: "0x4f00D43b5aF0a0aAd62E9075D1bFa86a89CDb9aB",
+            address: "0x8E76cAEbaca6c0e390F825fa44Dfd1fCb74B9C36",
             network: "ethereum",
           },
         });
