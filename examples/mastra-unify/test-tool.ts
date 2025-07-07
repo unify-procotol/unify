@@ -25,12 +25,12 @@ const WeatherPlugin = {
   adapters: [
     {
       source: "open-meteo",
-      entityName: "GeocodingEntity",
+      entity: "GeocodingEntity",
       adapter: new GeocodingAdapter(),
     },
     {
       source: "open-meteo",
-      entityName: "WeatherEntity",
+      entity: "WeatherEntity",
       adapter: new WeatherAdapter(),
     },
   ],

@@ -6,7 +6,7 @@ export { UniRender } from '@unilab/unify-ui';
 
 // Types
 export interface EntityData {
-  entityName: string;
+  entity: string;
   data: any[];
   loading: boolean;
   error: string | null;

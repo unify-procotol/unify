@@ -4,18 +4,18 @@ import { DataSourceAdapter } from "./types";
 const REPO_REGISTRY = new Map<string, Repository<any>>();
 
 export function registerAdapter<T extends Record<string, any>>(
-  entityName: string,
+  entity: string,
   source: string,
   adapter: DataSourceAdapter<T>
 ) {
-  const key = getRepoKey(entityName, source);
+  const key = getRepoKey(entity, source);
   const repo = new Repository<T>(adapter);
   REPO_REGISTRY.set(key, repo);
   return repo;
 }
 
-export function getRepo(entityName: string, source: string) {
-  const key = getRepoKey(entityName, source);
+export function getRepo(entity: string, source: string) {
+  const key = getRepoKey(entity, source);
   const repo = REPO_REGISTRY.get(key);
   if (!repo) {
     throw new Error(`Unknown data source: ${source}`);
@@ -27,9 +27,7 @@ export function getRepoRegistry() {
   return REPO_REGISTRY;
 }
 
-function getRepoKey(entityName: string, source: string) {
-  const entityNameWithoutEntity = entityName
-    .replace(/Entity$/i, "")
-    .toLowerCase();
+function getRepoKey(entity: string, source: string) {
+  const entityNameWithoutEntity = entity.replace(/Entity$/i, "").toLowerCase();
   return `${entityNameWithoutEntity}:${source}`;
 }

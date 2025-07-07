@@ -10,7 +10,7 @@ const demo = async () => {
   // Test findMany - should return all entities with their adapters
   console.log("=== Testing findMany ===");
   const allEntities = await repo<SchemaEntity>({
-    entityName: "schema",
+    entity: "schema",
     source: "_global",
   }).findMany();
   console.log("All entities:", JSON.stringify(allEntities, null, 2));
@@ -18,7 +18,7 @@ const demo = async () => {
   // Test findOne - should return specific entity with adapters
   console.log("\n=== Testing findOne ===");
   const singleEntity = await repo<SchemaEntity>({
-    entityName: "schema",
+    entity: "schema",
     source: "_global",
   }).findOne({
     where: {

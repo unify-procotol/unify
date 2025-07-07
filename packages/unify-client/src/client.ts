@@ -80,8 +80,8 @@ export class UnifyClient {
   ): Repository<T> {
     return new Proxy({} as Repository<T>, {
       get: (target, prop: string) => {
-        const { entityName, source } = options;
-        const entity = entityName.replace(/Entity$/i, "").toLowerCase();
+        const { entity, source } = options;
+        const _entity = entity.replace(/Entity$/i, "").toLowerCase();
         switch (prop) {
           case "findMany":
             return async (args: FindManyArgs<T> = {}) => {
@@ -94,7 +94,7 @@ export class UnifyClient {
 
               const result = await this.request<T[]>({
                 method: "GET",
-                url: `/${entity}/list`,
+                url: `/${_entity}/list`,
                 params,
               });
 
@@ -114,7 +114,7 @@ export class UnifyClient {
 
               const result = await this.request<T | null>({
                 method: "GET",
-                url: `/${entity}/find_one`,
+                url: `/${_entity}/find_one`,
                 params,
               });
 
@@ -129,7 +129,7 @@ export class UnifyClient {
             return async (args: CreationArgs<T>) => {
               return this.request<T>({
                 method: "POST",
-                url: `/${entity}/create`,
+                url: `/${_entity}/create`,
                 params: { source },
                 data: { data: args.data },
               });
@@ -139,7 +139,7 @@ export class UnifyClient {
             return async (args: UpdateArgs<T>) => {
               return this.request<T>({
                 method: "PATCH",
-                url: `/${entity}/update`,
+                url: `/${_entity}/update`,
                 params: { source },
                 data: {
                   where: args.where,
@@ -152,7 +152,7 @@ export class UnifyClient {
             return async (args: DeletionArgs<T>) => {
               const result = await this.request<{ success: boolean }>({
                 method: "DELETE",
-                url: `/${entity}/delete`,
+                url: `/${_entity}/delete`,
                 params: {
                   source,
                   where: args.where,
@@ -289,7 +289,7 @@ export function repo<T extends Record<string, any>>(
 
 export function joinRepo<
   F extends Record<string, any> = Record<string, any>,
-  L extends Record<string, any> = Record<string, any>
+  L extends Record<string, any> = Record<string, any>,
 >(options: JoinRepoOptions<F, L>): Repository<F> {
   return UnifyClient.joinRepo<F, L>(options);
 }

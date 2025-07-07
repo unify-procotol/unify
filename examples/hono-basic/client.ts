@@ -9,7 +9,7 @@ UnifyClient.init({
 
 const fetchUser = async () => {
   const data = await repo<UserEntity>({
-    entityName: "user",
+    entity: "user",
     source: "demo",
   }).findMany({
     where: {
@@ -20,7 +20,7 @@ const fetchUser = async () => {
       posts: (userList) => {
         const ids = userList.map((user) => user.id);
         // return repo<PostEntity>({
-        //   entityName: "post",
+        //   entity: "post",
         //   source: "demo",
         // }).findMany({
         //   where: {
@@ -32,7 +32,7 @@ const fetchUser = async () => {
 
         // If you don't set the where parameter, you must use joinRepo, but in other cases you can use repo directly.
         return joinRepo<PostEntity, UserEntity>({
-          entityName: "post",
+          entity: "post",
           source: "demo",
           localField: "id",
           foreignField: "userId",
@@ -53,7 +53,7 @@ fetchUser();
 
 // const fetchPost = async () => {
 //   const data = await repo<PostEntity>({
-//     entityName: "post",
+//     entity: "post",
 //     source: "demo",
 //   }).findOne({
 //     where: {
@@ -63,7 +63,7 @@ fetchUser();
 //       user: (post) => {
 //         const userId = post.userId;
 //         return repo<UserEntity>({
-//           entityName: "user",
+//           entity: "user",
 //           source: "demo",
 //         }).findOne({
 //           where: {
@@ -80,7 +80,7 @@ fetchUser();
 
 // const createUser = async () => {
 //   const data = await repo<UserEntity>({
-//     entityName: "user",
+//     entity: "user",
 //     source: "demo",
 //   }).create({
 //     data: {

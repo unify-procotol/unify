@@ -20,7 +20,7 @@ export default function Home() {
     const fetchEvmBalance = async () => {
       try {
         const data = await repo<WalletEntity>({
-          entityName: "wallet",
+          entity: "wallet",
           source: "evm",
         }).findOne({
           where: {
@@ -39,7 +39,7 @@ export default function Home() {
     const fetchSolanaBalance = async () => {
       try {
         const data = await repo<WalletEntity>({
-          entityName: "wallet",
+          entity: "wallet",
           source: "solana",
         }).findOne({
           where: {

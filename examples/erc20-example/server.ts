@@ -34,7 +34,7 @@ const MimoPlugin: Plugin = {
   adapters: [
     {
       source: "mimo",
-      entityName: "PairEntity",
+      entity: "PairEntity",
       adapter: new MimoAdapter(),
     },
   ],

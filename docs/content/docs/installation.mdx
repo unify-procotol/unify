@@ -69,8 +69,8 @@ import { createHookMiddleware, Logging } from "@unilab/core/middleware";
 const MyPlugin = {
   entities: [UserEntity, PostEntity],
   adapters: [
-    { source: "demo", entityName: "UserEntity", adapter: new UserAdapter() },
-    { source: "demo", entityName: "PostEntity", adapter: new PostAdapter() },
+    { source: "demo", entity: "UserEntity", adapter: new UserAdapter() },
+    { source: "demo", entity: "PostEntity", adapter: new PostAdapter() },
   ],
 };
 
@@ -81,7 +81,7 @@ Unify.init({
 
 // Use repo for data operations
 const users = await repo({
-  entityName: "user",
+  entity: "user",
   source: "demo",
 }).findMany();
 ```
@@ -97,8 +97,8 @@ import { Logging } from "@unilab/core/middleware";
 const MyPlugin = {
   entities: [UserEntity, PostEntity],
   adapters: [
-    { source: "demo", entityName: "UserEntity", adapter: new UserAdapter() },
-    { source: "demo", entityName: "PostEntity", adapter: new PostAdapter() },
+    { source: "demo", entity: "UserEntity", adapter: new UserAdapter() },
+    { source: "demo", entity: "PostEntity", adapter: new PostAdapter() },
   ],
 };
 

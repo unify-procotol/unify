@@ -14,7 +14,7 @@
     "prepublishOnly": "bun run build"
   },
   "dependencies": {
-    "@unilab/core": "^0.0.1"
+    "@unilab/core": "^0.0.2"
   },
   "devDependencies": {
     "typescript": "^5.0.0",

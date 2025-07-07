@@ -47,8 +47,8 @@ export class Unify {
     }
     this.entitySources = this.analyzeEntitySources(adapters);
 
-    adapters.forEach(({ entityName, source, adapter }) =>
-      registerAdapter(entityName, source, adapter)
+    adapters.forEach(({ entity, source, adapter }) =>
+      registerAdapter(entity, source, adapter)
     );
 
     console.log(
@@ -76,11 +76,11 @@ export class Unify {
     adapters: AdapterRegistration[]
   ): Record<string, string[]> {
     const entitySources: Record<string, string[]> = {};
-    adapters.forEach(({ source, entityName }) => {
-      if (!entitySources[entityName]) {
-        entitySources[entityName] = [];
+    adapters.forEach(({ source, entity }) => {
+      if (!entitySources[entity]) {
+        entitySources[entity] = [];
       }
-      entitySources[entityName].push(source);
+      entitySources[entity].push(source);
     });
     return entitySources;
   }
@@ -90,13 +90,13 @@ export class Unify {
   ): Repository<T> {
     return new Proxy({} as Repository<T>, {
       get: (target, prop: string) => {
-        const { entityName, source } = options;
-        const repo = getRepo(entityName, source!);
+        const { entity, source } = options;
+        const repo = getRepo(entity, source!);
 
         switch (prop) {
           case "findMany":
             return async (args: FindManyArgs<T> = {}) => {
-              this.log(`findMany called for ${entityName}:${source}`, args);
+              this.log(`findMany called for ${entity}:${source}`, args);
 
               const result = await repo.findMany(args);
 
@@ -109,7 +109,7 @@ export class Unify {
 
           case "findOne":
             return async (args: FindOneArgs<T>) => {
-              this.log(`findOne called for ${entityName}:${source}`, args);
+              this.log(`findOne called for ${entity}:${source}`, args);
 
               const result = await repo.findOne(args);
 
@@ -122,19 +122,19 @@ export class Unify {
 
           case "create":
             return async (args: CreationArgs<T>) => {
-              this.log(`create called for ${entityName}:${source}`, args);
+              this.log(`create called for ${entity}:${source}`, args);
               return repo.create(args);
             };
 
           case "update":
             return async (args: UpdateArgs<T>) => {
-              this.log(`update called for ${entityName}:${source}`, args);
+              this.log(`update called for ${entity}:${source}`, args);
               return repo.update(args);
             };
 
           case "delete":
             return async (args: DeletionArgs<T>) => {
-              this.log(`delete called for ${entityName}:${source}`, args);
+              this.log(`delete called for ${entity}:${source}`, args);
               return repo.delete(args);
             };
 
@@ -269,7 +269,7 @@ export function repo<T extends Record<string, any>>(
 
 export function joinRepo<
   F extends Record<string, any> = Record<string, any>,
-  L extends Record<string, any> = Record<string, any>
+  L extends Record<string, any> = Record<string, any>,
 >(options: JoinRepoOptions<F, L>): Repository<F> {
   return Unify.joinRepo<F, L>(options);
 }

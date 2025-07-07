@@ -53,8 +53,8 @@ export class Unify {
     }
     this.entitySources = this.analyzeEntitySources(adapters);
 
-    adapters.forEach(({ entityName, source, adapter }) =>
-      registerAdapter(entityName, source, adapter)
+    adapters.forEach(({ entity, source, adapter }) =>
+      registerAdapter(entity, source, adapter)
     );
 
     console.log(
@@ -77,19 +77,19 @@ export class Unify {
   }
 
   static repo<T extends Record<string, any>>({
-    entityName,
+    entity,
     source,
     adapter,
   }: {
-    entityName: string;
+    entity: string;
     source: string;
     adapter: DataSourceAdapter<T>;
   }) {
     try {
-      const repo = getRepo(entityName, source) as Repository<T>;
+      const repo = getRepo(entity, source) as Repository<T>;
       return repo;
     } catch (error) {
-      return registerAdapter(entityName, source, adapter);
+      return registerAdapter(entity, source, adapter);
     }
   }
 
@@ -230,11 +230,11 @@ export class Unify {
     adapters: AdapterRegistration[]
   ): Record<string, string[]> {
     const entitySources: Record<string, string[]> = {};
-    adapters.forEach(({ source, entityName }) => {
-      if (!entitySources[entityName]) {
-        entitySources[entityName] = [];
+    adapters.forEach(({ source, entity }) => {
+      if (!entitySources[entity]) {
+        entitySources[entity] = [];
       }
-      entitySources[entityName].push(source);
+      entitySources[entity].push(source);
     });
     return entitySources;
   }

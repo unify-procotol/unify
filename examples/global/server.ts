@@ -9,10 +9,10 @@ import { Plugin } from "@unilab/core";
 const MyPlugin: Plugin = {
   entities: [UserEntity, PostEntity],
   adapters: [
-    { source: "_global", entityName: "SchemaEntity", adapter: new SchemaAdapter() },
-    { source: "google", entityName: "UserEntity", adapter: new UserAdapter() },
-    { source: "github", entityName: "UserEntity", adapter: new UserAdapter() },
-    { source: "demo", entityName: "PostEntity", adapter: new PostAdapter() },
+    { source: "_global", entity: "SchemaEntity", adapter: new SchemaAdapter() },
+    { source: "google", entity: "UserEntity", adapter: new UserAdapter() },
+    { source: "github", entity: "UserEntity", adapter: new UserAdapter() },
+    { source: "demo", entity: "PostEntity", adapter: new PostAdapter() },
   ],
 };
 

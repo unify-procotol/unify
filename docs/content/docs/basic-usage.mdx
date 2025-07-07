@@ -43,7 +43,7 @@ UnifyClient.init({
 });
 
 const evmBalanceRes = await repo<WalletEntity>({
-  entityName: "wallet",
+  entity: "wallet",
   source: "evm",
 }).findOne({
   where: {
@@ -53,7 +53,7 @@ const evmBalanceRes = await repo<WalletEntity>({
 });
 
 const solanaBalanceRes = await repo<WalletEntity>({
-  entityName: "wallet",
+  entity: "wallet",
   source: "solana",
 }).findOne({
   where: {

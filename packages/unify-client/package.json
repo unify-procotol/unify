@@ -22,7 +22,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@unilab/core": "^0.0.1",
+    "@unilab/core": "^0.0.2",
     "zod": "^3.25.57"
   },
   "devDependencies": {

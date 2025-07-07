@@ -103,7 +103,7 @@ export interface MiddlewareManagerInterface<T extends Record<string, any>> {
 
 export interface AdapterRegistration {
   source: string;
-  entityName: string;
+  entity: string;
   adapter: DataSourceAdapter<any>;
 }
 
@@ -121,7 +121,7 @@ export interface RelationMapping<
 }
 
 export interface RepoOptions {
-  entityName: string;
+  entity: string;
   source: string;
 }
 

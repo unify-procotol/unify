@@ -8,9 +8,9 @@ export const WalletPlugin: Plugin = {
   adapters: [
     {
       source: "solana",
-      entityName: "WalletEntity",
+      entity: "WalletEntity",
       adapter: new SolanaAdapter(),
     },
-    { source: "evm", entityName: "WalletEntity", adapter: new EVMAdapter() },
+    { source: "evm", entity: "WalletEntity", adapter: new EVMAdapter() },
   ],
 };

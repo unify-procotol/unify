@@ -5,19 +5,19 @@ import { Unify } from "@unilab/unify-hono";
 export class SchemaAdapter extends BaseAdapter<SchemaEntity> {
   static readonly adapterName = "SchemaAdapter";
 
-  private getSourcesForEntity(entityName: string): string[] {
+  private getSourcesForEntity(entity: string): string[] {
     const entitySources = Unify.getEntitySources();
-    return entitySources[entityName] || [];
+    return entitySources[entity] || [];
   }
 
   async findMany(args?: FindManyArgs<SchemaEntity>): Promise<SchemaEntity[]> {
     const where = args?.where || {};
     const schemas = Unify.getEntitySchemas();
-    const entityName = where.name;
+    const entity = where.name;
 
-    if (entityName) {
+    if (entity) {
       const actualEntityName =
-        typeof entityName === "string" ? entityName : entityName.$eq;
+        typeof entity === "string" ? entity : entity.$eq;
       if (actualEntityName) {
         const schema = schemas[actualEntityName];
         if (schema) {

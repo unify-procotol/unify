@@ -225,7 +225,7 @@ interface Plugin {
 
 interface AdapterRegistration {
   source: string;
-  entityName: string;
+  entity: string;
   adapter: DataSourceAdapter<any>;
 }
 ```
@@ -369,13 +369,13 @@ Create a repository proxy for a specific entity and data source.
 
 ```typescript
 createRepositoryProxy<T extends Record<string, any>>(
-  entityName: string,
+  entity: string,
   source: string
 ): Repository<T>
 ```
 
 **Parameters:**
-- `entityName` - Name of the entity
+- `entity` - Name of the entity
 - `source` - Data source identifier
 
 **Returns:** Repository instance with client-side relation loading support
@@ -412,7 +412,7 @@ Create a repository instance using the global client.
 
 ```typescript
 interface RepoOptions {
-  entityName: string;
+  entity: string;
   source: string;
 }
 
@@ -427,7 +427,7 @@ import { UnifyClient } from "@unilab/unify-client";
 import { WalletEntity } from "@unilab/uniweb3/entities";
 
 const walletRepo = UnifyClient.repo<WalletEntity>({
-  entityName: "wallet",
+  entity: "wallet",
   source: "evm",
 });
 ```
@@ -541,7 +541,7 @@ UnifyClient.init({ baseUrl: "http://localhost:3000" });
 
 // Use the convenience function
 const walletRepo = repo<WalletEntity>({
-  entityName: "wallet",
+  entity: "wallet",
   source: "solana",
 });
 const wallet = await walletRepo.findOne({
@@ -777,8 +777,8 @@ Complete plugin configuration for wallet functionality.
 const WalletPlugin: Plugin = {
   entities: [WalletEntity],
   adapters: [
-    { source: "evm", entityName: "wallet", adapter: new EVMAdapter() },
-    { source: "solana", entityName: "wallet", adapter: new SolanaAdapter() }
+    { source: "evm", entity: "wallet", adapter: new EVMAdapter() },
+    { source: "solana", entity: "wallet", adapter: new SolanaAdapter() }
   ]
 };
 ```
@@ -914,7 +914,7 @@ UnifyClient.init({
 
 // Query with relations
 const wallets = await repo<WalletEntity>({
-  entityName: "wallet",
+  entity: "wallet",
   source: "solana",
 }).findMany({
   where: { 
@@ -968,7 +968,7 @@ class DatabaseAdapter extends BaseAdapter<UserEntity> {
 const UserPlugin: Plugin = {
   entities: [UserEntity],
   adapters: [
-    { source: "database", entityName: "user", adapter: new DatabaseAdapter() }
+    { source: "database", entity: "user", adapter: new DatabaseAdapter() }
   ]
 };
 ```

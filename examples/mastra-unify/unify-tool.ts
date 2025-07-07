@@ -123,14 +123,14 @@ export function createRepoFunctions(
 
   if (plugin.adapters) {
     for (const adapterReg of plugin.adapters) {
-      const entityNameKey = adapterReg.entityName
+      const entityNameKey = adapterReg.entity
         .replace(/Entity$/i, "")
         .toLowerCase();
       repoFunctions[entityNameKey] = {
         findOne: async (whereConditions: any) => {
           try {
             return await repo<any>({
-              entityName: entityNameKey,
+              entity: entityNameKey,
               source: adapterReg.source,
             }).findOne({ where: whereConditions });
           } catch (error) {
@@ -141,7 +141,7 @@ export function createRepoFunctions(
         findMany: async (whereConditions?: any) => {
           try {
             return await repo<any>({
-              entityName: entityNameKey,
+              entity: entityNameKey,
               source: adapterReg.source,
             }).findMany(whereConditions ? { where: whereConditions } : {});
           } catch (error) {
@@ -335,7 +335,7 @@ export class UnifyToolBuilder {
 
 export interface EntityMetadata {
   name: string;
-  entityName: string;
+  entity: string;
   source: string;
   adapter: any;
   schema: any;
@@ -349,7 +349,7 @@ export interface QueryPlan {
 }
 
 export interface QueryStep {
-  entityName: string;
+  entity: string;
   operation: "findOne" | "findMany";
   parameters: any;
   dependsOn?: string[];
@@ -400,7 +400,7 @@ export class SmartUnifyTool {
 
       // Find corresponding adapter
       const adapterReg = this.plugin.adapters.find(
-        (a) => a.entityName === entityName
+        (a) => a.entity === entityName
       );
       if (!adapterReg) continue;
 
@@ -412,7 +412,7 @@ export class SmartUnifyTool {
 
       const metadata: EntityMetadata = {
         name: entityKey,
-        entityName,
+        entity: entityName,
         source: adapterReg.source,
         adapter: adapterReg.adapter,
         schema,
@@ -605,7 +605,7 @@ export class SmartUnifyTool {
       if (!metadata) continue;
 
       const step: QueryStep = {
-        entityName,
+        entity: entityName,
         operation: "findOne", // Default operation
         parameters: await this.extractParametersForEntity(context, metadata),
         dependsOn: metadata.dependencies,
@@ -833,7 +833,7 @@ export class SmartUnifyTool {
   ): string {
     return `
 Context: User query is "${context.query}"
-Entity: ${metadata.entityName}
+Entity: ${metadata.entity}
 Field: ${fieldName}
 Field Type: ${fieldType}
 Field Description: ${fieldDescription}
@@ -1094,7 +1094,7 @@ Return only the extracted value or null if not found.
     const stepResults: Record<string, any> = {};
 
     for (const step of plan.steps) {
-      console.log(`🔄 Executing step: ${step.entityName}.${step.operation}`);
+      console.log(`🔄 Executing step: ${step.entity}.${step.operation}`);
 
       // Update parameters with results from previous steps
       let parameters = { ...step.parameters };
@@ -1111,18 +1111,18 @@ Return only the extracted value or null if not found.
               parameters,
               depResult.result,
               depName,
-              step.entityName
+              step.entity
             );
           }
         }
       }
 
-      console.log(`🎯 Final parameters for ${step.entityName}:`, parameters);
+      console.log(`🎯 Final parameters for ${step.entity}:`, parameters);
 
       // Execute the step
-      const repoFunction = this.repoFunctions[step.entityName];
+      const repoFunction = this.repoFunctions[step.entity];
       if (!repoFunction) {
-        throw new Error(`No repository function found for ${step.entityName}`);
+        throw new Error(`No repository function found for ${step.entity}`);
       }
 
       let result: any;
@@ -1138,16 +1138,16 @@ Return only the extracted value or null if not found.
             throw new Error(`Unsupported operation: ${step.operation}`);
         }
         console.log(
-          `✅ Step completed: ${step.entityName}`,
+          `✅ Step completed: ${step.entity}`,
           result ? "✓" : "✗"
         );
         console.log(`📤 Result:`, result);
       } catch (error) {
-        console.log(`❌ Step failed: ${step.entityName}`, error);
+        console.log(`❌ Step failed: ${step.entity}`, error);
         throw error;
       }
 
-      stepResults[step.entityName] = result;
+      stepResults[step.entity] = result;
     }
 
     // Return the final result based on plan

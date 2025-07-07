@@ -12,12 +12,12 @@ const MyPlugin: Plugin = {
   adapters: [
     {
       source: "demo",
-      entityName: "UserEntity",
+      entity: "UserEntity",
       adapter: new UserAdapter(),
     },
     {
       source: "demo",
-      entityName: "PostEntity",
+      entity: "PostEntity",
       adapter: new PostAdapter(),
     },
   ],
@@ -107,7 +107,7 @@ Unify.init({
 
 const fetchUser = async () => {
   const data = await repo<UserEntity>({
-    entityName: "user",
+    entity: "user",
     source: "demo",
   }).findMany({
     // where: {
@@ -118,7 +118,7 @@ const fetchUser = async () => {
       posts: (userList) => {
         const ids = userList.map((user) => user.id);
         return joinRepo<PostEntity, UserEntity>({
-          entityName: "post",
+          entity: "post",
           source: "demo",
           localField: "id",
           foreignField: "userId",
@@ -139,7 +139,7 @@ fetchUser();
 
 // const fetchPost = async () => {
 //   const data = await repo<PostEntity>({
-//     entityName: "post",
+//     entity: "post",
 //     source: "demo",
 //   }).findOne({
 //     where: {
@@ -149,7 +149,7 @@ fetchUser();
 //       user: (post) => {
 //         const userId = post.userId;
 //         return repo<UserEntity>({
-//           entityName: "user",
+//           entity: "user",
 //           source: "demo",
 //         }).findOne({
 //           where: {
@@ -166,11 +166,11 @@ fetchUser();
 
 // const fetchEvmBalance = async () => {
 //   const data = await repo<WalletEntity>({
-//     entityName: "wallet",
+//     entity: "wallet",
 //     source: "evm",
 //   }).findOne({
 //     where: {
-//       address: "0x4f00D43b5aF0a0aAd62E9075D1bFa86a89CDb9aB",
+//       address: "0x...",
 //       network: "ethereum",
 //     },
 //   });

@@ -149,7 +149,7 @@ export const UserPlugin: Plugin = {
   adapters: [
     {
       source: "demo", 
-      entityName: "UserEntity",
+      entity: "UserEntity",
       adapter: new UserAdapter()
     }
   ]
@@ -254,7 +254,7 @@ UnifyClient.init({
 // Create a user
 const createUser = async () => {
   const user = await repo<UserEntity>({
-    entityName: "user",
+    entity: "user",
     source: "demo",
   }).create({
     data: {
@@ -269,7 +269,7 @@ const createUser = async () => {
 // Find users
 const getUsers = async () => {
   const users = await repo<UserEntity>({
-    entityName: "user",
+    entity: "user",
     source: "demo",
   }).findMany({
     where: { name: "John Doe" }
@@ -280,7 +280,7 @@ const getUsers = async () => {
 // Update a user
 const updateUser = async () => {
   const updated = await repo<UserEntity>({
-    entityName: "user",
+    entity: "user",
     source: "demo",
   }).update({
     where: { id: "1" },
