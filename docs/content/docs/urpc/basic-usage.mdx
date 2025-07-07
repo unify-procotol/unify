@@ -30,7 +30,24 @@ export default {
 };
 ```
 
-### 3. Client Usage
+### 3. Use repo on the server side
+
+```typescript
+import { URPC } from "@unilab/urpc-hono";
+
+await URPC.repo<WalletEntity>({
+  entity: "WalletEntity",
+  source: "evm",
+}).findOne({
+  where: {
+    address: "0x...",
+    network: "ethereum",
+  },
+});
+
+```
+
+### 4. Client Usage
 
 ```typescript
 // client.ts
@@ -42,8 +59,8 @@ URPC.init({
   timeout: 10000,
 });
 
-const evmBalanceRes = await repo<WalletEntity>({
-  entity: "wallet",
+const evmBalance = await repo<WalletEntity>({
+  entity: "WalletEntity",
   source: "evm",
 }).findOne({
   where: {
@@ -52,8 +69,8 @@ const evmBalanceRes = await repo<WalletEntity>({
   },
 });
 
-const solanaBalanceRes = await repo<WalletEntity>({
-  entity: "wallet",
+const solanaBalance = await repo<WalletEntity>({
+  entity: "WalletEntity",
   source: "solana",
 }).findOne({
   where: {

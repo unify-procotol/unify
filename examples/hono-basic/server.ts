@@ -96,13 +96,10 @@ const app = URPC.init({
 });
 
 // // Use repo on the server side
-// const userRepo = URPC.repo<UserEntity>({
+// const user = await URPC.repo<UserEntity>({
 //   entity: "UserEntity",
 //   source: "demo",
-//   adapter: new UserAdapter(),
-// });
-
-// const user = await userRepo.findOne({
+// }).findOne({
 //   where: {
 //     id: "2",
 //   },

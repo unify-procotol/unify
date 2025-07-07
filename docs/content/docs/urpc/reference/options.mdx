@@ -272,15 +272,9 @@ const app = URPC.init({
 Get or create a repository for a specific data source.
 
 ```typescript
-static repo<T extends Record<string, any>>({
-  entity,
-  source,
-  adapter,
-}: {
-  entity: string;
-  source: string;
-  adapter: DataSourceAdapter<T>;
-}): Repository<T>
+static repo<T extends Record<string, any>>(
+  options: RepoOptions
+): Repository<T>
 ```
 
 #### getApp
@@ -597,15 +591,9 @@ export const { GET, POST, PATCH, DELETE } = api;
 Get or create a repository for a specific data source.
 
 ```typescript
-static repo<T extends Record<string, any>>({
-  entity,
-  source,
-  adapter,
-}: {
-  entity: string;
-  source: string;
-  adapter: DataSourceAdapter<T>;
-}): Repository<T>
+static repo<T extends Record<string, any>>(
+  options: RepoOptions
+): Repository<T>
 ```
 
 ## URPC

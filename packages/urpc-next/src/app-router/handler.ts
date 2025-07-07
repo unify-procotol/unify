@@ -1,7 +1,7 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { handleError, parseQueryParams, validateSource } from "./utils";
-import { registerAdapter, getRepo, getRepoRegistry } from "@unilab/urpc-core";
+import { registerAdapter, getRepo, getRepoRegistry, RepoOptions } from "@unilab/urpc-core";
 import {
   DataSourceAdapter,
   generateSchemas,
@@ -84,21 +84,8 @@ export class URPC {
     );
   }
 
-  static repo<T extends Record<string, any>>({
-    entity,
-    source,
-    adapter,
-  }: {
-    entity: string;
-    source: string;
-    adapter: DataSourceAdapter<T>;
-  }) {
-    try {
-      const repo = getRepo(entity, source) as Repository<T>;
-      return repo;
-    } catch (error) {
-      return registerAdapter(entity, source, adapter);
-    }
+  static repo<T extends Record<string, any>>(options: RepoOptions) {
+    return getRepo(options.entity, options.source) as Repository<T>;
   }
 
   private static async resolveParams(
