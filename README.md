@@ -15,20 +15,35 @@ Kills switch-case hell in multi-protocol apps 🧹
 - 3️⃣ Data Standardization → Protocol-agnostic outputs via entity contracts (e.g., unify EVM hex and Solana base58 addresses).
 
 
-## Use Case 
+## Use Case Example
 
 Query balance for an EVM and a Solana wallet — same code pattern, different source:
 ```ts
 repo<WalletEntity>({ entityName: "wallet", source: "evm" }).findOne({ where: { address: "0x..." } });
 repo<WalletEntity>({ entityName: "wallet", source: "solana" }).findOne({ where: { address: "1111..." } });
+
+repo<NFT>({ entityName: "nft", source: "ethereum" }).findMany({ where: { owner: "0x..." } });
+repo<NFT>({ entityName: "nft", source: "polygon" }).findMany({ where: { owner: "0x..." } });
+```
+Legacy vs. modern systems 
+```ts
+repo<User>({ source: "legacy-api" }).findMany() // legacy system
+repo<User>({ source: "v2-graphql" }).findMany() // new service
+```
+Device Agnostic IoT
+```ts
+repo<SensorData>({ source: "mqtt" }).findOne({where:{name:"device-001"}});  
+repo<SensorData>({ source: "http-api" }).findOne({where:{name:"device-002"}});  
 ```
 
 ```ts
-repo<User>({ source: "legacy-api" }).find() // legacy system
-repo<User>({ source: "v2-graphql" }).find() // new service
+// Query events from Datadog
+repo<LogEntry>({ entityName: "event", source: "datadog" }).find({ where: { type: "error", timestamp: { gte: "..." } } });
+// Query user actions from Mixpanel
+repo<LogEntry>({ entityName: "userAction", source: "mixpanel" }).find({ where: { userId: "user-x", eventName: "login" } });
+// Query system metrics from Prometheus
+repo<Metric>({ entityName: "metric", source: "prometheus" }).find({ where: { name: "cpu_usage", host: "server-a" } });
 ```
-
-
 ## License
 
 MIT License 🚀
