@@ -32,8 +32,8 @@ repo<User>({ source: "v2-graphql" }).findMany() // new service
 ```
 Device Agnostic IoT
 ```ts
-repo<SensorData>({ source: "mqtt" }).findOne({where:{name:"device-001"}});  
-repo<SensorData>({ source: "http-api" }).findOne({where:{name:"device-002"}});  
+repo<SensorData>({ source: "mqtt" }).create({...});  
+repo<SensorData>({ source: "http-api" }).create({...}});  
 ```
 
 ```ts
