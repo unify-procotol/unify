@@ -1,19 +1,36 @@
-# Unify
-
-A Hono-based SDK that maps entity configurations to REST API endpoints
+# 🌟 Unify Protocol: Solve Data Heterogeneity
 
 ## Overview
 
-Unify is a powerful and flexible SDK built on top of the high-performance [Hono](https://hono.dev/) web framework. It automatically maps entity methods to REST API endpoints, providing a seamless way to create APIs from your data models.
+Unify is a protocol focused on entity-first abstraction, aimed at resolving same-domain, cross-source complexity 🧭. Developers define unified entity models to seamlessly abstract over diverse implementations (APIs, protocols, schemas).
+
+
+## 🌐 Why Unify?
+Kills switch-case hell in multi-protocol apps 🧹
+- Frontend works with clean abstractions
+- backend freely extends supported sources.
+
 
 ## Features
+- 1️⃣ Entity-Driven API → Call `repo().findOne()` to abstract away backend differences (schema, protocol, source).
+- 2️⃣ Plug-and-Play Sources → Switch implementation via `source:"evm"/"solana"` — same interface, no logic rewrite.
+- 3️⃣ Data Standardization → Protocol-agnostic outputs via entity contracts (e.g., unify EVM hex and Solana base58 addresses).
 
-- 🔧 **Flexible Querying**: Support for complex query parameters and filtering
-- 🛡️ **Error Handling**: Built-in error handling and response standardization
-- 🔌 **Extensible**: Easy to add custom adapters and middleware
-- 💪 **TypeScript**: Full TypeScript support with type safety
-- 🔗 **Framework Integration**: Seamless integration with Next.js, Hono and other frameworks
+
+## Use Case 
+
+Query balance for an EVM and a Solana wallet — same code pattern, different source:
+```ts
+repo<WalletEntity>({ entityName: "wallet", source: "evm" }).findOne({ where: { address: "0x..." } });
+repo<WalletEntity>({ entityName: "wallet", source: "solana" }).findOne({ where: { address: "1111..." } });
+```
+
+```ts
+repo<User>({ source: "legacy-api" }).find() // legacy system
+repo<User>({ source: "v2-graphql" }).find() // new service
+```
+
 
 ## License
 
-MIT 
+MIT License 🚀
