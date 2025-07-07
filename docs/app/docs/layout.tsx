@@ -1,167 +1,21 @@
 import { DocsLayout } from "fumadocs-ui/layouts/docs";
 import React from "react";
-import { baseOptions } from "@/app/layout.config";
-import {
-  Book,
-  Database,
-  LayoutGrid,
-  Plug,
-  SquarePlay,
-  Webhook,
-} from "lucide-react";
+import { baseOptions, linkItems } from "@/app/layout.config";
+import { Book } from "lucide-react";
+import { source } from "@/lib/source";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <DocsLayout
+      links={linkItems.filter((item) => item.type === "icon")}
+      tree={source.pageTree}
       sidebar={{
-        tabs: [
-          {
-            title: "Docs",
-            description: "get started and plugins",
-            url: "/docs/introduction",
+        tabs: {
+          transform: (option, node) => ({
+            ...option,
             icon: <Book />,
-            urls: new Set([
-              "/docs/introduction",
-              "/docs/installation",
-              "/docs/basic-usage",
-              "/docs/integrations/next",
-              "/docs/integrations/hono",
-              "/docs/plugins/creating-plugins",
-              "/docs/plugins/uniweb3",
-              "/docs/middleware/hook",
-              "/docs/middleware/logging",
-              "/docs/reference/options",
-              "/docs/reference/contributing",
-            ]),
-          },
-          {
-            title: "Examples",
-            description: "examples and guides",
-            url: "/docs/examples/next",
-            icon: <SquarePlay />,
-            urls: new Set(["/docs/examples/next"]),
-          },
-        ],
-      }}
-      tree={{
-        name: "docs",
-        children: [
-          {
-            type: "folder",
-            name: "Get Started",
-            children: [
-              {
-                type: "page",
-                name: "Introduction",
-                url: "/docs/introduction",
-              },
-              {
-                type: "page",
-                name: "Installation",
-                url: "/docs/installation",
-              },
-              {
-                type: "page",
-                name: "Basic Usage",
-                url: "/docs/basic-usage",
-              },
-            ],
-            icon: <Book />,
-          },
-          {
-            type: "folder",
-            name: "Integrations",
-            children: [
-              {
-                type: "page",
-                name: "Next",
-                url: "/docs/integrations/next",
-              },
-              {
-                type: "page",
-                name: "Hono",
-                url: "/docs/integrations/hono",
-              },
-            ],
-            icon: <LayoutGrid />,
-          },
-          {
-            type: "folder",
-            name: "Plugins",
-            children: [
-              {
-                type: "page",
-                name: "Creating Plugins",
-                url: "/docs/plugins/creating-plugins",
-              },
-              {
-                type: "page",
-                name: "UniWeb3",
-                url: "/docs/plugins/uniweb3",
-              },
-            ],
-            icon: <Plug />,
-          },
-          {
-            type: "folder",
-            name: "Middleware",
-            children: [
-              {
-                type: "page",
-                name: "Hook",
-                url: "/docs/middleware/hook",
-              },
-              {
-                type: "page",
-                name: "Logging",
-                url: "/docs/middleware/logging",
-              },
-            ],
-            icon: <Webhook />,
-          },
-          {
-            type: "folder",
-            name: "Relations",
-            children: [
-              {
-                type: "page",
-                name: "Relations",
-                url: "/docs/relations",
-              },
-            ],
-            icon: <LayoutGrid />,
-          },
-          {
-            type: "folder",
-            name: "Reference",
-            children: [
-              {
-                type: "page",
-                name: "Options",
-                url: "/docs/reference/options",
-              },
-              {
-                type: "page",
-                name: "Contributing",
-                url: "/docs/reference/contributing",
-              },
-            ],
-            icon: <Book />,
-          },
-          {
-            type: "folder",
-            name: "Examples",
-            children: [
-              {
-                type: "page",
-                name: "Next.js",
-                url: "/docs/examples/next",
-              },
-            ],
-            icon: <SquarePlay />,
-            root: true,
-          },
-        ],
+          }),
+        },
       }}
       {...baseOptions}
     >
