@@ -1,5 +1,5 @@
 import { ReactNode, useState, useEffect } from "react";
-import { repo, UnifyClient } from "@unilab/unify-client";
+import { repo, URPC } from "@unilab/urpc-client";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Card } from "./ui/card";
@@ -24,7 +24,7 @@ export function Layout({ children }: LayoutProps) {
   const connectToServer = async (url: string) => {
     setIsConnecting(true);
     try {
-      UnifyClient.init({
+      URPC.init({
         baseUrl: url,
         timeout: 10000,
       });
@@ -66,7 +66,7 @@ export function Layout({ children }: LayoutProps) {
             </div>
             <div>
               <h1 className="text-xl font-bold text-foreground">
-                Unify Studio
+                URPC Studio
               </h1>
               <p className="text-xs text-muted-foreground font-medium">Database Explorer</p>
             </div>

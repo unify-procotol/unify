@@ -1,6 +1,6 @@
 ---
 title: Hook Middleware
-description: Hook Middleware is a powerful middleware that allows you to hook into the Unify lifecycle and execute custom logic before and after CRUD operations. This enables you to implement cross-cutting concerns like validation, logging, caching, notifications, and more.
+description: Hook Middleware is a powerful middleware that allows you to hook into the URPC lifecycle and execute custom logic before and after CRUD operations. This enables you to implement cross-cutting concerns like validation, logging, caching, notifications, and more.
 ---
 
 
@@ -16,7 +16,7 @@ description: Hook Middleware is a powerful middleware that allows you to hook in
 ## Installation
 
 ```bash
-npm install @unilab/core
+npm install @unilab/urpc-core
 ```
 
 ## Basic Usage
@@ -26,7 +26,7 @@ npm install @unilab/core
 Use the `createHookMiddleware` factory function to create a hook middleware:
 
 ```typescript
-import { createHookMiddleware } from '@unilab/core/middleware';
+import { createHookMiddleware } from '@unilab/urpc-core/middleware';
 
 const HookMiddleware = createHookMiddleware((hookManager) => {
   hookManager
@@ -41,12 +41,12 @@ const HookMiddleware = createHookMiddleware((hookManager) => {
 });
 ```
 
-### Registering with Unify
+### Registering with URPC
 
 ```typescript
-import { Unify } from '@unilab/unify-hono';
+import { URPC } from '@unilab/urpc-hono';
 
-const app = Unify.init({
+const app = URPC.init({
   plugins: [MyPlugin],
   middleware: [HookMiddleware],
 });

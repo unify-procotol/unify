@@ -1,4 +1,4 @@
-import { BaseAdapter, type FindOneArgs } from "@unilab/core";
+import { BaseAdapter, type FindOneArgs } from "@unilab/urpc-core";
 import { PairEntity } from "../entities/pair";
 
 interface TokenInfo {

@@ -1,6 +1,6 @@
 ---
 title: Installation
-description: Get started with Unify - installation guide and setup instructions
+description: Get started with URPC - installation guide and setup instructions
 ---
 
 ## Quick Start
@@ -12,7 +12,7 @@ Choose the appropriate installation method based on your use case:
 For client-side applications that need basic entity management functionality:
 
 ```package-install
-@unilab/unify @unilab/core
+@unilab/urpc @unilab/urpc-core
 ```
 
 ### Hono Server
@@ -20,13 +20,13 @@ For client-side applications that need basic entity management functionality:
 For server-side applications using the Hono framework:
 
 ```package-install
-@unilab/unify-hono @unilab/core hono @hono/node-server
+@unilab/urpc-hono @unilab/urpc-core hono @hono/node-server
 ```
 
 ### Next.js
 
 ```package-install
-@unilab/unify-next @unilab/unify-client @unilab/core
+@unilab/urpc-next @unilab/urpc-client @unilab/urpc-core
 ```
 
 ### Client Library
@@ -34,7 +34,7 @@ For server-side applications using the Hono framework:
 For applications that need client-side API calling functionality:
 
 ```package-install
-@unilab/unify-client
+@unilab/urpc-client
 ```
 
 ## Optional Packages
@@ -52,7 +52,7 @@ Install when you need Web3 wallet functionality:
 Install when you need advanced middleware functionality:
 
 ```package-install
-@unilab/core
+@unilab/urpc-core
 ```
 
 ## Usage Examples
@@ -62,9 +62,9 @@ Install when you need advanced middleware functionality:
 ```typescript
 import { UserEntity } from "./entities/user";
 import { PostEntity } from "./entities/post";
-import { Unify, repo } from "@unilab/unify";
+import { URPC, repo } from "@unilab/urpc";
 import { WalletPlugin } from "@unilab/uniweb3";
-import { createHookMiddleware, Logging } from "@unilab/core/middleware";
+import { createHookMiddleware, Logging } from "@unilab/urpc-core/middleware";
 
 const MyPlugin = {
   entities: [UserEntity, PostEntity],
@@ -74,7 +74,7 @@ const MyPlugin = {
   ],
 };
 
-Unify.init({
+URPC.init({
   plugins: [MyPlugin, WalletPlugin],
   middleware: [Logging()],
 });
@@ -89,10 +89,10 @@ const users = await repo({
 ### Hono Server
 
 ```typescript
-import { Unify } from "@unilab/unify-hono";
+import { URPC } from "@unilab/urpc-hono";
 import { UserAdapter } from "./adapters/user";
 import { PostAdapter } from "./adapters/post";
-import { Logging } from "@unilab/core/middleware";
+import { Logging } from "@unilab/urpc-core/middleware";
 
 const MyPlugin = {
   entities: [UserEntity, PostEntity],
@@ -102,7 +102,7 @@ const MyPlugin = {
   ],
 };
 
-const app = Unify.init({
+const app = URPC.init({
   plugins: [MyPlugin],
   middleware: [Logging()],
 });
@@ -118,17 +118,17 @@ export default {
 Create `src/api.ts`:
 
 ```typescript
-import { Unify } from "@unilab/unify-next/app-router";
+import { URPC } from "@unilab/urpc-next/app-router";
 import { WalletPlugin } from "@unilab/uniweb3";
-import { Logging } from "@unilab/core/middleware";
+import { Logging } from "@unilab/urpc-core/middleware";
 
-export const api = Unify.init({
+export const api = URPC.init({
   plugins: [WalletPlugin],
   middleware: [Logging()],
 });
 ```
 
-Create `src/app/api/[...unify]/route.ts`:
+Create `src/app/api/[...URPC]/route.ts`:
 
 ```typescript
 import { api } from "../../../api";
@@ -138,14 +138,14 @@ export const { GET, POST, PATCH, DELETE } = api;
 
 ### Next.js Pages Router
 
-Create `src/pages/api/[...unify].ts`:
+Create `src/pages/api/[...URPC].ts`:
 
 ```typescript
-import { Unify } from "@unilab/unify-next/pages-router";
+import { URPC } from "@unilab/urpc-next/pages-router";
 import { WalletPlugin } from "@unilab/uniweb3";
-import { Logging } from "@unilab/core/middleware";
+import { Logging } from "@unilab/urpc-core/middleware";
 
-const handler = Unify.init({
+const handler = URPC.init({
   plugins: [WalletPlugin],
   middleware: [Logging()],
 });

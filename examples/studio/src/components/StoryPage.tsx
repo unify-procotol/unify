@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { UniRender, Entity, FieldConfig, LayoutType } from '@unilab/unify-ui';
+import { UniRender, Entity, FieldConfig, LayoutType } from '@unilab/urpc-ui';
 import { Button } from './ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';

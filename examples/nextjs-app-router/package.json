@@ -9,9 +9,9 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@unilab/unify-next": "workspace:*",
-    "@unilab/unify-client": "workspace:*",
-    "@unilab/core": "workspace:*",
+    "@unilab/urpc-next": "workspace:*",
+    "@unilab/urpc-client": "workspace:*",
+    "@unilab/urpc-core": "workspace:*",
     "@unilab/uniweb3": "workspace:*",
     "next": "^15.0.0",
     "react": "^19",

@@ -1,6 +1,6 @@
 ---
 title: Basic Usage
-description: Learn how to set up Unify with plugins and middleware
+description: Learn how to set up URPC with plugins and middleware
 ---
 
 ## Server Setup
@@ -8,18 +8,18 @@ description: Learn how to set up Unify with plugins and middleware
 ### 1. Install Dependencies
 
 ```bash
-npm install @unilab/unify-hono @unilab/unify-client @unilab/core
+npm install @unilab/urpc-hono @unilab/urpc-client @unilab/urpc-core
 ```
 
 ### 2. Create Server
 
 ```typescript
 // server.ts
-import { Unify } from "@unilab/unify-hono";
+import { URPC } from "@unilab/urpc-hono";
 import { WalletPlugin } from "@unilab/uniweb3";
-import { Logging } from "@unilab/core/middleware";
+import { Logging } from "@unilab/urpc-core/middleware";
 
-const app = Unify.init({
+const app = URPC.init({
   plugins: [WalletPlugin],
   middleware: [Logging()],
 });
@@ -34,10 +34,10 @@ export default {
 
 ```typescript
 // client.ts
-import { repo, UnifyClient } from "@unilab/unify-client";
+import { repo, URPC } from "@unilab/urpc-client";
 import { WalletEntity } from "@unilab/uniweb3/entities";
 
-UnifyClient.init({
+URPC.init({
   baseUrl: "http://localhost:3000",
   timeout: 10000,
 });

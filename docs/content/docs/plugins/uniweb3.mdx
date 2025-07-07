@@ -1,6 +1,6 @@
 ---
 title: UniWeb3 Plugin
-description: UniWeb3 is a comprehensive blockchain plugin for Unify that provides unified access to multiple blockchain networks. It includes support for EVM-compatible chains and Solana, allowing you to query blockchain data through a consistent API.
+description: UniWeb3 is a comprehensive blockchain plugin for URPC that provides unified access to multiple blockchain networks. It includes support for EVM-compatible chains and Solana, allowing you to query blockchain data through a consistent API.
 
 ---
 
@@ -13,21 +13,21 @@ description: UniWeb3 is a comprehensive blockchain plugin for Unify that provide
 
 ## Installation
 
-Install the UniWeb3 plugin along with Unify dependencies:
+Install the UniWeb3 plugin along with URPC dependencies:
 
 For Hono server:
 ```package-install
-@unilab/unify-hono @unilab/unify @unilab/uniweb3
+@unilab/urpc-hono @unilab/urpc @unilab/uniweb3
 ```
 
 For Next.js Pages Router:
 ```package-install
-@unilab/unify-next @unilab/unify-client @unilab/core @unilab/uniweb3 next react react-dom
+@unilab/urpc-next @unilab/urpc-client @unilab/urpc-core @unilab/uniweb3 next react react-dom
 ```
 
 Runs only in a browser or node environment:
 ```package-install
-@unilab/unify @unilab/core @unilab/uniweb3
+@unilab/urpc @unilab/urpc-core @unilab/uniweb3
 ```
 
 ## Server Setup
@@ -37,12 +37,12 @@ Runs only in a browser or node environment:
 Register the UniWeb3 plugin in your Hono server:
 
 ```typescript
-import { Unify } from "@unilab/unify-hono";
+import { URPC } from "@unilab/urpc-hono";
 import { WalletPlugin } from "@unilab/uniweb3";
-import { Logging } from "@unilab/core/middleware";
+import { Logging } from "@unilab/urpc-core/middleware";
 
 // Register Web3 plugin
-const app = Unify.init({
+const app = URPC.init({
   plugins: [WalletPlugin],
   middleware: [Logging()],
 });
@@ -58,12 +58,12 @@ export default {
 For Next.js with Pages Router, create an API route to handle UniWeb3 requests:
 
 ```typescript
-// pages/api/[...unify].ts
-import { Unify } from "@unilab/unify-next/pages-router";
+// pages/api/[...urpc].ts
+import { URPC } from "@unilab/urpc-next/pages-router";
 import { WalletPlugin } from "@unilab/uniweb3";
-import { Logging } from "@unilab/core/middleware";
+import { Logging } from "@unilab/urpc-core/middleware";
 
-const handler = Unify.init({
+const handler = URPC.init({
   plugins: [WalletPlugin],
   middleware: [Logging()],
 });
@@ -76,12 +76,12 @@ export default handler;
 For browser environments, you can use UniWeb3 directly without a server:
 
 ```typescript
-import { Unify } from "@unilab/unify";
+import { URPC } from "@unilab/urpc";
 import { WalletPlugin } from "@unilab/uniweb3";
-import { Logging } from "@unilab/core/middleware";
+import { Logging } from "@unilab/urpc-core/middleware";
 
-// Initialize Unify with Web3 plugin for browser or node.js
-Unify.init({
+// Initialize URPC with Web3 plugin for browser or node.js
+URPC.init({
   enableDebug: true,
   plugins: [WalletPlugin],
   middleware: [Logging()],
@@ -93,11 +93,11 @@ Unify.init({
 ### Initializing the Client
 
 ```typescript
-import { repo, UnifyClient } from "@unilab/unify-client";
+import { repo, URPC } from "@unilab/urpc-client";
 import { WalletEntity } from "@unilab/uniweb3/entities";
 
 // Initialize the client (for standalone server)
-UnifyClient.init({
+URPC.init({
   baseUrl: "http://localhost:3000",
   timeout: 10000,
 });
@@ -156,12 +156,12 @@ console.log("Solana Wallet:", solanaWallet);
 Here's a complete React component example that fetches wallet balances:
 
 ```typescript
-import { repo, UnifyClient } from "@unilab/unify-client";
+import { repo, URPC } from "@unilab/urpc-client";
 import { WalletEntity } from "@unilab/uniweb3/entities";
 import { useEffect, useState } from "react";
 
 // Initialize the client for Next.js API routes
-UnifyClient.init({
+URPC.init({
   baseUrl: "http://localhost:3000/api",
   timeout: 10000,
   headers: {
@@ -233,11 +233,11 @@ export default function Home() {
 Here's a standalone Node.js example for querying balances:
 
 ```typescript
-import { repo, UnifyClient } from "@unilab/unify-client";
+import { repo, URPC } from "@unilab/urpc-client";
 import { WalletEntity } from "@unilab/uniweb3/entities";
 
 // Initialize the client for standalone server
-UnifyClient.init({
+URPC.init({
   baseUrl: "http://localhost:3000",
   timeout: 10000,
 });
@@ -341,16 +341,16 @@ cd my-web3-app
 
 2. Install the required dependencies:
 ```bash
-npm install @unilab/unify-next @unilab/unify-client @unilab/core @unilab/uniweb3
+npm install @unilab/urpc-next @unilab/urpc-client @unilab/urpc-core @unilab/uniweb3
 ```
 
-3. Create the API route at `pages/api/[...unify].ts`:
+3. Create the API route at `pages/api/[...urpc].ts`:
 ```typescript
-import { Unify } from "@unilab/unify-next/pages-router";
+import { URPC } from "@unilab/urpc-next/pages-router";
 import { WalletPlugin } from "@unilab/uniweb3";
-import { Logging } from "@unilab/core/middleware";
+import { Logging } from "@unilab/urpc-core/middleware";
 
-const handler = Unify.init({
+const handler = URPC.init({
   plugins: [WalletPlugin],
   middleware: [Logging()],
 });
@@ -364,7 +364,7 @@ export default handler;
 
 ### API Route Configuration
 
-The `[...unify].ts` API route in the `pages/api` directory will handle all UniWeb3 requests. The route uses dynamic routing to catch all paths under `/api/`.
+The `[...urpc].ts` API route in the `pages/api` directory will handle all UniWeb3 requests. The route uses dynamic routing to catch all paths under `/api/`.
 
 ### Client Configuration
 

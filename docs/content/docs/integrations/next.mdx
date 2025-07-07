@@ -1,6 +1,6 @@
 ---
 title: Next.js Integration
-description: Unify provides complete Next.js support, including both App Router and Pages Router routing methods. This guide will show you how to integrate Unify in Next.js projects.
+description: URPC provides complete Next.js support, including both App Router and Pages Router routing methods. This guide will show you how to integrate URPC in Next.js projects.
 
 ---
 
@@ -9,7 +9,7 @@ description: Unify provides complete Next.js support, including both App Router 
 First, install the required dependency packages:
 
 ```package-install
-@unilab/unify-next @unilab/unify-client @unilab/core @unilab/uniweb3
+@unilab/urpc-next @unilab/urpc-client @unilab/urpc-core @unilab/uniweb3
 ```
 
 ### App Router Additional Dependencies
@@ -34,7 +34,7 @@ nextjs-app-router/
 │   ├── api.ts                    # API configuration
 │   └── app/
 │       ├── api/
-│       │   └── [...unify]/
+│       │   └── [...urpc]/
 │       │       └── route.ts      # API routes
 │       ├── globals.css
 │       ├── layout.tsx
@@ -49,11 +49,11 @@ nextjs-app-router/
 Create API configuration in `src/api.ts`:
 
 ```typescript
-import { Logging } from "@unilab/core/middleware";
-import { Unify } from "@unilab/unify-next/app-router";
+import { Logging } from "@unilab/urpc-core/middleware";
+import { URPC } from "@unilab/urpc-next/app-router";
 import { WalletPlugin } from "@unilab/uniweb3";
 
-export const api = Unify.init({
+export const api = URPC.init({
   plugins: [WalletPlugin],
   middleware: [Logging()],
 });
@@ -61,7 +61,7 @@ export const api = Unify.init({
 
 ### API Route Setup
 
-Create API routes in `src/app/api/[...unify]/route.ts`:
+Create API routes in `src/app/api/[...urpc]/route.ts`:
 
 ```typescript
 import { api } from "../../../api";
@@ -71,16 +71,16 @@ export const { GET, POST, PATCH, DELETE } = api;
 
 ### Client Usage
 
-Using Unify client in page components:
+Using URPC client in page components:
 
 ```tsx
 "use client";
 
-import { repo, UnifyClient } from "@unilab/unify-client";
+import { repo, URPC } from "@unilab/urpc-client";
 import { WalletEntity } from "@unilab/uniweb3/entities";
 import { useEffect, useState } from "react";
 
-UnifyClient.init({
+URPC.init({
   baseUrl: "http://localhost:3000/api",
   timeout: 10000,
   headers: {
@@ -152,7 +152,7 @@ nextjs-pages-router/
 ├── src/
 │   ├── pages/
 │   │   ├── api/
-│   │   │   └── [...unify].ts     # API routes
+│   │   │   └── [...urpc].ts     # API routes
 │   │   ├── _app.tsx
 │   │   ├── _document.tsx
 │   │   └── index.tsx             # Main page
@@ -165,14 +165,14 @@ nextjs-pages-router/
 
 ### API Route Setup
 
-Create API routes in `src/pages/api/[...unify].ts`:
+Create API routes in `src/pages/api/[...urpc].ts`:
 
 ```typescript
-import { Unify } from "@unilab/unify-next/pages-router";
+import { URPC } from "@unilab/urpc-next/pages-router";
 import { WalletPlugin } from "@unilab/uniweb3";
-import { Logging } from "@unilab/core/middleware";
+import { Logging } from "@unilab/urpc-core/middleware";
 
-const handler = Unify.init({
+const handler = URPC.init({
   plugins: [WalletPlugin],
   middleware: [Logging()],
 });
@@ -182,14 +182,14 @@ export default handler;
 
 ### Client Usage
 
-Using Unify client in page components:
+Using URPC client in page components:
 
 ```tsx
-import { repo, UnifyClient } from "@unilab/unify-client";
+import { repo, URPC } from "@unilab/urpc-client";
 import { WalletEntity } from "@unilab/uniweb3/entities";
 import { useEffect, useState } from "react";
 
-UnifyClient.init({
+URPC.init({
   baseUrl: "http://localhost:3000/api",
   timeout: 10000,
   headers: {
@@ -271,9 +271,9 @@ The integration supports all standard HTTP methods:
 
 ### Client Configuration
 
-The `UnifyClient` provides flexible configuration options:
+The `URPC` provides flexible configuration options:
 - **baseUrl**: API endpoint base URL
 - **timeout**: Request timeout in milliseconds
 - **headers**: Custom headers including authorization
 
-This integration provides a seamless way to use Unify in Next.js applications with both routing approaches.
+This integration provides a seamless way to use URPC in Next.js applications with both routing approaches.

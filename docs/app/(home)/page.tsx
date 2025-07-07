@@ -71,9 +71,9 @@ export default function HomePage() {
 function CodeExample() {
   const [activeTab, setActiveTab] = useState<"server" | "client">("server");
 
-  const serverCode = `import { Unify } from "@unilab/unify-hono";
+  const serverCode = `import { Unify } from "@unilab/urpc-hono";
 import { WalletPlugin } from "@unilab/uniweb3";
-import { Logging } from "@unilab/core/middleware";
+import { Logging } from "@unilab/urpc-core/middleware";
 
 const app = Unify.init({
   plugins: [WalletPlugin],
@@ -85,7 +85,7 @@ export default {
   fetch: app.fetch,
 };`;
 
-  const clientCode = `import { repo, UnifyClient } from "@unilab/unify-client";
+  const clientCode = `import { repo, UnifyClient } from "@unilab/urpc-client";
 import { WalletEntity } from "@unilab/uniweb3/entities";
 
 UnifyClient.init({

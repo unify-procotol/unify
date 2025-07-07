@@ -1,11 +1,11 @@
 ---
 title: Contributing
-description: Contributing to Unify - guidelines for contributing to the framework and its packages
+description: Contributing to URPC - guidelines for contributing to the framework and its packages
 ---
 
 ## Getting Started
 
-Thank you for your interest in contributing to Unify! This guide will help you get started with contributing to the project.
+Thank you for your interest in contributing to URPC! This guide will help you get started with contributing to the project.
 
 ### Development Setup
 
@@ -27,12 +27,13 @@ Thank you for your interest in contributing to Unify! This guide will help you g
 
 ## Project Structure
 
-Unify is organized as a monorepo with the following packages:
+URPC is organized as a monorepo with the following packages:
 
-- **`packages/core`** - Core types and interfaces
-- **`packages/server`** - Server-side components and Unify class
-- **`packages/client`** - Client-side components and UnifyClient class
-- **`packages/uniweb3`** - Web3 adapters for Solana and EVM chains
+- **`packages/urpc-core`** - Core types and interfaces
+- **`packages/urpc-hono`** - Server-side with Hono
+- **`packages/urpc-next`** - Server-side with Next.js
+- **`packages/urpc-client`** - Client-side components and URPC Client
+- **`packages/urpc-ui`** - UI components
 - **`examples/`** - Example implementations
 - **`docs/`** - Documentation website
 
@@ -74,7 +75,7 @@ To add support for a new blockchain or data source:
 
 1. **Create a new adapter class:**
    ```typescript
-   import { BaseAdapter, FindManyArgs, FindOneArgs } from "@unilab/core";
+   import { BaseAdapter, FindManyArgs, FindOneArgs } from "@unilab/urpc-core";
 
    class YourAdapter extends BaseAdapter<YourEntity> {
      async findMany(args: FindManyArgs<YourEntity>): Promise<YourEntity[]> {

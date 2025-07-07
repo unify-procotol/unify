@@ -1,12 +1,12 @@
 ---
 title: Relations
-description: Relations in Unify allow you to define connections between different entities using flexible callback functions. This approach enables you to query related data in a single request with complete control over the relation logic.
+description: Relations in URPC allow you to define connections between different entities using flexible callback functions. This approach enables you to query related data in a single request with complete control over the relation logic.
 
 ---
 
 ## Overview
 
-Unify supports flexible relation queries through callback functions:
+URPC supports flexible relation queries through callback functions:
 - **One-to-Many Relations**: Load multiple related entities for each main entity
 - **One-to-One Relations**: Load a single related entity for each main entity
 - **Custom Logic**: Define complex relation logic based on any entity properties
@@ -42,7 +42,7 @@ include: {
 The `joinRepo` function provides an optimized way to handle relations with explicit field mappings:
 
 ```typescript
-import { joinRepo } from "@unilab/unify-client";
+import { joinRepo } from "@unilab/urpc-client";
 
 joinRepo<PostEntity, UserEntity>({
   entity: "post",
@@ -58,7 +58,7 @@ Entities are defined with `@Fields` decorators but relations are handled via cal
 
 **entities/user.ts**
 ```typescript
-import { Fields } from "@unilab/core";
+import { Fields } from "@unilab/urpc-core";
 import { PostEntity } from "./post";
 
 export class UserEntity {
@@ -83,7 +83,7 @@ export class UserEntity {
 
 **entities/post.ts**
 ```typescript
-import { Fields } from "@unilab/core";
+import { Fields } from "@unilab/urpc-core";
 import type { UserEntity } from "./user";
 
 export class PostEntity {
@@ -108,16 +108,16 @@ export class PostEntity {
 
 ## Server Setup
 
-Configure your server with the Unify framework and register your adapters:
+Configure your server with the URPC framework and register your adapters:
 
 ```typescript
-import { Unify } from "@unilab/unify-hono";
+import { URPC } from "@unilab/urpc-hono";
 import { UserAdapter } from "./adapters/user";
 import { PostAdapter } from "./adapters/post";
 import { UserEntity } from "./entities/user";
 import { PostEntity } from "./entities/post";
-import { createHookMiddleware, Logging } from "@unilab/core/middleware";
-import { Plugin } from "@unilab/core";
+import { createHookMiddleware, Logging } from "@unilab/urpc-core/middleware";
+import { Plugin } from "@unilab/urpc-core";
 
 const MyPlugin: Plugin = {
   entities: [UserEntity, PostEntity],
@@ -127,7 +127,7 @@ const MyPlugin: Plugin = {
   ],
 };
 
-const app = Unify.init({
+const app = URPC.init({
   plugins: [MyPlugin],
   middleware: [Logging()],
 });
@@ -143,7 +143,7 @@ export default {
 Your adapters need to support query operators like `$in` for efficient relation queries:
 
 ```typescript
-import { BaseAdapter, FindManyArgs } from "@unilab/core";
+import { BaseAdapter, FindManyArgs } from "@unilab/urpc-core";
 import { PostEntity } from "../entities/post";
 
 class PostAdapter extends BaseAdapter<PostEntity> {
@@ -185,7 +185,7 @@ class PostAdapter extends BaseAdapter<PostEntity> {
 For straightforward relation queries where you have specific where conditions:
 
 ```typescript
-import { repo, UnifyClient } from "@unilab/unify-client";
+import { repo, URPC } from "@unilab/urpc-client";
 import { PostEntity, UserEntity } from "./entities";
 
 // Query a post with its author
@@ -213,7 +213,7 @@ const post = await repo<PostEntity>({
 When you need optimized relation mapping, especially for queries without specific where conditions, use `joinRepo`:
 
 ```typescript
-import { repo, UnifyClient, joinRepo } from "@unilab/unify-client";
+import { repo, URPC, joinRepo } from "@unilab/urpc-client";
 
 // Query users with their posts using joinRepo
 const fetchUser = async () => {
@@ -319,12 +319,12 @@ console.log("Users with posts:", users);
 
 ## Client Setup
 
-Initialize the Unify client with your server configuration:
+Initialize the URPC client with your server configuration:
 
 ```typescript
-import { UnifyClient } from "@unilab/unify-client";
+import { URPC } from "@unilab/urpc-client";
 
-UnifyClient.init({
+URPC.init({
   baseUrl: "http://localhost:3000",
   timeout: 10000,
 });
@@ -337,9 +337,9 @@ Here's a complete working example from the hono-basic implementation:
 ```typescript
 import { UserEntity } from "./entities/user";
 import { PostEntity } from "./entities/post";
-import { repo, UnifyClient, joinRepo } from "@unilab/unify-client";
+import { repo, URPC, joinRepo } from "@unilab/urpc-client";
 
-UnifyClient.init({
+URPC.init({
   baseUrl: "http://localhost:3000",
   timeout: 10000,
 });
@@ -412,6 +412,6 @@ createUser();
 
 ## Next Steps
 
-- Explore [Basic Usage](/docs/basic-usage) for general Unify concepts
+- Explore [Basic Usage](/docs/basic-usage) for general URPC concepts
 - Learn about [Framework Integrations](/docs/integrations) for frontend usage
-- Check out the [complete hono-basic example](https://github.com/your-repo/unify/tree/main/examples/hono-basic) in the repository
+- Check out the [complete hono-basic example](https://github.com/unifi-lab/unify/tree/main/examples/hono-basic) in the repository

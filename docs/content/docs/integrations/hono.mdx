@@ -1,6 +1,6 @@
 ---
 title: Hono Integration
-description: Unify provides seamless Hono integration. This guide shows you how to integrate Unify with Hono for building fast and lightweight web APIs.
+description: URPC provides seamless Hono integration. This guide shows you how to integrate URPC with Hono for building fast and lightweight web APIs.
 ---
 
 ## Install Dependencies
@@ -8,7 +8,7 @@ description: Unify provides seamless Hono integration. This guide shows you how 
 First, install the required dependency packages:
 
 ```package-install
-@unilab/unify-hono @unilab/unify-client @unilab/core hono @hono/node-server
+@unilab/urpc-hono @unilab/urpc-client @unilab/urpc-core hono @hono/node-server
 ```
 
 ## Project Structure
@@ -29,10 +29,10 @@ hono-basic/
 
 ## Entity Definition
 
-Define your entities using Unify decorators:
+Define your entities using URPC decorators:
 
 ```typescript
-import { Fields } from "@unilab/core";
+import { Fields } from "@unilab/urpc-core";
 import { PostEntity } from "./post";
 
 export class UserEntity {
@@ -60,7 +60,7 @@ export class UserEntity {
 Create adapters to handle data operations:
 
 ```typescript
-import { BaseAdapter, FindManyArgs, FindOneArgs } from "@unilab/core";
+import { BaseAdapter, FindManyArgs, FindOneArgs } from "@unilab/urpc-core";
 import { UserEntity } from "../entities/user";
 
 export class UserAdapter extends BaseAdapter<UserEntity> {
@@ -78,16 +78,16 @@ export class UserAdapter extends BaseAdapter<UserEntity> {
 
 ## Server Setup
 
-Configure your Hono server with Unify:
+Configure your Hono server with URPC:
 
 ```typescript
-import { Unify } from "@unilab/unify-hono";
+import { URPC } from "@unilab/urpc-hono";
 import { UserAdapter } from "./adapters/user";
 import { PostAdapter } from "./adapters/post";
 import { UserEntity } from "./entities/user";
 import { PostEntity } from "./entities/post";
-import { Logging } from "@unilab/core/middleware";
-import { Plugin } from "@unilab/core";
+import { Logging } from "@unilab/urpc-core/middleware";
+import { Plugin } from "@unilab/urpc-core";
 
 const MyPlugin: Plugin = {
   entities: [UserEntity, PostEntity],
@@ -97,7 +97,7 @@ const MyPlugin: Plugin = {
   ],
 };
 
-const app = Unify.init({
+const app = URPC.init({
   plugins: [MyPlugin],
   middleware: [Logging()],
 });
@@ -110,13 +110,13 @@ export default {
 
 ## Client Usage
 
-Use the Unify client to interact with your API:
+Use the URPC client to interact with your API:
 
 ```typescript
 import { UserEntity } from "./entities/user";
-import { repo, UnifyClient } from "@unilab/unify-client";
+import { repo, URPCClient } from "@unilab/urpc-client";
 
-UnifyClient.init({
+URPCClient.init({
   baseUrl: "http://localhost:3000",
   timeout: 10000,
 });
@@ -160,18 +160,18 @@ bun run dev
 npm run dev
 ```
 
-Your Unify-powered Hono API will be available at `http://localhost:3000`.
+Your URPC-powered Hono API will be available at `http://localhost:3000`.
 
 ## Middleware Support
 
-Unify supports various middleware for Hono integration:
+URPC supports various middleware for Hono integration:
 
 - **Logging**: Built-in request/response logging
 - **Hooks**: Before/after operation hooks
 - **Custom Middleware**: Add your own middleware logic
 
 ```typescript
-import { createHookMiddleware, Logging } from "@unilab/core/middleware";
+import { createHookMiddleware, Logging } from "@unilab/urpc-core/middleware";
 
 const HookMiddleware = createHookMiddleware((hookManager) => {
   hookManager
@@ -183,7 +183,7 @@ const HookMiddleware = createHookMiddleware((hookManager) => {
     });
 });
 
-const app = Unify.init({
+const app = URPC.init({
   plugins: [MyPlugin],
   middleware: [HookMiddleware, Logging()],
 });

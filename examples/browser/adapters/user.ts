@@ -3,7 +3,7 @@ import {
   CreationArgs,
   FindManyArgs,
   FindOneArgs,
-} from "@unilab/core";
+} from "@unilab/urpc-core";
 import { UserEntity } from "../entities/user";
 
 const userData = [

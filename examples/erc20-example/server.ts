@@ -1,6 +1,6 @@
-import { Unify } from "@unilab/unify-hono";
-import type { Plugin } from "@unilab/core";
-import { createHookMiddleware, Logging } from "@unilab/core/middleware";
+import { URPC } from "@unilab/urpc-hono";
+import type { Plugin } from "@unilab/urpc-core";
+import { createHookMiddleware, Logging } from "@unilab/urpc-core/middleware";
 
 // 导入Mimo相关文件
 import { PairEntity } from "./entities/pair";
@@ -40,8 +40,8 @@ const MimoPlugin: Plugin = {
   ],
 };
 
-// 创建Unify应用并配置  
-const app = Unify.init({
+// 创建URPC应用并配置  
+const app = URPC.init({
   plugins: [MimoPlugin],
   middleware: [HookMiddleware, Logging()],
 });

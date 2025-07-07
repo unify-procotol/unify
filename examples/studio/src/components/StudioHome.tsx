@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { repo, UnifyClient } from "@unilab/unify-client";
-import { UniRender, Entity, LayoutType, FieldConfig } from "@unilab/unify-ui";
+import { repo, URPC } from "@unilab/urpc-client";
+import { UniRender, Entity, LayoutType, FieldConfig } from "@unilab/urpc-ui";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
@@ -229,7 +229,7 @@ export function StudioHome({ isConnected, baseUrl }: StudioHomeProps) {
     try {
       const entityName = selectedEntity.name;
 
-      // Build query parameters based on search criteria using proper Unify syntax
+      // Build query parameters based on search criteria using proper urpc syntax
       let findManyArgs: any = {};
 
       if (searchField && searchValue.trim()) {
@@ -239,7 +239,7 @@ export function StudioHome({ isConnected, baseUrl }: StudioHomeProps) {
         switch (searchOperator) {
           case "contains":
             // For string contains, we might need to use a different approach
-            // Since Unify might not support regex, we'll use equals for now
+            // Since urpc might not support regex, we'll use equals for now
             whereCondition[searchField] = searchValue;
             break;
           case "equals":
@@ -290,7 +290,7 @@ export function StudioHome({ isConnected, baseUrl }: StudioHomeProps) {
 
       console.log("findManyArgs:", findManyArgs);
 
-      // Call the backend with proper Unify query syntax
+      // Call the backend with proper urpc query syntax
       const searchResults =
         Object.keys(findManyArgs).length > 0
           ? await repo<any>({
@@ -367,7 +367,7 @@ export function StudioHome({ isConnected, baseUrl }: StudioHomeProps) {
     try {
       const entity = selectedEntity.name;
 
-      // Create new record using Unify client
+      // Create new record using urpc client
       await repo<any>({
         entity: entity,
         source: selectedSource,

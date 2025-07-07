@@ -1,8 +1,8 @@
 import { UserEntity } from "./entities/user";
 import { PostEntity } from "./entities/post";
-import { repo, UnifyClient, joinRepo } from "@unilab/unify-client";
+import { repo, URPC, joinRepo } from "@unilab/urpc-client";
 
-UnifyClient.init({
+URPC.init({
   baseUrl: "http://localhost:3000",
   timeout: 10000,
 });

@@ -1,11 +1,11 @@
 import { UserEntity } from "./entities/user";
 import { PostEntity } from "./entities/post";
-import { joinRepo, repo, Unify } from "@unilab/unify";
+import { joinRepo, repo, URPC } from "@unilab/urpc";
 import { UserAdapter } from "./adapters/user";
 import { PostAdapter } from "./adapters/post";
 import { WalletPlugin } from "@unilab/uniweb3";
-import { Plugin } from "@unilab/core";
-import { createHookMiddleware, Logging } from "@unilab/core/middleware";
+import { Plugin } from "@unilab/urpc-core";
+import { createHookMiddleware, Logging } from "@unilab/urpc-core/middleware";
 
 const MyPlugin: Plugin = {
   entities: [UserEntity, PostEntity],
@@ -99,7 +99,7 @@ const HookMiddleware = createHookMiddleware((hookManager) => {
     });
 });
 
-Unify.init({
+URPC.init({
   enableDebug: true,
   plugins: [MyPlugin, WalletPlugin],
   // middleware: [HookMiddleware, Logging()],

@@ -1,10 +1,10 @@
-import { Unify } from "@unilab/unify-hono";
+import { URPC } from "@unilab/urpc-hono";
 import { SchemaAdapter } from "./adapters/schema";
 import { UserEntity } from "./entities/user";
 import { PostEntity } from "./entities/post";
 import { UserAdapter } from "../hono-basic/adapters/user";
 import { PostAdapter } from "../hono-basic/adapters/post";
-import { Plugin } from "@unilab/core";
+import { Plugin } from "@unilab/urpc-core";
 
 const MyPlugin: Plugin = {
   entities: [UserEntity, PostEntity],
@@ -16,7 +16,7 @@ const MyPlugin: Plugin = {
   ],
 };
 
-const app = Unify.init({
+const app = URPC.init({
   plugins: [MyPlugin],
 });
 

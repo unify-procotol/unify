@@ -1,11 +1,11 @@
 ---
 title: API Reference
-description: Complete API reference for Unify packages including @unilab/core, @unilab/unify-hono, @unilab/unify-client, @unilab/unify-next, @unilab/unify, and @unilab/uniweb3.
+description: Complete API reference for URPC packages including @unilab/urpc-core, @unilab/urpc-hono, @unilab/urpc-client, @unilab/urpc-next, @unilab/urpc, and @unilab/uniweb3.
 ---
 
-# @unilab/core
+# @unilab/urpc-core
 
-Core types and interfaces for the Unify framework.
+Core types and interfaces for the URPC framework.
 
 ## Repository Operations Arguments
 
@@ -230,22 +230,22 @@ interface AdapterRegistration {
 }
 ```
 
-# @unilab/unify-hono
+# @unilab/urpc-hono
 
-Server-side components for creating Unify API servers using Hono framework.
+Server-side components for creating URPC API servers using Hono framework.
 
 ## Unify
 
-Main class for creating and configuring Unify servers with plugin support.
+Main class for creating and configuring URPC servers with plugin support.
 
 ### Static Methods
 
 #### init
 
-Initialize the Unify server with configuration including plugins and middleware.
+Initialize the URPC server with configuration including plugins and middleware.
 
 ```typescript
-static init(config: UnifyConfig): Hono
+static init(config: URPCConfig): Hono
 ```
 
 **Parameters:**
@@ -257,11 +257,11 @@ static init(config: UnifyConfig): Hono
 
 **Example:**
 ```typescript
-import { Unify } from "@unilab/unify-hono";
+import { URPC } from "@unilab/urpc-hono";
 import { WalletPlugin } from "@unilab/uniweb3";
-import { LoggingMiddleware } from "@unilab/core/middleware";
+import { LoggingMiddleware } from "@unilab/urpc-core/middleware";
 
-const app = Unify.init({
+const app = URPC.init({
   plugins: [WalletPlugin],
   middleware: [LoggingMiddleware]
 });
@@ -273,9 +273,11 @@ Get or create a repository for a specific data source.
 
 ```typescript
 static repo<T extends Record<string, any>>({
+  entity,
   source,
   adapter,
 }: {
+  entity: string;
   source: string;
   adapter: DataSourceAdapter<T>;
 }): Repository<T>
@@ -315,12 +317,12 @@ static getEntitySources(): Record<string, string[]>
 
 ## Configuration Interfaces
 
-### UnifyConfig
+### URPCConfig
 
-Configuration options for initializing Unify server.
+Configuration options for initializing URPC server.
 
 ```typescript
-interface UnifyConfig {
+interface URPCConfig {
   app?: Hono;
   plugins?: Plugin[];
   middleware?: Middleware<any>[];
@@ -334,7 +336,7 @@ interface UnifyConfig {
 
 ## Automatic Route Generation
 
-The Unify server automatically generates REST API endpoints based on registered plugins:
+The URPC server automatically generates REST API endpoints based on registered plugins:
 
 - `GET /{entity}/list` - Find multiple records
 - `GET /{entity}/find_one` - Find single record  
@@ -344,13 +346,13 @@ The Unify server automatically generates REST API endpoints based on registered 
 
 All routes require a `source` query parameter to specify the data source.
 
-# @unilab/unify-client
+# @unilab/urpc-client
 
-HTTP client library for consuming Unify APIs with relation support.
+HTTP client library for consuming URPC APIs with relation support.
 
-## UnifyClient
+## URPC Client
 
-Main client class for interacting with Unify APIs with automatic relation loading.
+Main client class for interacting with URPC APIs with automatic relation loading.
 
 ### Constructor
 
@@ -395,9 +397,9 @@ static init(config: ClientConfig): void
 
 **Example:**
 ```typescript
-import { UnifyClient } from "@unilab/unify-client";
+import { URPC } from "@unilab/urpc-client";
 
-UnifyClient.init({
+URPC.init({
   baseUrl: "http://localhost:3000",
   timeout: 10000,
   headers: {
@@ -423,10 +425,10 @@ static repo<T extends Record<string, any>>(
 
 **Example:**
 ```typescript
-import { UnifyClient } from "@unilab/unify-client";
+import { URPC } from "@unilab/urpc-client";
 import { WalletEntity } from "@unilab/uniweb3/entities";
 
-const walletRepo = UnifyClient.repo<WalletEntity>({
+const walletRepo = URPC.repo<WalletEntity>({
   entity: "wallet",
   source: "evm",
 });
@@ -451,7 +453,7 @@ static joinRepo<F extends Record<string, any>, L extends Record<string, any>>(
 
 ### ClientConfig
 
-Configuration options for the Unify client.
+Configuration options for the URPC client.
 
 ```typescript
 interface ClientConfig {
@@ -462,7 +464,7 @@ interface ClientConfig {
 ```
 
 **Properties:**
-- `baseUrl` - Base URL of the Unify server (required)
+- `baseUrl` - Base URL of the URPC server (required)
 - `timeout` - Request timeout in milliseconds (default: 5000)
 - `headers` - Default headers to include with requests
 
@@ -533,11 +535,11 @@ function joinRepo<
 
 **Example:**
 ```typescript
-import { repo } from "@unilab/unify-client";
+import { repo, URPC } from "@unilab/urpc-client";
 import { WalletEntity } from "@unilab/uniweb3/entities";
 
 // Initialize client first
-UnifyClient.init({ baseUrl: "http://localhost:3000" });
+URPC.init({ baseUrl: "http://localhost:3000" });
 
 // Use the convenience function
 const walletRepo = repo<WalletEntity>({
@@ -553,11 +555,11 @@ const wallet = await walletRepo.findOne({
 
 The client automatically handles relation loading by executing callback functions on the client side after fetching the main entity data. This allows for flexible relation definitions without server-side configuration.
 
-# @unilab/unify-next
+# @unilab/urpc-next
 
-Next.js integration for Unify with support for both App Router and Pages Router.
+Next.js integration for URPC with support for both App Router and Pages Router.
 
-## Unify
+## URPC
 
 App Router integration (Next.js 13+).
 
@@ -565,10 +567,10 @@ App Router integration (Next.js 13+).
 
 #### init
 
-Initialize the Unify API handlers for App Router.
+Initialize the URPC API handlers for App Router.
 
 ```typescript
-static init(config: UnifyConfig): UnifyAPI
+static init(config: URPCConfig): URPCAPI
 ```
 
 **Parameters:**
@@ -579,11 +581,11 @@ static init(config: UnifyConfig): UnifyAPI
 
 **Example:**
 ```typescript
-// app/api/[...unify]/route.ts
-import { Unify } from "@unilab/unify-next";
+// app/api/[...urpc]/route.ts
+import { URPC } from "@unilab/urpc-next";
 import { WalletPlugin } from "@unilab/uniweb3";
 
-const api = Unify.init({
+const api = URPC.init({
   plugins: [WalletPlugin]
 });
 
@@ -596,15 +598,17 @@ Get or create a repository for a specific data source.
 
 ```typescript
 static repo<T extends Record<string, any>>({
+  entity,
   source,
   adapter,
 }: {
+  entity: string;
   source: string;
   adapter: DataSourceAdapter<T>;
 }): Repository<T>
 ```
 
-## Unify
+## URPC
 
 Pages Router integration (Next.js 12+).
 
@@ -612,31 +616,31 @@ Pages Router integration (Next.js 12+).
 
 #### init
 
-Initialize the Unify API handler for Pages Router.
+Initialize the URPC API handler for Pages Router.
 
 ```typescript
-static init(config: UnifyConfig): (req: NextApiRequest, res: NextApiResponse) => Promise<void>
+static init(config: URPCConfig): (req: NextApiRequest, res: NextApiResponse) => Promise<void>
 ```
 
 **Example:**
 ```typescript
-// pages/api/[...unify].ts
-import { Unify } from "@unilab/unify-next";
+// pages/api/[...urpc].ts
+import { URPC } from "@unilab/urpc-next";
 import { WalletPlugin } from "@unilab/uniweb3";
 
-export default Unify.init({
+export default URPC.init({
   plugins: [WalletPlugin]
 });
 ```
 
 ## Configuration Interfaces
 
-### UnifyAPI
+### URPC API
 
 Interface for App Router API handlers.
 
 ```typescript
-interface UnifyAPI {
+interface URPCAPI {
   GET: RouteHandler;
   POST: RouteHandler;
   PATCH: RouteHandler;
@@ -644,22 +648,22 @@ interface UnifyAPI {
 }
 ```
 
-### UnifyConfig
+### URPCConfig
 
 Configuration options for Next.js integration.
 
 ```typescript
-interface UnifyConfig {
+interface URPCConfig {
   plugins?: Plugin[];
   middleware?: Middleware<any>[];
 }
 ```
 
-# @unilab/unify
+# @unilab/urpc
 
-Lightweight browser-only client library for Unify without HTTP functionality.
+Lightweight browser-only client library for URPC without HTTP functionality.
 
-## Unify
+## URPC
 
 Browser-optimized client for local data sources.
 
@@ -718,7 +722,7 @@ Unified blockchain data adapters and entities for Web3 integration.
 Entity for blockchain wallet data.
 
 ```typescript
-import { Fields } from "@unilab/core";
+import { Fields } from "@unilab/urpc-core";
 
 class TokenEntity {
   @Fields.string()
@@ -785,7 +789,7 @@ const WalletPlugin: Plugin = {
 
 ## API Routes
 
-The Unify server automatically generates the following REST API endpoints when adapters are registered:
+The URPC server automatically generates the following REST API endpoints when adapters are registered:
 
 ### GET /\{entity\}/list
 
@@ -871,11 +875,11 @@ DELETE /wallet/delete?source=evm&where={"balance":"0"}
 ### Hono Server Setup
 
 ```typescript
-import { Unify } from "@unilab/unify-hono";
+import { URPC } from "@unilab/urpc-hono";
 import { WalletPlugin } from "@unilab/uniweb3";
-import { LoggingMiddleware } from "@unilab/core/middleware";
+import { LoggingMiddleware } from "@unilab/urpc-core/middleware";
 
-const app = Unify.init({
+const app = URPC.init({
   plugins: [WalletPlugin],
   middleware: [LoggingMiddleware]
 });
@@ -889,11 +893,11 @@ export default {
 ### Next.js App Router Setup
 
 ```typescript
-// app/api/[...unify]/route.ts
-import { Unify } from "@unilab/unify-next";
+// app/api/[...urpc]/route.ts
+import { URPC } from "@unilab/urpc-next";
 import { WalletPlugin } from "@unilab/uniweb3";
 
-const api = Unify.init({
+const api = URPC.init({
   plugins: [WalletPlugin]
 });
 
@@ -903,11 +907,11 @@ export const { GET, POST, PATCH, DELETE } = api;
 ### Client Usage with Relations
 
 ```typescript
-import { UnifyClient, repo } from "@unilab/unify-client";
+import { URPC, repo } from "@unilab/urpc-client";
 import { WalletEntity } from "@unilab/uniweb3/entities";
 
 // Initialize client
-UnifyClient.init({
+URPC.init({
   baseUrl: "http://localhost:3000",
   timeout: 10000,
 });
@@ -934,7 +938,7 @@ const wallets = await repo<WalletEntity>({
 ### Custom Entity and Adapter
 
 ```typescript
-import { Fields, Relations, DataSourceAdapter } from "@unilab/core";
+import { Fields, Relations, DataSourceAdapter } from "@unilab/urpc-core";
 
 // Define entity with decorators
 class UserEntity {
@@ -976,7 +980,7 @@ const UserPlugin: Plugin = {
 ### Browser-Only Usage
 
 ```typescript
-import { repo } from "@unilab/unify";
+import { repo } from "@unilab/urpc";
 import { LocalStorageAdapter } from "./local-storage-adapter";
 
 // Browser-only repository without HTTP
@@ -991,7 +995,7 @@ const todos = await localRepo.findMany({
 ### Middleware Usage
 
 ```typescript
-import { useGlobalMiddleware } from "@unilab/core";
+import { useGlobalMiddleware } from "@unilab/urpc-core";
 
 // Add logging middleware
 useGlobalMiddleware(async (context, next) => {

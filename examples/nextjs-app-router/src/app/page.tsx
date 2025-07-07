@@ -1,10 +1,10 @@
 "use client";
 
-import { repo, UnifyClient } from "@unilab/unify-client";
+import { repo, URPC } from "@unilab/urpc-client";
 import { WalletEntity } from "@unilab/uniweb3/entities";
 import { useEffect, useState } from "react";
 
-UnifyClient.init({
+URPC.init({
   baseUrl: "http://localhost:3000/api",
   timeout: 10000,
   headers: {

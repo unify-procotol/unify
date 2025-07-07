@@ -1,0 +1,24 @@
+{
+  "name": "entity-getter",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.ts",
+  "scripts": {
+    "memory": "bun run memory.ts",
+    "indexeddb": "vite"
+  },
+  "dependencies": {
+    "@unilab/uni-store": "workspace:*"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0",
+    "typescript": "^5.3.0"
+  },
+  "keywords": [
+    "unilab",
+    "browser",
+    "example"
+  ],
+  "author": "",
+  "license": "MIT"
+}

@@ -1,18 +1,18 @@
-import { BaseAdapter, FindManyArgs, FindOneArgs } from "@unilab/core";
+import { BaseAdapter, FindManyArgs, FindOneArgs } from "@unilab/urpc-core";
 import { SchemaEntity } from "../entities/schema";
-import { Unify } from "@unilab/unify-hono";
+import { URPC } from "@unilab/urpc-hono";
 
 export class SchemaAdapter extends BaseAdapter<SchemaEntity> {
   static readonly adapterName = "SchemaAdapter";
 
   private getSourcesForEntity(entity: string): string[] {
-    const entitySources = Unify.getEntitySources();
+    const entitySources = URPC.getEntitySources();
     return entitySources[entity] || [];
   }
 
   async findMany(args?: FindManyArgs<SchemaEntity>): Promise<SchemaEntity[]> {
     const where = args?.where || {};
-    const schemas = Unify.getEntitySchemas();
+    const schemas = URPC.getEntitySchemas();
     const entity = where.name;
 
     if (entity) {
@@ -45,7 +45,7 @@ export class SchemaAdapter extends BaseAdapter<SchemaEntity> {
 
   async findOne(args: FindOneArgs<SchemaEntity>): Promise<SchemaEntity | null> {
     const where = args.where;
-    const schemas = Unify.getEntitySchemas();
+    const schemas = URPC.getEntitySchemas();
     const entityName = where.name;
     if (entityName) {
       if (entityName && schemas[entityName]) {

@@ -1,11 +1,11 @@
 ---
 title: Creating Custom Plugins
-description: Learn how to create custom plugins for Unify with entities, adapters, and complete implementations.
+description: Learn how to create custom plugins for URPC with entities, adapters, and complete implementations.
 ---
 
 ## Overview
 
-Plugins in Unify allow you to extend functionality by defining custom entities and data source adapters. A plugin consists of:
+Plugins in URPC allow you to extend functionality by defining custom entities and data source adapters. A plugin consists of:
 
 - **Entities**: Data structures that define your domain models
 - **Adapters**: Implementations that handle data operations for specific sources
@@ -33,11 +33,11 @@ my-plugin/
 
 ### 1. Define Your Entity
 
-Entities define the structure of your data. Use decorators from `@unilab/core` to specify field types:
+Entities define the structure of your data. Use decorators from `@unilab/urpc-core` to specify field types:
 
 ```typescript
 // src/entities/user.ts
-import { Fields } from "@unilab/core";
+import { Fields } from "@unilab/urpc-core";
 
 export class UserEntity {
   @Fields.string()
@@ -65,9 +65,9 @@ import {
   CreationArgs,
   FindManyArgs,
   FindOneArgs,
-  UnifyError,
+  URPCError,
   ErrorCodes,
-} from "@unilab/core";
+} from "@unilab/urpc-core";
 import { UserEntity } from "../entities/user";
 
 // Mock data for demonstration
@@ -119,7 +119,7 @@ export class UserAdapter extends BaseAdapter<UserEntity> {
   async create(args: CreationArgs<UserEntity>): Promise<UserEntity> {
     const { name, email, avatar } = args.data;
     if (!name || !email || !avatar) {
-      throw new UnifyError(ErrorCodes.BAD_REQUEST, "Invalid arguments");
+      throw new URPCError(ErrorCodes.BAD_REQUEST, "Invalid arguments");
     }
     
     const newUser = {
@@ -140,7 +140,7 @@ Define your plugin by combining entities and adapters:
 
 ```typescript
 // src/plugins/index.ts
-import { Plugin } from "@unilab/core";
+import { Plugin } from "@unilab/urpc-core";
 import { UserEntity } from "../entities/user";
 import { UserAdapter } from "../adapters/user-adapter";
 
@@ -173,7 +173,7 @@ Define entities with relationships using field decorators:
 
 ```typescript
 // src/entities/post.ts
-import { Fields } from "@unilab/core";
+import { Fields } from "@unilab/urpc-core";
 import type { UserEntity } from "./user";
 
 export class PostEntity {
@@ -220,14 +220,14 @@ export class UserEntity {
 
 ### Server Setup
 
-Register your plugin in a Unify server:
+Register your plugin in a URPC server:
 
 ```typescript
 // server.ts
-import { Unify } from "@unilab/unify-hono";
+import { URPC } from "@unilab/urpc-hono";
 import { UserPlugin } from "./my-plugin";
 
-const app = Unify.init({
+const app = URPC.init({
   plugins: [UserPlugin]
 });
 
@@ -243,10 +243,10 @@ Use your plugin entities from the client:
 
 ```typescript
 // client.ts
-import { repo, UnifyClient } from "@unilab/unify-client";
+import { repo, URPC } from "@unilab/urpc-client";
 import { UserEntity } from "./my-plugin";
 
-UnifyClient.init({
+URPC.init({
   baseUrl: "http://localhost:3000",
   timeout: 10000
 });
@@ -300,9 +300,9 @@ Create a proper `package.json` for your plugin:
 
 ```json
 {
-  "name": "@mycompany/unify-user-plugin",
+  "name": "@mycompany/urpc-user-plugin",
   "version": "1.0.0",
-  "description": "User management plugin for Unify",
+  "description": "User management plugin for URPC",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
@@ -311,7 +311,7 @@ Create a proper `package.json` for your plugin:
     "dev": "tsc --watch"
   },
   "dependencies": {
-    "@unilab/core": "^1.0.0"
+    "@unilab/urpc-core": "^1.0.0"
   },
   "devDependencies": {
     "typescript": "^5.0.0",
@@ -319,7 +319,7 @@ Create a proper `package.json` for your plugin:
     "@types/jest": "^29.0.0"
   },
   "peerDependencies": {
-    "@unilab/core": "^1.0.0"
+    "@unilab/urpc-core": "^1.0.0"
   }
 }
 ```

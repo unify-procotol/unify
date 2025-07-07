@@ -5,9 +5,9 @@ module.exports = {
     './components/**/*.{js,ts,jsx,tsx,mdx}',
     './content/**/*.{js,ts,jsx,tsx,mdx}',
     './stories/**/*.{js,ts,jsx,tsx,mdx}',
-    // Include @unilab/unify-ui package content
-    '../packages/unify-ui/src/**/*.{js,ts,jsx,tsx}',
-    './node_modules/@unilab/unify-ui/**/*.{js,ts,jsx,tsx}',
+    // Include @unilab/urpc-ui package content
+    '../packages/urpc-ui/src/**/*.{js,ts,jsx,tsx}',
+    './node_modules/@unilab/urpc-ui/**/*.{js,ts,jsx,tsx}',
   ],
   theme: {
     extend: {

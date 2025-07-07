@@ -24,7 +24,7 @@
     "plugin"
   ],
   "dependencies": {
-    "@unilab/core": "^0.0.1",
+    "@unilab/urpc-core": "workspace:*",
     "@solana/web3.js": "^1.95.2",
     "ethers": "^6.13.2"
   },

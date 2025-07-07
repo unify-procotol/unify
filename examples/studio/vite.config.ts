@@ -15,7 +15,7 @@ export default defineConfig({
         studio: resolve(__dirname, 'src/main.tsx'),
         components: resolve(__dirname, 'src/components/index.ts'),
       },
-      name: 'UnifyStudio',
+      name: 'URPC Studio',
       formats: ['es', 'cjs'],
     },
     rollupOptions: {

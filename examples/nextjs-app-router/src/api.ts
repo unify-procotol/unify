@@ -1,8 +1,8 @@
-import { Logging } from "@unilab/core/middleware";
-import { Unify } from "@unilab/unify-next/app-router";
+import { Logging } from "@unilab/urpc-core/middleware";
+import { URPC } from "@unilab/urpc-next/app-router";
 import { WalletPlugin } from "@unilab/uniweb3";
 
-export const api = Unify.init({
+export const api = URPC.init({
   plugins: [WalletPlugin],
   middleware: [Logging()],
 });

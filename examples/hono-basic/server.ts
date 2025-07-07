@@ -1,10 +1,10 @@
-import { Unify } from "@unilab/unify-hono";
+import { URPC } from "@unilab/urpc-hono";
 import { UserAdapter } from "./adapters/user";
 import { PostAdapter } from "./adapters/post";
 import { UserEntity } from "./entities/user";
 import { PostEntity } from "./entities/post";
-import { createHookMiddleware, Logging } from "@unilab/core/middleware";
-import { Plugin } from "@unilab/core";
+import { createHookMiddleware, Logging } from "@unilab/urpc-core/middleware";
+import { Plugin } from "@unilab/urpc-core";
 
 const HookMiddleware = createHookMiddleware((hookManager) => {
   hookManager
@@ -90,7 +90,7 @@ const MyPlugin: Plugin = {
   ],
 };
 
-const app = Unify.init({
+const app = URPC.init({
   plugins: [MyPlugin],
   // middleware: [HookMiddleware, Logging()],
 });

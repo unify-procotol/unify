@@ -15,7 +15,7 @@ description: Logging Middleware is a powerful middleware that automatically logs
 ## Installation
 
 ```bash
-npm install @unilab/core
+npm install @unilab/urpc-core
 ```
 
 ## Basic Usage
@@ -25,9 +25,9 @@ npm install @unilab/core
 The simplest way to use logging middleware is with the default console logger:
 
 ```typescript
-import { Logging } from '@unilab/core/middleware';
+import { Logging } from '@unilab/urpc-core/middleware';
 
-const app = Unify.init({
+const app = URPC.init({
   middleware: [Logging()],
 });
 
@@ -38,7 +38,7 @@ const app = Unify.init({
 You can provide your own logging function for custom log formatting or integration with external logging services:
 
 ```typescript
-import { Logging } from '@unilab/core/middleware';
+import { Logging } from '@unilab/urpc-core/middleware';
 
 // Custom logger function
 const customLogger = (message: string, context?: any) => {
@@ -46,7 +46,7 @@ const customLogger = (message: string, context?: any) => {
   console.log(`[${timestamp}] CUSTOM: ${message}`, context);
 };
 
-const app = Unify.init({
+const app = URPC.init({
   middleware: [Logging(customLogger)],
 });
 ```
@@ -111,7 +111,7 @@ const customLoggingMiddleware = Logging((message, context) =>
   customLogger.log(`CUSTOM: ${message}`, context)
 );
 
-const app = Unify.init({
+const app = URPC.init({
   middleware: [customLoggingMiddleware],
 });
 ```
@@ -138,7 +138,7 @@ const winstonLoggingMiddleware = Logging((message, context) => {
   }
 });
 
-const app = Unify.init({
+const app = URPC.init({
   middleware: [winstonLoggingMiddleware],
 });
 ```
