@@ -46,7 +46,7 @@ import { joinRepo } from "@unilab/unify-client";
 
 joinRepo<PostEntity, UserEntity>({
   entityName: "post",
-  source: "wordpress",
+  source: "demo",
   localField: "id",
   foreignField: "userId",
 })
@@ -122,8 +122,8 @@ import { Plugin } from "@unilab/core";
 const MyPlugin: Plugin = {
   entities: [UserEntity, PostEntity],
   adapters: [
-    { source: "wordpress", entityName: "UserEntity", adapter: new UserAdapter() },
-    { source: "wordpress", entityName: "PostEntity", adapter: new PostAdapter() },
+    { source: "demo", entityName: "UserEntity", adapter: new UserAdapter() },
+    { source: "demo", entityName: "PostEntity", adapter: new PostAdapter() },
   ],
 };
 
@@ -191,7 +191,7 @@ import { PostEntity, UserEntity } from "./entities";
 // Query a post with its author
 const post = await repo<PostEntity>({
   entityName: "post",
-  source: "wordpress",
+  source: "demo",
 }).findOne({
   where: { id: "1" },
   include: {
@@ -199,7 +199,7 @@ const post = await repo<PostEntity>({
       const userId = post.userId;
       return repo<UserEntity>({
         entityName: "user",
-        source: "wordpress",
+        source: "demo",
       }).findOne({
         where: { id: userId },
       });
@@ -219,7 +219,7 @@ import { repo, UnifyClient, joinRepo } from "@unilab/unify-client";
 const fetchUser = async () => {
   const data = await repo<UserEntity>({
     entityName: "user",
-    source: "wordpress",
+    source: "demo",
   }).findMany({
     where: {
       id: "2",
@@ -231,7 +231,7 @@ const fetchUser = async () => {
         // Use joinRepo for optimized relation mapping, if you don't set the where parameter, you must use joinRepo, but in other cases you can use repo directly.
         return joinRepo<PostEntity, UserEntity>({
           entityName: "post",
-          source: "wordpress",
+          source: "demo",
           localField: "id",        // User.id
           foreignField: "userId",  // Post.userId
         }).findMany({
@@ -256,7 +256,7 @@ For `findOne` queries, relation callbacks receive the single entity:
 // Query a post with its author
 const post = await repo<PostEntity>({
   entityName: "post",
-  source: "wordpress",
+  source: "demo",
 }).findOne({
   where: { id: "2" },
   include: {
@@ -264,7 +264,7 @@ const post = await repo<PostEntity>({
       const userId = post.userId;
       return repo<UserEntity>({
         entityName: "user",
-        source: "wordpress",
+        source: "demo",
       }).findOne({
         where: { id: userId },
       });
@@ -283,7 +283,7 @@ For `findMany` queries, relation callbacks receive an array of entities:
 // Query users with their posts
 const users = await repo<UserEntity>({
   entityName: "user",
-  source: "wordpress",
+  source: "demo",
 }).findMany({
   where: { id: "1" },
   include: {
@@ -291,7 +291,7 @@ const users = await repo<UserEntity>({
       const ids = userList.map((user) => user.id);
       return repo<PostEntity>({
         entityName: "post",
-        source: "wordpress",
+        source: "demo",
       }).findMany({
         where: {
           userId: { $in: ids },
@@ -347,7 +347,7 @@ UnifyClient.init({
 const fetchUser = async () => {
   const data = await repo<UserEntity>({
     entityName: "user",
-    source: "wordpress",
+    source: "demo",
   }).findMany({
     where: {
       id: "2",
@@ -359,7 +359,7 @@ const fetchUser = async () => {
         // If you don't set the where parameter, you must use joinRepo, but in other cases you can use repo directly.
         return joinRepo<PostEntity, UserEntity>({
           entityName: "post",
-          source: "wordpress",
+          source: "demo",
           localField: "id",
           foreignField: "userId",
         }).findMany({
@@ -377,7 +377,7 @@ const fetchUser = async () => {
 const createUser = async () => {
   const data = await repo<UserEntity>({
     entityName: "user",
-    source: "wordpress",
+    source: "demo",
   }).create({
     data: {
       name: "John Doe",

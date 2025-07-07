@@ -11,12 +11,12 @@ const MyPlugin: Plugin = {
   entities: [UserEntity, PostEntity],
   adapters: [
     {
-      source: "wordpress",
+      source: "demo",
       entityName: "UserEntity",
       adapter: new UserAdapter(),
     },
     {
-      source: "wordpress",
+      source: "demo",
       entityName: "PostEntity",
       adapter: new PostAdapter(),
     },
@@ -108,7 +108,7 @@ Unify.init({
 const fetchUser = async () => {
   const data = await repo<UserEntity>({
     entityName: "user",
-    source: "wordpress",
+    source: "demo",
   }).findMany({
     // where: {
     //   id: "1",
@@ -119,7 +119,7 @@ const fetchUser = async () => {
         const ids = userList.map((user) => user.id);
         return joinRepo<PostEntity, UserEntity>({
           entityName: "post",
-          source: "wordpress",
+          source: "demo",
           localField: "id",
           foreignField: "userId",
         }).findMany({
@@ -140,7 +140,7 @@ fetchUser();
 // const fetchPost = async () => {
 //   const data = await repo<PostEntity>({
 //     entityName: "post",
-//     source: "wordpress",
+//     source: "demo",
 //   }).findOne({
 //     where: {
 //       id: "2",
@@ -150,7 +150,7 @@ fetchUser();
 //         const userId = post.userId;
 //         return repo<UserEntity>({
 //           entityName: "user",
-//           source: "wordpress",
+//           source: "demo",
 //         }).findOne({
 //           where: {
 //             id: userId,
@@ -171,7 +171,7 @@ fetchUser();
 //   }).findOne({
 //     where: {
 //       address: "0x4f00D43b5aF0a0aAd62E9075D1bFa86a89CDb9aB",
-//       network: "iotex",
+//       network: "ethereum",
 //     },
 //   });
 //   console.log("[3] =>", JSON.stringify(data, null, 2));

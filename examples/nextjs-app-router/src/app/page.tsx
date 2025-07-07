@@ -25,7 +25,7 @@ export default function Home() {
         }).findOne({
           where: {
             address: "0x4f00D43b5aF0a0aAd62E9075D1bFa86a89CDb9aB",
-            network: "iotex",
+            network: "ethereum",
           },
         });
         if (data) {

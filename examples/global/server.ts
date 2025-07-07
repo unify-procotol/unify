@@ -12,7 +12,7 @@ const MyPlugin: Plugin = {
     { source: "_global", entityName: "SchemaEntity", adapter: new SchemaAdapter() },
     { source: "google", entityName: "UserEntity", adapter: new UserAdapter() },
     { source: "github", entityName: "UserEntity", adapter: new UserAdapter() },
-    { source: "wordpress", entityName: "PostEntity", adapter: new PostAdapter() },
+    { source: "demo", entityName: "PostEntity", adapter: new PostAdapter() },
   ],
 };
 

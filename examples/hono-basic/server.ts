@@ -85,8 +85,8 @@ const HookMiddleware = createHookMiddleware((hookManager) => {
 const MyPlugin: Plugin = {
   entities: [UserEntity, PostEntity],
   adapters: [
-    { source: "wordpress", entityName: "UserEntity", adapter: new UserAdapter() },
-    { source: "wordpress", entityName: "PostEntity", adapter: new PostAdapter() },
+    { source: "demo", entityName: "UserEntity", adapter: new UserAdapter() },
+    { source: "demo", entityName: "PostEntity", adapter: new PostAdapter() },
   ],
 };
 

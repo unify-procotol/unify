@@ -48,7 +48,7 @@ const evmBalanceRes = await repo<WalletEntity>({
 }).findOne({
   where: {
     address: "0x...",
-    network: "iotex",
+    network: "ethereum",
   },
 });
 
