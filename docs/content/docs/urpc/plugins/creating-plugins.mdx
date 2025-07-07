@@ -167,55 +167,6 @@ export * from "./adapters/user-adapter";
 export * from "./plugins";
 ```
 
-## Entity Relationships
-
-Define entities with relationships using field decorators:
-
-```typescript
-// src/entities/post.ts
-import { Fields } from "@unilab/urpc-core";
-import type { UserEntity } from "./user";
-
-export class PostEntity {
-  @Fields.string()
-  id = "";
-
-  @Fields.string()
-  title = "";
-
-  @Fields.string()
-  content = "";
-
-  @Fields.string()
-  userId = "";
-
-  @Fields.record(() => require("./user").UserEntity, {
-    optional: true,
-  })
-  user?: UserEntity;
-}
-
-// Updated user entity with posts relationship
-export class UserEntity {
-  @Fields.string()
-  id = "";
-
-  @Fields.string()
-  name = "";
-
-  @Fields.string()
-  email = "";
-
-  @Fields.string()
-  avatar = "";
-
-  @Fields.array(() => PostEntity, {
-    optional: true,
-  })
-  posts?: PostEntity[];
-}
-```
-
 ## Using Your Plugin
 
 ### Server Setup

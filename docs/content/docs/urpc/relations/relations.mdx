@@ -392,24 +392,6 @@ fetchUser();
 createUser();
 ```
 
-## Best Practices
-
-1. **Choose the Right Tool**: Use `joinRepo` for optimized relations, `repo` for simple queries
-2. **Efficient Queries**: Leverage `$in` operator for batch loading related entities
-3. **Type Safety**: Let TypeScript infer callback parameter types automatically
-4. **Field Mapping**: Use clear, descriptive field names in `joinRepo` mappings
-5. **Error Handling**: Wrap relation callbacks in try-catch blocks for robustness
-6. **Performance**: Consider parallel queries for independent relations
-
-## Key Features
-
-- 🎯 **Flexible Relations**: Define relation logic at query time with callbacks
-- 🚀 **Type Safe**: Full TypeScript support with automatic type inference
-- 📊 **Optimized Joins**: Use `joinRepo` for efficient relation mappings
-- 🔧 **Simple Setup**: Minimal configuration required
-- 💪 **Powerful**: Access to full entity data in relation callbacks
-- ⚡ **Performance**: Client-side parallel relation loading
-
 ## Next Steps
 
 - Explore [Basic Usage](/docs/basic-usage) for general URPC concepts

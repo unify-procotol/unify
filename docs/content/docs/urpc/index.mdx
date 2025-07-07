@@ -49,10 +49,3 @@ repo<LogEntry>({ entity: "userAction", source: "mixpanel" }).find({ where: { use
 // Query system metrics from Prometheus
 repo<Metric>({ entity: "metric", source: "prometheus" }).find({ where: { name: "cpu_usage", host: "server-a" } });
 ```
-
-## What's Next?
-
-<Cards>
-  <Card title="Installation" href="/docs/installation" />
-  <Card title="Basic Usage" href="/docs/basic-usage" />
-</Cards>
