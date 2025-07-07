@@ -6,15 +6,24 @@ const fs = require('fs');
 
 // Get the directory where this package is installed
 const packageDir = path.dirname(__dirname);
-const studioDir = path.join(packageDir, 'studio');
 
 console.log('🚀 Starting Unify Studio...');
 console.log('📍 Package directory:', packageDir);
-console.log('📍 Studio directory:', studioDir);
 
-// Check if studio directory exists
-if (!fs.existsSync(studioDir)) {
-  console.error('❌ Studio directory not found. Please ensure @unify/client is properly installed.');
+// Check if we're running in development (from examples/studio) or as installed package
+const isDevMode = fs.existsSync(path.join(packageDir, 'examples'));
+const studioDir = isDevMode ? packageDir : packageDir;
+
+console.log('📍 Studio directory:', studioDir);
+console.log('🔧 Running in:', isDevMode ? 'development mode' : 'production mode');
+
+// Check if required files exist
+const requiredFiles = ['index.html', 'src', 'vite.config.ts'];
+const missingFiles = requiredFiles.filter(file => !fs.existsSync(path.join(studioDir, file)));
+
+if (missingFiles.length > 0) {
+  console.error('❌ Missing required files:', missingFiles.join(', '));
+  console.error('Please ensure unify-studio is properly installed.');
   process.exit(1);
 }
 
@@ -28,7 +37,11 @@ function startStudio() {
   const studioProcess = spawn('npx', ['vite'], {
     cwd: studioDir,
     stdio: 'inherit',
-    shell: true
+    shell: true,
+    env: {
+      ...process.env,
+      NODE_ENV: process.env.NODE_ENV || 'development'
+    }
   });
 
   // Handle process termination
@@ -48,7 +61,13 @@ function startStudio() {
     console.log(`\n📴 Studio process exited with code ${code}`);
     process.exit(code);
   });
+
+  studioProcess.on('error', (error) => {
+    console.error('❌ Failed to start Studio:', error.message);
+    console.error('Please make sure vite is available in your system.');
+    process.exit(1);
+  });
 }
 
-// Start studio directly since dependencies are in parent package
+// Start studio
 startStudio(); 

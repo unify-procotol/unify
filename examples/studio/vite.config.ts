@@ -8,22 +8,20 @@ export default defineConfig({
   server: {
     port: 3001,
     open: true,
+    host: '0.0.0.0', // Allow external access
   },
   build: {
-    lib: {
-      entry: {
-        studio: resolve(__dirname, 'src/main.tsx'),
-        components: resolve(__dirname, 'src/components/index.ts'),
-      },
-      name: 'UnifyStudio',
-      formats: ['es', 'cjs'],
-    },
+    outDir: 'dist',
     rollupOptions: {
-      external: ['react', 'react-dom'],
+      input: {
+        // Main app entry
+        main: resolve(__dirname, 'index.html'),
+      },
       output: {
-        globals: {
-          react: 'React',
-          'react-dom': 'ReactDOM',
+        // Separate chunks for better caching
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          ui: ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-tabs'],
         },
       },
     },
@@ -33,12 +31,7 @@ export default defineConfig({
       '@': resolve(__dirname, 'src'),
     },
   },
-  css: {
-    postcss: {
-      plugins: [
-        require('tailwindcss'),
-        require('autoprefixer'),
-      ],
-    },
+  define: {
+    'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development'),
   },
 }) 
