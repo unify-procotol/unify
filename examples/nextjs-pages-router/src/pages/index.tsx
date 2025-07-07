@@ -7,18 +7,12 @@ URPC.init({
   timeout: 10000,
 });
 
-interface WalletData {
-  address: string;
-  network?: string;
-  balance?: string;
-  [key: string]: any;
-}
-
 export default function Home() {
-  const [evmBalanceData, setEvmBalanceData] = useState<WalletData | null>(null);
-  const [solanaBalanceData, setSolanaBalanceData] = useState<WalletData | null>(
+  const [evmBalanceData, setEvmBalanceData] = useState<WalletEntity | null>(
     null
   );
+  const [solanaBalanceData, setSolanaBalanceData] =
+    useState<WalletEntity | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -88,7 +82,7 @@ export default function Home() {
     gradientTo,
   }: {
     title: string;
-    data: WalletData | null;
+    data: WalletEntity | null;
     icon: string;
     gradientFrom: string;
     gradientTo: string;

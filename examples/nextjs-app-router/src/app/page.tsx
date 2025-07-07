@@ -13,8 +13,11 @@ URPC.init({
 });
 
 export default function Home() {
-  const [evmBalanceData, setEvmBalanceData] = useState<any>(null);
-  const [solanaBalanceData, setSolanaBalanceData] = useState<any>(null);
+  const [evmBalanceData, setEvmBalanceData] = useState<WalletEntity | null>(
+    null
+  );
+  const [solanaBalanceData, setSolanaBalanceData] =
+    useState<WalletEntity | null>(null);
 
   useEffect(() => {
     const fetchEvmBalance = async () => {
