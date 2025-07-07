@@ -10,9 +10,11 @@ Kills switch-case hell in multi-protocol apps 🧹
 
 
 ## Features
-- 1️⃣ Entity-Driven API → Call `repo().findOne()` to abstract away backend differences (schema, protocol, source).
-- 2️⃣ Plug-and-Play Sources → Switch implementation via `source:"evm"/"solana"` — same interface, no logic rewrite.
-- 3️⃣ Data Standardization → Protocol-agnostic outputs via entity contracts (e.g., unify EVM hex and Solana base58 addresses).
+1️⃣ Entity-Driven API → Call `repo().findOne()` to abstract away backend differences (schema, protocol, source).
+
+2️⃣ Plug-and-Play Sources → Switch implementation via `source:"evm"/"solana"` — same interface, no logic rewrite.
+
+3️⃣ Data Standardization → Protocol-agnostic outputs via entity contracts (e.g., unify EVM hex and Solana base58 addresses).
 
 
 ## Use Case Example
