@@ -1,5 +1,5 @@
 import { UserEntity } from "./entities/user";
-import { repo, getCacheStats } from "@unilab/uni-store";
+import { repo, getCacheStats } from "@unilab/ustore";
 
 async function test() {
   console.log("🚀 Starting entity repository test...");

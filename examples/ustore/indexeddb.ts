@@ -1,4 +1,4 @@
-import { repo } from "@unilab/uni-store";
+import { repo } from "@unilab/ustore";
 import { UserEntity } from "./entities/user";
 
 declare global {

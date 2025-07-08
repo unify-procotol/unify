@@ -1,5 +1,5 @@
 {
-  "name": "entity-getter",
+  "name": "ustore-example",
   "version": "1.0.0",
   "description": "",
   "main": "server.ts",
@@ -8,7 +8,7 @@
     "indexeddb": "vite"
   },
   "dependencies": {
-    "@unilab/uni-store": "workspace:*"
+    "@unilab/ustore": "workspace:*"
   },
   "devDependencies": {
     "vite": "^5.0.0",

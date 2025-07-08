@@ -1,5 +1,5 @@
 {
-  "name": "@unilab/uni-store",
+  "name": "@unilab/ustore",
   "version": "0.0.1",
   "description": "Repository for managing entity instances",
   "main": "dist/index.js",
