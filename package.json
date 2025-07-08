@@ -21,9 +21,9 @@
     "build:uniweb3": "cd packages/uniweb3 && bun run build",
     "dev:uniweb3": "cd packages/uniweb3 && bun run dev",
     "build:unify-ui": "cd packages/unify-ui && bun run build",
-    "build:uni-store": "cd packages/uni-store && bun run build",
-    "dev:uni-store": "cd packages/uni-store && bun run dev",
-    "build": "bun run build:urpc-core && bun run build:urpc-hono && bun run build:urpc-next && bun run build:urpc-client && bun run build:urpc && bun run build:uniweb3 && bun run build:unify-ui && bun run build:uni-store"
+    "build:ustore": "cd packages/ustore && bun run build",
+    "dev:ustore": "cd packages/ustore && bun run dev",
+    "build": "bun run build:urpc-core && bun run build:urpc-hono && bun run build:urpc-next && bun run build:urpc-client && bun run build:urpc && bun run build:uniweb3 && bun run build:unify-ui && bun run build:ustore"
   },
   "author": "",
   "license": "MIT",

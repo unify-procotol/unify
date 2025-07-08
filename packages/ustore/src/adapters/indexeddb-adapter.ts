@@ -33,7 +33,7 @@ export class IndexedDBAdapter<T extends Record<string, any>>
     } = {}
   ) {
     this.EntityClass = EntityClass;
-    this.dbName = options.dbName || `urpc`;
+    this.dbName = options.dbName || `ustore`;
     this.storeName = options.storeName || EntityClass.name.toLowerCase();
     this.version = options.version || 1;
   }

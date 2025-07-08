@@ -1,12 +1,11 @@
 {
   "name": "urpc-studio",
   "version": "0.0.1",
-  "type": "module",
-  "description": "Interactive development studio for Unify API framework",
+  "description": "Lightweight browser-only client library for URPC without HTTP functionality",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
-    "studio": "bin/unify-studio.js"
+    "urpc-studio": "bin/urpc-studio.js"
   },
   "scripts": {
     "studio": "vite",
