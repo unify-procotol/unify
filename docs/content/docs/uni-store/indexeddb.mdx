@@ -1,0 +1,74 @@
+---
+title: IndexedDB Adapter
+description: The IndexedDB adapter provides persistent storage for your entities in web browsers using the IndexedDB API.
+---
+
+## Usage
+
+```typescript
+import { repo } from "@unilab/uni-store";
+import { UserEntity } from "./entities/user";
+
+// Create a repository with IndexedDB adapter
+const userRepo = repo(UserEntity, "indexeddb");
+
+// Create a user
+const user = await userRepo.create({
+  data: {
+    id: "1",
+    name: "John Doe",
+    email: "john@example.com",
+    avatar: "https://example.com/avatar.jpg"
+  }
+});
+
+// Find a user
+const foundUser = await userRepo.findOne({
+  where: { id: "1" }
+});
+
+// Update a user
+const updatedUser = await userRepo.update({
+  where: { id: "1" },
+  data: { name: "Jane Doe" }
+});
+
+// Delete a user
+await userRepo.delete({
+  where: { id: "1" }
+});
+```
+
+## Configuration
+
+```typescript
+// Custom configuration
+const userRepo = repo(UserEntity, "indexeddb", {
+  dbName: "myApp",
+  storeName: "users",
+  version: 1
+});
+```
+
+## Features
+
+- **Persistent Storage**: Data persists across browser sessions
+- **Optimized Queries**: Fast ID-based lookups
+- **CRUD Operations**: Full support for create, read, update, delete
+- **Counting**: Built-in count functionality
+- **Upsert**: Create or update operations
+- **Type Safety**: Full TypeScript support
+
+## Browser Support
+
+IndexedDB is supported in all modern browsers. For older browsers, consider using the memory adapter as a fallback.
+
+
+## Try it out
+
+See [Demo](https://github.com/unifi-lab/unify/tree/main/examples/uni-store)
+
+run the following command to try it out:
+```bash
+bun run indexeddb
+```

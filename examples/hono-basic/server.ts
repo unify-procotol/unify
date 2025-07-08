@@ -1,10 +1,10 @@
-import { Unify } from "@unilab/unify-hono";
+import { URPC } from "@unilab/urpc-hono";
 import { UserAdapter } from "./adapters/user";
 import { PostAdapter } from "./adapters/post";
 import { UserEntity } from "./entities/user";
 import { PostEntity } from "./entities/post";
-import { createHookMiddleware, Logging } from "@unilab/core/middleware";
-import { Plugin } from "@unilab/core";
+import { createHookMiddleware, Logging } from "@unilab/urpc-core/middleware";
+import { Plugin } from "@unilab/urpc-core";
 
 const HookMiddleware = createHookMiddleware((hookManager) => {
   hookManager
@@ -61,39 +61,51 @@ const HookMiddleware = createHookMiddleware((hookManager) => {
         "context: ",
         context
       );
-    })
-    // .beforeAny(async (args, _, context) => {
-    //   console.log(
-    //     "🔄 Builder: Before Any Hook",
-    //     "args: ",
-    //     args,
-    //     "context: ",
-    //     context
-    //   );
-    // })
-    // .afterAny(async (args, result, context) => {
-    //   console.log(
-    //     "✅ Builder: After Any Hook",
-    //     "result: ",
-    //     result,
-    //     "context: ",
-    //     context
-    //   );
-    // });
+    });
+  // .beforeAny(async (args, _, context) => {
+  //   console.log(
+  //     "🔄 Builder: Before Any Hook",
+  //     "args: ",
+  //     args,
+  //     "context: ",
+  //     context
+  //   );
+  // })
+  // .afterAny(async (args, result, context) => {
+  //   console.log(
+  //     "✅ Builder: After Any Hook",
+  //     "result: ",
+  //     result,
+  //     "context: ",
+  //     context
+  //   );
+  // });
 });
 
 const MyPlugin: Plugin = {
   entities: [UserEntity, PostEntity],
   adapters: [
-    { source: "wordpress", entityName: "UserEntity", adapter: new UserAdapter() },
-    { source: "wordpress", entityName: "PostEntity", adapter: new PostAdapter() },
+    { source: "demo", entity: "UserEntity", adapter: new UserAdapter() },
+    { source: "demo", entity: "PostEntity", adapter: new PostAdapter() },
   ],
 };
 
-const app = Unify.init({
+const app = URPC.init({
   plugins: [MyPlugin],
   // middleware: [HookMiddleware, Logging()],
 });
+
+// // Use repo on the server side
+// const user = await URPC.repo<UserEntity>({
+//   entity: "UserEntity",
+//   source: "demo",
+// }).findOne({
+//   where: {
+//     id: "2",
+//   },
+// });
+
+// console.log("user =>", user);
 
 export default {
   port: 3000,

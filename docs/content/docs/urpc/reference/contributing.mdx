@@ -1,0 +1,153 @@
+---
+title: Contributing
+description: Contributing to URPC - guidelines for contributing to the framework and its packages
+---
+
+## Getting Started
+
+Thank you for your interest in contributing to URPC! This guide will help you get started with contributing to the project.
+
+### Development Setup
+
+1. **Fork and clone the repository:**
+   ```bash
+   git clone https://github.com/unifi-lab/unify.git
+   cd unify
+   ```
+
+2. **Install dependencies:**
+   ```bash
+   bun install
+   ```
+
+3. **Build all packages:**
+   ```bash
+   bun run build
+   ```
+
+## Project Structure
+
+URPC is organized as a monorepo with the following packages:
+
+- **`packages/urpc-core`** - Core types and interfaces
+- **`packages/urpc-hono`** - Server-side with Hono
+- **`packages/urpc-next`** - Server-side with Next.js
+- **`packages/urpc-client`** - Client-side components and URPC Client
+- **`packages/urpc-ui`** - UI components
+- **`examples/`** - Example implementations
+- **`docs/`** - Documentation website
+
+## Contributing Guidelines
+
+### Code Style
+
+- Use TypeScript for all code
+- Follow the existing code style and conventions
+- Include proper type annotations
+- Write clear, descriptive variable and function names
+
+### Adding New Features
+
+1. **Create a new branch:**
+   ```bash
+   git checkout -b feature/your-feature-name
+   ```
+
+2. **Make your changes:**
+   - Add new functionality to the appropriate package
+   - Include comprehensive tests
+   - Update documentation as needed
+
+3. **Test your changes:**
+   ```bash
+   bun run test
+   bun run build
+   ```
+
+4. **Submit a pull request:**
+   - Provide a clear description of your changes
+   - Include examples of how to use the new feature
+   - Reference any related issues
+
+### Adding New Adapters
+
+To add support for a new blockchain or data source:
+
+1. **Create a new adapter class:**
+   ```typescript
+   import { BaseAdapter, FindManyArgs, FindOneArgs } from "@unilab/urpc-core";
+
+   class YourAdapter extends BaseAdapter<YourEntity> {
+     async findMany(args: FindManyArgs<YourEntity>): Promise<YourEntity[]> {
+       // Implementation
+     }
+     
+     async findOne(args: FindOneArgs<YourEntity>): Promise<YourEntity | null> {
+       // Implementation
+     }
+     
+     // ... other methods
+   }
+   ```
+
+2. **Add proper TypeScript types:**
+   ```typescript
+   interface YourEntity {
+     // Define your entity structure
+   }
+   ```
+
+3. **Include comprehensive tests**
+4. **Update documentation with usage examples**
+
+### Documentation
+
+When contributing:
+
+- Update relevant documentation in the `docs/` directory
+- Include code examples for new features
+- Ensure all public APIs are documented
+- Update the changelog for significant changes
+
+### Testing
+
+- Write unit tests for new functionality
+- Ensure all existing tests pass
+- Test with real-world examples when possible
+- Include integration tests for new adapters
+
+## Pull Request Process
+
+1. **Ensure your PR:**
+   - Has a clear title and description
+   - Includes tests for new functionality
+   - Updates documentation as needed
+   - Follows the existing code style
+
+2. **PR Review:**
+   - Maintainers will review your PR
+   - Address any feedback or requested changes
+   - Ensure CI checks pass
+
+3. **Merging:**
+   - PRs will be merged after approval
+   - Your contribution will be included in the next release
+
+## Reporting Issues
+
+When reporting bugs or requesting features:
+
+1. **Check existing issues** first to avoid duplicates
+2. **Provide clear reproduction steps** for bugs
+3. **Include relevant code examples**
+4. **Specify your environment** (Node.js version, OS, etc.)
+
+## Community
+
+- Join our discussions on GitHub
+- Ask questions in issues or discussions
+- Help others by reviewing PRs and answering questions
+
+## License
+
+By contributing to Unify, you agree that your contributions will be licensed under the same license as the project.

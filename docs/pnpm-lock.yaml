@@ -8,10 +8,13 @@ importers:
 
   .:
     dependencies:
+      '@orama/orama':
+        specifier: ^3.1.10
+        version: 3.1.10
       '@shikijs/transformers':
         specifier: ^1.24.2
         version: 1.29.2
-      '@unilab/unify-ui':
+      '@unilab/urpc-ui':
         specifier: ^0.0.1
         version: 0.0.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(tailwindcss@4.1.11)
       fumadocs-core:
@@ -2690,8 +2693,8 @@ packages:
   '@ungap/structured-clone@1.3.0':
     resolution: {integrity: sha512-WmoN8qaIAo7WTYWbAZuG8PYEhn5fkz7dZrqTBZ7dtt//lL2Gwms1IcnQ5yHqjDfX8Ft5j4YzDM23f87zBfDe9g==}
 
-  '@unilab/unify-ui@0.0.1':
-    resolution: {integrity: sha512-CV/K3TVTF7pQXoft7t2bKnQfexOjxbX639UKqTw3YCOm0ZzXqzMrYpaxNLYUYOWAnrQjj9C0CldNMUV5MuT26w==}
+  '@unilab/urpc-ui@0.0.1':
+    resolution: {integrity: sha512-+mJpeywk8FsUrhIWyMCOOfz/6euXKiv0ujtOrk4K84+lp5cj0tYn9TWosED96HPekc4GlWdlSe9SYvqxxfLcNA==}
     peerDependencies:
       react: '>=16.8.0'
       react-dom: '>=16.8.0'
@@ -9122,7 +9125,7 @@ snapshots:
 
   '@ungap/structured-clone@1.3.0': {}
 
-  '@unilab/unify-ui@0.0.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(tailwindcss@4.1.11)':
+  '@unilab/urpc-ui@0.0.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(tailwindcss@4.1.11)':
     dependencies:
       clsx: 2.1.1
       react: 19.1.0

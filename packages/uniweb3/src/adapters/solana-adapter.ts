@@ -1,4 +1,4 @@
-import { BaseAdapter, type FindOneArgs } from "@unilab/core";
+import { BaseAdapter, type FindOneArgs } from "@unilab/urpc-core";
 import type { WalletEntity } from "../entities/wallet";
 import { SolanaHandler } from "../handlers/solana";
 

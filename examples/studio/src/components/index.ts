@@ -2,11 +2,11 @@
 export { Layout } from './Layout';
 export { StudioHome } from './StudioHome';
 export { default as StoryPage } from './StoryPage';
-export { UniRender } from '@unilab/unify-ui';
+export { UniRender } from '@unilab/urpc-ui';
 
 // Types
 export interface EntityData {
-  entityName: string;
+  entity: string;
   data: any[];
   loading: boolean;
   error: string | null;

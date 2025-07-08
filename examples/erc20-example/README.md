@@ -1,6 +1,6 @@
 # Mimo Trading Pair Example
 
-这个示例演示了如何使用 Unify 框架创建一个 Mimo 交易对插件，从 Mimo Exchange 获取实时价格。
+这个示例演示了如何使用 URPC 框架创建一个 Mimo 交易对插件，从 Mimo Exchange 获取实时价格。
 
 ## 功能特性
 

@@ -1,0 +1,76 @@
+---
+title: Memory Adapter
+description: The Memory adapter provides in-memory data storage with LRU (Least Recently Used) cache management.
+---
+
+## Features
+
+- **In-memory storage** - Fast data access with no persistence
+- **LRU cache** - Automatic cache size management (default: 5 instances)
+- **Full CRUD operations** - Create, read, update, delete support
+- **Cache statistics** - Monitor cache performance
+
+## Usage
+
+```typescript
+import { repo, getCacheStats } from "@unilab/uni-store";
+import { UserEntity } from "./entities/user";
+
+// Create a new entity
+const user = await repo(UserEntity).create({
+  data: {
+    id: "1",
+    name: "John Doe",
+    email: "john@example.com",
+    avatar: "avatar.png",
+  },
+});
+
+// Find an entity
+const foundUser = await repo(UserEntity).findOne({
+  where: { id: "1" },
+});
+
+// Update an entity
+const updatedUser = await repo(UserEntity).update({
+  where: { id: "1" },
+  data: { name: "Jane Doe" },
+});
+
+// Delete an entity
+await repo(UserEntity).delete({
+  where: { id: "1" },
+});
+
+// Get cache statistics
+console.log(getCacheStats());
+```
+
+## Cache Management
+
+The memory adapter automatically manages cache size using LRU eviction:
+
+- Default cache size: 5 items
+- Oldest items are evicted when cache is full
+- Cache statistics available via `getCacheStats()`
+
+## API Reference
+
+All standard repository methods are supported:
+
+- `create(args)` - Create new entity
+- `findOne(args)` - Find single entity
+- `findMany(args)` - Find multiple entities
+- `update(args)` - Update existing entity
+- `delete(args)` - Delete entity
+- `upsert(args)` - Create or update entity
+- `count(args)` - Count entities
+
+## Try it out
+
+See [Demo](https://github.com/unifi-lab/unify/tree/main/examples/uni-store)
+
+run the following command to try it out:
+```bash
+bun run memory
+```

@@ -4,6 +4,7 @@ import * as TabsComponents from "fumadocs-ui/components/tabs";
 import type { MDXComponents } from "mdx/types";
 import { Accordion, Accordions } from "fumadocs-ui/components/accordion";
 import * as icons from "lucide-react";
+import { DemoCard, DemoGrid } from "@/app/(home)/components/demo-card";
 
 export function getMDXComponents(components?: MDXComponents): MDXComponents {
   return {
@@ -13,6 +14,8 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     ...FilesComponents,
     Accordion,
     Accordions,
+    DemoCard,
+    DemoGrid,
     ...components,
   } as any;
 }

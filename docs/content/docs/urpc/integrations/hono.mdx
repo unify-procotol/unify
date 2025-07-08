@@ -1,0 +1,190 @@
+---
+title: Hono Integration
+description: URPC provides seamless Hono integration. This guide shows you how to integrate URPC with Hono for building fast and lightweight web APIs.
+---
+
+## Install Dependencies
+
+First, install the required dependency packages:
+
+```package-install
+@unilab/urpc-hono @unilab/urpc-client @unilab/urpc-core hono @hono/node-server
+```
+
+## Project Structure
+
+```
+hono-basic/
+├── adapters/
+│   ├── user.ts               # User adapter
+│   └── post.ts               # Post adapter
+├── entities/
+│   ├── user.ts               # User entity
+│   └── post.ts               # Post entity
+├── server.ts                 # Server setup
+├── client.ts                 # Client usage
+├── package.json
+└── tsconfig.json
+```
+
+## Entity Definition
+
+Define your entities using URPC decorators:
+
+```typescript
+import { Fields } from "@unilab/urpc-core";
+import { PostEntity } from "./post";
+
+export class UserEntity {
+  @Fields.string()
+  id = "";
+
+  @Fields.string()
+  name = "";
+
+  @Fields.string()
+  email = "";
+
+  @Fields.string()
+  avatar = "";
+
+  @Fields.array(() => PostEntity, {
+    optional: true,
+  })
+  posts?: PostEntity[];
+}
+```
+
+## Adapter Implementation
+
+Create adapters to handle data operations:
+
+```typescript
+import { BaseAdapter, FindManyArgs, FindOneArgs } from "@unilab/urpc-core";
+import { UserEntity } from "../entities/user";
+
+export class UserAdapter extends BaseAdapter<UserEntity> {
+  async findMany(args: FindManyArgs<UserEntity>): Promise<UserEntity[]> {
+    // Implementation logic
+    return [];
+  }
+
+  async findOne(args: FindOneArgs<UserEntity>): Promise<UserEntity | null> {
+    // Implementation logic
+    return null;
+  }
+}
+```
+
+## Server Setup
+
+Configure your Hono server with URPC:
+
+```typescript
+import { URPC } from "@unilab/urpc-hono";
+import { UserAdapter } from "./adapters/user";
+import { PostAdapter } from "./adapters/post";
+import { UserEntity } from "./entities/user";
+import { PostEntity } from "./entities/post";
+import { Logging } from "@unilab/urpc-core/middleware";
+import { Plugin } from "@unilab/urpc-core";
+
+const MyPlugin: Plugin = {
+  entities: [UserEntity, PostEntity],
+  adapters: [
+    { source: "demo", entity: "UserEntity", adapter: new UserAdapter() },
+    { source: "demo", entity: "PostEntity", adapter: new PostAdapter() },
+  ],
+};
+
+const app = URPC.init({
+  plugins: [MyPlugin],
+  middleware: [Logging()],
+});
+
+export default {
+  port: 3000,
+  fetch: app.fetch,
+};
+```
+
+## Client Usage
+
+Use the URPC client to interact with your API:
+
+```typescript
+import { UserEntity } from "./entities/user";
+import { repo, URPCClient } from "@unilab/urpc-client";
+
+URPCClient.init({
+  baseUrl: "http://localhost:3000",
+  timeout: 10000,
+});
+
+// Create a user
+const createUser = async () => {
+  const data = await repo<UserEntity>({
+    entity: "user",
+    source: "demo",
+  }).create({
+    data: {
+      name: "John Doe",
+      email: "john.doe@example.com",
+      avatar: "https://example.com/avatar.jpg",
+    },
+  });
+  console.log("Created user:", data);
+};
+
+// Find users
+const findUsers = async () => {
+  const data = await repo<UserEntity>({
+    entity: "user",
+    source: "demo",
+  }).findMany({
+    where: {
+      name: "John Doe",
+    },
+  });
+  console.log("Found users:", data);
+};
+```
+
+## Running the Application
+
+Start your Hono server:
+
+```bash
+bun run dev
+# or
+npm run dev
+```
+
+Your URPC-powered Hono API will be available at `http://localhost:3000`.
+
+## Middleware Support
+
+URPC supports various middleware for Hono integration:
+
+- **Logging**: Built-in request/response logging
+- **Hooks**: Before/after operation hooks
+- **Custom Middleware**: Add your own middleware logic
+
+```typescript
+import { createHookMiddleware, Logging } from "@unilab/urpc-core/middleware";
+
+const HookMiddleware = createHookMiddleware((hookManager) => {
+  hookManager
+    .beforeCreate(async (args, _, context) => {
+      console.log("Before create:", args);
+    })
+    .afterCreate(async (args, result, context) => {
+      console.log("After create:", result);
+    });
+});
+
+const app = URPC.init({
+  plugins: [MyPlugin],
+  middleware: [HookMiddleware, Logging()],
+});
+```

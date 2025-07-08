@@ -18,8 +18,13 @@
     "storybook": "storybook dev -p 6006"
   },
   "dependencies": {
+    "@orama/orama": "^3.1.10",
     "@shikijs/transformers": "^1.24.2",
+<<<<<<< HEAD
     "@unilab/unify-ui": "workspace:*",
+=======
+    "@unilab/urpc-ui": "^0.0.1",
+>>>>>>> aa78ca4dc94f08a34c334599e0fcd0a54f7d0f21
     "fumadocs-core": "15.5.2",
     "fumadocs-docgen": "^2.0.1",
     "fumadocs-mdx": "11.6.8",

@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>IndexedDB Entity Example</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        background: #f5f5f5;
+      }
+      .container {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+      button {
+        background: #007acc;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        margin: 5px;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      button:hover {
+        background: #005c99;
+      }
+      .output {
+        background: #f8f8f8;
+        border: 1px solid #ddd;
+        padding: 15px;
+        margin: 10px 0;
+        border-radius: 4px;
+        white-space: pre-wrap;
+        font-family: monospace;
+        max-height: 300px;
+        overflow-y: auto;
+      }
+      .input-group {
+        margin: 10px 0;
+      }
+      .input-group label {
+        display: inline-block;
+        width: 100px;
+        font-weight: bold;
+      }
+      .input-group input {
+        padding: 5px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        width: 200px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🗄️ IndexedDB Entity Repository Demo</h1>
+      <p>
+        This example demonstrates how to use IndexedDB adapter for browser
+        persistent storage.
+      </p>
+
+      <div class="input-group">
+        <label>ID:</label>
+        <input type="text" id="userId" placeholder="User ID" value="1" />
+      </div>
+      <div class="input-group">
+        <label>Name:</label>
+        <input
+          type="text"
+          id="userName"
+          placeholder="User Name"
+          value="John Doe"
+        />
+      </div>
+      <div class="input-group">
+        <label>Email:</label>
+        <input
+          type="text"
+          id="userEmail"
+          placeholder="Email"
+          value="john@example.com"
+        />
+      </div>
+      <div class="input-group">
+        <label>Avatar:</label>
+        <input
+          type="text"
+          id="userAvatar"
+          placeholder="Avatar URL"
+          value="avatar.png"
+        />
+      </div>
+
+      <div>
+        <button onclick="createUser()">Create User</button>
+        <button onclick="findUser()">Find User</button>
+        <button onclick="updateUser()">Update User</button>
+        <button onclick="deleteUser()">Delete User</button>
+        <button onclick="listAllUsers()">List All Users</button>
+        <button onclick="countUsers()">Count Users</button>
+        <button onclick="clearDatabase()">Clear Database</button>
+      </div>
+
+      <div id="output" class="output">Waiting for operation...</div>
+    </div>
+
+    <script type="module" src="/indexeddb.ts"></script>
+  </body>
+</html>

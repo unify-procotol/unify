@@ -1,14 +1,14 @@
 {
   "name": "browser-example",
   "version": "1.0.0",
-  "description": "Basic browser example using @unilab/unify",
+  "description": "Basic browser example using @unilab/urpc",
   "main": "server.ts",
   "scripts": {
     "dev": "bun run index.ts"
   },
   "dependencies": {
-    "@unilab/unify": "workspace:*",
-    "@unilab/core": "workspace:*"
+    "@unilab/urpc": "workspace:*",
+    "@unilab/urpc-core": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5.3.0"

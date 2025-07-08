@@ -1,0 +1,420 @@
+---
+title: UniWeb3 Plugin
+description: UniWeb3 is a comprehensive blockchain plugin for URPC that provides unified access to multiple blockchain networks. It includes support for EVM-compatible chains and Solana, allowing you to query blockchain data through a consistent API.
+
+---
+
+## Features
+
+- **Multi-Chain Support**: Query data from EVM-compatible chains and Solana
+- **Unified API**: Consistent interface across different blockchain networks
+- **Balance Queries**: Retrieve account balances across supported networks
+- **Type Safety**: Full TypeScript support with type definitions
+
+## Installation
+
+Install the UniWeb3 plugin along with URPC dependencies:
+
+For Hono server:
+```package-install
+@unilab/urpc-hono @unilab/urpc @unilab/uniweb3
+```
+
+For Next.js Pages Router:
+```package-install
+@unilab/urpc-next @unilab/urpc-client @unilab/urpc-core @unilab/uniweb3 next react react-dom
+```
+
+Runs only in a browser or node environment:
+```package-install
+@unilab/urpc @unilab/urpc-core @unilab/uniweb3
+```
+
+## Server Setup
+
+### Hono Server Setup
+
+Register the UniWeb3 plugin in your Hono server:
+
+```typescript
+import { URPC } from "@unilab/urpc-hono";
+import { WalletPlugin } from "@unilab/uniweb3";
+import { Logging } from "@unilab/urpc-core/middleware";
+
+// Register Web3 plugin
+const app = URPC.init({
+  plugins: [WalletPlugin],
+  middleware: [Logging()],
+});
+
+export default {
+  port: 3000,
+  fetch: app.fetch,
+};
+```
+
+### Next.js Pages Router Setup
+
+For Next.js with Pages Router, create an API route to handle UniWeb3 requests:
+
+```typescript
+// pages/api/[...urpc].ts
+import { URPC } from "@unilab/urpc-next/pages-router";
+import { WalletPlugin } from "@unilab/uniweb3";
+import { Logging } from "@unilab/urpc-core/middleware";
+
+const handler = URPC.init({
+  plugins: [WalletPlugin],
+  middleware: [Logging()],
+});
+
+export default handler;
+```
+
+### Runs only in a browser or node environment
+
+For browser environments, you can use UniWeb3 directly without a server:
+
+```typescript
+import { URPC } from "@unilab/urpc";
+import { WalletPlugin } from "@unilab/uniweb3";
+import { Logging } from "@unilab/urpc-core/middleware";
+
+// Initialize URPC with Web3 plugin for browser or node.js
+URPC.init({
+  enableDebug: true,
+  plugins: [WalletPlugin],
+  middleware: [Logging()],
+});
+```
+
+## Client Usage
+
+### Initializing the Client
+
+```typescript
+import { repo, URPC } from "@unilab/urpc-client";
+import { WalletEntity } from "@unilab/uniweb3/entities";
+
+// Initialize the client (for standalone server)
+URPC.init({
+  baseUrl: "http://localhost:3000",
+  timeout: 10000,
+});
+```
+
+### EVM Wallet Queries
+
+Query account balances on EVM-compatible networks:
+
+```typescript
+// Get balance for a specific address on Ethereum mainnet
+const evmWallet = await repo<WalletEntity>({
+  entity: "wallet",
+  source: "evm",
+}).findOne({
+  where: {
+    address: "0x...",
+    network: "ethereum",
+  },
+});
+
+console.log("EVM Wallet:", evmWallet);
+```
+
+#### Supported EVM Networks
+
+The EVM adapter supports various networks including:
+- `ethereum` - Ethereum mainnet
+- `iotex` - IoTeX network
+- `polygon` - Polygon
+- `bsc` - Binance Smart Chain
+- And other EVM-compatible chains
+
+### Solana Wallet Queries
+
+Query account balances on Solana:
+
+```typescript
+// Get balance for a Solana address
+const solanaWallet = await repo<WalletEntity>({
+  entity: "wallet",
+  source: "solana",
+}).findOne({
+  where: {
+    address: "11111111111111111111111111111112",
+  },
+});
+
+console.log("Solana Wallet:", solanaWallet);
+```
+
+## Complete Example
+
+### React Component Example (Next.js Pages Router)
+
+Here's a complete React component example that fetches wallet balances:
+
+```typescript
+import { repo, URPC } from "@unilab/urpc-client";
+import { WalletEntity } from "@unilab/uniweb3/entities";
+import { useEffect, useState } from "react";
+
+// Initialize the client for Next.js API routes
+URPC.init({
+  baseUrl: "http://localhost:3000/api",
+  timeout: 10000,
+  headers: {
+    Authorization: "Bearer your-token-here",
+  },
+});
+
+export default function Home() {
+  const [evmBalanceData, setEvmBalanceData] = useState<any>(null);
+  const [solanaBalanceData, setSolanaBalanceData] = useState<any>(null);
+
+  useEffect(() => {
+    const fetchEvmBalance = async () => {
+      try {
+        const data = await repo<WalletEntity>({
+          entity: "wallet",
+          source: "evm",
+        }).findOne({
+          where: {
+            address: "0x...",
+            network: "ethereum",
+          },
+        });
+        if (data) {
+          setEvmBalanceData(data);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    const fetchSolanaBalance = async () => {
+      try {
+        const data = await repo<WalletEntity>({
+          entity: "wallet",
+          source: "solana",
+        }).findOne({
+          where: {
+            address: "11111111111111111111111111111112",
+          },
+        });
+        if (data) {
+          setSolanaBalanceData(data);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchEvmBalance();
+    fetchSolanaBalance();
+  }, []);
+
+  return (
+    <div className="min-h-screen w-full flex flex-col items-center p-10">
+      {evmBalanceData && (
+        <pre>{JSON.stringify(evmBalanceData, null, 2)}</pre>
+      )}
+      {solanaBalanceData && (
+        <pre>{JSON.stringify(solanaBalanceData, null, 2)}</pre>
+      )}
+    </div>
+  );
+}
+```
+
+### Node.js/Server Example
+
+Here's a standalone Node.js example for querying balances:
+
+```typescript
+import { repo, URPC } from "@unilab/urpc-client";
+import { WalletEntity } from "@unilab/uniweb3/entities";
+
+// Initialize the client for standalone server
+URPC.init({
+  baseUrl: "http://localhost:3000",
+  timeout: 10000,
+});
+
+async function queryBalances() {
+  try {
+    // Query EVM wallet balance
+    const evmWallet = await repo<WalletEntity>({
+      entity: "wallet",
+      source: "evm",
+    }).findOne({
+      where: {
+        address: "0x...",
+        network: "ethereum",
+      },
+    });
+
+    if (evmWallet) {
+      console.log("EVM Wallet:", evmWallet);
+    }
+
+    // Query Solana wallet balance
+    const solanaWallet = await repo<WalletEntity>({
+      entity: "wallet",
+      source: "solana",
+    }).findOne({
+      where: {
+        address: "11111111111111111111111111111112",
+      },
+    });
+
+    if (solanaWallet) {
+      console.log("Solana Wallet:", solanaWallet);
+    }
+  } catch (error) {
+    console.error("Error querying balances:", error);
+  }
+}
+
+queryBalances();
+```
+
+## API Reference
+
+### WalletEntity Interface
+
+```typescript
+interface WalletEntity  {
+  address: string;
+  balance: string;
+  network: string;
+  token?: {
+    symbol: string;
+    decimals: number;
+  };
+}
+```
+
+### EVM Adapter
+
+#### `repo<WalletEntity>({ entity: "wallet", source: "evm" }).findOne(options)`
+
+Query balance for an EVM wallet address.
+
+**Parameters:**
+- `options.where.address`: The wallet address to query
+- `options.where.network`: The EVM network to query (e.g., "ethereum")
+
+**Returns:**
+- Promise resolving to `WalletEntity` or `null`
+
+### Solana Adapter
+
+#### `repo<WalletEntity>({ entity: "wallet", source: "solana" }).findOne(options)`
+
+Query balance for a Solana wallet address.
+
+**Parameters:**
+- `options.where.address`: The Solana wallet address to query
+
+**Returns:**
+- Promise resolving to `WalletEntity` or `null`
+
+## Integration Examples
+
+The UniWeb3 plugin works seamlessly with various frameworks:
+
+- [Next.js App Router Integration](/docs/integrations/next) - Complete Next.js App Router setup guide
+- Next.js Pages Router - Covered in this documentation
+- [Hono Integration](/docs/integrations/hono) - Hono server setup guide
+- Express.js Integration - Coming soon
+- Fastify Integration - Coming soon
+
+### Setting up a Next.js Pages Router Project
+
+1. Create a new Next.js project:
+```bash
+npx create-next-app@latest my-web3-app --typescript --tailwind --src-dir
+cd my-web3-app
+```
+
+2. Install the required dependencies:
+```bash
+npm install @unilab/urpc-next @unilab/urpc-client @unilab/urpc-core @unilab/uniweb3
+```
+
+3. Create the API route at `pages/api/[...urpc].ts`:
+```typescript
+import { URPC } from "@unilab/urpc-next/pages-router";
+import { WalletPlugin } from "@unilab/uniweb3";
+import { Logging } from "@unilab/urpc-core/middleware";
+
+const handler = URPC.init({
+  plugins: [WalletPlugin],
+  middleware: [Logging()],
+});
+
+export default handler;
+```
+
+4. Use the client in your React components as shown in the examples above.
+
+## Next.js Pages Router Configuration
+
+### API Route Configuration
+
+The `[...urpc].ts` API route in the `pages/api` directory will handle all UniWeb3 requests. The route uses dynamic routing to catch all paths under `/api/`.
+
+### Client Configuration
+
+When using UniWeb3 with Next.js Pages Router, make sure to:
+
+1. Initialize the client with the correct base URL pointing to your API route
+2. Include necessary headers for authentication if required
+3. Handle loading states and errors appropriately in your React components
+
+### TypeScript Configuration
+
+Ensure your `tsconfig.json` includes the proper paths for workspace dependencies:
+
+```json
+{
+  "compilerOptions": {
+    "target": "es5",
+    "lib": ["dom", "dom.iterable", "es6"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"]
+}
+```
+
+## Best Practices
+
+1. **Error Handling**: Always implement proper error handling for network requests
+2. **Rate Limiting**: Be mindful of API rate limits when making frequent requests
+3. **Caching**: Consider implementing caching for frequently requested data
+4. **Address Validation**: Validate addresses before making requests
+5. **Network Selection**: Ensure you're using the correct network identifier for EVM queries
+6. **Loading States**: Implement loading states in React components for better UX
+7. **Environment Variables**: Store sensitive configuration in environment variables

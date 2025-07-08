@@ -1,0 +1,48 @@
+{
+  "name": "@unilab/urpc-next",
+  "version": "0.0.3",
+  "description": "URPC Next.js Adapter",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "publishConfig": {
+    "access": "public"
+  },
+  "exports": {
+    "./app-router": "./dist/app-router/handler.js",
+    "./pages-router": "./dist/pages-router/handler.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "bun test",
+    "prepublishOnly": "bun run build"
+  },
+  "keywords": [
+    "nextjs",
+    "rest",
+    "api",
+    "cli"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@unilab/urpc-core": "^0.0.1",
+    "next": "^14.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.0",
+    "@types/node": "^20.10.0"
+  },
+  "peerDependencies": {
+    "next": "^13.0.0 || ^14.0.0"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/unifi-lab/unify.git",
+    "directory": "packages/unify-next"
+  }
+}

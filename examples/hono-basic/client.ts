@@ -1,16 +1,16 @@
 import { UserEntity } from "./entities/user";
 import { PostEntity } from "./entities/post";
-import { repo, UnifyClient, joinRepo } from "@unilab/unify-client";
+import { repo, URPC, joinRepo } from "@unilab/urpc-client";
 
-UnifyClient.init({
+URPC.init({
   baseUrl: "http://localhost:3000",
   timeout: 10000,
 });
 
 const fetchUser = async () => {
   const data = await repo<UserEntity>({
-    entityName: "user",
-    source: "wordpress",
+    entity: "user",
+    source: "demo",
   }).findMany({
     where: {
       id: "2",
@@ -20,8 +20,8 @@ const fetchUser = async () => {
       posts: (userList) => {
         const ids = userList.map((user) => user.id);
         // return repo<PostEntity>({
-        //   entityName: "post",
-        //   source: "wordpress",
+        //   entity: "post",
+        //   source: "demo",
         // }).findMany({
         //   where: {
         //     userId: {
@@ -32,8 +32,8 @@ const fetchUser = async () => {
 
         // If you don't set the where parameter, you must use joinRepo, but in other cases you can use repo directly.
         return joinRepo<PostEntity, UserEntity>({
-          entityName: "post",
-          source: "wordpress",
+          entity: "post",
+          source: "demo",
           localField: "id",
           foreignField: "userId",
         }).findMany({
@@ -53,8 +53,8 @@ fetchUser();
 
 // const fetchPost = async () => {
 //   const data = await repo<PostEntity>({
-//     entityName: "post",
-//     source: "wordpress",
+//     entity: "post",
+//     source: "demo",
 //   }).findOne({
 //     where: {
 //       id: "1",
@@ -63,8 +63,8 @@ fetchUser();
 //       user: (post) => {
 //         const userId = post.userId;
 //         return repo<UserEntity>({
-//           entityName: "user",
-//           source: "wordpress",
+//           entity: "user",
+//           source: "demo",
 //         }).findOne({
 //           where: {
 //             id: userId,
@@ -80,8 +80,8 @@ fetchUser();
 
 // const createUser = async () => {
 //   const data = await repo<UserEntity>({
-//     entityName: "user",
-//     source: "wordpress",
+//     entity: "user",
+//     source: "demo",
 //   }).create({
 //     data: {
 //       name: "John Doe",

@@ -1,4 +1,4 @@
-import { SchemaObject } from "@unilab/core";
+import { SchemaObject } from "@unilab/urpc-core";
 
 export class SchemaEntity {
   name: string = "";

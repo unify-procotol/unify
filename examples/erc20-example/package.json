@@ -1,7 +1,7 @@
 {
   "name": "mimo-example",
   "version": "1.0.0",
-  "description": "Mimo trading pair price example using @unilab/unify-client",
+  "description": "Mimo trading pair price example using @unilab/urpc-client",
   "main": "server.ts",
   "scripts": {
     "dev": "bun run server.ts",
@@ -12,9 +12,9 @@
   },
   "dependencies": {
     "@hono/node-server": "^1.12.2",
-    "@unilab/unify-client": "workspace:*",
-    "@unilab/core": "workspace:*",
-    "@unilab/unify-hono": "workspace:*",
+    "@unilab/urpc-client": "workspace:*",
+    "@unilab/urpc-core": "workspace:*",
+    "@unilab/urpc-hono": "workspace:*",
     "@unilab/uniweb3": "workspace:*",
     "hono": "^4.7.11"
   },
@@ -36,4 +36,4 @@
   ],
   "author": "",
   "license": "MIT"
-} 
+}

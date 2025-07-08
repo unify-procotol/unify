@@ -1,0 +1,94 @@
+---
+title: Basic Usage
+description: Learn how to set up URPC with plugins and middleware
+---
+
+## Server Setup
+
+### 1. Install Dependencies
+
+```package-install
+@unilab/urpc-hono @unilab/urpc-client @unilab/urpc-core
+```
+
+### 2. Create Server
+
+```typescript
+// server.ts
+import { URPC } from "@unilab/urpc-hono";
+import { WalletPlugin } from "@unilab/uniweb3";
+import { Logging } from "@unilab/urpc-core/middleware";
+
+const app = URPC.init({
+  plugins: [WalletPlugin],
+  middleware: [Logging()],
+});
+
+export default {
+  port: 3000,
+  fetch: app.fetch,
+};
+```
+
+### 3. Use repo on the server side
+
+```typescript
+import { URPC } from "@unilab/urpc-hono";
+
+await URPC.repo<WalletEntity>({
+  entity: "WalletEntity",
+  source: "evm",
+}).findOne({
+  where: {
+    address: "0x...",
+    network: "ethereum",
+  },
+});
+
+```
+
+### 4. Client Usage
+
+```typescript
+// client.ts
+import { repo, URPC } from "@unilab/urpc-client";
+import { WalletEntity } from "@unilab/uniweb3/entities";
+
+URPC.init({
+  baseUrl: "http://localhost:3000",
+  timeout: 10000,
+});
+
+const evmBalance = await repo<WalletEntity>({
+  entity: "WalletEntity",
+  source: "evm",
+}).findOne({
+  where: {
+    address: "0x...",
+    network: "ethereum",
+  },
+});
+
+const solanaBalance = await repo<WalletEntity>({
+  entity: "WalletEntity",
+  source: "solana",
+}).findOne({
+  where: {
+    address: "11111111111111111111111111111112",
+  },
+});
+```
+
+## Running the Server
+
+```bash
+bun run server.ts
+# or
+node server.js
+```
+
+## Next Steps
+
+- Explore [Plugin Development](/docs/plugins/creating-plugins)
+- Learn about [Middleware](/docs/middleware/logging)
+- Check [Integration Guides](/docs/integrations/next)

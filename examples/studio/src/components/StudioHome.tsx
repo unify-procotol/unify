@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { repo, UnifyClient } from "@unilab/unify-client";
-import { UniRender, Entity, LayoutType, FieldConfig } from "@unilab/unify-ui";
+import { repo, URPC } from "@unilab/urpc-client";
+import { UniRender, Entity, LayoutType, FieldConfig } from "@unilab/urpc-ui";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
@@ -37,7 +37,7 @@ interface Schema {
 }
 
 interface SourceData {
-  entityName: string;
+  entity: string;
   source: string;
   data: any[];
   loading: boolean;
@@ -106,7 +106,7 @@ export function StudioHome({ isConnected, baseUrl }: StudioHomeProps) {
 
       // Use the same API call as examples/global/client.ts
       const entitiesInfo = await repo<Schema>({
-        entityName: "schema",
+        entity: "schema",
         source: "_global",
       }).findMany();
       setEntities(entitiesInfo);
@@ -126,7 +126,7 @@ export function StudioHome({ isConnected, baseUrl }: StudioHomeProps) {
         if (entity.sources && entity.sources.length > 0) {
           entity.sources.forEach((source: string) => {
             initialSourceData.push({
-              entityName: entity.name,
+              entity: entity.name,
               source: source,
               data: [],
               loading: true, // Set to true to start loading immediately
@@ -164,19 +164,19 @@ export function StudioHome({ isConnected, baseUrl }: StudioHomeProps) {
   };
 
   const loadSingleSourceData = async (
-    entityName: string,
+    entity: string,
     source: string
   ): Promise<void> => {
     try {
       // Convert entity name to repo name format (e.g., "UserEntity" -> "user")
       const data = await repo<any>({
-        entityName: entityName,
+        entity: entity,
         source: source,
       }).findMany();
 
       setSourceDataList((prev) =>
         prev.map((item) =>
-          item.entityName === entityName && item.source === source
+          item.entity === entity && item.source === source
             ? { ...item, data, loading: false }
             : item
         )
@@ -184,7 +184,7 @@ export function StudioHome({ isConnected, baseUrl }: StudioHomeProps) {
     } catch (err) {
       setSourceDataList((prev) =>
         prev.map((item) =>
-          item.entityName === entityName && item.source === source
+          item.entity === entity && item.source === source
             ? {
                 ...item,
                 loading: false,
@@ -201,25 +201,25 @@ export function StudioHome({ isConnected, baseUrl }: StudioHomeProps) {
     if (!selectedEntity || !selectedSource) return undefined;
     return sourceDataList.find(
       (item) =>
-        item.entityName === selectedEntity.name &&
+        item.entity === selectedEntity.name &&
         item.source === selectedSource
     );
   };
 
-  const toggleEntityCollapse = (entityName: string) => {
+  const toggleEntityCollapse = (entity: string) => {
     setCollapsedEntities((prev) => {
       const newSet = new Set(prev);
-      if (newSet.has(entityName)) {
-        newSet.delete(entityName);
+      if (newSet.has(entity)) {
+        newSet.delete(entity);
       } else {
-        newSet.add(entityName);
+        newSet.add(entity);
       }
       return newSet;
     });
   };
 
-  const isEntityCollapsed = (entityName: string) =>
-    collapsedEntities.has(entityName);
+  const isEntityCollapsed = (entity: string) =>
+    collapsedEntities.has(entity);
 
   // Execute search query on backend
   const executeSearch = async () => {
@@ -229,7 +229,7 @@ export function StudioHome({ isConnected, baseUrl }: StudioHomeProps) {
     try {
       const entityName = selectedEntity.name;
 
-      // Build query parameters based on search criteria using proper Unify syntax
+      // Build query parameters based on search criteria using proper urpc syntax
       let findManyArgs: any = {};
 
       if (searchField && searchValue.trim()) {
@@ -239,7 +239,7 @@ export function StudioHome({ isConnected, baseUrl }: StudioHomeProps) {
         switch (searchOperator) {
           case "contains":
             // For string contains, we might need to use a different approach
-            // Since Unify might not support regex, we'll use equals for now
+            // Since urpc might not support regex, we'll use equals for now
             whereCondition[searchField] = searchValue;
             break;
           case "equals":
@@ -290,22 +290,22 @@ export function StudioHome({ isConnected, baseUrl }: StudioHomeProps) {
 
       console.log("findManyArgs:", findManyArgs);
 
-      // Call the backend with proper Unify query syntax
+      // Call the backend with proper urpc query syntax
       const searchResults =
         Object.keys(findManyArgs).length > 0
           ? await repo<any>({
-              entityName: entityName,
+              entity: entityName,
               source: selectedSource,
             }).findMany(findManyArgs)
           : await repo<any>({
-              entityName: entityName,
+              entity: entityName,
               source: selectedSource,
             }).findMany();
 
       // Update the source data with search results
       setSourceDataList((prev) =>
         prev.map((item) =>
-          item.entityName === selectedEntity.name &&
+          item.entity === selectedEntity.name &&
           item.source === selectedSource
             ? { ...item, data: searchResults, loading: false }
             : item
@@ -314,7 +314,7 @@ export function StudioHome({ isConnected, baseUrl }: StudioHomeProps) {
     } catch (err) {
       setSourceDataList((prev) =>
         prev.map((item) =>
-          item.entityName === selectedEntity.name &&
+          item.entity === selectedEntity.name &&
           item.source === selectedSource
             ? {
                 ...item,
@@ -365,11 +365,11 @@ export function StudioHome({ isConnected, baseUrl }: StudioHomeProps) {
 
     setAddLoading(true);
     try {
-      const entityName = selectedEntity.name;
+      const entity = selectedEntity.name;
 
-      // Create new record using Unify client
+      // Create new record using urpc client
       await repo<any>({
-        entityName: entityName,
+        entity: entity,
         source: selectedSource,
       }).create({ data: newRowData });
 
@@ -429,12 +429,12 @@ export function StudioHome({ isConnected, baseUrl }: StudioHomeProps) {
   };
 
   // Example field configuration with custom rendering and ordering
-  const getFieldConfig = (entityName: string): Record<string, FieldConfig> => {
+  const getFieldConfig = (entity: string): Record<string, FieldConfig> => {
     // You can customize this based on different entities
     const baseConfig: Record<string, FieldConfig> = {};
 
     // Example configurations for different field types
-    if (entityName.toLowerCase().includes("user")) {
+    if (entity.toLowerCase().includes("user")) {
       return {
         id: { order: 1, label: "ID", width: "80px", align: "center" },
         name: { order: 2, label: "Full Name", width: "150px" },
@@ -706,7 +706,7 @@ export function StudioHome({ isConnected, baseUrl }: StudioHomeProps) {
                                   selectedEntity?.name === entity.name;
                                 const sourceStatus = sourceDataList.find(
                                   (item) =>
-                                    item.entityName === entity.name &&
+                                    item.entity === entity.name &&
                                     item.source === source
                                 );
                                 return (

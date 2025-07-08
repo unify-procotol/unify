@@ -1,6 +1,6 @@
-# Unify Studio
+# URPC Studio
 
-Unify Studio 是一个类似于 Prisma Studio 的可视化数据库浏览器，专为 Unify 框架设计。
+URPC Studio 是一个类似于 Prisma Studio 的可视化数据库浏览器，专为 URPC 框架设计。
 
 ## 功能特性
 
@@ -14,31 +14,31 @@ Unify Studio 是一个类似于 Prisma Studio 的可视化数据库浏览器，�
 
 ### 方法 1: 使用 CLI 命令（推荐）
 
-安装 `@unify/client` 后，你可以直接运行：
+安装 `@unilab/urpc-client` 后，你可以直接运行：
 
 ```bash
-npx unify-studio
+npx urpc-studio
 ```
 
 或者全局安装后使用：
 
 ```bash
-npm install -g @unify/client
-unify-studio
+npm install -g @unilab/urpc-client
+urpc-studio
 ```
 
 ### 方法 2: 使用 npm scripts
 
-在安装了 `@unify/client` 的项目中：
+在安装了 `@unilab/urpc-client` 的项目中：
 
 ```bash
-# 在 @unify/client 目录下
+# 在 @unilab/urpc-client 目录下
 npm run studio
 ```
 
 ## 前置条件
 
-1. 确保你的 Unify 服务器正在运行在 `http://localhost:3000`
+1. 确保你的 urpc 服务器正在运行在 `http://localhost:3000`
 2. 确保已经注册了至少一个 adapter
 
 ## 访问地址
@@ -65,7 +65,7 @@ Studio 将在 `http://localhost:3001` 启动
 
 如果遇到问题，请检查：
 
-1. Unify 服务器是否正在运行
+1. urpc 服务器是否正在运行
 2. 服务器端口是否为 3000
 3. 是否已经正确注册了 adapters
 4. 网络连接是否正常

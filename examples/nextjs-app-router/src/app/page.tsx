@@ -1,10 +1,10 @@
 "use client";
 
-import { repo, UnifyClient } from "@unilab/unify-client";
+import { repo, URPC } from "@unilab/urpc-client";
 import { WalletEntity } from "@unilab/uniweb3/entities";
 import { useEffect, useState } from "react";
 
-UnifyClient.init({
+URPC.init({
   baseUrl: "http://localhost:3000/api",
   timeout: 10000,
   headers: {
@@ -13,19 +13,22 @@ UnifyClient.init({
 });
 
 export default function Home() {
-  const [evmBalanceData, setEvmBalanceData] = useState<any>(null);
-  const [solanaBalanceData, setSolanaBalanceData] = useState<any>(null);
+  const [evmBalanceData, setEvmBalanceData] = useState<WalletEntity | null>(
+    null
+  );
+  const [solanaBalanceData, setSolanaBalanceData] =
+    useState<WalletEntity | null>(null);
 
   useEffect(() => {
     const fetchEvmBalance = async () => {
       try {
         const data = await repo<WalletEntity>({
-          entityName: "wallet",
+          entity: "wallet",
           source: "evm",
         }).findOne({
           where: {
-            address: "0x4f00D43b5aF0a0aAd62E9075D1bFa86a89CDb9aB",
-            network: "iotex",
+            address: "0x8E76cAEbaca6c0e390F825fa44Dfd1fCb74B9C36",
+            network: "ethereum",
           },
         });
         if (data) {
@@ -39,7 +42,7 @@ export default function Home() {
     const fetchSolanaBalance = async () => {
       try {
         const data = await repo<WalletEntity>({
-          entityName: "wallet",
+          entity: "wallet",
           source: "solana",
         }).findOne({
           where: {

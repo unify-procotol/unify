@@ -3,9 +3,9 @@ import {
   CreationArgs,
   FindManyArgs,
   FindOneArgs,
-  UnifyError,
+  URPCError,
   ErrorCodes,
-} from "@unilab/core";
+} from "@unilab/urpc-core";
 import { UserEntity } from "../entities/user";
 
 const userData = [
@@ -67,7 +67,7 @@ class UserAdapter extends BaseAdapter<UserEntity> {
   async create(args: CreationArgs<UserEntity>): Promise<UserEntity> {
     const { name, email, avatar } = args.data;
     if (!name || !email || !avatar) {
-      throw new UnifyError(ErrorCodes.BAD_REQUEST, "Invalid arguments");
+      throw new URPCError(ErrorCodes.BAD_REQUEST, "Invalid arguments");
     }
     const newUser = {
       id: (userData.length + 1).toString(),

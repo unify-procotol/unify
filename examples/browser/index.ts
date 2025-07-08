@@ -1,23 +1,23 @@
 import { UserEntity } from "./entities/user";
 import { PostEntity } from "./entities/post";
-import { joinRepo, repo, Unify } from "@unilab/unify";
+import { joinRepo, repo, URPC } from "@unilab/urpc";
 import { UserAdapter } from "./adapters/user";
 import { PostAdapter } from "./adapters/post";
 import { WalletPlugin } from "@unilab/uniweb3";
-import { Plugin } from "@unilab/core";
-import { createHookMiddleware, Logging } from "@unilab/core/middleware";
+import { Plugin } from "@unilab/urpc-core";
+import { createHookMiddleware, Logging } from "@unilab/urpc-core/middleware";
 
 const MyPlugin: Plugin = {
   entities: [UserEntity, PostEntity],
   adapters: [
     {
-      source: "wordpress",
-      entityName: "UserEntity",
+      source: "demo",
+      entity: "UserEntity",
       adapter: new UserAdapter(),
     },
     {
-      source: "wordpress",
-      entityName: "PostEntity",
+      source: "demo",
+      entity: "PostEntity",
       adapter: new PostAdapter(),
     },
   ],
@@ -99,7 +99,7 @@ const HookMiddleware = createHookMiddleware((hookManager) => {
     });
 });
 
-Unify.init({
+URPC.init({
   enableDebug: true,
   plugins: [MyPlugin, WalletPlugin],
   // middleware: [HookMiddleware, Logging()],
@@ -107,8 +107,8 @@ Unify.init({
 
 const fetchUser = async () => {
   const data = await repo<UserEntity>({
-    entityName: "user",
-    source: "wordpress",
+    entity: "user",
+    source: "demo",
   }).findMany({
     // where: {
     //   id: "1",
@@ -118,8 +118,8 @@ const fetchUser = async () => {
       posts: (userList) => {
         const ids = userList.map((user) => user.id);
         return joinRepo<PostEntity, UserEntity>({
-          entityName: "post",
-          source: "wordpress",
+          entity: "post",
+          source: "demo",
           localField: "id",
           foreignField: "userId",
         }).findMany({
@@ -139,8 +139,8 @@ fetchUser();
 
 // const fetchPost = async () => {
 //   const data = await repo<PostEntity>({
-//     entityName: "post",
-//     source: "wordpress",
+//     entity: "post",
+//     source: "demo",
 //   }).findOne({
 //     where: {
 //       id: "2",
@@ -149,8 +149,8 @@ fetchUser();
 //       user: (post) => {
 //         const userId = post.userId;
 //         return repo<UserEntity>({
-//           entityName: "user",
-//           source: "wordpress",
+//           entity: "user",
+//           source: "demo",
 //         }).findOne({
 //           where: {
 //             id: userId,
@@ -166,12 +166,12 @@ fetchUser();
 
 // const fetchEvmBalance = async () => {
 //   const data = await repo<WalletEntity>({
-//     entityName: "wallet",
+//     entity: "wallet",
 //     source: "evm",
 //   }).findOne({
 //     where: {
-//       address: "0x4f00D43b5aF0a0aAd62E9075D1bFa86a89CDb9aB",
-//       network: "iotex",
+//       address: "0x...",
+//       network: "ethereum",
 //     },
 //   });
 //   console.log("[3] =>", JSON.stringify(data, null, 2));

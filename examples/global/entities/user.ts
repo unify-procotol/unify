@@ -1,4 +1,4 @@
-import { Fields, Relations } from "@unilab/core";
+import { Fields, Relations } from "@unilab/urpc-core";
 import { PostEntity } from "./post";
 
 export class UserEntity {

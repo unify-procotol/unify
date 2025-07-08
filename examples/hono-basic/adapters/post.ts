@@ -1,4 +1,4 @@
-import { BaseAdapter, FindManyArgs, FindOneArgs } from "@unilab/core";
+import { BaseAdapter, FindManyArgs, FindOneArgs } from "@unilab/urpc-core";
 import { PostEntity } from "../entities/post";
 
 const postData = [
