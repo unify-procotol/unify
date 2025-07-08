@@ -64,9 +64,13 @@ export const renderFieldValue = (
     
     case 'date':
       const dateValue = new Date(value);
+      // Use a consistent date format to prevent hydration mismatches
+      const formatDate = (date: Date) => {
+        return date.toISOString().split('T')[0] + ' ' + date.toISOString().split('T')[1].slice(0, 8);
+      };
       return (
         <span className="text-purple-600 dark:text-purple-400" title={dateValue.toISOString()}>
-          {dateValue.toLocaleString()}
+          {formatDate(dateValue)}
         </span>
       );
     

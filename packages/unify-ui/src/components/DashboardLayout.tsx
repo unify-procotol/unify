@@ -22,7 +22,10 @@ import {
 export const DashboardLayout: React.FC<LayoutProps> = ({ 
   entity, 
   data, 
-  config
+  config,
+  generalConfig,
+  onEdit,
+  onDelete
 }) => {
   const sortedFields = getSortedFields(entity, config);
   
