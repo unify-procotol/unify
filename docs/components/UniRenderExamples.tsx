@@ -5,7 +5,7 @@ import type { UniRenderProps } from "@unilab/unify-ui";
 import { useState } from "react";
 
 interface ExampleProps {
-  type: 'basic' | 'table-editable' | 'card' | 'form' | 'loading' | 'error' | 'empty';
+  type: 'basic' | 'table-editable' | 'card' | 'form' | 'grid' | 'list' | 'dashboard' | 'loading' | 'error' | 'empty';
 }
 
 export function UniRenderExample({ type }: ExampleProps) {
@@ -257,6 +257,238 @@ export function UniRenderExample({ type }: ExampleProps) {
             </span>
           )
         }
+      }
+    },
+    grid: {
+      entity: {
+        name: 'Gallery Item',
+        fields: [
+          { name: 'id', type: 'number', required: true },
+          { name: 'title', type: 'string', required: true },
+          { name: 'image', type: 'string' },
+          { name: 'category', type: 'string' },
+          { name: 'views', type: 'number' },
+          { name: 'likes', type: 'number' }
+        ]
+      },
+      data: [
+        { 
+          id: 1, 
+          title: 'Mountain Landscape', 
+          image: '/images/mountain.jpg',
+          category: 'Nature', 
+          views: 1250, 
+          likes: 89 
+        },
+        { 
+          id: 2, 
+          title: 'City Sunset', 
+          image: '/images/city.jpg',
+          category: 'Urban', 
+          views: 987, 
+          likes: 156 
+        },
+        { 
+          id: 3, 
+          title: 'Ocean Waves', 
+          image: '/images/ocean.jpg',
+          category: 'Nature', 
+          views: 2100, 
+          likes: 203 
+        },
+        { 
+          id: 4, 
+          title: 'Forest Path', 
+          image: '/images/forest.jpg',
+          category: 'Nature', 
+          views: 743, 
+          likes: 67 
+        }
+      ],
+      layout: 'grid' as const,
+      config: {
+        title: { label: 'Title' },
+        category: { 
+          label: 'Category',
+          render: (value: string) => (
+            <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">
+              {value}
+            </span>
+          )
+        },
+        views: { 
+          label: 'Views',
+          render: (value: number) => `${value.toLocaleString()} views`
+        },
+        likes: { 
+          label: 'Likes',
+          render: (value: number) => `${value} ❤️`
+        }
+      }
+    },
+    list: {
+      entity: {
+        name: 'Message',
+        fields: [
+          { name: 'id', type: 'number', required: true },
+          { name: 'sender', type: 'string', required: true },
+          { name: 'subject', type: 'string', required: true },
+          { name: 'preview', type: 'string' },
+          { name: 'timestamp', type: 'date', required: true },
+          { name: 'isRead', type: 'boolean' },
+          { name: 'priority', type: 'string' }
+        ]
+      },
+      data: [
+        { 
+          id: 1, 
+          sender: 'Alice Johnson', 
+          subject: 'Project Update', 
+          preview: 'The quarterly report is ready for review...',
+          timestamp: '2024-01-15T10:30:00Z',
+          isRead: false,
+          priority: 'high'
+        },
+        { 
+          id: 2, 
+          sender: 'Bob Smith', 
+          subject: 'Meeting Request', 
+          preview: 'Would you be available for a quick call...',
+          timestamp: '2024-01-15T09:15:00Z',
+          isRead: true,
+          priority: 'medium'
+        },
+        { 
+          id: 3, 
+          sender: 'Carol Davis', 
+          subject: 'Weekly Summary', 
+          preview: 'Here are the key metrics from this week...',
+          timestamp: '2024-01-14T16:45:00Z',
+          isRead: true,
+          priority: 'low'
+        }
+      ],
+      layout: 'list' as const,
+      config: {
+        sender: { label: 'From' },
+        subject: { label: 'Subject' },
+        preview: { label: 'Preview' },
+        timestamp: { 
+          label: 'Time',
+          render: (value: string) => new Date(value).toLocaleString()
+        },
+        isRead: { 
+          label: 'Read Status',
+          render: (value: boolean) => (
+            <span className={`px-2 py-1 rounded text-xs font-semibold ${
+              value ? 'bg-gray-100 text-gray-800' : 'bg-blue-100 text-blue-800'
+            }`}>
+              {value ? 'Read' : 'Unread'}
+            </span>
+          )
+        },
+        priority: { 
+          label: 'Priority',
+          render: (value: string) => (
+            <span className={`px-2 py-1 rounded text-xs font-semibold ${
+              value === 'high' ? 'bg-red-100 text-red-800' :
+              value === 'medium' ? 'bg-yellow-100 text-yellow-800' :
+              'bg-green-100 text-green-800'
+            }`}>
+              {value.charAt(0).toUpperCase() + value.slice(1)}
+            </span>
+          )
+        }
+      }
+    },
+    dashboard: {
+      entity: {
+        name: 'Business Metrics',
+        fields: [
+          { name: 'metric', type: 'string', required: true },
+          { name: 'value', type: 'number', required: true },
+          { name: 'change', type: 'number' },
+          { name: 'trend', type: 'string' },
+          { name: 'target', type: 'number' },
+          { name: 'period', type: 'string' }
+        ]
+      },
+      data: [
+        { 
+          metric: 'Total Revenue', 
+          value: 245000, 
+          change: 12.5,
+          trend: 'up',
+          target: 250000,
+          period: 'This Month'
+        },
+        { 
+          metric: 'New Customers', 
+          value: 1847, 
+          change: -3.2,
+          trend: 'down',
+          target: 2000,
+          period: 'This Month'
+        },
+        { 
+          metric: 'Conversion Rate', 
+          value: 3.45, 
+          change: 0.8,
+          trend: 'up',
+          target: 4.0,
+          period: 'This Month'
+        },
+        { 
+          metric: 'Average Order Value', 
+          value: 127.50, 
+          change: 8.3,
+          trend: 'up',
+          target: 135.0,
+          period: 'This Month'
+        }
+      ],
+      layout: 'dashboard' as const,
+      config: {
+        metric: { label: 'Metric' },
+        value: { 
+          label: 'Value',
+          render: (value: number, record: any) => {
+            if (record.metric.includes('Revenue') || record.metric.includes('Value')) {
+              return `$${value.toLocaleString()}`;
+            }
+            if (record.metric.includes('Rate')) {
+              return `${value}%`;
+            }
+            return value.toLocaleString();
+          }
+        },
+        change: { 
+          label: 'Change',
+          render: (value: number) => (
+            <span className={`px-2 py-1 rounded text-xs font-semibold ${
+              value > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+            }`}>
+              {value > 0 ? '+' : ''}{value}%
+            </span>
+          )
+        },
+        trend: { 
+          label: 'Trend',
+          render: (value: string) => value === 'up' ? '📈' : value === 'down' ? '📉' : '➡️'
+        },
+        target: { 
+          label: 'Target',
+          render: (value: number, record: any) => {
+            if (record.metric.includes('Revenue') || record.metric.includes('Value')) {
+              return `$${value.toLocaleString()}`;
+            }
+            if (record.metric.includes('Rate')) {
+              return `${value}%`;
+            }
+            return value.toLocaleString();
+          }
+        },
+        period: { label: 'Period' }
       }
     },
     loading: {
