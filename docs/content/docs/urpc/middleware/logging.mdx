@@ -19,7 +19,7 @@ The simplest way to use logging middleware is with the default console logger:
 import { Logging } from '@unilab/urpc-core/middleware';
 
 const app = URPC.init({
-  middleware: [Logging()],
+  middlewares: [Logging()],
 });
 
 ```
@@ -38,7 +38,7 @@ const customLogger = (message: string, context?: any) => {
 };
 
 const app = URPC.init({
-  middleware: [Logging(customLogger)],
+  middlewares: [Logging(customLogger)],
 });
 ```
 
@@ -103,7 +103,7 @@ const customLoggingMiddleware = Logging((message, context) =>
 );
 
 const app = URPC.init({
-  middleware: [customLoggingMiddleware],
+  middlewares: [customLoggingMiddleware],
 });
 ```
 
@@ -130,7 +130,7 @@ const winstonLoggingMiddleware = Logging((message, context) => {
 });
 
 const app = URPC.init({
-  middleware: [winstonLoggingMiddleware],
+  middlewares: [winstonLoggingMiddleware],
 });
 ```
 

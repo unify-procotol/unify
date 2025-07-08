@@ -99,7 +99,7 @@ const MyPlugin: Plugin = {
 
 const app = URPC.init({
   plugins: [MyPlugin],
-  middleware: [Logging()],
+  middlewares: [Logging()],
 });
 
 export default {
@@ -185,6 +185,6 @@ const HookMiddleware = createHookMiddleware((hookManager) => {
 
 const app = URPC.init({
   plugins: [MyPlugin],
-  middleware: [HookMiddleware, Logging()],
+  middlewares: [HookMiddleware, Logging()],
 });
 ```

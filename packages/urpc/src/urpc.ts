@@ -19,7 +19,7 @@ import {
   registerAdapter,
   useGlobalMiddleware,
 } from "@unilab/urpc-core";
-import type { ClientConfig } from "./types";
+import type { URPCConfig } from "./types";
 import { BuiltinPlugin } from "@unilab/builtin-plugin";
 
 export class URPC {
@@ -27,10 +27,10 @@ export class URPC {
   private entitySchemas: Record<string, SchemaObject> = {};
   private entitySources: Record<string, string[]> = {};
 
-  constructor(config: ClientConfig) {
+  constructor(config: URPCConfig) {
     this.enableDebug = config.enableDebug || false;
     this.initFromPlugins([...config.plugins, BuiltinPlugin(URPC)]);
-    this.applyMiddlewareToRepos(config.middleware);
+    this.applyMiddlewareToRepos(config.middlewares);
   }
 
   private log(...args: any[]): void {
@@ -64,11 +64,11 @@ export class URPC {
     );
   }
 
-  private applyMiddlewareToRepos(middleware: Middleware<any>[] = []) {
-    if (middleware.length > 0) {
-      middleware.forEach((m) => useGlobalMiddleware(m));
+  private applyMiddlewareToRepos(middlewares: Middleware<any>[] = []) {
+    if (middlewares.length > 0) {
+      middlewares.forEach((m) => useGlobalMiddleware(m));
       console.log(
-        `✅ Registered middleware: ${middleware.map((m) => m.name).join(", ")}`
+        `✅ Registered middlewares: ${middlewares.map((m) => m.name).join(", ")}`
       );
     }
   }
@@ -210,7 +210,7 @@ export class URPC {
 
   private static globalClient: URPC | null = null;
 
-  static init(config: ClientConfig): void {
+  static init(config: URPCConfig): void {
     URPC.globalClient = new URPC(config);
   }
 

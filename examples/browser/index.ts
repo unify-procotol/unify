@@ -102,7 +102,7 @@ const HookMiddleware = createHookMiddleware((hookManager) => {
 URPC.init({
   enableDebug: true,
   plugins: [MyPlugin, WalletPlugin],
-  // middleware: [HookMiddleware, Logging()],
+  middlewares: [HookMiddleware, Logging()],
 });
 
 const fetchUser = async () => {

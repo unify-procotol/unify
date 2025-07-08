@@ -38,7 +38,7 @@ import { URPC } from '@unilab/urpc-hono';
 
 const app = URPC.init({
   plugins: [MyPlugin],
-  middleware: [HookMiddleware],
+  middlewares: [HookMiddleware],
 });
 ```
 

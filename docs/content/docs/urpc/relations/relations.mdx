@@ -129,7 +129,7 @@ const MyPlugin: Plugin = {
 
 const app = URPC.init({
   plugins: [MyPlugin],
-  middleware: [Logging()],
+  middlewares: [Logging()],
 });
 
 export default {

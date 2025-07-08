@@ -92,7 +92,7 @@ const MyPlugin: Plugin = {
 
 const app = URPC.init({
   plugins: [MyPlugin],
-  // middleware: [HookMiddleware, Logging()],
+  middlewares: [HookMiddleware, Logging()],
 });
 
 // // Use repo on the server side

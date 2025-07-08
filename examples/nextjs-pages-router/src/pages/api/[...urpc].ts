@@ -4,7 +4,7 @@ import { Logging } from "@unilab/urpc-core/middleware";
 
 const handler = URPC.init({
   plugins: [WalletPlugin],
-  middleware: [Logging()],
+  middlewares: [Logging()],
 });
 
 export default handler;

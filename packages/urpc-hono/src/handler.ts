@@ -20,7 +20,7 @@ import { BuiltinPlugin } from "@unilab/builtin-plugin";
 export interface URPCConfig {
   app?: Hono;
   plugins?: Plugin[];
-  middleware?: Middleware<any>[];
+  middlewares?: Middleware<any>[];
 }
 
 export class URPC {
@@ -40,8 +40,8 @@ export class URPC {
       this.initFromPlugins([...config.plugins, BuiltinPlugin(this)]);
     }
 
-    if (config.middleware) {
-      this.applyMiddlewareToRepos(config.middleware);
+    if (config.middlewares) {
+      this.applyMiddlewareToRepos(config.middlewares);
     }
 
     this.setupRoutes();
@@ -74,10 +74,10 @@ export class URPC {
     );
   }
 
-  private static applyMiddlewareToRepos(middleware: Middleware<any>[]) {
-    middleware.forEach((m) => useGlobalMiddleware(m));
+  private static applyMiddlewareToRepos(middlewares: Middleware<any>[]) {
+    middlewares.forEach((m) => useGlobalMiddleware(m));
     console.log(
-      `✅ Registered middleware: ${middleware.map((m) => m.name).join(", ")}`
+      `✅ Registered middlewares: ${middlewares.map((m) => m.name).join(", ")}`
     );
   }
 

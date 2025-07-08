@@ -1,7 +1,7 @@
 import type { Middleware, Plugin } from "@unilab/urpc-core";
 
-export interface ClientConfig {
+export interface URPCConfig {
   enableDebug?: boolean;
   plugins: Plugin[];
-  middleware?: Middleware<any>[];
+  middlewares?: Middleware<any>[];
 }

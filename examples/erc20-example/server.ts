@@ -43,7 +43,7 @@ const MimoPlugin: Plugin = {
 // 创建URPC应用并配置  
 const app = URPC.init({
   plugins: [MimoPlugin],
-  middleware: [HookMiddleware, Logging()],
+  middlewares: [HookMiddleware, Logging()],
 });
 
 // 添加健康检查端点

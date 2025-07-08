@@ -263,7 +263,7 @@ import { LoggingMiddleware } from "@unilab/urpc-core/middleware";
 
 const app = URPC.init({
   plugins: [WalletPlugin],
-  middleware: [LoggingMiddleware]
+  middlewares: [LoggingMiddleware]
 });
 ```
 
@@ -869,7 +869,7 @@ import { LoggingMiddleware } from "@unilab/urpc-core/middleware";
 
 const app = URPC.init({
   plugins: [WalletPlugin],
-  middleware: [LoggingMiddleware]
+  middlewares: [LoggingMiddleware]
 });
 
 export default {

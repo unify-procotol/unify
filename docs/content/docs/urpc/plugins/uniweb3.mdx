@@ -44,7 +44,7 @@ import { Logging } from "@unilab/urpc-core/middleware";
 // Register Web3 plugin
 const app = URPC.init({
   plugins: [WalletPlugin],
-  middleware: [Logging()],
+  middlewares: [Logging()],
 });
 
 export default {
@@ -65,7 +65,7 @@ import { Logging } from "@unilab/urpc-core/middleware";
 
 const handler = URPC.init({
   plugins: [WalletPlugin],
-  middleware: [Logging()],
+  middlewares: [Logging()],
 });
 
 export default handler;
@@ -84,7 +84,7 @@ import { Logging } from "@unilab/urpc-core/middleware";
 URPC.init({
   enableDebug: true,
   plugins: [WalletPlugin],
-  middleware: [Logging()],
+  middlewares: [Logging()],
 });
 ```
 
@@ -352,7 +352,7 @@ import { Logging } from "@unilab/urpc-core/middleware";
 
 const handler = URPC.init({
   plugins: [WalletPlugin],
-  middleware: [Logging()],
+  middlewares: [Logging()],
 });
 
 export default handler;

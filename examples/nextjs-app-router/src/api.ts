@@ -4,5 +4,5 @@ import { WalletPlugin } from "@unilab/uniweb3";
 
 export const api = URPC.init({
   plugins: [WalletPlugin],
-  middleware: [Logging()],
+  middlewares: [Logging()],
 });
