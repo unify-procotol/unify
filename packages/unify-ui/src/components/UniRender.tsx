@@ -173,5 +173,5 @@ export const UniRender: React.FC<UniRenderProps> = ({
   }
 
   // Render the main content
-  return <div className={`urpc-ui-render ${className}`}>{renderLayout()}</div>;
+  return <div className={`unify-ui-render ${className}`}>{renderLayout()}</div>;
 };

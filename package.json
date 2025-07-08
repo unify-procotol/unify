@@ -20,10 +20,10 @@
     "dev:urpc": "cd packages/urpc && bun run dev",
     "build:uniweb3": "cd packages/uniweb3 && bun run build",
     "dev:uniweb3": "cd packages/uniweb3 && bun run dev",
-    "build:urpc-ui": "cd packages/urpc-ui && bun run build",
+    "build:unify-ui": "cd packages/unify-ui && bun run build",
     "build:uni-store": "cd packages/uni-store && bun run build",
     "dev:uni-store": "cd packages/uni-store && bun run dev",
-    "build": "bun run build:urpc-core && bun run build:urpc-hono && bun run build:urpc-next && bun run build:urpc-client && bun run build:urpc && bun run build:uniweb3 && bun run build:urpc-ui && bun run build:uni-store"
+    "build": "bun run build:urpc-core && bun run build:urpc-hono && bun run build:urpc-next && bun run build:urpc-client && bun run build:urpc && bun run build:uniweb3 && bun run build:unify-ui && bun run build:uni-store"
   },
   "author": "",
   "license": "MIT",

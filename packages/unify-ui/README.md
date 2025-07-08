@@ -1,4 +1,4 @@
-# @unilab/urpc-ui
+# @unilab/unify-ui
 
 A flexible and elegant UI rendering library for dynamic data visualization with multiple layout options. Built with **shadcn/ui** components for modern, accessible design.
 
