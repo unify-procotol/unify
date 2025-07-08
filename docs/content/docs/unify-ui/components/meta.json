@@ -1,0 +1,13 @@
+{
+  "title": "Components",
+  "icon": "Component",
+  "description": "Layout components for data visualization",
+  "pages": [
+    "table-layout",
+    "card-layout", 
+    "form",
+    "grid",
+    "list",
+    "dashboard"
+  ]
+} 

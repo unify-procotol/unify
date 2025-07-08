@@ -1,0 +1,483 @@
+---
+title: List
+description: Display data in a vertical list format, perfect for feeds, notifications, and timelines
+---
+
+# List
+
+The list layout displays data in a vertical, scrollable list format. It's ideal for feeds, notifications, messages, and any chronological or priority-based content where items need to be displayed with rich metadata.
+
+## 🎯 Basic List Layout
+
+<Tabs items={['Preview', 'Code']}>
+<Tab value="Preview">
+<UniRenderExample type="list" />
+</Tab>
+<Tab value="Code">
+```tsx
+import { UniRender } from '@unilab/unify-ui';
+
+<UniRender
+  entity={{
+    name: 'Message',
+    fields: [
+      { name: 'id', type: 'number', required: true },
+      { name: 'sender', type: 'string', required: true },
+      { name: 'subject', type: 'string', required: true },
+      { name: 'preview', type: 'string' },
+      { name: 'timestamp', type: 'date', required: true },
+      { name: 'isRead', type: 'boolean' },
+      { name: 'priority', type: 'string' }
+    ]
+  }}
+  data={[
+    { 
+      id: 1, 
+      sender: 'Alice Johnson', 
+      subject: 'Project Update', 
+      preview: 'The quarterly report is ready for review...',
+      timestamp: '2024-01-15T10:30:00Z',
+      isRead: false,
+      priority: 'high'
+    },
+    { 
+      id: 2, 
+      sender: 'Bob Smith', 
+      subject: 'Meeting Request', 
+      preview: 'Would you be available for a quick call...',
+      timestamp: '2024-01-15T09:15:00Z',
+      isRead: true,
+      priority: 'medium'
+    },
+    { 
+      id: 3, 
+      sender: 'Carol Davis', 
+      subject: 'Weekly Summary', 
+      preview: 'Here are the key metrics from this week...',
+      timestamp: '2024-01-14T16:45:00Z',
+      isRead: true,
+      priority: 'low'
+    }
+  ]}
+  layout="list"
+  config={{
+    sender: { label: 'From' },
+    subject: { label: 'Subject' },
+    preview: { label: 'Preview' },
+    timestamp: { label: 'Time' },
+    isRead: { label: 'Read Status' },
+    priority: { label: 'Priority' }
+  }}
+/>
+```
+</Tab>
+</Tabs>
+
+## 🎛️ List Configuration
+
+### Basic Setup
+
+```tsx
+const listConfig = {
+  // Primary content
+  sender: {
+    label: 'From',
+    order: 1,
+    weight: 'bold'
+  },
+  
+  // Main title/subject
+  subject: {
+    label: 'Subject',
+    order: 2,
+    truncate: 50
+  },
+  
+  // Secondary content
+  preview: {
+    label: 'Preview',
+    order: 3,
+    truncate: 100,
+    color: 'muted'
+  },
+  
+  // Timestamp
+  timestamp: {
+    label: 'Time',
+    order: 4,
+    align: 'right',
+    format: 'relative' // "5 minutes ago"
+  },
+  
+  // Status indicators
+  isRead: {
+    label: 'Read Status',
+    order: 5,
+    type: 'badge'
+  },
+  
+  priority: {
+    label: 'Priority',
+    order: 6,
+    type: 'badge',
+    colorMap: {
+      'high': 'red',
+      'medium': 'yellow',
+      'low': 'green'
+    }
+  },
+  
+  // Hidden fields
+  id: {
+    hidden: true
+  }
+};
+```
+
+### Advanced Configuration
+
+```tsx
+const advancedListConfig = {
+  // Avatar/profile image
+  avatar: {
+    label: 'Avatar',
+    order: 1,
+    type: 'image',
+    size: 'sm',
+    rounded: true
+  },
+  
+  // Expandable content
+  content: {
+    label: 'Content',
+    order: 2,
+    expandable: true,
+    maxHeight: '100px'
+  },
+  
+  // Tags
+  tags: {
+    label: 'Tags',
+    order: 3,
+    type: 'tags',
+    color: 'blue'
+  },
+  
+  // Actions
+  actions: {
+    label: 'Actions',
+    order: 4,
+    type: 'actions',
+    align: 'right'
+  }
+};
+```
+
+## 📋 List Variations
+
+### Feed Style
+
+Perfect for social media feeds or news:
+
+```tsx
+const feedConfig = {
+  author: {
+    label: 'Author',
+    order: 1,
+    avatar: 'authorAvatar'
+  },
+  
+  content: {
+    label: 'Content',
+    order: 2,
+    expandable: true
+  },
+  
+  timestamp: {
+    label: 'Posted',
+    order: 3,
+    format: 'relative'
+  },
+  
+  stats: {
+    label: 'Stats',
+    order: 4,
+    type: 'stats',
+    fields: ['likes', 'comments', 'shares']
+  }
+};
+```
+
+### Notification Style
+
+For alerts and notifications:
+
+```tsx
+const notificationConfig = {
+  icon: {
+    label: 'Icon',
+    order: 1,
+    type: 'icon',
+    colorMap: {
+      'info': 'blue',
+      'warning': 'orange',
+      'error': 'red',
+      'success': 'green'
+    }
+  },
+  
+  message: {
+    label: 'Message',
+    order: 2,
+    weight: 'medium'
+  },
+  
+  timestamp: {
+    label: 'Time',
+    order: 3,
+    format: 'relative',
+    color: 'muted'
+  }
+};
+```
+
+### Timeline Style
+
+For chronological events:
+
+```tsx
+const timelineConfig = {
+  date: {
+    label: 'Date',
+    order: 1,
+    type: 'date',
+    format: 'MMM DD'
+  },
+  
+  event: {
+    label: 'Event',
+    order: 2,
+    weight: 'bold'
+  },
+  
+  description: {
+    label: 'Description',
+    order: 3,
+    color: 'muted'
+  },
+  
+  connector: {
+    label: 'Connector',
+    order: 4,
+    type: 'timeline-connector'
+  }
+};
+```
+
+## 🎨 Styling Options
+
+### List Item Spacing
+
+```css
+.unify-ui-render .list-layout {
+  gap: 1rem;
+}
+
+.unify-ui-render .list-layout .list-item {
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+```
+
+### Hover Effects
+
+```css
+.unify-ui-render .list-layout .list-item:hover {
+  background-color: #f9fafb;
+  border-color: #d1d5db;
+  transform: translateX(4px);
+  transition: all 0.2s ease;
+}
+```
+
+### Read/Unread States
+
+```css
+.unify-ui-render .list-layout .list-item.unread {
+  background-color: #fef3c7;
+  border-left: 4px solid #f59e0b;
+}
+
+.unify-ui-render .list-layout .list-item.read {
+  opacity: 0.7;
+}
+```
+
+## 🔧 Advanced Features
+
+### Expandable Items
+
+Items can expand to show more content:
+
+```tsx
+const expandableConfig = {
+  title: {
+    label: 'Title',
+    order: 1,
+    expandable: true
+  },
+  
+  summary: {
+    label: 'Summary',
+    order: 2,
+    showInExpanded: false
+  },
+  
+  fullContent: {
+    label: 'Full Content',
+    order: 3,
+    showInExpanded: true
+  }
+};
+```
+
+### Infinite Scroll
+
+Load more items as user scrolls:
+
+```tsx
+const [items, setItems] = useState(initialItems);
+const [loading, setLoading] = useState(false);
+
+const loadMore = async () => {
+  setLoading(true);
+  const newItems = await fetchMoreItems();
+  setItems([...items, ...newItems]);
+  setLoading(false);
+};
+
+<UniRender
+  layout="list"
+  data={items}
+  config={listConfig}
+  onLoadMore={loadMore}
+  loading={loading}
+/>
+```
+
+### Swipe Actions
+
+Mobile swipe gestures for actions:
+
+```tsx
+const swipeActions = {
+  left: [
+    {
+      label: 'Archive',
+      icon: <Archive size={16} />,
+      action: (item) => archiveItem(item),
+      color: 'gray'
+    }
+  ],
+  right: [
+    {
+      label: 'Delete',
+      icon: <Trash size={16} />,
+      action: (item) => deleteItem(item),
+      color: 'red'
+    },
+    {
+      label: 'Star',
+      icon: <Star size={16} />,
+      action: (item) => starItem(item),
+      color: 'yellow'
+    }
+  ]
+};
+```
+
+### Virtual Scrolling
+
+For large datasets:
+
+```tsx
+import { VirtualizedList } from '@unilab/unify-ui';
+
+<VirtualizedList
+  items={largeDataset}
+  itemHeight={80}
+  renderItem={({ item, index }) => (
+    <UniRender
+      layout="list"
+      data={[item]}
+      config={listConfig}
+    />
+  )}
+/>
+```
+
+## 📱 Mobile Optimization
+
+List layout is inherently mobile-friendly:
+
+- Touch-friendly item sizes
+- Swipe gesture support
+- Responsive text sizing
+- Optimized scrolling performance
+
+### Mobile-Specific Settings
+
+```tsx
+const mobileListConfig = {
+  touchOptimized: true,
+  swipeActions: true,
+  compactMode: true,
+  virtualized: true // For large lists
+};
+```
+
+## 🎯 Best Practices
+
+### Performance Tips
+
+1. **Virtual Scrolling**: Use for 500+ items
+2. **Lazy Loading**: Load content as needed
+3. **Pagination**: Consider pagination for very large datasets
+4. **Debounced Search**: Optimize search performance
+
+### UX Guidelines
+
+1. **Clear Hierarchy**: Use typography to establish information hierarchy
+2. **Consistent Spacing**: Maintain uniform spacing between items
+3. **Visual Feedback**: Provide hover and active states
+4. **Loading States**: Show loading indicators for async operations
+
+### Accessibility
+
+1. **Keyboard Navigation**: Support arrow key navigation
+2. **Screen Reader Support**: Proper ARIA labels
+3. **Focus Management**: Clear focus indicators
+4. **Color Contrast**: Ensure adequate contrast ratios
+
+## 🔗 Related Components
+
+- [Table Layout](/docs/unify-ui/components/table-layout) - For structured data comparison
+- [Card Layout](/docs/unify-ui/components/card-layout) - For rich visual content
+- [Form Layout](/docs/unify-ui/components/form) - For detailed single-item editing
+
+## 📊 When to Use List Layout
+
+**Perfect for:**
+- Message threads and conversations
+- Activity feeds and notifications
+- News articles and blog posts
+- Task lists and to-do items
+- Event timelines and history
+- Search results
+
+**Not ideal for:**
+- Data requiring comparison across multiple attributes
+- Heavily visual content (use Grid instead)
+- Complex data entry (use Form instead)
+- Statistical data (use Table instead) 

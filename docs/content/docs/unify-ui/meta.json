@@ -1,0 +1,11 @@
+{
+  "title": "Unify UI",
+  "icon": "Layers",
+  "description": "Universal data rendering components for React",
+  "pages": [
+    "index",
+    "getting-started",
+    "components"
+  ],
+  "root": true
+} 

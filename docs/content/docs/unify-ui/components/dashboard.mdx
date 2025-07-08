@@ -1,0 +1,519 @@
+---
+title: Dashboard
+description: Display metrics, KPIs, and analytics in a comprehensive dashboard layout
+---
+
+# Dashboard
+
+The dashboard layout is designed for displaying key performance indicators (KPIs), metrics, charts, and analytics in a comprehensive, easy-to-scan format. Perfect for executive dashboards, monitoring systems, and data visualization.
+
+## 🎯 Basic Dashboard Layout
+
+<Tabs items={['Preview', 'Code']}>
+<Tab value="Preview">
+<UniRenderExample type="dashboard" />
+</Tab>
+<Tab value="Code">
+```tsx
+import { UniRender } from '@unilab/unify-ui';
+
+<UniRender
+  entity={{
+    name: 'Business Metrics',
+    fields: [
+      { name: 'metric', type: 'string', required: true },
+      { name: 'value', type: 'number', required: true },
+      { name: 'change', type: 'number' },
+      { name: 'trend', type: 'string' },
+      { name: 'target', type: 'number' },
+      { name: 'period', type: 'string' }
+    ]
+  }}
+  data={[
+    { 
+      metric: 'Total Revenue', 
+      value: 245000, 
+      change: 12.5,
+      trend: 'up',
+      target: 250000,
+      period: 'This Month'
+    },
+    { 
+      metric: 'New Customers', 
+      value: 1847, 
+      change: -3.2,
+      trend: 'down',
+      target: 2000,
+      period: 'This Month'
+    },
+    { 
+      metric: 'Conversion Rate', 
+      value: 3.45, 
+      change: 0.8,
+      trend: 'up',
+      target: 4.0,
+      period: 'This Month'
+    },
+    { 
+      metric: 'Average Order Value', 
+      value: 127.50, 
+      change: 8.3,
+      trend: 'up',
+      target: 135.0,
+      period: 'This Month'
+    }
+  ]}
+  layout="dashboard"
+  config={{
+    metric: { label: 'Metric' },
+    value: { label: 'Value' },
+    change: { label: 'Change' },
+    trend: { label: 'Trend' },
+    target: { label: 'Target' },
+    period: { label: 'Period' }
+  }}
+/>
+```
+</Tab>
+</Tabs>
+
+## 🎛️ Dashboard Configuration
+
+### Metric Cards Setup
+
+```tsx
+const dashboardConfig = {
+  // Primary metric display
+  metric: {
+    label: 'Metric Name',
+    order: 1,
+    type: 'title',
+    size: 'lg'
+  },
+  
+  // Main value with formatting
+  value: {
+    label: 'Value',
+    order: 2,
+    type: 'metric',
+    format: 'currency', // or 'number', 'percentage'
+    size: 'xl'
+  },
+  
+  // Change indicator
+  change: {
+    label: 'Change',
+    order: 3,
+    type: 'change',
+    format: 'percentage',
+    showTrend: true
+  },
+  
+  // Trend direction
+  trend: {
+    label: 'Trend',
+    order: 4,
+    type: 'trend',
+    iconMap: {
+      'up': '📈',
+      'down': '📉',
+      'flat': '➡️'
+    }
+  },
+  
+  // Target/goal
+  target: {
+    label: 'Target',
+    order: 5,
+    type: 'progress',
+    showProgress: true
+  },
+  
+  // Time period
+  period: {
+    label: 'Period',
+    order: 6,
+    type: 'subtitle',
+    color: 'muted'
+  }
+};
+```
+
+### Widget Types
+
+```tsx
+const widgetConfig = {
+  // KPI Card
+  kpi: {
+    type: 'kpi',
+    title: 'Revenue',
+    value: 245000,
+    format: 'currency',
+    change: 12.5,
+    trend: 'up',
+    size: 'medium'
+  },
+  
+  // Chart Widget
+  chart: {
+    type: 'chart',
+    title: 'Sales Trend',
+    chartType: 'line',
+    data: chartData,
+    height: 300
+  },
+  
+  // Progress Widget
+  progress: {
+    type: 'progress',
+    title: 'Goal Progress',
+    current: 75,
+    target: 100,
+    unit: '%'
+  },
+  
+  // Status Widget
+  status: {
+    type: 'status',
+    title: 'System Health',
+    status: 'healthy',
+    indicators: ['api', 'database', 'cache']
+  }
+};
+```
+
+## 📊 Dashboard Variations
+
+### Executive Dashboard
+
+High-level metrics for executives:
+
+```tsx
+const executiveConfig = {
+  revenue: {
+    type: 'kpi',
+    title: 'Monthly Revenue',
+    format: 'currency',
+    showTrend: true,
+    size: 'large'
+  },
+  
+  customers: {
+    type: 'kpi',
+    title: 'Active Customers',
+    format: 'number',
+    showChange: true
+  },
+  
+  growth: {
+    type: 'chart',
+    title: 'Growth Trend',
+    chartType: 'area',
+    timeRange: '12m'
+  },
+  
+  goals: {
+    type: 'progress',
+    title: 'Quarterly Goals',
+    showMultiple: true
+  }
+};
+```
+
+### Operational Dashboard
+
+Real-time operational metrics:
+
+```tsx
+const operationalConfig = {
+  alerts: {
+    type: 'alert',
+    title: 'Active Alerts',
+    severity: 'critical',
+    count: 3
+  },
+  
+  performance: {
+    type: 'gauge',
+    title: 'System Performance',
+    value: 87,
+    thresholds: [50, 75, 90]
+  },
+  
+  throughput: {
+    type: 'metric',
+    title: 'Requests/sec',
+    value: 1247,
+    realTime: true
+  },
+  
+  errors: {
+    type: 'chart',
+    title: 'Error Rate',
+    chartType: 'bar',
+    alertThreshold: 5
+  }
+};
+```
+
+### Analytics Dashboard
+
+Data analysis and insights:
+
+```tsx
+const analyticsConfig = {
+  visitors: {
+    type: 'metric',
+    title: 'Unique Visitors',
+    value: 15420,
+    comparison: 'previousPeriod'
+  },
+  
+  conversion: {
+    type: 'funnel',
+    title: 'Conversion Funnel',
+    stages: ['Visit', 'View', 'Cart', 'Purchase']
+  },
+  
+  demographics: {
+    type: 'chart',
+    title: 'User Demographics',
+    chartType: 'doughnut'
+  },
+  
+  heatmap: {
+    type: 'heatmap',
+    title: 'Activity Heatmap',
+    dimensions: ['time', 'day']
+  }
+};
+```
+
+## 🎨 Layout Options
+
+### Grid Layout
+
+```tsx
+const gridLayout = {
+  columns: 4,
+  rows: 3,
+  gap: '1rem',
+  responsive: {
+    sm: { columns: 1 },
+    md: { columns: 2 },
+    lg: { columns: 3 },
+    xl: { columns: 4 }
+  }
+};
+```
+
+### Custom Widget Sizes
+
+```tsx
+const widgetSizes = {
+  small: {
+    width: '1fr',
+    height: '120px'
+  },
+  medium: {
+    width: '2fr',
+    height: '200px'
+  },
+  large: {
+    width: '3fr',
+    height: '300px'
+  },
+  wide: {
+    width: '4fr',
+    height: '200px'
+  }
+};
+```
+
+## 🔧 Advanced Features
+
+### Real-time Updates
+
+```tsx
+import { useEffect, useState } from 'react';
+
+const RealtimeDashboard = () => {
+  const [metrics, setMetrics] = useState(initialMetrics);
+  
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      const updatedMetrics = await fetchLatestMetrics();
+      setMetrics(updatedMetrics);
+    }, 30000); // Update every 30 seconds
+    
+    return () => clearInterval(interval);
+  }, []);
+  
+  return (
+    <UniRender
+      layout="dashboard"
+      data={metrics}
+      config={dashboardConfig}
+      realTimeUpdates={true}
+    />
+  );
+};
+```
+
+### Interactive Widgets
+
+```tsx
+const interactiveConfig = {
+  chart: {
+    type: 'chart',
+    title: 'Sales Data',
+    interactive: true,
+    onDataPointClick: (dataPoint) => {
+      setSelectedPeriod(dataPoint.period);
+    },
+    onZoom: (range) => {
+      setTimeRange(range);
+    }
+  },
+  
+  filter: {
+    type: 'filter',
+    title: 'Date Range',
+    options: ['7d', '30d', '90d', '1y'],
+    onChange: (range) => {
+      setDateRange(range);
+    }
+  }
+};
+```
+
+### Drill-down Navigation
+
+```tsx
+const drillDownConfig = {
+  revenue: {
+    type: 'kpi',
+    title: 'Total Revenue',
+    clickable: true,
+    onTitleClick: () => navigateToRevenue(),
+    onValueClick: () => showRevenueBreakdown()
+  },
+  
+  regions: {
+    type: 'chart',
+    title: 'Revenue by Region',
+    drillDown: true,
+    onRegionClick: (region) => {
+      showRegionDetails(region);
+    }
+  }
+};
+```
+
+## 📱 Responsive Design
+
+### Mobile Dashboard
+
+```tsx
+const mobileConfig = {
+  layout: 'stack', // Stack widgets vertically
+  compactMode: true,
+  touchOptimized: true,
+  swipeNavigation: true
+};
+```
+
+### Tablet Dashboard
+
+```tsx
+const tabletConfig = {
+  columns: 2,
+  adaptiveHeight: true,
+  touchActions: true
+};
+```
+
+## 🎯 Best Practices
+
+### Data Visualization
+
+1. **Use appropriate chart types** for different data
+2. **Limit colors** to maintain clarity
+3. **Include context** with comparisons and targets
+4. **Show trends** over time when relevant
+
+### Layout Design
+
+1. **Prioritize important metrics** in top-left position
+2. **Group related widgets** together
+3. **Use consistent spacing** between widgets
+4. **Maintain visual hierarchy** with sizing
+
+### Performance
+
+1. **Cache expensive calculations**
+2. **Use virtualization** for large datasets
+3. **Implement progressive loading**
+4. **Optimize chart rendering**
+
+### User Experience
+
+1. **Provide drill-down capabilities**
+2. **Include time range selectors**
+3. **Support custom arrangements**
+4. **Add export functionality**
+
+## 🔗 Chart Integration
+
+### Popular Chart Libraries
+
+```tsx
+// Chart.js integration
+import { Chart as ChartJS } from 'chart.js';
+
+const chartWidget = {
+  type: 'chart',
+  title: 'Revenue Trend',
+  component: LineChart,
+  props: {
+    data: chartData,
+    options: chartOptions
+  }
+};
+
+// Recharts integration
+import { LineChart, Line, XAxis, YAxis } from 'recharts';
+
+const rechartsWidget = {
+  type: 'custom',
+  title: 'Performance',
+  component: () => (
+    <LineChart data={data}>
+      <XAxis dataKey="name" />
+      <YAxis />
+      <Line type="monotone" dataKey="value" stroke="#8884d8" />
+    </LineChart>
+  )
+};
+```
+
+## 🔗 Related Components
+
+- [Table Layout](/docs/unify-ui/components/table-layout) - For detailed data analysis
+- [Card Layout](/docs/unify-ui/components/card-layout) - For individual metric cards
+- [Grid Layout](/docs/unify-ui/components/grid) - For image-based dashboards
+
+## 📊 When to Use Dashboard Layout
+
+**Perfect for:**
+- Executive summaries and KPIs
+- Real-time monitoring systems
+- Analytics and reporting
+- Performance tracking
+- Business intelligence
+
+**Not ideal for:**
+- Detailed data entry
+- Complex data manipulation
+- Long-form content
+- Transaction processing 

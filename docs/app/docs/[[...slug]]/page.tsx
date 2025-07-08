@@ -1,3 +1,4 @@
+
 import { source } from '@/lib/source';
 import {
   DocsPage,
@@ -16,10 +17,10 @@ export default async function Page(props: {
   const page = source.getPage(params.slug);
   if (!page) notFound();
 
-  const MDXContent = page.data.body;
+  const MDXContent = (page.data as any).body;
 
   return (
-    <DocsPage toc={page.data.toc} full={page.data.full}>
+    <DocsPage toc={(page.data as any).toc} full={(page.data as any).full}>
       <DocsTitle>{page.data.title}</DocsTitle>
       <DocsDescription>{page.data.description}</DocsDescription>
       <DocsBody>

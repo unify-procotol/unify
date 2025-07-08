@@ -1,0 +1,147 @@
+---
+title: Introduction
+description: Universal data rendering components for React applications
+---
+
+# 🎨 Unify UI
+
+Unify UI is a powerful React component library that provides universal data rendering capabilities. It transforms your data into beautiful, interactive layouts without writing repetitive UI code.
+
+## ✨ Key Features
+
+- **🎯 Entity-First Design**: Define your data structure once, render everywhere
+- **📱 Multiple Layouts**: Table, Card, Grid, List, Form, and Dashboard layouts
+- **🎨 Customizable**: Full control over styling and behavior
+- **⚡ TypeScript Ready**: Built with TypeScript for excellent developer experience
+- **📦 Zero Config**: Works out of the box with sensible defaults
+
+## 🎯 Core Concepts
+
+### Entity Definition
+Entities define your data structure and validation rules:
+
+```tsx
+interface Entity {
+  name: string;
+  fields: EntityField[];
+  schema?: JSONSchema;
+}
+```
+
+### Layout System
+Choose from 6 built-in layouts:
+
+- **Table**: Traditional data table with sorting and filtering
+- **Card**: Card-based layout for rich content display
+- **Grid**: Responsive grid layout
+- **List**: Vertical list with detailed view
+- **Form**: Form-based editing interface
+- **Dashboard**: Metrics and KPI display
+
+### Field Configuration
+Customize field behavior and appearance:
+
+```tsx
+const fieldConfig = {
+  email: {
+    label: 'Email Address',
+    render: (value) => <a href={`mailto:${value}`}>{value}</a>
+  },
+  status: {
+    render: (value) => (
+      <Badge variant={value ? 'success' : 'secondary'}>
+        {value ? 'Active' : 'Inactive'}
+      </Badge>
+    )
+  }
+};
+```
+
+## 🎨 Layout Previews
+
+<Tabs items={['Table', 'Card', 'Grid', 'List']}>
+<Tab value="Table">
+Perfect for data analysis and bulk operations:
+- Sortable columns
+- Inline editing
+- Bulk actions
+- Responsive design
+</Tab>
+<Tab value="Card">
+Ideal for content-rich data:
+- Visual hierarchy
+- Custom layouts
+- Action buttons
+- Responsive grid
+</Tab>
+<Tab value="Grid">
+Great for image galleries and catalogs:
+- Responsive columns
+- Hover effects
+- Quick actions
+- Masonry support
+</Tab>
+<Tab value="List">
+Excellent for detailed views:
+- Expandable rows
+- Rich metadata
+- Custom actions
+- Mobile-friendly
+</Tab>
+</Tabs>
+
+## 🛠️ Advanced Features
+
+### Custom Rendering
+Override default rendering for any field:
+
+```tsx
+const config = {
+  avatar: {
+    render: (value, record) => (
+      <Avatar src={value} alt={record.name} />
+    )
+  },
+  createdAt: {
+    render: (value) => (
+      <time className="text-muted-foreground">
+        {formatDistanceToNow(new Date(value))} ago
+      </time>
+    )
+  }
+};
+```
+
+### Event Handling
+Handle user interactions:
+
+```tsx
+<UniRender
+  entity={userEntity}
+  data={userData}
+  layout="table"
+  onEdit={(record, index) => openEditModal(record)}
+  onDelete={(record, index) => confirmDelete(record)}
+  onAdd={(record) => createNewRecord(record)}
+/>
+```
+
+### Loading States
+Built-in loading and error states:
+
+```tsx
+<UniRender
+  entity={userEntity}
+  data={userData}
+  layout="table"
+  loading={isLoading}
+  error={error}
+/>
+```
+
+## 🌟 What's Next?
+
+- [Getting Started](/docs/unify-ui/getting-started) - Detailed setup and configuration
+- [UniRender Component](/docs/unify-ui/components/uni-render) - Complete API reference
+- [Layout System](/docs/unify-ui/components/layouts) - Explore all layout options
+- [Examples](/docs/unify-ui/examples) - Real-world usage examples

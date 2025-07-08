@@ -1,0 +1,363 @@
+---
+title: Grid
+description: Display data in a responsive grid layout, perfect for image galleries and product catalogs
+---
+
+# Grid
+
+The grid layout arranges data in a responsive grid format, ideal for displaying visual content like images, products, or tiles. It automatically adapts to different screen sizes and provides masonry-style layouts.
+
+## 🎯 Basic Grid Layout
+
+<Tabs items={['Preview', 'Code']}>
+<Tab value="Preview">
+<UniRenderExample type="grid" />
+</Tab>
+<Tab value="Code">
+```tsx
+import { UniRender } from '@unilab/unify-ui';
+
+<UniRender
+  entity={{
+    name: 'Gallery Item',
+    fields: [
+      { name: 'id', type: 'number', required: true },
+      { name: 'title', type: 'string', required: true },
+      { name: 'image', type: 'string' },
+      { name: 'category', type: 'string' },
+      { name: 'views', type: 'number' },
+      { name: 'likes', type: 'number' }
+    ]
+  }}
+  data={[
+    { 
+      id: 1, 
+      title: 'Mountain Landscape', 
+      image: '/images/mountain.jpg',
+      category: 'Nature', 
+      views: 1250, 
+      likes: 89 
+    },
+    { 
+      id: 2, 
+      title: 'City Sunset', 
+      image: '/images/city.jpg',
+      category: 'Urban', 
+      views: 987, 
+      likes: 156 
+    },
+    { 
+      id: 3, 
+      title: 'Ocean Waves', 
+      image: '/images/ocean.jpg',
+      category: 'Nature', 
+      views: 2100, 
+      likes: 203 
+    }
+  ]}
+  layout="grid"
+  config={{
+    title: { label: 'Title' },
+    category: { label: 'Category' },
+    views: { label: 'Views' },
+    likes: { label: 'Likes' }
+  }}
+/>
+```
+</Tab>
+</Tabs>
+
+## 🎛️ Grid Configuration
+
+### Basic Setup
+
+```tsx
+const gridConfig = {
+  // Main image/content
+  image: {
+    label: 'Image',
+    order: 1,
+    width: '100%'
+  },
+  
+  // Title (prominently displayed)
+  title: {
+    label: 'Title',
+    order: 2
+  },
+  
+  // Category tag
+  category: {
+    label: 'Category',
+    order: 3
+  },
+  
+  // Statistics
+  views: {
+    label: 'Views',
+    order: 4,
+    align: 'center'
+  },
+  
+  likes: {
+    label: 'Likes',
+    order: 5,
+    align: 'center'
+  },
+  
+  // Hidden fields
+  id: {
+    hidden: true
+  }
+};
+```
+
+### Responsive Grid Options
+
+```tsx
+const gridSettings = {
+  // Responsive columns
+  columns: {
+    sm: 1,  // Mobile: 1 column
+    md: 2,  // Tablet: 2 columns
+    lg: 3,  // Desktop: 3 columns
+    xl: 4   // Large screens: 4 columns
+  },
+  
+  // Spacing between items
+  gap: '1rem',
+  
+  // Aspect ratio for items
+  aspectRatio: '16:9',
+  
+  // Masonry layout (Pinterest-style)
+  masonry: true
+};
+```
+
+## 🖼️ Grid Variations
+
+### Fixed Grid
+
+Equal-sized items in a regular grid:
+
+```tsx
+<UniRender
+  layout="grid"
+  data={data}
+  config={{
+    ...gridConfig,
+    aspectRatio: '1:1',
+    masonry: false
+  }}
+/>
+```
+
+### Masonry Grid
+
+Variable height items that flow naturally:
+
+```tsx
+<UniRender
+  layout="grid"
+  data={data}
+  config={{
+    ...gridConfig,
+    masonry: true,
+    minItemWidth: '280px'
+  }}
+/>
+```
+
+### Image Gallery
+
+Optimized for photos and visual content:
+
+```tsx
+const galleryConfig = {
+  image: {
+    label: 'Photo',
+    order: 1,
+    width: '100%',
+    aspectRatio: '4:3'
+  },
+  
+  title: {
+    label: 'Title',
+    order: 2,
+    overlay: true // Display over image
+  },
+  
+  metadata: {
+    label: 'Info',
+    order: 3,
+    overlay: true
+  }
+};
+```
+
+## 🎨 Styling Options
+
+### Hover Effects
+
+```css
+.unify-ui-render .grid-layout .grid-item {
+  transition: transform 0.3s ease;
+}
+
+.unify-ui-render .grid-layout .grid-item:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+```
+
+### Custom Spacing
+
+```tsx
+<UniRender
+  layout="grid"
+  className="grid-spacing-lg"
+  data={data}
+  config={gridConfig}
+/>
+```
+
+```css
+.grid-spacing-lg .grid-layout {
+  gap: 2rem;
+  padding: 2rem;
+}
+```
+
+## 🔧 Advanced Features
+
+### Overlay Information
+
+Display information over images:
+
+```tsx
+const overlayConfig = {
+  image: {
+    label: 'Image',
+    order: 1,
+    overlay: {
+      title: 'title',
+      subtitle: 'category',
+      metadata: ['views', 'likes']
+    }
+  }
+};
+```
+
+### Action Buttons
+
+Add action buttons to grid items:
+
+```tsx
+const gridActions = {
+  showActions: true,
+  actions: {
+    custom: [
+      {
+        label: 'View',
+        icon: <Eye size={16} />,
+        onClick: (item) => viewItem(item),
+        className: 'bg-blue-600 text-white'
+      },
+      {
+        label: 'Like',
+        icon: <Heart size={16} />,
+        onClick: (item) => likeItem(item),
+        className: 'bg-red-600 text-white'
+      }
+    ]
+  }
+};
+```
+
+### Infinite Scroll
+
+Load more items as user scrolls:
+
+```tsx
+const [items, setItems] = useState(initialItems);
+const [loading, setLoading] = useState(false);
+
+const loadMore = async () => {
+  setLoading(true);
+  const newItems = await fetchMoreItems();
+  setItems([...items, ...newItems]);
+  setLoading(false);
+};
+
+<UniRender
+  layout="grid"
+  data={items}
+  config={gridConfig}
+  onLoadMore={loadMore}
+  loading={loading}
+/>
+```
+
+## 📱 Mobile Optimization
+
+Grid layout is optimized for mobile:
+
+- Touch-friendly item sizes
+- Smooth scrolling performance
+- Adaptive column counts
+- Optimized image loading
+
+### Mobile-Specific Settings
+
+```tsx
+const mobileGridConfig = {
+  columns: {
+    sm: 1,
+    md: 2
+  },
+  gap: '0.75rem',
+  touchOptimized: true,
+  lazyLoading: true
+};
+```
+
+## 🎯 Best Practices
+
+### Performance Tips
+
+1. **Image Optimization**: Use optimized image formats (WebP, AVIF)
+2. **Lazy Loading**: Load images only when needed
+3. **Virtual Scrolling**: For large datasets (1000+ items)
+4. **Caching**: Cache frequently accessed items
+
+### Layout Guidelines
+
+1. **Consistent Sizing**: Use aspect ratios for uniform appearance
+2. **Adequate Spacing**: Ensure items don't feel cramped
+3. **Clear Hierarchy**: Use typography to establish information hierarchy
+4. **Accessibility**: Include alt text and keyboard navigation
+
+### Grid vs Other Layouts
+
+**Use Grid when:**
+- Visual content is primary
+- Items have images or rich media
+- Browsing and discovery are key
+- Space efficiency is important
+
+**Use Table when:**
+- Data comparison is needed
+- Structured information is primary
+- Sorting and filtering are required
+
+**Use Cards when:**
+- Detailed information per item
+- Actions are important
+- Sequential browsing is preferred
+
+## 🔗 Related Components
+
+- [Card Layout](/docs/unify-ui/components/card-layout) - For detailed item displays
+- [Table Layout](/docs/unify-ui/components/table-layout) - For structured data
+- [List Layout](/docs/unify-ui/components/list) - For text-heavy content 

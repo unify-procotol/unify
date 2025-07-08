@@ -1,0 +1,120 @@
+---
+title: Getting Started
+description: Installation and setup guide for Unify UI
+---
+
+# Getting Started
+
+Get up and running with Unify UI in minutes. This guide will walk you through installation and basic setup.
+
+## 📦 Installation
+
+<Tabs items={['npm', 'yarn', 'pnpm', 'bun']}>
+<Tab value="npm">
+```bash
+npm install @unilab/unify-ui
+```
+</Tab>
+<Tab value="yarn">
+```bash
+yarn add @unilab/unify-ui
+```
+</Tab>
+<Tab value="pnpm">
+```bash
+pnpm add @unilab/unify-ui
+```
+</Tab>
+<Tab value="bun">
+```bash
+bun add @unilab/unify-ui
+```
+</Tab>
+</Tabs>
+
+## 🔧 Dependencies Setup
+
+Install peer dependencies (Tailwind CSS v4+ required):
+
+<Tabs items={['npm', 'yarn', 'pnpm', 'bun']}>
+<Tab value="npm">
+```bash
+npm install -D tailwindcss@^4.0.0 @tailwindcss/vite tailwindcss-animate
+npx tailwindcss init
+npx shadcn@latest init
+```
+</Tab>
+<Tab value="yarn">
+```bash
+yarn add -D tailwindcss@^4.0.0 @tailwindcss/vite tailwindcss-animate
+npx tailwindcss init
+npx shadcn@latest init
+```
+</Tab>
+<Tab value="pnpm">
+```bash
+pnpm add -D tailwindcss@^4.0.0 @tailwindcss/vite tailwindcss-animate
+npx tailwindcss init
+pnpm dlx shadcn@latest init
+```
+</Tab>
+<Tab value="bun">
+```bash
+bun add -D tailwindcss@^4.0.0 @tailwindcss/vite tailwindcss-animate
+npx tailwindcss init
+bunx shadcn@latest init
+```
+</Tab>
+</Tabs>
+
+> 🎉 **All shadcn/ui and Radix components are now built-in!** No need to install them separately.
+
+## 🎯 Vite Configuration (Optional)
+
+If you're using Vite, you can use the official Tailwind CSS Vite plugin:
+
+```typescript
+// vite.config.ts
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import tailwindcss from '@tailwindcss/vite'
+
+export default defineConfig({
+  plugins: [react(), tailwindcss()],
+})
+```
+
+## 🎨 CSS Setup
+
+Add Tailwind CSS and import Unify UI styles to your main CSS file:
+
+```css
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Import Unify UI styles from node_modules */
+@source '../../node_modules/@unilab/unify-ui/**/*.{js,ts,jsx,tsx}';
+```
+
+## 🌙 Dark Mode Support (Optional)
+
+Unify UI comes with built-in dark mode support. Simply add the dark class to enable it:
+
+```css
+/* Optional: Custom theme overrides */
+@layer base {
+  :root {
+    /* Override any color you want - others use defaults */
+    --primary: 142 76% 36%;        /* Custom green */
+    --primary-foreground: 0 0% 98%;
+    /* No need to define all colors! */
+  }
+
+  .dark {
+    /* Add dark mode overrides if needed */
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+  }
+}
+```
