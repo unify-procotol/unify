@@ -50,6 +50,17 @@ export function parseQueryParams(request: NextApiRequest) {
     params.offset = offset;
   }
 
+  const contextParam = Array.isArray(request.query.context)
+    ? request.query.context[0]
+    : request.query.context;
+  if (contextParam) {
+    try {
+      params.context = JSON.parse(contextParam);
+    } catch (e) {
+      console.warn("Invalid context parameter", e);
+    }
+  }
+
   return params;
 }
 

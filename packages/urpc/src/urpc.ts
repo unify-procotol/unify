@@ -11,6 +11,7 @@ import type {
   Middleware,
   RepoOptions,
   JoinRepoOptions,
+  EntityConfigs,
 } from "@unilab/urpc-core";
 import {
   generateSchemas,
@@ -18,6 +19,7 @@ import {
   getRepoRegistry,
   registerAdapter,
   useGlobalMiddleware,
+  getGlobalMiddlewareManager,
 } from "@unilab/urpc-core";
 import type { URPCConfig } from "./types";
 import { BuiltinPlugin } from "@unilab/builtin-plugin";
@@ -26,11 +28,13 @@ export class URPC {
   private enableDebug: boolean = false;
   private entitySchemas: Record<string, SchemaObject> = {};
   private entitySources: Record<string, string[]> = {};
+  private entityConfigs: EntityConfigs = {};
 
   constructor(config: URPCConfig) {
     this.enableDebug = config.enableDebug || false;
     this.initFromPlugins([...config.plugins, BuiltinPlugin(URPC)]);
     this.applyMiddlewareToRepos(config.middlewares);
+    this.setEntityConfigs(config.entityConfigs);
   }
 
   private log(...args: any[]): void {
@@ -73,6 +77,13 @@ export class URPC {
     }
   }
 
+  private setEntityConfigs(entityConfigs: any) {
+    if (entityConfigs) {
+      this.entityConfigs = entityConfigs;
+      getGlobalMiddlewareManager().setEntityConfigs(entityConfigs);
+    }
+  }
+
   private analyzeEntitySources(
     adapters: AdapterRegistration[]
   ): Record<string, string[]> {
@@ -91,7 +102,7 @@ export class URPC {
   ): Repository<T> {
     return new Proxy({} as Repository<T>, {
       get: (target, prop: string) => {
-        const { entity, source } = options;
+        const { entity, source, context } = options;
         const repo = getRepo(entity, source!);
 
         switch (prop) {
@@ -99,7 +110,11 @@ export class URPC {
             return async (args: FindManyArgs<T> = {}) => {
               this.log(`findMany called for ${entity}:${source}`, args);
 
-              const result = await repo.findMany(args);
+              const result = await repo.findMany(args, {
+                entity,
+                source,
+                context,
+              });
 
               if (args.include && result && result.length > 0) {
                 return await this.loadRelationsForMany(result, args.include);
@@ -112,7 +127,11 @@ export class URPC {
             return async (args: FindOneArgs<T>) => {
               this.log(`findOne called for ${entity}:${source}`, args);
 
-              const result = await repo.findOne(args);
+              const result = await repo.findOne(args, {
+                entity,
+                source,
+                context,
+              });
 
               if (args.include && result) {
                 return await this.loadRelations(result, args.include);
@@ -124,19 +143,28 @@ export class URPC {
           case "create":
             return async (args: CreationArgs<T>) => {
               this.log(`create called for ${entity}:${source}`, args);
-              return repo.create(args);
+              return repo.create(args, {
+                entity,
+                source,
+              });
             };
 
           case "update":
             return async (args: UpdateArgs<T>) => {
               this.log(`update called for ${entity}:${source}`, args);
-              return repo.update(args);
+              return repo.update(args, {
+                entity,
+                source,
+              });
             };
 
           case "delete":
             return async (args: DeletionArgs<T>) => {
               this.log(`delete called for ${entity}:${source}`, args);
-              return repo.delete(args);
+              return repo.delete(args, {
+                entity,
+                source,
+              });
             };
 
           default:

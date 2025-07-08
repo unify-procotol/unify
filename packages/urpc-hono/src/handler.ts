@@ -5,6 +5,8 @@ import {
   getRepo,
   getRepoRegistry,
   RepoOptions,
+  EntityConfigs,
+  getGlobalMiddlewareManager,
 } from "@unilab/urpc-core";
 import {
   generateSchemas,
@@ -21,12 +23,14 @@ export interface URPCConfig {
   app?: Hono;
   plugins?: Plugin[];
   middlewares?: Middleware<any>[];
+  entityConfigs?: EntityConfigs;
 }
 
 export class URPC {
   private static app: Hono;
   private static entitySchemas: Record<string, SchemaObject> = {};
   private static entitySources: Record<string, string[]> = {};
+  private static entityConfigs: EntityConfigs = {};
 
   static init(config: URPCConfig) {
     if (config.app) {
@@ -42,6 +46,11 @@ export class URPC {
 
     if (config.middlewares) {
       this.applyMiddlewareToRepos(config.middlewares);
+    }
+
+    if (config.entityConfigs) {
+      this.entityConfigs = config.entityConfigs;
+      getGlobalMiddlewareManager().setEntityConfigs(this.entityConfigs);
     }
 
     this.setupRoutes();
@@ -90,15 +99,21 @@ export class URPC {
       try {
         const entity = c.req.param("entity");
         const source = c.req.query("source");
+        const contextStr = c.req.query("context");
+        const context = contextStr ? JSON.parse(contextStr) : undefined;
 
         const sourceError = validateSource(source, c);
         if (sourceError) return sourceError;
 
         const repo = getRepo(entity, source!);
         const params = parseQueryParams(c);
-        const result = await repo.findMany(params);
+        const result = await repo.findMany(params, {
+          entity,
+          source,
+          context,
+        });
 
-        return c.json({ data: result, entity, source });
+        return c.json({ data: result });
       } catch (error) {
         return handleError(error, c);
       }
@@ -108,6 +123,8 @@ export class URPC {
       try {
         const entity = c.req.param("entity");
         const source = c.req.query("source");
+        const contextStr = c.req.query("context");
+        const context = contextStr ? JSON.parse(contextStr) : undefined;
 
         const sourceError = validateSource(source, c);
         if (sourceError) return sourceError;
@@ -118,11 +135,19 @@ export class URPC {
         }
 
         const repo = getRepo(entity, source!);
-        const result = await repo.findOne({
-          where: params.where,
-        });
 
-        return c.json({ data: result, entity, source });
+        const result = await repo.findOne(
+          {
+            where: params.where,
+          },
+          {
+            entity,
+            source,
+            context,
+          }
+        );
+
+        return c.json({ data: result });
       } catch (error) {
         return handleError(error, c);
       }
@@ -142,11 +167,17 @@ export class URPC {
         }
 
         const repo = getRepo(entity, source!);
-        const result = await repo.create({
-          data: body.data,
-        });
+        const result = await repo.create(
+          {
+            data: body.data,
+          },
+          {
+            entity,
+            source,
+          }
+        );
 
-        return c.json({ data: result, entity, source }, 201);
+        return c.json({ data: result }, 201);
       } catch (error) {
         return handleError(error, c);
       }
@@ -166,12 +197,18 @@ export class URPC {
         }
 
         const repo = getRepo(entity, source!);
-        const result = await repo.update({
-          where: body.where,
-          data: body.data,
-        });
+        const result = await repo.update(
+          {
+            where: body.where,
+            data: body.data,
+          },
+          {
+            entity,
+            source,
+          }
+        );
 
-        return c.json({ data: result, entity, source });
+        return c.json({ data: result });
       } catch (error) {
         return handleError(error, c);
       }
@@ -191,11 +228,17 @@ export class URPC {
         }
 
         const repo = getRepo(entity, source!);
-        const result = await repo.delete({
-          where: params.where,
-        });
+        const result = await repo.delete(
+          {
+            where: params.where,
+          },
+          {
+            entity,
+            source,
+          }
+        );
 
-        return c.json({ data: { success: result }, entity, source });
+        return c.json({ data: { success: result } });
       } catch (error) {
         return handleError(error, c);
       }

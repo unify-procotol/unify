@@ -19,12 +19,12 @@ export type WhereConditionWithOperators<T> = {
 
 export type RelationCallbackSingle<
   T extends Record<string, any>,
-  R extends Record<string, any>
+  R extends Record<string, any>,
 > = (entity: T) => Promise<R | null>;
 
 export type RelationCallbackMany<
   T extends Record<string, any>,
-  R extends Record<string, any>
+  R extends Record<string, any>,
 > = (entities: T[]) => Promise<R[]>;
 
 export interface FindManyArgs<T extends Record<string, any>> {
@@ -71,11 +71,21 @@ export interface DataSourceAdapter<T extends Record<string, any>> {
   delete(args: DeletionArgs<T>): Promise<boolean>;
 }
 
+export interface MiddlewareMetadata {
+  entity: string;
+  source?: string;
+  context?: {
+    language?: string;
+    [key: string]: any;
+  };
+}
+
 export type MiddlewareContext<T extends Record<string, any>> = {
   operation: "findMany" | "findOne" | "create" | "update" | "delete";
   args: any;
   result?: any;
   adapter: DataSourceAdapter<T>;
+  metadata?: MiddlewareMetadata;
 };
 
 export type MiddlewareNext<T extends Record<string, any>> = () => Promise<any>;
@@ -114,7 +124,7 @@ export interface Plugin {
 
 export interface RelationMapping<
   T extends Record<string, any>,
-  F extends Record<string, any>
+  F extends Record<string, any>,
 > {
   localField: keyof F;
   foreignField: keyof T;
@@ -123,10 +133,37 @@ export interface RelationMapping<
 export interface RepoOptions {
   entity: string;
   source: string;
+  context?: {
+    language?: string;
+    [key: string]: any;
+  };
 }
 
 export type JoinRepoOptions<
   F extends Record<string, any> = Record<string, any>,
-  L extends Record<string, any> = Record<string, any>
+  L extends Record<string, any> = Record<string, any>,
 > = RepoOptions & RelationMapping<F, L>;
 
+export interface I18nConfig {
+  prompt?: string;
+  model?: string;
+  cache?: {
+    ttl?: number;
+  };
+}
+
+export interface FieldConfig {
+  i18n?: I18nConfig;
+}
+
+export interface EntityConfig {
+  defaultSource?: string;
+  exclude?: string[];
+  fields?: {
+    [fieldName: string]: FieldConfig;
+  };
+}
+
+export interface EntityConfigs {
+  [entityName: string]: EntityConfig;
+}

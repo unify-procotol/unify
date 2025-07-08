@@ -5,10 +5,9 @@ import type {
   UpdateArgs,
   DeletionArgs,
   Repository,
-  RepoOptions,
   JoinRepoOptions,
 } from "@unilab/urpc-core";
-import type { ClientConfig, HttpRequestOptions } from "./types";
+import type { ClientConfig, HttpRequestOptions, RepoOptions } from "./types";
 
 export class URPC {
   private config: ClientConfig;
@@ -91,6 +90,9 @@ export class URPC {
               if (args.order_by) params.order_by = args.order_by;
               if (args.limit) params.limit = args.limit;
               if (args.offset) params.offset = args.offset;
+              
+              // 传递 context 参数
+              if ((options as any).context) params.context = (options as any).context;
 
               const result = await this.request<T[]>({
                 method: "GET",
@@ -111,6 +113,9 @@ export class URPC {
                 source,
                 where: args.where,
               };
+              
+              // 传递 context 参数
+              if ((options as any).context) params.context = (options as any).context;
 
               const result = await this.request<T | null>({
                 method: "GET",

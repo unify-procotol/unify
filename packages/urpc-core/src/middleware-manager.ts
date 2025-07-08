@@ -1,4 +1,5 @@
 import {
+  EntityConfigs,
   Middleware,
   MiddlewareContext,
   MiddlewareManagerInterface,
@@ -8,10 +9,16 @@ import {
 class MiddlewareManager<T extends Record<string, any>>
   implements MiddlewareManagerInterface<T>
 {
+  entityConfigs: EntityConfigs = {};
+
   private middlewares: Array<{
     middleware: Middleware<T>;
     options: MiddlewareOptions;
   }> = [];
+
+  setEntityConfigs(entityConfigs: EntityConfigs): void {
+    this.entityConfigs = entityConfigs;
+  }
 
   use(middleware: Middleware<T>, options: MiddlewareOptions = {}): void {
     const middlewareConfig = {
@@ -49,14 +56,27 @@ class MiddlewareManager<T extends Record<string, any>>
       return operation();
     }
 
+    // Filter middlewares based on exclude configuration
+    const entityName = context.metadata?.entity;
+    const entityConfig = entityName ? this.entityConfigs[entityName] : undefined;
+    const excludedMiddlewares = entityConfig?.exclude || [];
+
+    const filteredMiddlewares = this.middlewares.filter(
+      (m) => !excludedMiddlewares.includes(m.options.name || "")
+    );
+
+    if (filteredMiddlewares.length === 0) {
+      return operation();
+    }
+
     // Filter middlewares based on position
-    const beforeMiddlewares = this.middlewares.filter(
+    const beforeMiddlewares = filteredMiddlewares.filter(
       (m) => m.options.position === "before"
     );
-    const afterMiddlewares = this.middlewares.filter(
+    const afterMiddlewares = filteredMiddlewares.filter(
       (m) => m.options.position === "after"
     );
-    const aroundMiddlewares = this.middlewares.filter(
+    const aroundMiddlewares = filteredMiddlewares.filter(
       (m) => m.options.position === "around"
     );
 
@@ -125,7 +145,11 @@ export function useGlobalMiddleware<T extends Record<string, any>>(
   middleware: Middleware<T>,
   options?: MiddlewareOptions
 ): void {
-  GlobalMiddleware.use(middleware, options);
+  const middlewareOptions = {
+    ...options,
+    name: options?.name || middleware.name || `middleware_${Date.now()}`
+  };
+  GlobalMiddleware.use(middleware, middlewareOptions);
 }
 
 export function removeGlobalMiddleware(name: string): boolean {

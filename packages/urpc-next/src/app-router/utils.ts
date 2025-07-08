@@ -43,15 +43,21 @@ export function parseQueryParams(request: NextRequest) {
     params.offset = offset;
   }
 
+  const contextParam = url.searchParams.get("context");
+  if (contextParam) {
+    try {
+      params.context = JSON.parse(contextParam);
+    } catch (e) {
+      console.warn("Invalid context parameter", e);
+    }
+  }
+
   return params;
 }
 
 export function handleError(error: unknown): NextResponse {
   if (error instanceof URPCError) {
-    return NextResponse.json(
-      { error: error.message },
-      { status: error.code }
-    );
+    return NextResponse.json({ error: error.message }, { status: error.code });
   }
   return NextResponse.json(
     { error: error instanceof Error ? error.message : "Unknown error" },

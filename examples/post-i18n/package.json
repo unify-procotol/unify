@@ -1,0 +1,31 @@
+{
+  "name": "post-i18n-example",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.ts",
+  "scripts": {
+    "dev": "bun run server.ts",
+    "start": "bun run server.ts",
+    "client": "bun run client.ts"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.12.2",
+    "@unilab/urpc-client": "workspace:*",
+    "@unilab/urpc-core": "workspace:*",
+    "@unilab/urpc-hono": "workspace:*",
+    "hono": "^4.7.11",
+    "lru-cache": "^11.1.0"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.1.12",
+    "typescript": "^5.3.0"
+  },
+  "keywords": [
+    "hono",
+    "unilab",
+    "api",
+    "example"
+  ],
+  "author": "",
+  "license": "MIT"
+}

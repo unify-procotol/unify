@@ -6,6 +6,8 @@ import {
   getRepo,
   getRepoRegistry,
   RepoOptions,
+  EntityConfigs,
+  getGlobalMiddlewareManager,
 } from "@unilab/urpc-core";
 import {
   generateSchemas,
@@ -34,6 +36,7 @@ export interface URPCAPI {
 export class URPC {
   private static entitySchemas: Record<string, SchemaObject> = {};
   private static entitySources: Record<string, string[]> = {};
+  private static entityConfigs: EntityConfigs = {};
   private static initialized = false;
 
   static init(config: URPCConfig): URPCAPI {
@@ -44,6 +47,11 @@ export class URPC {
 
       if (config.middlewares) {
         this.applyMiddlewareToRepos(config.middlewares);
+      }
+
+      if (config.entityConfigs) {
+        this.entityConfigs = config.entityConfigs;
+        getGlobalMiddlewareManager().setEntityConfigs(this.entityConfigs);
       }
 
       this.initialized = true;
@@ -154,8 +162,12 @@ export class URPC {
     source: string
   ): Promise<NextResponse> {
     try {
-      const params = parseQueryParams(request);
-      const result = await repo.findMany(params);
+      const { context, ...params } = parseQueryParams(request);
+      const result = await repo.findMany(params, {
+        entity,
+        source,
+        context,
+      });
 
       return NextResponse.json({ data: result, entity, source });
     } catch (error) {
@@ -170,7 +182,7 @@ export class URPC {
     source: string
   ): Promise<NextResponse> {
     try {
-      const params = parseQueryParams(request);
+      const { context, ...params } = parseQueryParams(request);
       if (!params.where) {
         return NextResponse.json(
           { error: "where parameter is required" },
@@ -178,9 +190,16 @@ export class URPC {
         );
       }
 
-      const result = await repo.findOne({
-        where: params.where,
-      });
+      const result = await repo.findOne(
+        {
+          where: params.where,
+        },
+        {
+          entity,
+          source,
+          context,
+        }
+      );
 
       return NextResponse.json({ data: result, entity, source });
     } catch (error) {
@@ -203,9 +222,15 @@ export class URPC {
         );
       }
 
-      const result = await repo.create({
-        data: body.data,
-      });
+      const result = await repo.create(
+        {
+          data: body.data,
+        },
+        {
+          entity,
+          source,
+        }
+      );
 
       return NextResponse.json(
         { data: result, entity, source },
@@ -231,10 +256,16 @@ export class URPC {
         );
       }
 
-      const result = await repo.update({
-        where: body.where,
-        data: body.data,
-      });
+      const result = await repo.update(
+        {
+          where: body.where,
+          data: body.data,
+        },
+        {
+          entity,
+          source,
+        }
+      );
 
       return NextResponse.json({ data: result, entity, source });
     } catch (error) {
@@ -257,9 +288,15 @@ export class URPC {
         );
       }
 
-      const result = await repo.delete({
-        where: params.where,
-      });
+      const result = await repo.delete(
+        {
+          where: params.where,
+        },
+        {
+          entity,
+          source,
+        }
+      );
 
       return NextResponse.json({ data: { success: result }, entity, source });
     } catch (error) {

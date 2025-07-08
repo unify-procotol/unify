@@ -7,6 +7,7 @@ import type {
   FindOneArgs,
   UpdateArgs,
   MiddlewareContext,
+  MiddlewareMetadata,
 } from "./types";
 
 export class Repository<T extends Record<string, any>> {
@@ -16,11 +17,15 @@ export class Repository<T extends Record<string, any>> {
     this.adapter = adapter;
   }
 
-  async findMany(args?: FindManyArgs<T>): Promise<T[]> {
+  async findMany(
+    args?: FindManyArgs<T>,
+    metadata?: MiddlewareMetadata
+  ): Promise<T[]> {
     const context: MiddlewareContext<T> = {
       args,
       operation: "findMany",
       adapter: this.adapter,
+      metadata: metadata,
     };
 
     return getGlobalMiddlewareManager().execute(context, async () => {
@@ -28,11 +33,15 @@ export class Repository<T extends Record<string, any>> {
     });
   }
 
-  async findOne(args: FindOneArgs<T>): Promise<T | null> {
+  async findOne(
+    args: FindOneArgs<T>,
+    metadata?: MiddlewareMetadata
+  ): Promise<T | null> {
     const context: MiddlewareContext<T> = {
       args,
       operation: "findOne",
       adapter: this.adapter,
+      metadata: metadata,
     };
 
     return getGlobalMiddlewareManager().execute(context, async () => {
@@ -40,11 +49,15 @@ export class Repository<T extends Record<string, any>> {
     });
   }
 
-  async create(args: CreationArgs<T>): Promise<T> {
+  async create(
+    args: CreationArgs<T>,
+    metadata?: MiddlewareMetadata
+  ): Promise<T> {
     const context: MiddlewareContext<T> = {
       args,
       operation: "create",
       adapter: this.adapter,
+      metadata: metadata,
     };
 
     return getGlobalMiddlewareManager().execute(context, async () => {
@@ -53,11 +66,12 @@ export class Repository<T extends Record<string, any>> {
     });
   }
 
-  async update(args: UpdateArgs<T>): Promise<T> {
+  async update(args: UpdateArgs<T>, metadata?: MiddlewareMetadata): Promise<T> {
     const context: MiddlewareContext<T> = {
       args,
       operation: "update",
       adapter: this.adapter,
+      metadata: metadata,
     };
 
     return getGlobalMiddlewareManager().execute(context, async () => {
@@ -65,11 +79,15 @@ export class Repository<T extends Record<string, any>> {
     });
   }
 
-  async delete(args: DeletionArgs<T>): Promise<boolean> {
+  async delete(
+    args: DeletionArgs<T>,
+    metadata?: MiddlewareMetadata
+  ): Promise<boolean> {
     const context: MiddlewareContext<T> = {
       args,
       operation: "delete",
       adapter: this.adapter,
+      metadata: metadata,
     };
 
     return getGlobalMiddlewareManager().execute(context, async () => {
