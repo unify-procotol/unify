@@ -4,6 +4,7 @@ import { getSortedFields, renderFieldValue, generateRecordKey } from "../utils";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader } from "./ui/card";
 import { Badge } from "./ui/badge";
+import { Edit3, Trash2, MoreHorizontal, Database } from "lucide-react";
 
 /**
  * Grid layout component for displaying data in a compact grid format
@@ -48,7 +49,7 @@ export const GridLayout: React.FC<LayoutProps> = ({
    * Render action buttons for a record
    */
   const renderActionButtons = (record: any, index: number) => (
-    <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+    <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
       {(generalConfig?.actions?.edit !== false && onEdit) && (
         <Button
           variant="ghost"
@@ -57,9 +58,7 @@ export const GridLayout: React.FC<LayoutProps> = ({
           className="h-6 w-6 p-0"
           title="Edit record"
         >
-          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-          </svg>
+          <Edit3 className="h-3 w-3" />
         </Button>
       )}
       {(generalConfig?.actions?.delete !== false && onDelete) && (
@@ -67,12 +66,10 @@ export const GridLayout: React.FC<LayoutProps> = ({
           variant="ghost"
           size="sm"
           onClick={() => handleDelete(record, index)}
-          className="h-6 w-6 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+          className="h-6 w-6 p-0 text-destructive hover:text-destructive"
           title="Delete record"
         >
-          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-          </svg>
+          <Trash2 className="h-3 w-3" />
         </Button>
       )}
       {generalConfig?.actions?.custom?.map((action, actionIndex) => (
@@ -84,63 +81,91 @@ export const GridLayout: React.FC<LayoutProps> = ({
           className={`h-6 w-6 p-0 ${action.className || ''}`}
           title={action.label}
         >
-          {action.icon || (
-            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/>
-            </svg>
-          )}
+          {action.icon || <MoreHorizontal className="h-3 w-3" />}
         </Button>
       ))}
     </div>
   );
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 2xl:grid-cols-8 gap-4">
-      {data.map((record, index) => (
-        <Card 
-          key={generateRecordKey(record, index)} 
-          className="p-4 hover:shadow-lg group transition-all duration-200 cursor-pointer"
-        >
-          <CardHeader className="p-0 pb-3">
-            <div className="flex items-center justify-between">
-              <Badge variant="outline" className="text-xs font-mono">
-                #{index + 1}
-              </Badge>
-              {(generalConfig?.showActions && (onEdit || onDelete || generalConfig?.actions?.custom)) && 
-                renderActionButtons(record, index)
-              }
-            </div>
-          </CardHeader>
-          
-          <CardContent className="p-0">
-            <div className="space-y-2">
-              {displayFields.map(field => (
-                <div key={field.name} className="text-center">
-                  <div className="text-xs text-gray-500 mb-1 font-medium">
-                    {config?.[field.name]?.label || field.name}
-                    {field.required && <span className="text-red-500 ml-1">*</span>}
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="space-y-1">
+          <h2 className="text-2xl font-bold tracking-tight">{entity.name}</h2>
+          <p className="text-muted-foreground">
+            {data.length} record{data.length !== 1 ? 's' : ''} in compact grid view
+          </p>
+        </div>
+      </div>
+
+      {/* Grid */}
+      <div className="grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 2xl:grid-cols-8">
+        {data.map((record, index) => (
+          <Card 
+            key={generateRecordKey(record, index)} 
+            className="group cursor-pointer transition-all duration-200 hover:shadow-lg"
+          >
+            <CardHeader className="p-0 pb-3">
+              <div className="flex items-center justify-between p-3">
+                <Badge variant="outline" className="text-xs font-mono">
+                  #{index + 1}
+                </Badge>
+                {(generalConfig?.showActions && (onEdit || onDelete || generalConfig?.actions?.custom)) && 
+                  renderActionButtons(record, index)
+                }
+              </div>
+            </CardHeader>
+            
+            <CardContent className="p-3 pt-0">
+              <div className="space-y-3">
+                {displayFields.map(field => (
+                  <div key={field.name} className="text-center space-y-1">
+                    <div className="flex items-center justify-center gap-1">
+                      <span className="text-xs font-medium text-muted-foreground">
+                        {config?.[field.name]?.label || field.name}
+                      </span>
+                      {field.required && (
+                        <Badge variant="destructive" className="h-3 text-[10px] px-1">
+                          *
+                        </Badge>
+                      )}
+                    </div>
+                    <div 
+                      className="text-sm font-mono truncate" 
+                      title={JSON.stringify(record[field.name])}
+                    >
+                      {renderFieldValue(record[field.name], field, record, index, config?.[field.name])}
+                    </div>
                   </div>
-                  <div 
-                    className="text-sm text-gray-900 truncate font-mono" 
-                    title={JSON.stringify(record[field.name])}
-                  >
-                    {renderFieldValue(record[field.name], field, record, index, config?.[field.name])}
+                ))}
+                
+                {/* Show additional fields count */}
+                {sortedFields.length > 3 && (
+                  <div className="pt-2 text-center border-t">
+                    <Badge variant="secondary" className="text-xs">
+                      +{sortedFields.length - 3}
+                    </Badge>
                   </div>
-                </div>
-              ))}
-              
-              {/* Show additional fields count */}
-              {sortedFields.length > 3 && (
-                <div className="pt-2 text-center">
-                  <Badge variant="secondary" className="text-xs">
-                    +{sortedFields.length - 3}
-                  </Badge>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      ))}
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Empty state */}
+      {data.length === 0 && (
+        <div className="flex flex-col items-center justify-center py-12">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted mb-4">
+            <Database className="h-6 w-6 text-muted-foreground" />
+          </div>
+          <h3 className="text-lg font-semibold">No records found</h3>
+          <p className="text-sm text-muted-foreground mt-1">
+            There are no {entity.name.toLowerCase()} records to display in grid view.
+          </p>
+        </div>
+      )}
     </div>
   );
 }; 

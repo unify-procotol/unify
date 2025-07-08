@@ -4,6 +4,7 @@ import { getSortedFields, renderFieldValue, generateRecordKey } from "../utils";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Badge } from "./ui/badge";
+import { Edit3, Trash2, MoreHorizontal, Database } from "lucide-react";
 
 /**
  * Card layout component for displaying data in card format
@@ -47,18 +48,16 @@ export const CardLayout: React.FC<LayoutProps> = ({
    * Render action buttons for a record
    */
   const renderActionButtons = (record: any, index: number) => (
-    <div className="flex items-center space-x-1">
+    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
       {(generalConfig?.actions?.edit !== false && onEdit) && (
         <Button
           variant="ghost"
           size="sm"
           onClick={() => handleEdit(record, index)}
-          className="h-6 w-6 p-0"
+          className="h-8 w-8 p-0"
           title="Edit record"
         >
-          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-          </svg>
+          <Edit3 className="h-4 w-4" />
         </Button>
       )}
       {(generalConfig?.actions?.delete !== false && onDelete) && (
@@ -66,12 +65,10 @@ export const CardLayout: React.FC<LayoutProps> = ({
           variant="ghost"
           size="sm"
           onClick={() => handleDelete(record, index)}
-          className="h-6 w-6 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+          className="h-8 w-8 p-0 text-destructive hover:text-destructive"
           title="Delete record"
         >
-          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-          </svg>
+          <Trash2 className="h-4 w-4" />
         </Button>
       )}
       {generalConfig?.actions?.custom?.map((action, actionIndex) => (
@@ -80,68 +77,105 @@ export const CardLayout: React.FC<LayoutProps> = ({
           variant="ghost"
           size="sm"
           onClick={() => action.onClick(record, index)}
-          className={`h-6 w-6 p-0 ${action.className || ''}`}
+          className={`h-8 w-8 p-0 ${action.className || ''}`}
           title={action.label}
         >
-          {action.icon || (
-            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/>
-            </svg>
-          )}
+          {action.icon || <MoreHorizontal className="h-4 w-4" />}
         </Button>
       ))}
     </div>
   );
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-      {data.map((record, index) => (
-        <Card key={generateRecordKey(record, index)} className="hover:shadow-lg transition-shadow">
-          <CardHeader className="pb-2">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-sm flex items-center space-x-2">
-                <span>Record #{index + 1}</span>
-                {entity.name && (
-                  <Badge variant="outline" className="text-xs">
-                    {entity.name}
-                  </Badge>
-                )}
-              </CardTitle>
-              {(generalConfig?.showActions && (onEdit || onDelete || generalConfig?.actions?.custom)) && 
-                renderActionButtons(record, index)
-              }
-            </div>
-          </CardHeader>
-          
-          <CardContent className="pt-0">
-            <div className="space-y-3">
-              {/* Display first 3 fields prominently */}
-              {sortedFields.slice(0, 3).map(field => (
-                <div key={field.name} className="space-y-1">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      {config?.[field.name]?.label || field.name}
-                      {field.required && <span className="text-red-500 ml-1">*</span>}
+    <div className="space-y-8">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="space-y-1">
+          <h2 className="text-3xl font-bold tracking-tight">{entity.name}</h2>
+          <p className="text-muted-foreground">
+            {data.length} record{data.length !== 1 ? 's' : ''} found
+          </p>
+        </div>
+      </div>
+
+      {/* Cards Grid */}
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {data.map((record, index) => (
+          <Card 
+            key={generateRecordKey(record, index)} 
+            className="group relative overflow-hidden transition-all duration-200 hover:shadow-lg"
+          >
+            <CardHeader className="pb-3">
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted">
+                    <span className="text-sm font-semibold text-muted-foreground">
+                      {(index + 1).toString().padStart(2, '0')}
                     </span>
                   </div>
-                  <div className="text-sm break-words">
+                  <div className="space-y-1">
+                    <CardTitle className="text-base font-semibold">
+                      {entity.name}
+                    </CardTitle>
+                    <p className="text-sm text-muted-foreground">
+                      Record #{index + 1}
+                    </p>
+                  </div>
+                </div>
+                {(generalConfig?.showActions && (onEdit || onDelete || generalConfig?.actions?.custom)) && 
+                  renderActionButtons(record, index)
+                }
+              </div>
+            </CardHeader>
+            
+            <CardContent className="space-y-4">
+              {/* Primary fields */}
+              {sortedFields.slice(0, 4).map((field, fieldIndex) => (
+                <div key={field.name} className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">
+                      {config?.[field.name]?.label || field.name}
+                    </span>
+                    {field.required && (
+                      <Badge variant="secondary" className="h-5 text-xs">
+                        Required
+                      </Badge>
+                    )}
+                  </div>
+                  <div className="text-sm text-muted-foreground break-words">
                     {renderFieldValue(record[field.name], field, record, index, config?.[field.name])}
                   </div>
+                  {fieldIndex < 3 && (
+                    <div className="h-px bg-border" />
+                  )}
                 </div>
               ))}
               
-              {/* Show remaining fields count if more than 3 */}
-              {sortedFields.length > 3 && (
-                <div className="pt-2 border-t border-gray-100">
-                  <Badge variant="secondary" className="text-xs">
-                    +{sortedFields.length - 3} more field{sortedFields.length - 3 !== 1 ? 's' : ''}
+              {/* Additional fields indicator */}
+              {sortedFields.length > 4 && (
+                <div className="pt-2 border-t">
+                  <Badge variant="outline" className="text-xs">
+                    +{sortedFields.length - 4} more field{sortedFields.length - 4 !== 1 ? 's' : ''}
                   </Badge>
                 </div>
               )}
-            </div>
-          </CardContent>
-        </Card>
-      ))}
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Empty state */}
+      {data.length === 0 && (
+        <div className="flex flex-col items-center justify-center py-12">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted mb-4">
+            <Database className="h-6 w-6 text-muted-foreground" />
+          </div>
+          <h3 className="text-lg font-semibold">No records found</h3>
+          <p className="text-sm text-muted-foreground mt-1">
+            There are no {entity.name.toLowerCase()} records to display.
+          </p>
+        </div>
+      )}
     </div>
   );
 }; 

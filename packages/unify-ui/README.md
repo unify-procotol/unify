@@ -1,6 +1,17 @@
 # @unilab/unify-ui
 
-A flexible and elegant UI rendering library for dynamic data visualization with multiple layout options.
+A flexible and elegant UI rendering library for dynamic data visualization with multiple layout options. Built with **shadcn/ui** components for modern, accessible design.
+
+## ✨ Features
+
+- 🎨 **shadcn/ui Integration**: Beautiful, accessible components out of the box
+- 🌙 **Dark Mode Support**: Built-in dark/light theme switching
+- 📱 **Responsive Design**: Works perfectly on all device sizes
+- 🎯 **Multiple Layouts**: Table, Card, Dashboard, Form, Grid, and List views
+- 🔧 **Highly Customizable**: Override colors, layouts, and behavior
+- 🚀 **TypeScript**: Full type safety and IntelliSense
+- 📦 **Built-in Dependencies**: All Radix UI components and utilities included
+- 🎨 **Auto CSS**: Styles automatically imported, no manual setup required
 
 ## 🚀 Quick Start
 
@@ -8,141 +19,56 @@ A flexible and elegant UI rendering library for dynamic data visualization with 
 
 ```bash
 npm install @unilab/unify-ui
-# Install peer dependencies
-npm install -D tailwindcss postcss autoprefixer
-npx tailwindcss init -p
+# Install peer dependencies (Tailwind CSS v4+ required)
+npm install -D tailwindcss@^4.0.0 @tailwindcss/vite tailwindcss-animate
+npx tailwindcss init
+pnpm dlx shadcn@latest init
+@source '../../../packages/unify-ui/dist/**/*.{js,ts,jsx,tsx}'; 
+@source '../../../packages/unify-ui/src/**/*.{js,ts,jsx,tsx}';
 ```
 
-### 2. Configure Tailwind CSS
+> 🎉 **All shadcn/ui and Radix components are now built-in!** No need to install them separately.
 
-Update your `tailwind.config.js`:
+### 📦 Development & Build
 
-```javascript
-/** @type {import('tailwindcss').Config} */
-module.exports = {
-  content: [
-    "./src/**/*.{js,ts,jsx,tsx,mdx}",
-    // 📦 Include @unilab/unify-ui components
-    "./node_modules/@unilab/unify-ui/**/*.{js,ts,jsx,tsx}",
-  ],
-  theme: {
-    extend: {
-      // 🎨 Pre-configured colors with sensible defaults
-      colors: {
-        border: "hsl(var(--border, 214.3 31.8% 91.4%))",
-        input: "hsl(var(--input, 214.3 31.8% 91.4%))",
-        ring: "hsl(var(--ring, 221.2 83.2% 53.3%))",
-        background: "hsl(var(--background, 0 0% 100%))",
-        foreground: "hsl(var(--foreground, 222.2 84% 4.9%))",
-        primary: {
-          DEFAULT: "hsl(var(--primary, 221.2 83.2% 53.3%))",
-          foreground: "hsl(var(--primary-foreground, 210 40% 98%))",
-        },
-        secondary: {
-          DEFAULT: "hsl(var(--secondary, 210 40% 96%))",
-          foreground: "hsl(var(--secondary-foreground, 222.2 84% 4.9%))",
-        },
-        destructive: {
-          DEFAULT: "hsl(var(--destructive, 0 84.2% 60.2%))",
-          foreground: "hsl(var(--destructive-foreground, 210 40% 98%))",
-        },
-        muted: {
-          DEFAULT: "hsl(var(--muted, 210 40% 96%))",
-          foreground: "hsl(var(--muted-foreground, 215.4 16.3% 46.9%))",
-        },
-        accent: {
-          DEFAULT: "hsl(var(--accent, 210 40% 96%))",
-          foreground: "hsl(var(--accent-foreground, 222.2 84% 4.9%))",
-        },
-        popover: {
-          DEFAULT: "hsl(var(--popover, 0 0% 100%))",
-          foreground: "hsl(var(--popover-foreground, 222.2 84% 4.9%))",
-        },
-        card: {
-          DEFAULT: "hsl(var(--card, 0 0% 100%))",
-          foreground: "hsl(var(--card-foreground, 222.2 84% 4.9%))",
-        },
-      },
-      borderRadius: {
-        lg: "var(--radius, 0.5rem)",
-        md: "calc(var(--radius, 0.5rem) - 2px)",
-        sm: "calc(var(--radius, 0.5rem) - 4px)",
-      },
-    },
-  },
-  plugins: [],
-}
+This package is built with **Vite** for optimal performance and modern ESM/CJS output:
+
+```bash
+# Development (watch mode)
+npm run dev
+
+# Build for production
+npm run build
+
+# Preview build
+npm run preview
 ```
 
-### 3. Add CSS Styles
+**Output formats:**
+- ESM: `dist/index.esm.js`
+- CommonJS: `dist/index.cjs.js`
+- TypeScript declarations: `dist/index.d.ts`
 
-Create or update your CSS file (globals.css):
+### 🔧 Vite Configuration (Optional)
 
-```css
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+If you're using Vite, you can use the official Tailwind CSS Vite plugin:
 
-/* 基础颜色变量 - 可自定义覆盖 */
-@layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 221.2 83.2% 53.3%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 222.2 84% 4.9%;
-    --muted: 210 40% 96%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96%;
-    --accent-foreground: 222.2 84% 4.9%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 221.2 83.2% 53.3%;
-    --radius: 0.5rem;
-  }
+```typescript
+// vite.config.ts
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import tailwindcss from '@tailwindcss/vite'
 
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 84% 4.9%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-  }
-
-  body {
-    @apply bg-background text-foreground;
-  }
-}
+export default defineConfig({
+  plugins: [react(), tailwindcss()],
+})
 ```
 
-### 4. Import CSS and Start Using
+### 3. Start Using
 
 ```jsx
-import './globals.css';
 import { UniRender } from '@unilab/unify-ui';
 
-// 🎉 Works immediately with beautiful default colors!
 function App() {
   const entity = {
     name: 'User',
@@ -162,8 +88,44 @@ function App() {
     <UniRender
       entity={entity}
       data={data}
-      layout="table"
+      layout="card"
+      generalConfig={{
+        showActions: true,
+        actions: {
+          edit: true,
+          delete: true
+        }
+      }}
+      onEdit={(record, index) => console.log('Edit:', record)}
+      onDelete={(record, index) => console.log('Delete:', record)}
     />
+  );
+}
+```
+
+### 4. Enable Dark Mode (Optional)
+
+Add dark mode toggle to your app:
+
+```jsx
+function App() {
+  const [isDark, setIsDark] = useState(false);
+
+  return (
+    <div className={isDark ? 'dark' : ''}>
+      <button 
+        onClick={() => setIsDark(!isDark)}
+        className="mb-4 px-4 py-2 bg-primary text-primary-foreground rounded-lg"
+      >
+        Toggle {isDark ? 'Light' : 'Dark'} Mode
+      </button>
+      
+      <UniRender
+        entity={entity}
+        data={data}
+        layout="dashboard"
+      />
+    </div>
   );
 }
 ```

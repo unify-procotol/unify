@@ -5,6 +5,16 @@ import { EditModal } from "./EditModal";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Badge } from "./ui/badge";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
+import { 
+  ChevronLeft, 
+  ChevronRight, 
+  Edit3, 
+  Trash2, 
+  FileText,
+  Loader2
+} from "lucide-react";
 
 /**
  * Form layout component for displaying data in form format with navigation
@@ -100,134 +110,145 @@ export const FormLayout: React.FC<LayoutProps> = ({
 
   if (!currentRecord) {
     return (
-      <Card className="p-8 text-center">
-        <div className="text-gray-500">
-          <svg className="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-          </svg>
-          <p>No records to display</p>
+      <div className="flex flex-col items-center justify-center py-12">
+        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted mb-4">
+          <FileText className="h-8 w-8 text-muted-foreground" />
         </div>
-      </Card>
+        <h3 className="text-lg font-semibold">No records to display</h3>
+        <p className="text-sm text-muted-foreground">
+          There are no records available to show.
+        </p>
+      </div>
     );
   }
 
   return (
     <>
-      <Card className="overflow-hidden">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <CardTitle className="text-lg">
-                {entity.name} Details
-              </CardTitle>
-              <Badge variant="outline" className="text-sm">
-                Record {currentIndex + 1} of {data.length}
-              </Badge>
-            </div>
-            
-            <div className="flex items-center space-x-2">
-              {/* Navigation controls */}
-              <div className="flex items-center space-x-1">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={goToPrevious}
-                  disabled={currentIndex === 0}
-                  title="Previous record"
-                  className="h-8 w-8 p-0"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"/>
-                  </svg>
-                </Button>
-                
-                <div className="flex items-center space-x-1 px-2">
-                  <input
-                    type="number"
-                    min="1"
-                    max={data.length}
-                    value={currentIndex + 1}
-                    onChange={(e) => goToRecord(Number(e.target.value) - 1)}
-                    className="w-16 px-2 py-1 text-xs border rounded text-center"
-                  />
-                  <span className="text-xs text-gray-500">/ {data.length}</span>
+      <div className="space-y-6">
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted">
+                  <FileText className="h-5 w-5 text-muted-foreground" />
                 </div>
-                
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={goToNext}
-                  disabled={currentIndex === data.length - 1}
-                  title="Next record"
-                  className="h-8 w-8 p-0"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"/>
-                  </svg>
-                </Button>
+                <div className="space-y-1">
+                  <CardTitle className="text-lg">
+                    {entity.name} Details
+                  </CardTitle>
+                  <Badge variant="outline" className="text-sm">
+                    Record {currentIndex + 1} of {data.length}
+                  </Badge>
+                </div>
               </div>
-
-              {/* Action buttons */}
-              {canEdit && (
-                <Button
-                  onClick={handleEdit}
-                  disabled={loading}
-                  size="sm"
-                  variant="outline"
-                >
-                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                  </svg>
-                  Edit
-                </Button>
-              )}
               
-              {(generalConfig?.actions?.delete !== false && onDelete) && (
-                <Button
-                  onClick={handleDelete}
-                  disabled={loading}
-                  size="sm"
-                  variant="destructive"
-                >
-                  {loading ? (
-                    <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-2"></div>
-                  ) : (
-                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                    </svg>
-                  )}
-                  Delete
-                </Button>
-              )}
-            </div>
-          </div>
-        </CardHeader>
-
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {sortedFields.map(field => (
-              <div key={field.name} className="space-y-2">
-                <div className="flex items-center space-x-2">
-                  <label className="block text-sm font-medium text-gray-700">
-                    {config?.[field.name]?.label || field.name}
-                  </label>
-                  {field.required && <span className="text-red-500 text-xs">*</span>}
-                </div>
-                
-                <Card className="p-3 bg-gray-50/50">
-                  <div className="text-sm text-gray-900 break-words">
-                    {renderFieldValue(currentRecord[field.name], field, currentRecord, currentIndex, config?.[field.name])}
+              <div className="flex items-center space-x-3">
+                {/* Navigation controls */}
+                <div className="flex items-center space-x-2 bg-muted rounded-lg p-1">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={goToPrevious}
+                    disabled={currentIndex === 0}
+                    title="Previous record"
+                    className="h-8 w-8 p-0"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  
+                  <div className="flex items-center space-x-2 px-2">
+                    <Input
+                      type="number"
+                      min="1"
+                      max={data.length}
+                      value={currentIndex + 1}
+                      onChange={(e) => goToRecord(Number(e.target.value) - 1)}
+                      className="w-16 h-8 text-xs text-center"
+                    />
+                    <span className="text-xs text-muted-foreground">/ {data.length}</span>
                   </div>
-                </Card>
-                
-                {field.description && (
-                  <p className="text-xs text-gray-500">{field.description}</p>
-                )}
+                  
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={goToNext}
+                    disabled={currentIndex === data.length - 1}
+                    title="Next record"
+                    className="h-8 w-8 p-0"
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
+
+                {/* Action buttons */}
+                <div className="flex items-center space-x-2">
+                  {canEdit && (
+                    <Button
+                      onClick={handleEdit}
+                      disabled={loading}
+                      size="sm"
+                      variant="outline"
+                    >
+                      <Edit3 className="mr-2 h-4 w-4" />
+                      Edit
+                    </Button>
+                  )}
+                  
+                  {(generalConfig?.actions?.delete !== false && onDelete) && (
+                    <Button
+                      onClick={handleDelete}
+                      disabled={loading}
+                      size="sm"
+                      variant="destructive"
+                    >
+                      {loading ? (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      ) : (
+                        <Trash2 className="mr-2 h-4 w-4" />
+                      )}
+                      Delete
+                    </Button>
+                  )}
+                </div>
               </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+            </div>
+          </CardHeader>
+
+          <CardContent>
+            <div className="grid gap-6 md:grid-cols-2">
+              {sortedFields.map(field => (
+                <div key={field.name} className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-sm font-medium">
+                      {config?.[field.name]?.label || field.name}
+                    </Label>
+                    <div className="flex items-center gap-2">
+                      {field.required && (
+                        <Badge variant="destructive" className="h-5 text-xs">
+                          Required
+                        </Badge>
+                      )}
+                      <Badge variant="outline" className="h-5 text-xs">
+                        {config?.[field.name]?.type || field.type}
+                      </Badge>
+                    </div>
+                  </div>
+                  
+                  <div className="min-h-[2.5rem] rounded-md border bg-muted/30 p-3">
+                    <div className="text-sm break-words">
+                      {renderFieldValue(currentRecord[field.name], field, currentRecord, currentIndex, config?.[field.name])}
+                    </div>
+                  </div>
+                  
+                  {field.description && (
+                    <p className="text-xs text-muted-foreground">{field.description}</p>
+                  )}
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Edit Modal */}
       {isEditing && editingRecord && (

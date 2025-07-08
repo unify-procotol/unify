@@ -2,9 +2,17 @@ import React, { useState } from "react";
 import { EditModalProps } from "../types";
 import { getSortedFields } from "../utils";
 import { Button } from "./ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
+import { Badge } from "./ui/badge";
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogFooter 
+} from "./ui/dialog";
+import { Save, Loader2, AlertCircle, Edit } from "lucide-react";
 
 /**
  * Modal component for editing records
@@ -85,208 +93,224 @@ export const EditModal: React.FC<EditModalProps> = ({
     }
   };
 
-     /**
-    * Render input field based on field type
-    */
-   const renderEditField = (field: any) => {
-     const fieldConfig = config?.[field.name];
-     const fieldType = fieldConfig?.type || field.type;
-     const value = formData[field.name];
-     const hasError = !!errors[field.name];
+  /**
+   * Render input field based on field type
+   */
+  const renderEditField = (field: any) => {
+    const fieldConfig = config?.[field.name];
+    const fieldType = fieldConfig?.type || field.type;
+    const value = formData[field.name];
+    const hasError = !!errors[field.name];
 
-     const commonProps = {
-       id: field.name,
-       name: field.name,
-     };
+    const commonProps = {
+      id: field.name,
+      name: field.name,
+    };
 
-     switch (fieldType) {
-       case 'checkbox':
-       case 'boolean':
-         return (
-           <div className="flex items-center space-x-2">
-             <input
-               type="checkbox"
-               checked={value || false}
-               onChange={(e) => handleInputChange(field.name, e.target.checked)}
-               className={`w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 ${
-                 hasError ? 'border-red-500 focus:ring-red-500' : ''
-               }`}
-               {...commonProps}
-             />
-             <Label htmlFor={field.name} className="text-sm">
-               {fieldConfig?.label || field.name}
-             </Label>
-           </div>
-         );
-       
-       case 'select':
-         return (
-           <select
-             value={value || ''}
-             onChange={(e) => handleInputChange(field.name, e.target.value)}
-             className={`w-full px-3 py-2 bg-background border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-               hasError ? 'border-red-500' : 'border-gray-300'
-             }`}
-             {...commonProps}
-           >
-             <option value="">Select {fieldConfig?.label || field.name}</option>
-             {fieldConfig?.options?.map((option) => (
-               <option key={option} value={option}>{option}</option>
-             ))}
-           </select>
-         );
-       
-       case 'textarea':
-         return (
-           <textarea
-             value={value || ''}
-             onChange={(e) => handleInputChange(field.name, e.target.value)}
-             className={`w-full px-3 py-2 bg-background border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[100px] resize-vertical ${
-               hasError ? 'border-red-500' : 'border-gray-300'
-             }`}
-             placeholder={`Enter ${fieldConfig?.label || field.name}...`}
-             {...commonProps}
-           />
-         );
+    switch (fieldType) {
+      case 'checkbox':
+      case 'boolean':
+        return (
+          <div className="flex items-center space-x-3">
+            <input
+              type="checkbox"
+              checked={value || false}
+              onChange={(e) => handleInputChange(field.name, e.target.checked)}
+              className={`h-4 w-4 rounded border-2 text-primary focus:ring-2 focus:ring-ring ${
+                hasError ? 'border-destructive' : 'border-input'
+              }`}
+              {...commonProps}
+            />
+            <Label htmlFor={field.name} className="text-sm font-medium cursor-pointer">
+              {fieldConfig?.label || field.name}
+            </Label>
+          </div>
+        );
       
-             case 'number':
-         return (
-           <Input
-             type="number"
-             value={value || ''}
-             onChange={(e) => handleInputChange(field.name, e.target.value ? Number(e.target.value) : '')}
-             placeholder={`Enter ${fieldConfig?.label || field.name}...`}
-             className={hasError ? 'border-red-500 focus:ring-red-500' : undefined}
-             {...commonProps}
-           />
-         );
-       
-       case 'date':
-         return (
-           <Input
-             type="date"
-             value={value ? new Date(value).toISOString().split('T')[0] : ''}
-             onChange={(e) => handleInputChange(field.name, e.target.value)}
-             className={hasError ? 'border-red-500 focus:ring-red-500' : undefined}
-             {...commonProps}
-           />
-         );
-       
-       case 'email':
-         return (
-           <Input
-             type="email"
-             value={value || ''}
-             onChange={(e) => handleInputChange(field.name, e.target.value)}
-             placeholder={`Enter ${fieldConfig?.label || field.name}...`}
-             className={hasError ? 'border-red-500 focus:ring-red-500' : undefined}
-             {...commonProps}
-           />
-         );
-       
-       default:
-         return (
-           <Input
-             type="text"
-             value={typeof value === 'object' ? JSON.stringify(value) : value || ''}
-             onChange={(e) => {
-               let newValue = e.target.value;
-               // Try to parse JSON for object fields
-               if (typeof record[field.name] === 'object' && newValue) {
-                 try {
-                   newValue = JSON.parse(newValue);
-                 } catch (error) {
-                   // Keep as string if parsing fails
-                 }
-               }
-               handleInputChange(field.name, newValue);
-             }}
-             placeholder={`Enter ${fieldConfig?.label || field.name}...`}
-             className={hasError ? 'border-red-500 focus:ring-red-500' : undefined}
-             {...commonProps}
-           />
-         );
+      case 'select':
+        return (
+          <select
+            value={value || ''}
+            onChange={(e) => handleInputChange(field.name, e.target.value)}
+            className={`flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${
+              hasError ? 'border-destructive focus:border-destructive' : ''
+            }`}
+            {...commonProps}
+          >
+            <option value="">Select {fieldConfig?.label || field.name}</option>
+            {fieldConfig?.options?.map((option) => (
+              <option key={option} value={option}>{option}</option>
+            ))}
+          </select>
+        );
+      
+      case 'textarea':
+        return (
+          <textarea
+            value={value || ''}
+            onChange={(e) => handleInputChange(field.name, e.target.value)}
+            className={`flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 resize-vertical ${
+              hasError ? 'border-destructive focus:border-destructive' : ''
+            }`}
+            placeholder={`Enter ${fieldConfig?.label || field.name}...`}
+            {...commonProps}
+          />
+        );
+     
+      case 'number':
+        return (
+          <Input
+            type="number"
+            value={value || ''}
+            onChange={(e) => handleInputChange(field.name, e.target.value ? Number(e.target.value) : '')}
+            placeholder={`Enter ${fieldConfig?.label || field.name}...`}
+            className={hasError ? 'border-destructive focus:border-destructive' : ''}
+            {...commonProps}
+          />
+        );
+      
+      case 'date':
+        return (
+          <Input
+            type="date"
+            value={value ? new Date(value).toISOString().split('T')[0] : ''}
+            onChange={(e) => handleInputChange(field.name, e.target.value)}
+            className={hasError ? 'border-destructive focus:border-destructive' : ''}
+            {...commonProps}
+          />
+        );
+      
+      case 'email':
+        return (
+          <Input
+            type="email"
+            value={value || ''}
+            onChange={(e) => handleInputChange(field.name, e.target.value)}
+            placeholder={`Enter ${fieldConfig?.label || field.name}...`}
+            className={hasError ? 'border-destructive focus:border-destructive' : ''}
+            {...commonProps}
+          />
+        );
+      
+      default:
+        return (
+          <Input
+            type="text"
+            value={typeof value === 'object' ? JSON.stringify(value) : value || ''}
+            onChange={(e) => {
+              let newValue = e.target.value;
+              // Try to parse JSON for object fields
+              if (typeof record[field.name] === 'object' && newValue) {
+                try {
+                  newValue = JSON.parse(newValue);
+                } catch (error) {
+                  // Keep as string if parsing fails
+                }
+              }
+              handleInputChange(field.name, newValue);
+            }}
+            placeholder={`Enter ${fieldConfig?.label || field.name}...`}
+            className={hasError ? 'border-destructive focus:border-destructive' : ''}
+            {...commonProps}
+          />
+        );
     }
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <Card className="w-full max-w-2xl max-h-[80vh] overflow-y-auto">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-lg">Edit {entity.name} Record</CardTitle>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onClose}
-              className="h-8 w-8 p-0"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"/>
-              </svg>
-            </Button>
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-h-[85vh] max-w-2xl overflow-hidden">
+        <DialogHeader>
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted">
+              <Edit className="h-5 w-5 text-muted-foreground" />
+            </div>
+            <div className="space-y-1">
+              <DialogTitle className="text-xl font-semibold">
+                Edit {entity.name}
+              </DialogTitle>
+              <p className="text-sm text-muted-foreground">
+                Record #{index + 1}
+              </p>
+            </div>
           </div>
-        </CardHeader>
+        </DialogHeader>
 
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Display general error */}
-            {errors._general && (
-              <div className="p-3 text-sm text-red-700 bg-red-100 border border-red-300 rounded">
-                {errors._general}
+        <div className="max-h-[60vh] overflow-y-auto px-1">
+          {/* Display general error */}
+          {errors._general && (
+            <div className="flex items-start gap-3 rounded-lg border border-destructive/10 bg-destructive/5 p-4 mb-6">
+              <AlertCircle className="h-5 w-5 text-destructive mt-0.5" />
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-destructive">Error</p>
+                <p className="text-sm text-destructive">{errors._general}</p>
               </div>
-            )}
+            </div>
+          )}
 
-            {/* Render form fields */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {editableFields.map(field => (
-                <div key={field.name} className="space-y-2">
+          {/* Render form fields */}
+          <div className="space-y-6">
+            {editableFields.map(field => (
+              <div key={field.name} className="space-y-3">
+                <div className="flex items-center justify-between">
                   <Label htmlFor={field.name} className="text-sm font-medium">
                     {config?.[field.name]?.label || field.name}
-                    {(field.required || config?.[field.name]?.required) && (
-                      <span className="text-red-500 ml-1">*</span>
-                    )}
                   </Label>
-                  {renderEditField(field)}
-                  {errors[field.name] && (
-                    <p className="text-sm text-red-600">{errors[field.name]}</p>
-                  )}
-                  {field.description && (
-                    <p className="text-xs text-gray-500">{field.description}</p>
-                  )}
-                </div>
-              ))}
-            </div>
-
-            {/* Action buttons */}
-            <div className="flex items-center justify-end space-x-3 pt-4 border-t">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={onClose}
-                disabled={loading}
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                disabled={loading}
-              >
-                {loading ? (
-                  <div className="flex items-center space-x-2">
-                    <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
-                    <span>Saving...</span>
+                  <div className="flex items-center gap-2">
+                    {(field.required || config?.[field.name]?.required) && (
+                      <Badge variant="destructive" className="h-6 text-xs">
+                        Required
+                      </Badge>
+                    )}
+                    <Badge variant="outline" className="h-6 text-xs">
+                      {config?.[field.name]?.type || field.type}
+                    </Badge>
                   </div>
-                ) : (
-                  "Save Changes"
+                </div>
+                {renderEditField(field)}
+                {errors[field.name] && (
+                  <div className="flex items-center gap-2 text-sm text-destructive">
+                    <AlertCircle className="h-4 w-4" />
+                    {errors[field.name]}
+                  </div>
                 )}
-              </Button>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
-    </div>
+                {field.description && (
+                  <p className="text-xs text-muted-foreground">{field.description}</p>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <DialogFooter className="gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onClose}
+            disabled={loading}
+          >
+            Cancel
+          </Button>
+          <Button
+            type="button"
+            onClick={handleSubmit}
+            disabled={loading}
+            className="min-w-[120px]"
+          >
+            {loading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              <>
+                <Save className="mr-2 h-4 w-4" />
+                Save Changes
+              </>
+            )}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }; 

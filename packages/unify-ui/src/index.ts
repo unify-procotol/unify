@@ -38,6 +38,18 @@ export {
   TableCell, 
   TableCaption 
 } from './components/ui/table';
+export {
+  Dialog,
+  DialogPortal,
+  DialogOverlay,
+  DialogClose,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogFooter,
+  DialogTitle,
+  DialogDescription,
+} from './components/ui/dialog';
 
 // Utilities
 export { 

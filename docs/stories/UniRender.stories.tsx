@@ -11,8 +11,7 @@ const userEntity: Entity = {
     { name: 'age', type: 'number' },
     { name: 'isActive', type: 'boolean' },
     { name: 'createdAt', type: 'date' },
-    { name: 'address', type: 'object' },
-    { name: 'tags', type: 'object' }
+    { name: 'address', type: 'object' }
   ]
 };
 
@@ -38,8 +37,7 @@ const userData = [
     age: 25,
     isActive: true,
     createdAt: '2024-01-15T10:30:00Z',
-    address: { city: 'New York', country: 'USA' },
-    tags: ['developer', 'frontend', 'react']
+    address: { city: 'New York', country: 'USA' }
   },
   {
     id: 2,
@@ -48,8 +46,7 @@ const userData = [
     age: 30,
     isActive: false,
     createdAt: '2024-01-10T09:15:00Z',
-    address: { city: 'London', country: 'UK' },
-    tags: ['designer', 'ui', 'ux']
+    address: { city: 'London', country: 'UK' }
   },
   {
     id: 3,
@@ -58,8 +55,7 @@ const userData = [
     age: 17,
     isActive: true,
     createdAt: '2024-01-20T14:45:00Z',
-    address: { city: 'Tokyo', country: 'Japan' },
-    tags: ['student', 'beginner']
+    address: { city: 'Tokyo', country: 'Japan' }
   }
 ];
 
@@ -93,46 +89,111 @@ const productData = [
   }
 ];
 
-// Custom field configurations
+// Field configuration with custom rendering and ordering
 const userFieldConfig: Record<string, FieldConfig> = {
   id: { 
     order: 1, 
     label: 'User ID', 
     width: '80px', 
-    align: 'center' 
+    align: 'center',
+    render: (value) => (
+      <span className="px-2 py-1 bg-blue-600/20 text-blue-400 rounded text-xs font-mono">
+        #{value}
+      </span>
+    )
   },
   name: { 
     order: 2, 
     label: 'Full Name', 
-    width: '200px' 
+    width: '200px',
+    render: (value) => (
+      <span className="font-semibold text-gray-200">{value}</span>
+    )
   },
   email: { 
     order: 3, 
-    label: 'Email Address' 
+    label: 'Email Address',
+    render: (value) => (
+      <a href={`mailto:${value}`} className="text-blue-400 hover:underline">
+        {value}
+      </a>
+    )
   },
   age: { 
     order: 4, 
     label: 'Age', 
-    align: 'center' 
+    align: 'center',
+    render: (value) => (
+      <span className={`px-2 py-1 rounded text-xs font-semibold ${
+        value >= 18 
+          ? 'bg-green-600/20 text-green-400' 
+          : 'bg-yellow-600/20 text-yellow-400'
+      }`}>
+        {value} {value >= 18 ? '(Adult)' : '(Minor)'}
+      </span>
+    )
   },
   isActive: { 
     order: 5, 
     label: 'Status', 
-    align: 'center' 
+    align: 'center',
+    render: (value) => (
+      <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+        value 
+          ? 'bg-green-600/20 text-green-400' 
+          : 'bg-red-600/20 text-red-400'
+      }`}>
+        {value ? '● Active' : '● Inactive'}
+      </span>
+    )
+  },
+  createdAt: { 
+    order: 6, 
+    label: 'Created Date',
+    render: (value) => (
+      <div className="text-xs">
+        <div className="text-cyan-400 font-mono">
+          {new Date(value).toLocaleDateString()}
+        </div>
+        <div className="text-gray-500">
+          {new Date(value).toLocaleTimeString()}
+        </div>
+      </div>
+    )
+  },
+  address: { 
+    order: 7, 
+    label: 'Location',
+    render: (value) => (
+      <div className="text-xs">
+        <div className="text-gray-300">{value.city}</div>
+        <div className="text-gray-500">{value.country}</div>
+      </div>
+    )
   }
 };
 
 const meta: Meta<typeof UniRender> = {
   title: 'Components/UniRender',
   component: UniRender,
+  tags: ['autodocs'],
   parameters: {
-    layout: 'fullscreen',
+    layout: 'padded', // 改为 padded 以添加边距
     docs: {
       description: {
         component: 'Universal data rendering component with multiple layout options'
       }
     }
   },
+  decorators: [
+    (Story) => (
+      <div className="p-6 min-h-screen bg-gray-50 dark:bg-gray-900">
+        <div className="max-w-7xl mx-auto">
+          <Story />
+        </div>
+      </div>
+    )
+  ],
   argTypes: {
     layout: {
       control: 'select',
@@ -160,6 +221,13 @@ export const TableLayout: Story = {
     data: userData,
     layout: 'table',
     config: userFieldConfig
+  },
+  parameters: {
+    docs: {
+      canvas: {
+        sourceState: 'shown'
+      }
+    }
   }
 };
 
@@ -170,6 +238,13 @@ export const CardLayout: Story = {
     data: userData,
     layout: 'card',
     config: userFieldConfig
+  },
+  parameters: {
+    docs: {
+      canvas: {
+        sourceState: 'shown'
+      }
+    }
   }
 };
 
@@ -180,6 +255,13 @@ export const GridLayout: Story = {
     data: userData,
     layout: 'grid',
     config: userFieldConfig
+  },
+  parameters: {
+    docs: {
+      canvas: {
+        sourceState: 'shown'
+      }
+    }
   }
 };
 
@@ -190,6 +272,13 @@ export const ListLayout: Story = {
     data: userData,
     layout: 'list',
     config: userFieldConfig
+  },
+  parameters: {
+    docs: {
+      canvas: {
+        sourceState: 'shown'
+      }
+    }
   }
 };
 
@@ -200,6 +289,13 @@ export const FormLayout: Story = {
     data: userData,
     layout: 'form',
     config: userFieldConfig
+  },
+  parameters: {
+    docs: {
+      canvas: {
+        sourceState: 'shown'
+      }
+    }
   }
 };
 
@@ -210,6 +306,13 @@ export const DashboardLayout: Story = {
     data: userData,
     layout: 'dashboard',
     config: userFieldConfig
+  },
+  parameters: {
+    docs: {
+      canvas: {
+        sourceState: 'shown'
+      }
+    }
   }
 };
 
@@ -219,6 +322,13 @@ export const ProductTable: Story = {
     entity: productEntity,
     data: productData,
     layout: 'table'
+  },
+  parameters: {
+    docs: {
+      canvas: {
+        sourceState: 'shown'
+      }
+    }
   }
 };
 
@@ -227,6 +337,13 @@ export const ProductCards: Story = {
     entity: productEntity,
     data: productData,
     layout: 'card'
+  },
+  parameters: {
+    docs: {
+      canvas: {
+        sourceState: 'shown'
+      }
+    }
   }
 };
 
@@ -237,6 +354,13 @@ export const LoadingState: Story = {
     data: [],
     layout: 'table',
     loading: true
+  },
+  parameters: {
+    docs: {
+      canvas: {
+        sourceState: 'shown'
+      }
+    }
   }
 };
 
@@ -247,6 +371,13 @@ export const ErrorState: Story = {
     data: [],
     layout: 'table',
     error: 'Failed to load data from server'
+  },
+  parameters: {
+    docs: {
+      canvas: {
+        sourceState: 'shown'
+      }
+    }
   }
 };
 
@@ -256,6 +387,13 @@ export const EmptyState: Story = {
     entity: userEntity,
     data: [],
     layout: 'table'
+  },
+  parameters: {
+    docs: {
+      canvas: {
+        sourceState: 'shown'
+      }
+    }
   }
 };
 
@@ -278,6 +416,13 @@ export const EditableTable: Story = {
     },
     onDelete: (record: any, index: number) => {
       console.log('Delete:', record, index);
+    }
+  },
+  parameters: {
+    docs: {
+      canvas: {
+        sourceState: 'shown'
+      }
     }
   }
 }; 

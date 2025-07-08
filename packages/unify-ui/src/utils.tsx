@@ -1,4 +1,6 @@
 import { ReactNode } from "react";
+import { type ClassValue, clsx } from "clsx";
+import { twMerge } from "tailwind-merge";
 import { Entity, EntityField, FieldConfig } from "./types";
 
 /**
@@ -95,13 +97,13 @@ export const renderFieldValue = (
 };
 
 /**
- * Utility function to combine class names
- * @param classes - Array of class names or conditional classes
- * @returns Combined class string
+ * Utility function to combine class names with Tailwind CSS conflict resolution
+ * @param inputs - Array of class names or conditional classes
+ * @returns Combined class string with proper Tailwind conflict resolution
  */
-export const cn = (...classes: (string | undefined | null | false)[]): string => {
-  return classes.filter(Boolean).join(' ');
-};
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
 
 /**
  * Generate a unique key for a record

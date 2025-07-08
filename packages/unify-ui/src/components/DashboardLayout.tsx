@@ -3,6 +3,18 @@ import { LayoutProps } from "../types";
 import { getSortedFields } from "../utils";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Badge } from "./ui/badge";
+import { 
+  Database, 
+  Hash, 
+  Activity, 
+  TrendingUp, 
+  CheckCircle2, 
+  XCircle, 
+  BarChart3, 
+  PieChart,
+  FileText,
+  Target
+} from "lucide-react";
 
 /**
  * Dashboard layout component for displaying data analytics and statistics
@@ -64,72 +76,80 @@ export const DashboardLayout: React.FC<LayoutProps> = ({
     return acc;
   }, {} as Record<string, any>);
 
+  const dataCompleteness = totalRecords > 0 ? 
+    Math.round((Object.values(stats).reduce((sum: number, stat: any) => sum + stat.totalCount || stat.count || 0, 0) / (sortedFields.length * totalRecords)) * 100) : 0;
+
   /**
    * Render overview statistics cards
    */
   const renderOverviewCards = () => (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-      <Card>
+    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+      <Card className="transition-shadow duration-200 hover:shadow-lg">
         <CardContent className="p-6">
-          <div className="flex items-center">
-            <div className="p-2 bg-blue-500 rounded-lg">
-              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
-              </svg>
+          <div className="flex items-center space-x-4">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-muted">
+              <Database className="h-6 w-6 text-muted-foreground" />
             </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Total Records</p>
-              <p className="text-2xl font-bold text-gray-900">{totalRecords.toLocaleString()}</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardContent className="p-6">
-          <div className="flex items-center">
-            <div className="p-2 bg-green-500 rounded-lg">
-              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
-              </svg>
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Fields</p>
-              <p className="text-2xl font-bold text-gray-900">{sortedFields.length}</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardContent className="p-6">
-          <div className="flex items-center">
-            <div className="p-2 bg-purple-500 rounded-lg">
-              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-              </svg>
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Entity</p>
-              <p className="text-lg font-bold text-gray-900 truncate">{entity.name}</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardContent className="p-6">
-          <div className="flex items-center">
-            <div className="p-2 bg-orange-500 rounded-lg">
-              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-              </svg>
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Data Completeness</p>
-              <p className="text-2xl font-bold text-gray-900">
-                {totalRecords > 0 ? Math.round((Object.values(stats).reduce((sum: number, stat: any) => sum + stat.totalCount || stat.count || 0, 0) / (sortedFields.length * totalRecords)) * 100) : 0}%
+            <div className="flex-1 space-y-1">
+              <p className="text-sm font-medium text-muted-foreground">Total Records</p>
+              <p className="text-2xl font-bold">{totalRecords.toLocaleString()}</p>
+              <p className="text-xs text-muted-foreground">
+                {totalRecords > 0 ? 'Records available' : 'No records found'}
               </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="transition-shadow duration-200 hover:shadow-lg">
+        <CardContent className="p-6">
+          <div className="flex items-center space-x-4">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-muted">
+              <Hash className="h-6 w-6 text-muted-foreground" />
+            </div>
+            <div className="flex-1 space-y-1">
+              <p className="text-sm font-medium text-muted-foreground">Fields</p>
+              <p className="text-2xl font-bold">{sortedFields.length}</p>
+              <p className="text-xs text-muted-foreground">
+                Defined schema fields
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="transition-shadow duration-200 hover:shadow-lg">
+        <CardContent className="p-6">
+          <div className="flex items-center space-x-4">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-muted">
+              <FileText className="h-6 w-6 text-muted-foreground" />
+            </div>
+            <div className="flex-1 space-y-1">
+              <p className="text-sm font-medium text-muted-foreground">Entity Type</p>
+              <p className="text-lg font-bold truncate">{entity.name}</p>
+              <p className="text-xs text-muted-foreground">
+                Data entity
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="transition-shadow duration-200 hover:shadow-lg">
+        <CardContent className="p-6">
+          <div className="flex items-center space-x-4">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-muted">
+              <Activity className="h-6 w-6 text-muted-foreground" />
+            </div>
+            <div className="flex-1 space-y-1">
+              <p className="text-sm font-medium text-muted-foreground">Completeness</p>
+              <p className="text-2xl font-bold">{dataCompleteness}%</p>
+              <div className="w-full bg-muted rounded-full h-2 mt-2">
+                <div 
+                  className="bg-primary h-2 rounded-full transition-all duration-300" 
+                  style={{ width: `${dataCompleteness}%` }}
+                />
+              </div>
             </div>
           </div>
         </CardContent>
@@ -141,107 +161,142 @@ export const DashboardLayout: React.FC<LayoutProps> = ({
    * Render field statistics
    */
   const renderFieldStatistics = () => (
-    <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+    <div className="grid gap-6 lg:grid-cols-2 xl:grid-cols-3">
       {Object.entries(stats).map(([fieldName, stat]) => (
-        <Card key={fieldName} className="hover:shadow-lg transition-shadow">
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center justify-between">
-              <span>{stat.label}</span>
+        <Card key={fieldName} className="transition-shadow duration-200 hover:shadow-lg">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-lg font-semibold flex items-center gap-2">
+                {stat.type === 'number' && <BarChart3 className="h-5 w-5 text-muted-foreground" />}
+                {stat.type === 'boolean' && <Target className="h-5 w-5 text-muted-foreground" />}
+                {stat.type === 'string' && <PieChart className="h-5 w-5 text-muted-foreground" />}
+                <span className="truncate">{stat.label}</span>
+              </CardTitle>
               <Badge variant="outline" className="text-xs">
                 {stat.type}
               </Badge>
-            </CardTitle>
+            </div>
           </CardHeader>
           <CardContent>
             {stat.type === 'number' && (
-              <div className="space-y-3">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="text-center p-3 bg-blue-50 rounded-lg">
-                    <div className="text-2xl font-bold text-blue-600">{stat.total.toLocaleString()}</div>
-                    <div className="text-xs text-blue-500">Total</div>
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="text-center p-4 bg-muted rounded-lg border">
+                    <div className="text-2xl font-bold text-foreground">
+                      {stat.total.toLocaleString()}
+                    </div>
+                    <div className="text-xs text-muted-foreground">Total</div>
                   </div>
-                  <div className="text-center p-3 bg-green-50 rounded-lg">
-                    <div className="text-2xl font-bold text-green-600">{stat.average.toFixed(2)}</div>
-                    <div className="text-xs text-green-500">Average</div>
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="flex justify-between items-center py-2">
-                    <span className="text-sm text-gray-600">Min</span>
-                    <span className="font-semibold text-gray-900">{stat.min.toLocaleString()}</span>
-                  </div>
-                  <div className="flex justify-between items-center py-2">
-                    <span className="text-sm text-gray-600">Max</span>
-                    <span className="font-semibold text-gray-900">{stat.max.toLocaleString()}</span>
+                  <div className="text-center p-4 bg-muted rounded-lg border">
+                    <div className="text-2xl font-bold text-foreground">
+                      {stat.average.toFixed(2)}
+                    </div>
+                    <div className="text-xs text-muted-foreground">Average</div>
                   </div>
                 </div>
-                <div className="flex justify-between items-center py-2 border-t">
-                  <span className="text-sm text-gray-600">Count</span>
-                  <span className="font-semibold text-purple-600">{stat.count}</span>
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center py-2 px-3 bg-muted rounded-lg">
+                    <span className="text-sm font-medium">Min</span>
+                    <span className="font-bold">{stat.min.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between items-center py-2 px-3 bg-muted rounded-lg">
+                    <span className="text-sm font-medium">Max</span>
+                    <span className="font-bold">{stat.max.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between items-center py-2 px-3 bg-muted rounded-lg">
+                    <span className="text-sm font-medium">Count</span>
+                    <Badge variant="secondary">{stat.count}</Badge>
+                  </div>
                 </div>
               </div>
             )}
             
             {stat.type === 'boolean' && (
-              <div className="space-y-3">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="text-center p-3 bg-green-50 rounded-lg">
-                    <div className="text-2xl font-bold text-green-600">{stat.trueCount}</div>
-                    <div className="text-xs text-green-500">True</div>
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="text-center p-4 bg-muted rounded-lg border">
+                    <div className="flex items-center justify-center gap-2 mb-2">
+                      <CheckCircle2 className="h-5 w-5 text-muted-foreground" />
+                      <div className="text-2xl font-bold text-foreground">
+                        {stat.trueCount}
+                      </div>
+                    </div>
+                    <div className="text-xs text-muted-foreground">True</div>
                   </div>
-                  <div className="text-center p-3 bg-red-50 rounded-lg">
-                    <div className="text-2xl font-bold text-red-600">{stat.falseCount}</div>
-                    <div className="text-xs text-red-500">False</div>
+                  <div className="text-center p-4 bg-muted rounded-lg border">
+                    <div className="flex items-center justify-center gap-2 mb-2">
+                      <XCircle className="h-5 w-5 text-muted-foreground" />
+                      <div className="text-2xl font-bold text-foreground">
+                        {stat.falseCount}
+                      </div>
+                    </div>
+                    <div className="text-xs text-muted-foreground">False</div>
                   </div>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div 
-                    className="bg-green-500 h-2 rounded-full transition-all duration-300" 
-                    style={{ width: `${stat.percentage}%` }}
-                  ></div>
-                </div>
-                <div className="text-center">
-                  <span className="text-lg font-bold text-blue-600">{stat.percentage}%</span>
-                  <span className="text-sm text-gray-500 ml-1">true values</span>
+                <div className="space-y-2">
+                  <div className="w-full bg-muted rounded-full h-3">
+                    <div 
+                      className="bg-primary h-3 rounded-full transition-all duration-300" 
+                      style={{ width: `${stat.percentage}%` }}
+                    />
+                  </div>
+                  <div className="text-center">
+                    <span className="text-xl font-bold text-foreground">
+                      {stat.percentage}%
+                    </span>
+                    <span className="text-sm text-muted-foreground ml-2">true values</span>
+                  </div>
                 </div>
               </div>
             )}
             
             {stat.type === 'string' && (
-              <div className="space-y-3">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="text-center p-3 bg-cyan-50 rounded-lg">
-                    <div className="text-2xl font-bold text-cyan-600">{stat.uniqueCount}</div>
-                    <div className="text-xs text-cyan-500">Unique</div>
-                  </div>
-                  <div className="text-center p-3 bg-orange-50 rounded-lg">
-                    <div className="text-2xl font-bold text-orange-600">{stat.totalCount}</div>
-                    <div className="text-xs text-orange-500">Total</div>
-                  </div>
-                </div>
-                
-                <div className="flex justify-between items-center py-2">
-                  <span className="text-sm text-gray-600">Diversity</span>
-                  <span className="font-semibold text-purple-600">{(stat.diversity * 100).toFixed(1)}%</span>
-                </div>
-                
-                {stat.topValues.length > 0 && (
-                  <div className="border-t pt-3">
-                    <div className="text-xs text-gray-500 mb-2">Top Values:</div>
-                    <div className="space-y-1">
-                      {stat.topValues.map(([value, count]: [string, number], index: number) => (
-                        <div key={value} className="flex justify-between items-center text-xs">
-                          <span className="text-gray-700 truncate max-w-24" title={value}>
-                            {index + 1}. {value}
-                          </span>
-                          <Badge variant="secondary" className="text-xs">
-                            {count}
-                          </Badge>
-                        </div>
-                      ))}
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="text-center p-4 bg-muted rounded-lg border">
+                    <div className="text-2xl font-bold text-foreground">
+                      {stat.uniqueCount}
                     </div>
+                    <div className="text-xs text-muted-foreground">Unique</div>
                   </div>
-                )}
+                  <div className="text-center p-4 bg-muted rounded-lg border">
+                    <div className="text-2xl font-bold text-foreground">
+                      {stat.totalCount}
+                    </div>
+                    <div className="text-xs text-muted-foreground">Total</div>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center py-2 px-3 bg-muted rounded-lg">
+                    <span className="text-sm font-medium">Diversity</span>
+                    <Badge variant="secondary">{(stat.diversity * 100).toFixed(1)}%</Badge>
+                  </div>
+                  
+                  {stat.topValues.length > 0 && (
+                    <div className="border-t pt-3">
+                      <div className="text-sm font-medium mb-2 flex items-center gap-2">
+                        <TrendingUp className="h-4 w-4" />
+                        Top Values
+                      </div>
+                      <div className="space-y-2">
+                        {stat.topValues.map(([value, count]: [string, number], index: number) => (
+                          <div key={value} className="flex justify-between items-center py-1 px-2 bg-muted rounded">
+                            <span className="text-sm text-foreground truncate flex-1" title={value}>
+                              <span className="font-medium text-muted-foreground mr-2">
+                                {index + 1}.
+                              </span>
+                              {value}
+                            </span>
+                            <Badge variant="outline" className="text-xs ml-2">
+                              {count}
+                            </Badge>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
           </CardContent>
@@ -251,20 +306,43 @@ export const DashboardLayout: React.FC<LayoutProps> = ({
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Page header */}
-      <div className="border-b border-gray-200 pb-4">
-        <h1 className="text-2xl font-bold text-gray-900">{entity.name} Dashboard</h1>
-        <p className="text-sm text-gray-600 mt-1">
-          Analytics and insights for your {entity.name.toLowerCase()} data
-        </p>
+      <div className="border-b pb-6">
+        <div className="flex items-center gap-3 mb-2">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted">
+            <BarChart3 className="h-6 w-6 text-muted-foreground" />
+          </div>
+          <div className="space-y-1">
+            <h1 className="text-3xl font-bold tracking-tight">{entity.name} Dashboard</h1>
+            <p className="text-muted-foreground">
+              Analytics and insights for your {entity.name.toLowerCase()} data
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* Overview cards */}
       {renderOverviewCards()}
 
       {/* Field statistics */}
-      {renderFieldStatistics()}
+      <div className="space-y-6">
+        <h2 className="text-xl font-semibold">Field Statistics</h2>
+        {renderFieldStatistics()}
+      </div>
+
+      {/* Empty state */}
+      {totalRecords === 0 && (
+        <div className="flex flex-col items-center justify-center py-12">
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted mb-4">
+            <Database className="h-8 w-8 text-muted-foreground" />
+          </div>
+          <h3 className="text-lg font-semibold">No data available</h3>
+          <p className="text-sm text-muted-foreground mt-1">
+            Add some {entity.name.toLowerCase()} records to see analytics and insights.
+          </p>
+        </div>
+      )}
     </div>
   );
 }; 
