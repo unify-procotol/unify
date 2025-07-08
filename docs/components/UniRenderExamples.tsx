@@ -2,12 +2,37 @@
 
 import { UniRender } from "@unilab/unify-ui";
 import type { UniRenderProps } from "@unilab/unify-ui";
+import { useState } from "react";
 
 interface ExampleProps {
-  type: 'basic' | 'card' | 'form' | 'loading' | 'error' | 'empty';
+  type: 'basic' | 'table-editable' | 'card' | 'form' | 'loading' | 'error' | 'empty';
 }
 
 export function UniRenderExample({ type }: ExampleProps) {
+  // State for editable table example
+  const [tableData, setTableData] = useState([
+    { id: 1, name: 'John Doe', email: 'john@example.com', role: 'Admin', isActive: true },
+    { id: 2, name: 'Jane Smith', email: 'jane@example.com', role: 'User', isActive: true },
+    { id: 3, name: 'Bob Johnson', email: 'bob@example.com', role: 'User', isActive: false }
+  ]);
+
+  const handleEdit = async (updatedRecord: any, index: number) => {
+    const newData = [...tableData];
+    newData[index] = updatedRecord;
+    setTableData(newData);
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 500));
+    console.log('Updated record:', updatedRecord);
+  };
+
+  const handleDelete = async (record: any, index: number) => {
+    const newData = tableData.filter((_, i) => i !== index);
+    setTableData(newData);
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 500));
+    console.log('Deleted record:', record);
+  };
+
   const examples = {
     basic: {
       entity: {
@@ -49,6 +74,63 @@ export function UniRenderExample({ type }: ExampleProps) {
           delete: true
         }
       }
+    },
+    'table-editable': {
+      entity: {
+        name: 'User',
+        fields: [
+          { name: 'id', type: 'number', required: true },
+          { name: 'name', type: 'string', required: true },
+          { name: 'email', type: 'string', required: true },
+          { name: 'role', type: 'string' },
+          { name: 'isActive', type: 'boolean' }
+        ]
+      },
+      data: tableData,
+      layout: 'table' as const,
+      config: {
+        id: { label: 'ID', width: '60px', editable: false },
+        name: { 
+          label: 'Full Name', 
+          editable: true,
+          required: true,
+          type: 'text'
+        },
+        email: { 
+          label: 'Email Address', 
+          editable: true,
+          required: true,
+          type: 'email'
+        },
+        role: { 
+          label: 'Role',
+          editable: true,
+          type: 'select',
+          options: ['Admin', 'User', 'Manager']
+        },
+        isActive: { 
+          label: 'Status',
+          editable: true,
+          type: 'checkbox',
+          render: (value: boolean) => (
+            <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+              value ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+            }`}>
+              {value ? 'Active' : 'Inactive'}
+            </span>
+          )
+        }
+      },
+      generalConfig: {
+        editable: true,
+        showActions: true,
+        actions: {
+          edit: true,
+          delete: true
+        }
+      },
+      onEdit: handleEdit,
+      onDelete: handleDelete
     },
     card: {
       entity: {

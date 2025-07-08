@@ -39,16 +39,7 @@ import { UniRender } from '@unilab/unify-ui';
     name: { label: 'Full Name' },
     email: { label: 'Email Address' },
     role: { label: 'Role' },
-    isActive: { 
-      label: 'Status',
-      render: (value) => (
-        <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-          value ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-        }`}>
-          {value ? 'Active' : 'Inactive'}
-        </span>
-      )
-    }
+    isActive: { label: 'Status' }
   }}
   generalConfig={{
     showActions: true,
@@ -86,158 +77,43 @@ import { UniRender } from '@unilab/unify-ui';
 | `onSave` | `(record: any, index: number) => void` | `undefined` | Save record callback |
 | `className` | `string` | `""` | Additional CSS classes |
 
-## 🎨 Different Layouts
+## 🎨 Available Layouts
 
-### Card Layout
+UniRender supports multiple layout types to display your data in different ways:
 
-<Tabs items={['Preview', 'Code']}>
-<Tab value="Preview">
-<UniRenderExample type="card" />
-</Tab>
-<Tab value="Code">
-```tsx
-<UniRender
-  entity={{
-    name: 'Product',
-    fields: [
-      { name: 'id', type: 'number', required: true },
-      { name: 'name', type: 'string', required: true },
-      { name: 'price', type: 'number', required: true },
-      { name: 'category', type: 'string' },
-      { name: 'inStock', type: 'boolean' },
-      { name: 'description', type: 'string' }
-    ]
-  }}
-  data={[
-    { 
-      id: 1, 
-      name: 'Wireless Headphones', 
-      price: 199.99, 
-      category: 'Electronics', 
-      inStock: true, 
-      description: 'High-quality wireless headphones with noise cancellation' 
-    },
-    { 
-      id: 2, 
-      name: 'Smart Watch', 
-      price: 299.99, 
-      category: 'Electronics', 
-      inStock: false, 
-      description: 'Feature-rich smartwatch with health tracking' 
-    },
-    { 
-      id: 3, 
-      name: 'Coffee Maker', 
-      price: 149.99, 
-      category: 'Home', 
-      inStock: true, 
-      description: 'Programmable coffee maker with thermal carafe' 
-    }
-  ]}
-  layout="card"
-  config={{
-    price: { 
-      label: 'Price',
-      render: (value) => (
-        <span className="text-lg font-bold text-green-600">
-          ${value.toFixed(2)}
-        </span>
-      )
-    },
-    inStock: { 
-      label: 'Stock Status',
-      render: (value) => (
-        <span className={`px-2 py-1 rounded text-xs font-semibold ${
-          value ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-        }`}>
-          {value ? 'In Stock' : 'Out of Stock'}
-        </span>
-      )
-    },
-    category: {
-      label: 'Category',
-      render: (value) => (
-        <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">
-          {value}
-        </span>
-      )
-    }
-  }}
-/>
-```
-</Tab>
-</Tabs>
+<div className="grid grid-cols-1 md:grid-cols-3 gap-6 my-8">
+  <div className="border rounded-lg p-6 hover:shadow-lg transition-shadow">
+    <h3 className="text-lg font-semibold mb-2">📋 Table Layout</h3>
+    <p className="text-gray-600 mb-4">Traditional spreadsheet-like view with sorting, filtering, and inline editing capabilities.</p>
+    <a href="/docs/unify-ui/components/layouts/table" className="text-blue-600 hover:text-blue-800 font-medium">
+      View Table Layout →
+    </a>
+  </div>
+  
+  <div className="border rounded-lg p-6 hover:shadow-lg transition-shadow">
+    <h3 className="text-lg font-semibold mb-2">🃏 Card Layout</h3>
+    <p className="text-gray-600 mb-4">Visual card-based display perfect for product catalogs and portfolios.</p>
+    <a href="/docs/unify-ui/components/layouts/card" className="text-blue-600 hover:text-blue-800 font-medium">
+      View Card Layout →
+    </a>
+  </div>
+  
+  <div className="border rounded-lg p-6 hover:shadow-lg transition-shadow">
+    <h3 className="text-lg font-semibold mb-2">📝 Form Layout</h3>
+    <p className="text-gray-600 mb-4">Detailed form view for single records with easy navigation between items.</p>
+    <a href="/docs/unify-ui/components/layouts/form" className="text-blue-600 hover:text-blue-800 font-medium">
+      View Form Layout →
+    </a>
+  </div>
+</div>
 
-### Form Layout
+### Quick Layout Comparison
 
-<Tabs items={['Preview', 'Code']}>
-<Tab value="Preview">
-<UniRenderExample type="form" />
-</Tab>
-<Tab value="Code">
-```tsx
-<UniRender
-  entity={{
-    name: 'User Profile',
-    fields: [
-      { name: 'id', type: 'number', required: true },
-      { name: 'firstName', type: 'string', required: true },
-      { name: 'lastName', type: 'string', required: true },
-      { name: 'email', type: 'string', required: true },
-      { name: 'phone', type: 'string' },
-      { name: 'department', type: 'string' },
-      { name: 'joinDate', type: 'date' },
-      { name: 'isManager', type: 'boolean' }
-    ]
-  }}
-  data={[
-    { 
-      id: 1, 
-      firstName: 'Alice', 
-      lastName: 'Johnson', 
-      email: 'alice.johnson@company.com', 
-      phone: '+1-555-0123',
-      department: 'Engineering',
-      joinDate: '2023-01-15',
-      isManager: true
-    },
-    { 
-      id: 2, 
-      firstName: 'Bob', 
-      lastName: 'Smith', 
-      email: 'bob.smith@company.com', 
-      phone: '+1-555-0124',
-      department: 'Marketing',
-      joinDate: '2023-03-20',
-      isManager: false
-    }
-  ]}
-  layout="form"
-  config={{
-    firstName: { label: 'First Name' },
-    lastName: { label: 'Last Name' },
-    email: { label: 'Email Address' },
-    phone: { label: 'Phone Number' },
-    department: { label: 'Department' },
-    joinDate: { 
-      label: 'Join Date',
-      render: (value) => new Date(value).toLocaleDateString()
-    },
-    isManager: { 
-      label: 'Management Role',
-      render: (value) => (
-        <span className={`px-2 py-1 rounded text-xs font-semibold ${
-          value ? 'bg-purple-100 text-purple-800' : 'bg-gray-100 text-gray-800'
-        }`}>
-          {value ? 'Manager' : 'Team Member'}
-        </span>
-      )
-    }
-  }}
-/>
-```
-</Tab>
-</Tabs>
+| Layout | Best For | Features |
+|--------|----------|----------|
+| **Table** | Data analysis, bulk operations | Sorting, filtering, inline editing |
+| **Card** | Visual browsing, product catalogs | Responsive grid, image support |
+| **Form** | Detailed editing, single records | Navigation controls, field validation |
 
 ## 🏗️ Entity Schema
 
@@ -297,128 +173,56 @@ interface FieldConfig {
 
 ### Advanced Field Configuration
 
-<Tabs items={['Custom Rendering', 'Status Badges', 'Interactive Elements', 'Formatting']}>
-<Tab value="Custom Rendering">
 ```tsx
 const fieldConfig = {
-  avatar: {
-    label: 'Profile',
-    render: (value, record) => (
-      <div className="flex items-center gap-2">
-        <img 
-          src={value || '/default-avatar.png'} 
-          alt={record.name}
-          className="w-8 h-8 rounded-full"
-        />
-        <span className="font-medium">{record.name}</span>
-      </div>
-    )
+  // Basic field configuration
+  id: { 
+    label: 'ID', 
+    width: '60px',
+    align: 'center'
   },
-  email: {
-    label: 'Contact',
-    render: (value) => (
-      <a 
-        href={`mailto:${value}`}
-        className="text-blue-600 hover:underline"
-      >
-        {value}
-      </a>
-    )
-  }
-};
-```
-</Tab>
-<Tab value="Status Badges">
-```tsx
-const fieldConfig = {
-  status: {
-    render: (value) => (
-      <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-        value === 'active' 
-          ? 'bg-green-100 text-green-800' 
-          : 'bg-red-100 text-red-800'
-      }`}>
-        {value}
-      </span>
-    )
+  name: { 
+    label: 'Full Name',
+    required: true
   },
-  priority: {
-    render: (value) => {
-      const colors = {
-        high: 'bg-red-100 text-red-800',
-        medium: 'bg-yellow-100 text-yellow-800',
-        low: 'bg-green-100 text-green-800'
-      };
-      return (
-        <span className={`px-2 py-1 rounded ${colors[value]}`}>
-          {value.toUpperCase()}
-        </span>
-      );
-    }
-  }
-};
-```
-</Tab>
-<Tab value="Interactive Elements">
-```tsx
-const fieldConfig = {
-  actions: {
-    label: 'Actions',
-    render: (value, record, index) => (
-      <div className="flex gap-2">
-        <button 
-          onClick={() => handleView(record)}
-          className="text-blue-600 hover:text-blue-800"
-        >
-          View
-        </button>
-        <button 
-          onClick={() => handleEdit(record)}
-          className="text-green-600 hover:text-green-800"
-        >
-          Edit
-        </button>
-        <button 
-          onClick={() => handleDelete(record)}
-          className="text-red-600 hover:text-red-800"
-        >
-          Delete
-        </button>
-      </div>
-    )
-  }
-};
-```
-</Tab>
-<Tab value="Formatting">
-```tsx
-const fieldConfig = {
-  createdAt: {
-    label: 'Created',
-    render: (value) => (
-      <div className="text-sm">
-        <div className="font-medium">
-          {new Date(value).toLocaleDateString()}
-        </div>
-        <div className="text-gray-500">
-          {new Date(value).toLocaleTimeString()}
-        </div>
-      </div>
-    )
+  email: { 
+    label: 'Email Address',
+    type: 'email'
   },
-  price: {
+  price: { 
     label: 'Price',
-    align: 'right',
-    render: (value) => (
-      <span className="font-mono font-semibold">
-        ${value.toFixed(2)}
-      </span>
-    )
+    type: 'number',
+    align: 'right'
+  },
+  status: {
+    label: 'Status',
+    type: 'select',
+    options: ['active', 'inactive', 'pending']
+  },
+  description: {
+    label: 'Description',
+    type: 'textarea'
+  },
+  isActive: {
+    label: 'Active',
+    type: 'checkbox'
+  },
+  createdAt: {
+    label: 'Created Date',
+    type: 'date'
+  },
+  // Hidden fields
+  internalId: {
+    label: 'Internal ID',
+    hidden: true
+  },
+  // Custom ordering
+  priority: {
+    label: 'Priority',
+    order: 1
   }
 };
 ```
-</Tab>
-</Tabs>
 
 ## 🎛️ General Configuration
 
@@ -529,32 +333,21 @@ Handle loading, error, and empty states:
 </Tab>
 <Tab value="Code">
 ```tsx
-const [loading, setLoading] = useState(true);
-const [data, setData] = useState([]);
-const [error, setError] = useState(null);
-
-useEffect(() => {
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-      const response = await api.getUsers();
-      setData(response.data);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  fetchData();
-}, []);
-
+// Loading state example
 <UniRender
-  entity={userEntity}
-  data={data}
+  entity={{
+    name: 'Posts',
+    fields: [
+      { name: 'id', type: 'number', required: true },
+      { name: 'title', type: 'string', required: true },
+      { name: 'content', type: 'string' },
+      { name: 'author', type: 'string' },
+      { name: 'publishedAt', type: 'date' }
+    ]
+  }}
+  data={[]}
   layout="table"
-  loading={loading}
-  error={error}
+  loading={true}
 />
 ```
 </Tab>
@@ -568,6 +361,7 @@ useEffect(() => {
 </Tab>
 <Tab value="Code">
 ```tsx
+// Error state example
 <UniRender
   entity={{
     name: 'Orders',
@@ -596,6 +390,7 @@ useEffect(() => {
 </Tab>
 <Tab value="Code">
 ```tsx
+// Empty state example
 <UniRender
   entity={{
     name: 'Messages',
@@ -672,7 +467,7 @@ Override default styles using CSS variables:
 ## 🚀 Performance Tips
 
 **Optimization Best Practices**:
-- Use `React.memo` for custom render functions
+- Use simple field configurations when possible
 - Implement pagination for large datasets
 - Use virtual scrolling for 1000+ items
 - Debounce search and filter operations
@@ -738,34 +533,37 @@ const bulkActions = [
 />
 ```
 
-### Conditional Rendering
+### Conditional Configuration
 
 ```tsx
 const fieldConfig = {
+  // Show/hide fields based on user permissions
   adminActions: {
     label: 'Admin Actions',
-    render: (value, record) => {
-      if (!user.isAdmin) return null;
-      
-      return (
-        <div className="flex gap-2">
-          <button onClick={() => promoteUser(record)}>
-            Promote
-          </button>
-          <button onClick={() => suspendUser(record)}>
-            Suspend
-          </button>
-        </div>
-      );
-    }
+    hidden: !user.isAdmin
+  },
+  // Different configurations for different users
+  sensitive: {
+    label: 'Sensitive Data',
+    hidden: !user.hasPermission('view_sensitive')
   }
 };
 ```
 
 ## 🌟 Next Steps
 
-- [Layout System](/docs/unify-ui/components/layouts) - Explore all available layouts
-- [Examples](/docs/unify-ui/examples) - See real-world implementations
+### Explore Layouts
+- [Table Layout](/docs/unify-ui/components/layouts/table) - Detailed table functionality with editing
+- [Card Layout](/docs/unify-ui/components/layouts/card) - Visual card displays
+- [Form Layout](/docs/unify-ui/components/layouts/form) - Single record forms
+
+### Advanced Topics
+- [Field Configuration](/docs/unify-ui/field-config) - Detailed field customization
+- [State Management](/docs/unify-ui/state-management) - Handling loading, errors, and data
+- [Styling & Theming](/docs/unify-ui/styling) - Customize appearance
+
+### Examples & Integration
+- [Examples](/docs/unify-ui/examples) - Real-world implementations
 - [API Reference](/docs/unify-ui/api-reference) - Complete type definitions
 
-**Remember**: UniRender is designed to be flexible. Start simple and add complexity as needed! 
+**Remember**: UniRender is designed to be flexible. Start with basic configurations and add complexity as your needs grow! 
