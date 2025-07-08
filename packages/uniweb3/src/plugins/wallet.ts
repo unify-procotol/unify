@@ -1,10 +1,10 @@
 import { Plugin } from "@unilab/urpc-core";
-import { WalletEntity } from "../entities/wallet";
+import { TokenEntity, WalletEntity } from "../entities/wallet";
 import { SolanaAdapter } from "../adapters/solana-adapter";
 import { EVMAdapter } from "../adapters/evm-adapter";
 
 export const WalletPlugin: Plugin = {
-  entities: [WalletEntity],
+  entities: [WalletEntity, TokenEntity],
   adapters: [
     {
       source: "solana",

@@ -1,23 +1,29 @@
 import { BaseAdapter, FindManyArgs, FindOneArgs } from "@unilab/urpc-core";
 import { SchemaEntity } from "../entities/schema";
-import { URPC } from "@unilab/urpc-hono";
+import { URPC } from "../type";
 
 export class SchemaAdapter extends BaseAdapter<SchemaEntity> {
+  private urpc: URPC;
+
+  constructor(urpc: URPC) {
+    super();
+    this.urpc = urpc;
+  }
+
   static readonly adapterName = "SchemaAdapter";
 
   private getSourcesForEntity(entity: string): string[] {
-    const entitySources = URPC.getEntitySources();
+    const entitySources = this.urpc.getEntitySources();
     return entitySources[entity] || [];
   }
 
   async findMany(args?: FindManyArgs<SchemaEntity>): Promise<SchemaEntity[]> {
     const where = args?.where || {};
-    const schemas = URPC.getEntitySchemas();
+    const schemas = this.urpc.getEntitySchemas();
     const entity = where.name;
 
     if (entity) {
-      const actualEntityName =
-        typeof entity === "string" ? entity : entity.$eq;
+      const actualEntityName = typeof entity === "string" ? entity : entity.$eq;
       if (actualEntityName) {
         const schema = schemas[actualEntityName];
         if (schema) {
@@ -45,7 +51,7 @@ export class SchemaAdapter extends BaseAdapter<SchemaEntity> {
 
   async findOne(args: FindOneArgs<SchemaEntity>): Promise<SchemaEntity | null> {
     const where = args.where;
-    const schemas = URPC.getEntitySchemas();
+    const schemas = this.urpc.getEntitySchemas();
     const entityName = where.name;
     if (entityName) {
       if (entityName && schemas[entityName]) {

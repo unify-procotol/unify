@@ -1,5 +1,5 @@
 import { repo, URPC } from "@unilab/urpc-client";
-import { SchemaEntity } from "./entities/schema";
+import { SchemaEntity } from "@unilab/builtin-plugin/entities";
 
 URPC.init({
   baseUrl: "http://localhost:3000",

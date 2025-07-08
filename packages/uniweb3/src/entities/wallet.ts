@@ -1,6 +1,6 @@
 import { Fields } from "@unilab/urpc-core";
 
-class TokenEntity {
+export class TokenEntity {
   @Fields.string()
   symbol = "";
 
