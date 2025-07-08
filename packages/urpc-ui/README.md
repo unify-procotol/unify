@@ -67,12 +67,7 @@ export default defineConfig({
 ### 3. Start Using
 
 ```jsx
-<<<<<<< HEAD:packages/unify-ui/README.md
 import { UniRender } from '@unilab/unify-ui';
-=======
-import './globals.css';
-import { UniRender } from '@unilab/urpc-ui';
->>>>>>> aa78ca4dc94f08a34c334599e0fcd0a54f7d0f21:packages/urpc-ui/README.md
 
 function App() {
   const entity = {
