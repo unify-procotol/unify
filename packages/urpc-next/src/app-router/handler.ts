@@ -1,9 +1,13 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { handleError, parseQueryParams, validateSource } from "./utils";
-import { registerAdapter, getRepo, getRepoRegistry, RepoOptions } from "@unilab/urpc-core";
 import {
-  DataSourceAdapter,
+  registerAdapter,
+  getRepo,
+  getRepoRegistry,
+  RepoOptions,
+} from "@unilab/urpc-core";
+import {
   generateSchemas,
   Repository,
   SchemaObject,
@@ -13,6 +17,7 @@ import {
   useGlobalMiddleware,
 } from "@unilab/urpc-core";
 import { URPCConfig } from "../type";
+import { BuiltinPlugin } from "@unilab/builtin-plugin";
 
 type RouteHandler = (
   request: NextRequest,
@@ -34,7 +39,7 @@ export class URPC {
   static init(config: URPCConfig): URPCAPI {
     if (!this.initialized) {
       if (config.plugins) {
-        this.initFromPlugins(config.plugins);
+        this.initFromPlugins([...config.plugins, BuiltinPlugin(this)]);
       }
 
       if (config.middleware) {

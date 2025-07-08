@@ -15,6 +15,7 @@ import {
   AdapterRegistration,
   useGlobalMiddleware,
 } from "@unilab/urpc-core";
+import { BuiltinPlugin } from "@unilab/builtin-plugin";
 
 export interface URPCConfig {
   app?: Hono;
@@ -36,7 +37,7 @@ export class URPC {
     }
 
     if (config.plugins) {
-      this.initFromPlugins(config.plugins);
+      this.initFromPlugins([...config.plugins, BuiltinPlugin(this)]);
     }
 
     if (config.middleware) {

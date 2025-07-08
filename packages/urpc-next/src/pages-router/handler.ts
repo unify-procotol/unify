@@ -12,7 +12,6 @@ import {
   RepoOptions,
 } from "@unilab/urpc-core";
 import {
-  DataSourceAdapter,
   generateSchemas,
   Repository,
   SchemaObject,
@@ -22,6 +21,7 @@ import {
   useGlobalMiddleware,
 } from "@unilab/urpc-core";
 import { URPCConfig } from "../type";
+import { BuiltinPlugin } from "@unilab/builtin-plugin";
 
 export class URPC {
   private static entitySchemas: Record<string, SchemaObject> = {};
@@ -34,7 +34,7 @@ export class URPC {
     }
 
     if (config.plugins) {
-      this.initFromPlugins(config.plugins);
+      this.initFromPlugins([...config.plugins, BuiltinPlugin(this)]);
     }
 
     if (config.middleware) {

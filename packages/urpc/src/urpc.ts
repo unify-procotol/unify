@@ -20,6 +20,7 @@ import {
   useGlobalMiddleware,
 } from "@unilab/urpc-core";
 import type { ClientConfig } from "./types";
+import { BuiltinPlugin } from "@unilab/builtin-plugin";
 
 export class URPC {
   private enableDebug: boolean = false;
@@ -28,7 +29,7 @@ export class URPC {
 
   constructor(config: ClientConfig) {
     this.enableDebug = config.enableDebug || false;
-    this.initFromPlugins(config.plugins);
+    this.initFromPlugins([...config.plugins, BuiltinPlugin(URPC)]);
     this.applyMiddlewareToRepos(config.middleware);
   }
 

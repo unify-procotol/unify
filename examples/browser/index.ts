@@ -178,3 +178,9 @@ fetchUser();
 // };
 
 // fetchEvmBalance();
+
+const allEntities = await repo({
+  entity: "schema",
+  source: "_global",
+}).findMany();
+console.log("All entities:", JSON.stringify(allEntities, null, 2));

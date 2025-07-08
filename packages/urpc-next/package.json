@@ -27,6 +27,7 @@
   "license": "MIT",
   "dependencies": {
     "@unilab/urpc-core": "^0.0.1",
+    "@unilab/builtin-plugin": "^0.0.1",
     "next": "^14.0.0"
   },
   "devDependencies": {
