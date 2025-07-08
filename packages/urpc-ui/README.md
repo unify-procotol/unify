@@ -18,13 +18,13 @@ A flexible and elegant UI rendering library for dynamic data visualization with 
 ### 1. Install Dependencies
 
 ```bash
-npm install @unilab/unify-ui
+npm install @unilab/urpc-ui
 # Install peer dependencies (Tailwind CSS v4+ required)
 npm install -D tailwindcss@^4.0.0 @tailwindcss/vite tailwindcss-animate
 npx tailwindcss init
 pnpm dlx shadcn@latest init
-@source '../../../packages/unify-ui/dist/**/*.{js,ts,jsx,tsx}'; 
-@source '../../../packages/unify-ui/src/**/*.{js,ts,jsx,tsx}';
+@source '../../../packages/urpc-ui/dist/**/*.{js,ts,jsx,tsx}'; 
+@source '../../../packages/urpc-ui/src/**/*.{js,ts,jsx,tsx}';
 ```
 
 > 🎉 **All shadcn/ui and Radix components are now built-in!** No need to install them separately.
@@ -67,7 +67,7 @@ export default defineConfig({
 ### 3. Start Using
 
 ```jsx
-import { UniRender } from '@unilab/unify-ui';
+import { UniRender } from '@unilab/urpc-ui';
 
 function App() {
   const entity = {

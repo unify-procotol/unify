@@ -1,20 +1,11 @@
 {
   "name": "urpc-studio",
   "version": "0.0.1",
-<<<<<<< HEAD
-  "type": "module",
-  "description": "Interactive development studio for Unify API framework",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "bin": {
-    "studio": "bin/unify-studio.js"
-=======
   "description": "Lightweight browser-only client library for URPC without HTTP functionality",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
     "urpc-studio": "bin/urpc-studio.js"
->>>>>>> aa78ca4dc94f08a34c334599e0fcd0a54f7d0f21
   },
   "scripts": {
     "studio": "vite",
@@ -47,8 +38,8 @@
     "@radix-ui/react-separator": "^1.1.7",
     "@radix-ui/react-slot": "^1.2.3",
     "@radix-ui/react-tabs": "^1.1.12",
-    "@unilab/unify-client": "workspace:*",
-    "@unilab/unify-ui": "workspace:*",
+    "@unilab/urpc-client": "workspace:*",
+    "@unilab/urpc-ui": "workspace:*",
     "@vitejs/plugin-react": "^4.2.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
