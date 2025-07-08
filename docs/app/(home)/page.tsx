@@ -91,7 +91,7 @@ URPC.init({
 });
 
 const evmBalanceRes = await repo<WalletEntity>({
-  entity "WalletEntity",
+  entity: "WalletEntity",
   source: "evm",
 }).findOne({
   where: {
@@ -101,7 +101,7 @@ const evmBalanceRes = await repo<WalletEntity>({
 });
 
 const solanaBalanceRes = await repo<WalletEntity>({
-  entity "WalletEntity",
+  entity: "WalletEntity",
   source: "solana",
 }).findOne({
   where: {
