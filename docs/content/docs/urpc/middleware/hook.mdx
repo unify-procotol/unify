@@ -67,14 +67,8 @@ const app = URPC.init({
 Each hook function receives three parameters:
 
 ```typescript
-type HookFunction<T, TArgs, TResult> = (
-  args: TArgs,           // Operation arguments
-  result?: TResult,      // Operation result (undefined for 'before' hooks)
-  context?: {
-    adapter: DataSourceAdapter<T>;
-    operation: string;
-    metadata?: Record<string, any>;
-  }
+type HookFunction<T extends Record<string, any>> = (
+  context: MiddlewareContext<T>
 ) => Promise<void> | void;
 ```
 
@@ -83,14 +77,14 @@ type HookFunction<T, TArgs, TResult> = (
 ```typescript
 const AuditHooks = createHookMiddleware((hookManager) => {
   hookManager
-    .afterCreate(async (args, result, context) => {
-      console.log(`AUDIT: Created ${context?.operation} with ID: ${result?.id}`);
+    .afterCreate(async (context) => {
+      console.log(`AUDIT: Created ${context.operation} with ID: ${context.result?.id}`);
     })
-    .afterUpdate(async (args, result, context) => {
-      console.log(`AUDIT: Updated ${context?.operation} with ID: ${result?.id}`);
+    .afterUpdate(async (context) => {
+      console.log(`AUDIT: Updated ${context.operation} with ID: ${context.result?.id}`);
     })
-    .afterDelete(async (args, result, context) => {
-      console.log(`AUDIT: Deleted ${context?.operation}`);
+    .afterDelete(async (context) => {
+      console.log(`AUDIT: Deleted ${context.operation}`);
     });
 });
 ```
@@ -100,13 +94,13 @@ const AuditHooks = createHookMiddleware((hookManager) => {
 ```typescript
 const NotificationHooks = createHookMiddleware((hookManager) => {
   hookManager
-    .afterCreate(async (args, result, context) => {
+    .afterCreate(async (context) => {
       if (context?.adapter.constructor.name === 'UserAdapter') {
-        await sendWelcomeEmail(result.email);
+        await sendWelcomeEmail(context.result?.email);
       }
     })
-    .afterUpdate(async (args, result) => {
-      await sendUpdateNotification(result.id, args.data);
+    .afterUpdate(async (context) => {
+      await sendUpdateNotification(context.result?.id, context.args.data);
     });
 });
 ```
