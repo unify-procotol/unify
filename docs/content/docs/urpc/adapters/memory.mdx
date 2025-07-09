@@ -1,0 +1,163 @@
+---
+title: Memory Adapter
+description: Memory Adapter is a lightweight in-memory storage adapter for URPC that stores data directly in application memory. It's perfect for development, testing, and scenarios where you need temporary data storage without persistence.
+---
+
+## Installation
+
+The Memory Adapter is part of the `@unilab/urpc-adapters` package:
+
+```bash
+npm install @unilab/urpc-adapters
+```
+
+## Basic Setup
+
+```typescript
+import { URPC } from "@unilab/urpc";
+import { MemoryAdapter } from "@unilab/urpc-adapters";
+import { UserEntity } from "./entities/user";
+
+const MyPlugin = {
+  entities: [UserEntity],
+};
+
+URPC.init({
+  plugins: [MyPlugin],
+  entityConfigs: {
+    user: {
+      defaultSource: "memory",
+    },
+  },
+  globalAdapters: [MemoryAdapter],
+});
+```
+
+## Usage Examples
+
+### Creating Data
+
+```typescript
+import { repo } from "@unilab/urpc";
+
+const newUser = await repo({
+  entity: UserEntity,
+  source: "memory",
+}).create({
+  data: {
+    id: "1",
+    name: "John Doe",
+    email: "john@example.com",
+  },
+});
+console.log("Created user:", newUser);
+```
+
+### Querying Data
+
+#### Using Entity Class (Returns Entity Instance)
+
+```typescript
+const userByClass = await repo({
+  entity: UserEntity,
+  source: "memory",
+}).findOne({
+  where: {
+    id: "1",
+  },
+});
+
+// Can call entity methods
+userByClass?.click(" 123 ");
+userByClass?.greet(" this is a test message ");
+```
+
+#### Using String Entity Name (Returns JSON Data)
+
+```typescript
+const userByString = await repo<UserEntity>({
+  entity: "user", // Using string instead of class
+  source: "memory",
+}).findOne({
+  where: {
+    id: "1",
+  },
+});
+console.log("User by string:", userByString);
+```
+
+### Querying Multiple Records
+
+```typescript
+const users = await repo<UserEntity>({
+  entity: "user",
+}).findMany({
+  where: {
+    id: "1",
+  },
+});
+console.log("Found users:", JSON.stringify(users, null, 2));
+```
+
+## Default Source Configuration
+
+You can set memory as the default source for specific entities:
+
+```typescript
+URPC.init({
+  entityConfigs: {
+    user: {
+      defaultSource: "memory", // Users will use memory by default
+    },
+  },
+  globalAdapters: [MemoryAdapter],
+});
+
+// Now you can omit the source parameter
+const user = await repo<UserEntity>({
+  entity: "user", // Will automatically use memory source
+}).findOne({
+  where: { id: "1" },
+});
+```
+
+## Features
+
+- **In-Memory Storage**: Data is stored in application memory
+- **Fast Access**: No I/O operations, immediate data access
+- **Entity Support**: Works with both Entity classes and string entity names
+- **CRUD Operations**: Full support for create, read, update, delete operations
+- **Temporary Storage**: Data is lost when the application restarts
+
+## Use Cases
+
+- **Development**: Quick prototyping without setting up databases
+- **Testing**: Unit tests with predictable, isolated data
+- **Caching**: Temporary storage for frequently accessed data
+- **Session Data**: Store user session information
+
+## Limitations
+
+- **No Persistence**: Data is lost when the application stops
+- **Memory Usage**: Large datasets can consume significant memory
+- **Single Instance**: Data is not shared across multiple application instances
+
+## Advanced Configuration
+
+You can configure multiple entities with different default sources:
+
+```typescript
+URPC.init({
+  plugins: [MyPlugin, WalletPlugin],
+  middlewares: [Logging()],
+  entityConfigs: {
+    user: {
+      defaultSource: "memory",
+    },
+    wallet: {
+      defaultSource: "evm", // Different adapter for wallet
+    },
+  },
+  globalAdapters: [MemoryAdapter],
+});
+```

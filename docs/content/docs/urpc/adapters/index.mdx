@@ -1,0 +1,83 @@
+---
+title: Global Adapters
+description: A collection of adapters for URPC that provide different data storage solutions. Choose the right adapter for your development needs.
+---
+
+## Overview
+
+The `@unilab/urpc-adapters` package provides ready-to-use adapters for URPC, making it easy to get started with different data storage solutions. Whether you need temporary storage for development or persistent storage for production, we have you covered.
+
+## Installation
+
+```bash
+npm install @unilab/urpc-adapters
+```
+
+## Available Adapters
+
+### Memory Adapter
+- **Use case**: Development, testing, temporary storage
+- **Storage**: In-memory (lost on restart)
+- **Speed**: Fastest access
+- **Best for**: Development and caching
+
+### Mock Adapter  
+- **Use case**: Testing, prototyping
+- **Storage**: In-memory (lost on restart)
+- **Speed**: Fast
+- **Best for**: Unit tests and demos
+
+### IndexedDB Adapter
+- **Use case**: Browser applications
+- **Storage**: Persistent browser storage
+- **Speed**: Good performance
+- **Best for**: Client-side apps, PWAs, offline support
+
+## Quick Start
+
+```typescript
+import { URPC } from "@unilab/urpc";
+import { MemoryAdapter, MockAdapter, IndexedDBAdapter } from "@unilab/urpc-adapters";
+import { UserEntity } from "./entities/user";
+
+const MyPlugin = {
+  entities: [UserEntity],
+};
+
+URPC.init({
+  plugins: [MyPlugin],
+  entityConfigs: {
+    user: {
+      defaultSource: "memory", // Choose your adapter
+    },
+  },
+  globalAdapters: [MemoryAdapter, MockAdapter, IndexedDBAdapter],
+});
+
+// Use the repository
+const user = await repo({
+  entity: UserEntity,
+}).create({
+  data: {
+    id: "1",
+    name: "John Doe",
+    email: "john@example.com",
+  },
+});
+```
+
+## Choosing the Right Adapter
+
+| Adapter | Persistence | Environment | Use Case |
+|---------|-------------|-------------|----------|
+| Memory | No | Any | Development, caching |
+| Mock | No | Any | Testing, prototyping |
+| IndexedDB | Yes | Browser | Client apps, PWAs |
+
+## Learn More
+
+- [Memory Adapter](/docs/urpc/adapters/memory) - Lightweight in-memory storage
+- [Mock Adapter](/docs/urpc/adapters/mock) - Simple testing adapter  
+- [IndexedDB Adapter](/docs/urpc/adapters/indexeddb) - Browser persistent storage
+
+Get started with the adapter that fits your needs and switch between them as your application grows.

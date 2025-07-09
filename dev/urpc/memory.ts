@@ -1,45 +1,17 @@
 import { UserEntity } from "./entities/user";
-import { joinRepo, repo, URPC } from "@unilab/urpc";
+import { repo, URPC } from "@unilab/urpc";
 import { WalletPlugin } from "@unilab/uniweb3";
 import { Plugin } from "@unilab/urpc-core";
-import { createHookMiddleware, Logging } from "@unilab/urpc-core/middleware";
+import { Logging } from "@unilab/urpc-core/middleware";
 import { MemoryAdapter } from "@unilab/urpc-adapters";
 
 const MyPlugin: Plugin = {
   entities: [UserEntity],
 };
 
-const HookMiddleware = createHookMiddleware((hookManager) => {
-  hookManager
-    .beforeCreate(async (context) => {
-      console.log("🚀 Builder: Before Create Hook", "context: ", context);
-    })
-    .afterCreate(async (context) => {
-      console.log("✨ Builder: After Create Hook", "context: ", context);
-    })
-    .beforeUpdate(async (context) => {
-      console.log("🔄 Builder: Before Update Hook", "context: ", context);
-    })
-    .afterUpdate(async (context) => {
-      console.log("✅ Builder: After Update Hook", "context: ", context);
-    })
-    .beforeDelete(async (context) => {
-      console.log("🗑️ Builder: Before Delete Hook", "context: ", context);
-    })
-    .afterDelete(async (context) => {
-      console.log("💀 Builder: After Delete Hook", "context: ", context);
-    });
-  // .beforeAny(async (context) => {
-  //   console.log("🔄 Builder: Before Any Hook", "context: ", context);
-  // })
-  // .afterAny(async (context) => {
-  //   console.log("✅ Builder: After Any Hook", "context: ", context);
-  // });
-});
-
 URPC.init({
   plugins: [MyPlugin, WalletPlugin],
-  middlewares: [HookMiddleware, Logging()],
+  middlewares: [Logging()],
   entityConfigs: {
     user: {
       defaultSource: "memory",

@@ -8,16 +8,13 @@ description: URPC provides seamless Hono integration. This guide shows you how t
 First, install the required dependency packages:
 
 ```package-install
-@unilab/urpc-hono @unilab/urpc-client @unilab/urpc-core hono @hono/node-server
+@unilab/urpc-hono @unilab/urpc-client @unilab/urpc-core @unilab/urpc-adapters hono @hono/node-server
 ```
 
 ## Project Structure
 
 ```
 hono-basic/
-├── adapters/
-│   ├── user.ts               # User adapter
-│   └── post.ts               # Post adapter
 ├── entities/
 │   ├── user.ts               # User entity
 │   └── post.ts               # Post entity
@@ -30,6 +27,8 @@ hono-basic/
 ## Entity Definition
 
 Define your entities using URPC decorators:
+
+**User Entity:**
 
 ```typescript
 import { Fields } from "@unilab/urpc-core";
@@ -55,99 +54,162 @@ export class UserEntity {
 }
 ```
 
-## Adapter Implementation
-
-Create adapters to handle data operations:
+**Post Entity:**
 
 ```typescript
-import { BaseAdapter, FindManyArgs, FindOneArgs } from "@unilab/urpc-core";
-import { UserEntity } from "../entities/user";
+import { Fields } from "@unilab/urpc-core";
+import type { UserEntity } from "./user";
 
-export class UserAdapter extends BaseAdapter<UserEntity> {
-  async findMany(args: FindManyArgs<UserEntity>): Promise<UserEntity[]> {
-    // Implementation logic
-    return [];
-  }
+export class PostEntity {
+  @Fields.string()
+  id = "";
 
-  async findOne(args: FindOneArgs<UserEntity>): Promise<UserEntity | null> {
-    // Implementation logic
-    return null;
-  }
+  @Fields.string()
+  title = "";
+
+  @Fields.string()
+  content = "";
+
+  @Fields.string()
+  userId = "";
+
+  @Fields.record(() => require("./user").UserEntity, {
+    optional: true,
+  })
+  user?: UserEntity;
 }
 ```
 
 ## Server Setup
 
-Configure your Hono server with URPC:
+Configure your Hono server with URPC using MockAdapter for development:
 
 ```typescript
 import { URPC } from "@unilab/urpc-hono";
-import { UserAdapter } from "./adapters/user";
-import { PostAdapter } from "./adapters/post";
 import { UserEntity } from "./entities/user";
 import { PostEntity } from "./entities/post";
-import { Logging } from "@unilab/urpc-core/middleware";
 import { Plugin } from "@unilab/urpc-core";
+import { MockAdapter } from "@unilab/urpc-adapters";
 
 const MyPlugin: Plugin = {
   entities: [UserEntity, PostEntity],
-  adapters: [
-    { source: "demo", entity: "UserEntity", adapter: new UserAdapter() },
-    { source: "demo", entity: "PostEntity", adapter: new PostAdapter() },
-  ],
 };
 
 const app = URPC.init({
   plugins: [MyPlugin],
-  middlewares: [Logging()],
+  entityConfigs: {
+    user: {
+      defaultSource: "mock",
+    },
+    post: {
+      defaultSource: "mock",
+    },
+  },
+  globalAdapters: [MockAdapter],
+});
+
+// Initialize sample data
+await URPC.repo<UserEntity>({
+  entity: "UserEntity",
+  source: "mock",
+}).create({
+  data: {
+    id: "1",
+    name: "John Doe",
+    email: "john.doe@example.com",
+    avatar: "https://example.com/avatar.png",
+  },
+});
+
+await URPC.repo<PostEntity>({
+  entity: "PostEntity",
+  source: "mock",
+}).create({
+  data: {
+    id: "1",
+    title: "Post 1",
+    content: "Content 1",
+    userId: "1",
+  },
 });
 
 export default {
   port: 3000,
+  timeout: 30000,
   fetch: app.fetch,
 };
 ```
 
 ## Client Usage
 
-Use the URPC client to interact with your API:
+Use the URPC client to interact with your API with advanced relationship queries:
 
 ```typescript
 import { UserEntity } from "./entities/user";
-import { repo, URPCClient } from "@unilab/urpc-client";
+import { PostEntity } from "./entities/post";
+import { repo, URPC, joinRepo } from "@unilab/urpc-client";
 
-URPCClient.init({
+URPC.init({
   baseUrl: "http://localhost:3000",
   timeout: 10000,
 });
 
-// Create a user
-const createUser = async () => {
+// Fetch user with posts using include
+const fetchUser = async () => {
   const data = await repo<UserEntity>({
     entity: "user",
-    source: "demo",
-  }).create({
-    data: {
-      name: "John Doe",
-      email: "john.doe@example.com",
-      avatar: "https://example.com/avatar.jpg",
-    },
-  });
-  console.log("Created user:", data);
-};
-
-// Find users
-const findUsers = async () => {
-  const data = await repo<UserEntity>({
-    entity: "user",
-    source: "demo",
   }).findMany({
     where: {
-      name: "John Doe",
+      id: "1",
+    },
+    include: {
+      posts: (userList) => {
+        const ids = userList.map((user) => user.id);
+        
+        // If you don't set the where parameter, you must use joinRepo, but in other cases you can use repo directly.
+        return joinRepo<PostEntity, UserEntity>({
+          entity: "post",
+          localField: "id",
+          foreignField: "userId",
+        }).findMany({
+          where: {
+            userId: {
+              $in: ids,
+            },
+          },
+        });
+      },
     },
   });
-  console.log("Found users:", data);
+  console.log("User with posts:", JSON.stringify(data, null, 2));
 };
+
+// Fetch post with user relationship
+const fetchPost = async () => {
+  const data = await repo<PostEntity>({
+    entity: "post",
+  }).findOne({
+    where: {
+      id: "1",
+    },
+    include: {
+      user: (post) => {
+        const userId = post.userId;
+        return repo<UserEntity>({
+          entity: "user",
+        }).findOne({
+          where: {
+            id: userId,
+          },
+        });
+      },
+    },
+  });
+  console.log("Post with user:", JSON.stringify(data, null, 2));
+};
+
+fetchUser();
+fetchPost();
 ```
 
 ## Running the Application
@@ -157,34 +219,58 @@ Start your Hono server:
 ```bash
 bun run dev
 # or
-npm run dev
+bun run server.ts
+```
+
+Run the client to test the API:
+
+```bash
+bun run client
+# or  
+bun run client.ts
 ```
 
 Your URPC-powered Hono API will be available at `http://localhost:3000`.
 
-## Middleware Support
+## Key Features
 
-URPC supports various middleware for Hono integration:
+### Entity Configuration
 
-- **Logging**: Built-in request/response logging
-- **Hooks**: Before/after operation hooks
-- **Custom Middleware**: Add your own middleware logic
+URPC allows you to configure default sources for entities:
 
 ```typescript
-import { createHookMiddleware, Logging } from "@unilab/urpc-core/middleware";
-
-const HookMiddleware = createHookMiddleware((hookManager) => {
-  hookManager
-    .beforeCreate(async (context) => {
-      console.log("Before create:", context);
-    })
-    .afterCreate(async (context) => {
-      console.log("After create:", context);
-    });
-});
-
-const app = URPC.init({
-  plugins: [MyPlugin],
-  middlewares: [HookMiddleware, Logging()],
-});
+entityConfigs: {
+  user: {
+    defaultSource: "mock",  // Default adapter for user operations
+  },
+  post: {
+    defaultSource: "mock",  // Default adapter for post operations  
+  },
+}
 ```
+
+### Global Adapters
+
+Use global adapters like MockAdapter for development:
+
+```typescript
+globalAdapters: [MockAdapter]
+```
+
+### Relationship Queries
+
+URPC supports complex relationship queries:
+
+- **Include**: Load related data with the main query
+- **JoinRepo**: Handle foreign key relationships efficiently
+- **Nested relationships**: Support for deep relationship loading
+
+### MockAdapter Benefits
+
+The MockAdapter provides:
+- In-memory data storage for development
+- No database setup required
+- Fast prototyping and testing
+- Automatic relationship handling
+
+This makes it perfect for getting started quickly with URPC and Hono integration.

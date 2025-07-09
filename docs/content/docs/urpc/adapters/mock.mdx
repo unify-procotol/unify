@@ -1,0 +1,191 @@
+---
+title: Mock Adapter
+description: Mock Adapter is a simple in-memory adapter for URPC that provides temporary data storage during application runtime. It's perfect for testing, prototyping, and development scenarios where you don't need persistent data storage.
+---
+
+## Features
+
+- **In-memory storage**: Data is stored in memory and will be lost when the application restarts
+- **No setup required**: Works out of the box without any configuration
+- **Development friendly**: Perfect for testing and rapid prototyping
+- **Full CRUD support**: Supports all basic repository operations
+
+## Installation
+
+The Mock Adapter is included in the `@unilab/urpc-adapters` package:
+
+```bash
+npm install @unilab/urpc-adapters
+```
+
+## Basic Usage
+
+### 1. Import and Setup
+
+```typescript
+import { UserEntity } from "./entities/user";
+import { repo, URPC } from "@unilab/urpc";
+import { Plugin } from "@unilab/urpc-core";
+import { Logging } from "@unilab/urpc-core/middleware";
+import { MockAdapter } from "@unilab/urpc-adapters";
+
+const MyPlugin: Plugin = {
+  entities: [UserEntity],
+};
+
+URPC.init({
+  plugins: [MyPlugin],
+  middlewares: [Logging()],
+  entityConfigs: {
+    user: {
+      defaultSource: "mock",
+    },
+  },
+  globalAdapters: [MockAdapter],
+});
+```
+
+### 2. Creating Data
+
+```typescript
+async function createUser() {
+  await repo<UserEntity>({
+    entity: "user",
+  }).create({
+    data: {
+      id: "1",
+      name: "John Doe",
+      email: "john.doe@example.com",
+      avatar: "https://example.com/avatar.png",
+    },
+  });
+}
+```
+
+### 3. Querying Data
+
+```typescript
+async function getUsers() {
+  const users = await repo({
+    entity: "user",
+  }).findMany();
+  
+  console.log("All users:", users);
+}
+```
+
+## Complete Example
+
+Here's a complete working example:
+
+```typescript
+import { UserEntity } from "./entities/user";
+import { repo, URPC } from "@unilab/urpc";
+import { Plugin } from "@unilab/urpc-core";
+import { Logging } from "@unilab/urpc-core/middleware";
+import { MockAdapter } from "@unilab/urpc-adapters";
+
+const MyPlugin: Plugin = {
+  entities: [UserEntity],
+};
+
+URPC.init({
+  plugins: [MyPlugin],
+  middlewares: [Logging()],
+  entityConfigs: {
+    user: {
+      defaultSource: "mock",
+    },
+  },
+  globalAdapters: [MockAdapter],
+});
+
+async function demo() {
+  // Create first user
+  await repo<UserEntity>({
+    entity: "user",
+  }).create({
+    data: {
+      id: "1",
+      name: "John Doe",
+      email: "john.doe@example.com",
+      avatar: "https://example.com/avatar.png",
+    },
+  });
+
+  // Create second user
+  await repo<UserEntity>({
+    entity: "user",
+  }).create({
+    data: {
+      id: "2",
+      name: "Jane Doe",
+      email: "jane.doe@example.com",
+      avatar: "https://example.com/avatar.png",
+    },
+  });
+
+  // Query all users
+  const users = await repo({
+    entity: "user",
+  }).findMany();
+
+  console.log("Users:", users);
+}
+
+demo();
+```
+
+## Configuration Options
+
+### Entity Configuration
+
+You can configure the Mock Adapter as the default source for specific entities:
+
+```typescript
+URPC.init({
+  entityConfigs: {
+    user: {
+      defaultSource: "mock",
+    },
+    post: {
+      defaultSource: "mock",
+    },
+  },
+  globalAdapters: [MockAdapter],
+});
+```
+
+### Global Configuration
+
+To use Mock Adapter globally for all entities, add it to the `globalAdapters` array:
+
+```typescript
+URPC.init({
+  globalAdapters: [MockAdapter],
+});
+```
+
+## Supported Operations
+
+The Mock Adapter supports all standard repository operations:
+
+- `create()` - Create new records
+- `findMany()` - Query multiple records
+- `findOne()` - Query a single record
+- `update()` - Update existing records
+- `delete()` - Delete records
+- `upsert()` - Update or create records
+
+## Best Practices
+
+1. **Development Only**: Use Mock Adapter only for development and testing
+2. **Data Persistence**: Remember that data will be lost on application restart
+3. **Testing**: Ideal for unit tests and integration tests
+4. **Prototyping**: Perfect for rapid prototyping and demos
+
+## Limitations
+
+- **No persistence**: Data is lost when the application restarts
+- **Memory usage**: All data is stored in memory, which may not be suitable for large datasets
+- **No concurrent access**: Not suitable for production environments with multiple instances

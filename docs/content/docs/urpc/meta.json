@@ -1,5 +1,16 @@
 {
   "title": "urpc",
   "description": "get started and plugins",
-  "root": true
+  "root": true,
+  "pages": [
+    "index",
+    "basic-usage",
+    "examples",
+    "integrations",
+    "plugins",
+    "middleware",
+    "adapters",
+    "relations",
+    "reference"
+  ]
 }
