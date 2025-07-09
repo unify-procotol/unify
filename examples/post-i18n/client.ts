@@ -40,21 +40,18 @@ const demo = async () => {
   const posts = await repo<PostEntity>({
     entity: "post",
     // source: "ghost",
-    context: { language: "zh" },
+    context: { language: "zh" }, //zh,ja,ko,fr,de,es,ru,pt
   }).findOne({
     where: {
       slug: "hello-world",
     },
-    // include: {
-    //   author: async (posts: PostEntity[]) => {
-    //     const authorIds = posts.map((post) => post.authorId);
-    //     const user = await repo<UserEntity>({
-    //       entity: "UserEntity",
-    //       source: "ghost",
-    //     }).findMany({ where: { id: { $in: authorIds } } });
-    //     return user;
-    //   },
-    // },
+    include: {
+      author: async (post) =>
+        repo<UserEntity>({
+          entity: "UserEntity",
+          source: "ghost",
+        }).findOne({ where: { id: post.authorId } }),
+    },
   });
   console.log("posts=>", posts);
 };

@@ -31,6 +31,7 @@ const CachePlugin: Plugin = {
       }),
     },
     // { source: "redis", entity: "CacheEntity", adapter: new RedisAdapter() },
+    // { source: "pg", entity: "CacheEntity", adapter: new PgAdapter() },
   ],
 };
 
@@ -60,7 +61,7 @@ const app = URPC.init({
         },
       },
     }),
-    Logging()
+    Logging(),
   ],
   entityConfigs: {
     cache: {
@@ -84,7 +85,6 @@ const app = URPC.init({
         content: {
           i18n: {
             prompt: "200 words or less",
-            model: "openai/gpt-4o-mini",
           },
         },
       },

@@ -60,6 +60,14 @@ export function i18nAIMiddleware<T extends Record<string, any>>(
       return await next();
     }
 
+    // If target language is English, return original value without translation
+    if (targetLanguage === "en") {
+      console.log(
+        "Target language is English, executing without translation"
+      );
+      return await next();
+    }
+
     const entityName = metadata.entity;
     const entityConfigs = getGlobalMiddlewareManager().entityConfigs;
     const entityConfig = entityConfigs[entityName];

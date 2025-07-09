@@ -7,76 +7,76 @@ URPC.init({
   timeout: 10000,
 });
 
-// const fetchUser = async () => {
-//   const data = await repo<UserEntity>({
-//     entity: "user",
-//     source: "demo",
-//   }).findMany({
-//     where: {
-//       id: "2",
-//       // email: "john.doe@example.com",
-//     },
-//     include: {
-//       posts: (userList) => {
-//         const ids = userList.map((user) => user.id);
-//         // return repo<PostEntity>({
-//         //   entity: "post",
-//         //   source: "demo",
-//         // }).findMany({
-//         //   where: {
-//         //     userId: {
-//         //       $in: ids,
-//         //     },
-//         //   },
-//         // });
+const fetchUser = async () => {
+  const data = await repo<UserEntity>({
+    entity: "user",
+    source: "demo",
+  }).findMany({
+    where: {
+      id: "2",
+      // email: "john.doe@example.com",
+    },
+    include: {
+      posts: (userList) => {
+        const ids = userList.map((user) => user.id);
+        // return repo<PostEntity>({
+        //   entity: "post",
+        //   source: "demo",
+        // }).findMany({
+        //   where: {
+        //     userId: {
+        //       $in: ids,
+        //     },
+        //   },
+        // });
 
-//         // If you don't set the where parameter, you must use joinRepo, but in other cases you can use repo directly.
-//         return joinRepo<PostEntity, UserEntity>({
-//           entity: "post",
-//           source: "demo",
-//           localField: "id",
-//           foreignField: "userId",
-//         }).findMany({
-//           where: {
-//             userId: {
-//               $in: ids,
-//             },
-//           },
-//         });
-//       },
-//     },
-//   });
-//   console.log("[1] =>", JSON.stringify(data, null, 2));
-// };
+        // If you don't set the where parameter, you must use joinRepo, but in other cases you can use repo directly.
+        return joinRepo<PostEntity, UserEntity>({
+          entity: "post",
+          source: "demo",
+          localField: "id",
+          foreignField: "userId",
+        }).findMany({
+          where: {
+            userId: {
+              $in: ids,
+            },
+          },
+        });
+      },
+    },
+  });
+  console.log("[1] =>", JSON.stringify(data, null, 2));
+};
 
-// fetchUser();
+fetchUser();
 
-// const fetchPost = async () => {
-//   const data = await repo<PostEntity>({
-//     entity: "post",
-//     source: "demo",
-//   }).findOne({
-//     where: {
-//       id: "1",
-//     },
-//     include: {
-//       user: (post) => {
-//         const userId = post.userId;
-//         return repo<UserEntity>({
-//           entity: "user",
-//           source: "demo",
-//         }).findOne({
-//           where: {
-//             id: userId,
-//           },
-//         });
-//       },
-//     },
-//   });
-//   console.log("[2] =>", JSON.stringify(data, null, 2));
-// };
+const fetchPost = async () => {
+  const data = await repo<PostEntity>({
+    entity: "post",
+    source: "demo",
+  }).findOne({
+    where: {
+      id: "1",
+    },
+    include: {
+      user: (post) => {
+        const userId = post.userId;
+        return repo<UserEntity>({
+          entity: "user",
+          source: "demo",
+        }).findOne({
+          where: {
+            id: userId,
+          },
+        });
+      },
+    },
+  });
+  console.log("[2] =>", JSON.stringify(data, null, 2));
+};
 
-// fetchPost();
+fetchPost();
 
 const createUser = async () => {
   const data = await repo<UserEntity>({
