@@ -44,13 +44,13 @@ export class URPC {
       this.initFromPlugins([...config.plugins, BuiltinPlugin(this)]);
     }
 
-    if (config.middlewares) {
-      this.applyMiddlewareToRepos(config.middlewares);
-    }
-
     if (config.entityConfigs) {
       this.entityConfigs = config.entityConfigs;
       getGlobalMiddlewareManager().setEntityConfigs(this.entityConfigs);
+    }
+
+    if (config.middlewares) {
+      this.applyMiddlewareToRepos(config.middlewares);
     }
 
     this.setupRoutes();

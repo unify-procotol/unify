@@ -8,20 +8,16 @@ import { MimoAdapter } from "./adapters/mimo-adapter";
 
 const HookMiddleware = createHookMiddleware((hookManager) => {
   hookManager
-    .beforeCreate(async (args, _, context) => {
+    .beforeCreate(async (context) => {
       console.log(
         "🚀 Builder: Before Create Hook",
-        "args: ",
-        args,
         "context: ",
         context
       );
     })
-    .afterCreate(async (args, result, context) => {
+    .afterCreate(async (context) => {
       console.log(
         "✨ Builder: After Create Hook",
-        "result: ",
-        result,
         "context: ",
         context
       );

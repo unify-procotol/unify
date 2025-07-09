@@ -41,7 +41,7 @@ const demo = async () => {
     entity: "post",
     source: "ghost",
     context: { language: "zh" },
-  }).findMany({
+  }).findOne({
     where: {
       slug: "hello-world",
     },

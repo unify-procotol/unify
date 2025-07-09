@@ -1,39 +1,21 @@
-import type {
-  Middleware,
-  MiddlewareContext,
-  MiddlewareNext,
-  CreationArgs,
-  UpdateArgs,
-  DeletionArgs,
-  DataSourceAdapter,
-} from "../types";
+import type { Middleware, MiddlewareContext, MiddlewareNext } from "../types";
 
-export type HookFunction<
-  T extends Record<string, any>,
-  TArgs = any,
-  TResult = any
-> = (
-  args: TArgs,
-  result?: TResult,
-  context?: {
-    adapter: DataSourceAdapter<T>;
-    operation: string;
-    metadata?: Record<string, any>;
-  }
+export type HookFunction<T extends Record<string, any>> = (
+  context: MiddlewareContext<T>
 ) => Promise<void> | void;
 
 export interface HookRegistry<T extends Record<string, any>> {
-  beforeCreate: HookFunction<T, CreationArgs<T>>[];
-  afterCreate: HookFunction<T, CreationArgs<T>, T>[];
+  beforeCreate: HookFunction<T>[];
+  afterCreate: HookFunction<T>[];
 
-  beforeUpdate: HookFunction<T, UpdateArgs<T>>[];
-  afterUpdate: HookFunction<T, UpdateArgs<T>, T>[];
+  beforeUpdate: HookFunction<T>[];
+  afterUpdate: HookFunction<T>[];
 
-  beforeDelete: HookFunction<T, DeletionArgs<T>>[];
-  afterDelete: HookFunction<T, DeletionArgs<T>, boolean>[];
+  beforeDelete: HookFunction<T>[];
+  afterDelete: HookFunction<T>[];
 
-  beforeAny: HookFunction<T, any>[];
-  afterAny: HookFunction<T, any, any>[];
+  beforeAny: HookFunction<T>[];
+  afterAny: HookFunction<T>[];
 }
 
 export class HookManager<T extends Record<string, any>> {
@@ -48,104 +30,91 @@ export class HookManager<T extends Record<string, any>> {
     afterAny: [],
   };
 
-  beforeCreate(hook: HookFunction<T, CreationArgs<T>>): this {
+  beforeCreate(hook: HookFunction<T>): this {
     this.hooks.beforeCreate.push(hook);
     return this;
   }
 
-  afterCreate(hook: HookFunction<T, CreationArgs<T>, T>): this {
+  afterCreate(hook: HookFunction<T>): this {
     this.hooks.afterCreate.push(hook);
     return this;
   }
 
-  beforeUpdate(hook: HookFunction<T, UpdateArgs<T>>): this {
+  beforeUpdate(hook: HookFunction<T>): this {
     this.hooks.beforeUpdate.push(hook);
     return this;
   }
 
-  afterUpdate(hook: HookFunction<T, UpdateArgs<T>, T>): this {
+  afterUpdate(hook: HookFunction<T>): this {
     this.hooks.afterUpdate.push(hook);
     return this;
   }
 
-  beforeDelete(hook: HookFunction<T, DeletionArgs<T>>): this {
+  beforeDelete(hook: HookFunction<T>): this {
     this.hooks.beforeDelete.push(hook);
     return this;
   }
 
-  afterDelete(hook: HookFunction<T, DeletionArgs<T>, boolean>): this {
+  afterDelete(hook: HookFunction<T>): this {
     this.hooks.afterDelete.push(hook);
     return this;
   }
 
-  beforeAny(hook: HookFunction<T, any>): this {
+  beforeAny(hook: HookFunction<T>): this {
     this.hooks.beforeAny.push(hook);
     return this;
   }
 
-  afterAny(hook: HookFunction<T, any, any>): this {
+  afterAny(hook: HookFunction<T>): this {
     this.hooks.afterAny.push(hook);
     return this;
   }
 
-  async executeBefore(
-    operation: string,
-    args: any,
-    adapter: DataSourceAdapter<T>
-  ): Promise<void> {
-    const context = { adapter, operation };
-
+  async executeBefore(context: MiddlewareContext<T>): Promise<void> {
     for (const hook of this.hooks.beforeAny) {
-      await hook(args, undefined, context);
+      await hook(context);
     }
 
-    switch (operation) {
+    switch (context.operation) {
       case "create":
         for (const hook of this.hooks.beforeCreate) {
-          await hook(args, undefined, context);
+          await hook(context);
         }
         break;
       case "update":
         for (const hook of this.hooks.beforeUpdate) {
-          await hook(args, undefined, context);
+          await hook(context);
         }
         break;
       case "delete":
         for (const hook of this.hooks.beforeDelete) {
-          await hook(args, undefined, context);
+          await hook(context);
         }
         break;
     }
   }
 
-  async executeAfter(
-    operation: string,
-    args: any,
-    result: any,
-    adapter: DataSourceAdapter<T>
-  ): Promise<void> {
-    const context = { adapter, operation };
-
-    switch (operation) {
+  async executeAfter(context: MiddlewareContext<T>): Promise<void> {
+    switch (context.operation) {
       case "create":
         for (const hook of this.hooks.afterCreate) {
-          await hook(args, result, context);
+          await hook(context);
         }
         break;
       case "update":
         for (const hook of this.hooks.afterUpdate) {
-          await hook(args, result, context);
+          await hook(context);
         }
         break;
       case "delete":
         for (const hook of this.hooks.afterDelete) {
-          await hook(args, result, context);
+          await hook(context);
         }
         break;
     }
 
     for (const hook of this.hooks.afterAny) {
-      await hook(args, result, context);
+      await hook(context);
     }
   }
 
@@ -180,20 +149,13 @@ export function createHookMiddleware<T extends Record<string, any>>(
     context: MiddlewareContext<T>,
     next: MiddlewareNext<T>
   ) => {
-    await hookManager.executeBefore(
-      context.operation,
-      context.args,
-      context.adapter
-    );
+    await hookManager.executeBefore(context);
 
     const result = await next();
 
-    await hookManager.executeAfter(
-      context.operation,
-      context.args,
-      result,
-      context.adapter
-    );
+    context.result = result;
+    
+    await hookManager.executeAfter(context);
 
     return result;
   };

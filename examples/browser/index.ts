@@ -25,74 +25,58 @@ const MyPlugin: Plugin = {
 
 const HookMiddleware = createHookMiddleware((hookManager) => {
   hookManager
-    .beforeCreate(async (args, _, context) => {
+    .beforeCreate(async (context) => {
       console.log(
         "🚀 Builder: Before Create Hook",
-        "args: ",
-        args,
         "context: ",
         context
       );
     })
-    .afterCreate(async (args, result, context) => {
+    .afterCreate(async (context) => {
       console.log(
         "✨ Builder: After Create Hook",
-        "result: ",
-        result,
         "context: ",
         context
       );
     })
-    .beforeUpdate(async (args, _, context) => {
+    .beforeUpdate(async (context) => {
       console.log(
         "🔄 Builder: Before Update Hook",
-        "args: ",
-        args,
         "context: ",
         context
       );
     })
-    .afterUpdate(async (args, result, context) => {
+    .afterUpdate(async (context) => {
       console.log(
         "✅ Builder: After Update Hook",
-        "result: ",
-        result,
         "context: ",
         context
       );
     })
-    .beforeDelete(async (args, _, context) => {
+    .beforeDelete(async (context) => {
       console.log(
         "🗑️ Builder: Before Delete Hook",
-        "args: ",
-        args,
         "context: ",
         context
       );
     })
-    .afterDelete(async (args, result, context) => {
+    .afterDelete(async (context) => {
       console.log(
         "💀 Builder: After Delete Hook",
-        "result: ",
-        result,
         "context: ",
         context
       );
     })
-    .beforeAny(async (args, _, context) => {
+    .beforeAny(async (context) => {
       console.log(
         "🔄 Builder: Before Any Hook",
-        "args: ",
-        args,
         "context: ",
         context
       );
     })
-    .afterAny(async (args, result, context) => {
+    .afterAny(async (context) => {
       console.log(
         "✅ Builder: After Any Hook",
-        "result: ",
-        result,
         "context: ",
         context
       );

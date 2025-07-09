@@ -24,7 +24,6 @@ export class Repository<T extends Record<string, any>> {
     const context: MiddlewareContext<T> = {
       args,
       operation: "findMany",
-      adapter: this.adapter,
       metadata: metadata,
     };
 
@@ -40,7 +39,6 @@ export class Repository<T extends Record<string, any>> {
     const context: MiddlewareContext<T> = {
       args,
       operation: "findOne",
-      adapter: this.adapter,
       metadata: metadata,
     };
 
@@ -56,7 +54,6 @@ export class Repository<T extends Record<string, any>> {
     const context: MiddlewareContext<T> = {
       args,
       operation: "create",
-      adapter: this.adapter,
       metadata: metadata,
     };
 
@@ -70,7 +67,6 @@ export class Repository<T extends Record<string, any>> {
     const context: MiddlewareContext<T> = {
       args,
       operation: "update",
-      adapter: this.adapter,
       metadata: metadata,
     };
 
@@ -86,7 +82,6 @@ export class Repository<T extends Record<string, any>> {
     const context: MiddlewareContext<T> = {
       args,
       operation: "delete",
-      adapter: this.adapter,
       metadata: metadata,
     };
 

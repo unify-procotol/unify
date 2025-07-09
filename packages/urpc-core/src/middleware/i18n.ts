@@ -8,103 +8,156 @@ import { getRepo } from "../repo-register";
 import { getGlobalMiddlewareManager } from "../middleware-manager";
 
 const languageMap = {
-  zh: "中文",
-  en: "英文",
-  ja: "日文",
-  ko: "韩文",
-  fr: "法文",
-  de: "德文",
-  es: "西班牙文",
-  it: "意大利文",
-  ru: "俄文",
-  pt: "葡萄牙文",
-  nl: "荷兰文",
-  pl: "波兰文",
-  ar: "阿拉伯文",
-  hi: "印地文",
+  zh: "Chinese",
+  en: "English",
+  ja: "Japanese",
+  ko: "Korean",
+  fr: "French",
+  de: "German",
+  es: "Spanish",
+  it: "Italian",
+  ru: "Russian",
+  pt: "Portuguese",
+  nl: "Dutch",
+  pl: "Polish",
+  ar: "Arabic",
+  hi: "Hindi",
 } as const;
 
-export function i18nAIMiddleware<
-  T extends Record<string, any>,
->(): Middleware<T> {
+export interface I18nAIMiddlewareOptions {
+  required: {
+    cache: {
+      entity: string;
+      source: string;
+    };
+    llm: {
+      entity: string;
+      source: string;
+    };
+  };
+}
+
+export function i18nAIMiddleware<T extends Record<string, any>>(
+  options?: I18nAIMiddlewareOptions
+): Middleware<T> {
   const middleware = async (
     context: MiddlewareContext<T>,
     next: MiddlewareNext<T>
   ) => {
-    console.log("i18nAIMiddleware called with operation:", context.operation);
-
-    const result = await next();
+    console.log(
+      "i18nAIMiddleware called with context:",
+      JSON.stringify(context, null, 2)
+    );
 
     const metadata = context.metadata;
     const targetLanguage = metadata?.context?.language;
 
-    console.log("metadata:", metadata);
-    console.log("targetLanguage:", targetLanguage);
-    console.log("result:", result);
-
-    if (!targetLanguage || !result) {
-      console.log("No translation needed, returning result as-is");
-      return result;
+    // If no target language specified, execute normally without translation
+    if (!targetLanguage) {
+      console.log(
+        "No target language specified, executing without translation"
+      );
+      return await next();
     }
 
     const entityName = metadata.entity;
     const entityConfigs = getGlobalMiddlewareManager().entityConfigs;
-    console.log("entityConfigs:", entityConfigs);
     const entityConfig = entityConfigs[entityName];
-
-    console.log("entityConfig:", entityConfig);
 
     const fields = entityConfig?.fields;
     if (!fields) {
-      return result;
+      console.log(
+        "No fields configuration found, executing without translation"
+      );
+      return await next();
     }
 
-    const processEntity = async (result: any) => {
-      const translatedEntity = { ...result };
+    // Check if any field has i18n configuration
+    const hasI18nFields = Object.values(fields).some(
+      (field: any) => field.i18n
+    );
+    if (!hasI18nFields) {
+      console.log("No i18n fields found, executing without translation");
+      return await next();
+    }
 
-      for (const [fieldName, fieldConfig] of Object.entries(fields)) {
-        const typedFieldConfig = fieldConfig as FieldConfig;
-        if (typedFieldConfig.i18n && result[fieldName]) {
-          const originalValue = result[fieldName];
-          const cacheKey = `i18n:${entityName}:${result.slug}:${fieldName}:${targetLanguage}`;
-          console.log("cacheKey:===>", cacheKey);
-          try {
-            const cacheDefaultSource =
-              entityConfigs["cache"]?.defaultSource || "memory";
-            const cacheRepo = getRepo("CacheEntity", cacheDefaultSource);
-            let cachedTranslation = null;
+    // Extract identifier from context args for cache key
+    const whereClause = context.args?.where;
+    const identifier = whereClause?.slug || whereClause?.id;
 
+    if (!identifier) {
+      console.log(
+        "No slug or id found in where clause, executing without translation"
+      );
+      return await next();
+    }
+
+    // Build cache key from context
+    const cacheKey = `i18n:${entityName}:${identifier}:${targetLanguage}`;
+    console.log("cacheKey:===>", cacheKey);
+
+    try {
+      const cacheEntity = options?.required.cache.entity || "CacheEntity";
+      const cacheDefaultSource =
+        options?.required.cache.source ||
+        entityConfigs["cache"]?.defaultSource ||
+        "memory";
+      const cacheRepo = getRepo(cacheEntity, cacheDefaultSource);
+
+      // First check for cached translations
+      try {
+        const res = await cacheRepo.findOne(
+          {
+            where: { key: cacheKey },
+          },
+          {
+            entity: "cache",
+            source: cacheDefaultSource,
+          }
+        );
+
+        if (res?.value) {
+          console.log("Translation found in cache, returning cached result");
+          return res.value;
+        }
+      } catch (error) {
+        console.warn("Cache lookup failed:", error);
+      }
+
+      console.log("No cache found, fetching original data and translating");
+
+      // If no cache found, get original data
+      const originalResult = await next();
+
+      if (!originalResult) {
+        console.log("No original result found");
+        return originalResult;
+      }
+
+      console.log("Original result:", originalResult);
+
+      const processEntity = async (entity: any) => {
+        const translatedEntity = { ...entity };
+
+        // Translate fields
+        for (const [fieldName, fieldConfig] of Object.entries(fields)) {
+          const typedFieldConfig = fieldConfig as FieldConfig;
+          const i18n = typedFieldConfig.i18n;
+          const originalValue = entity[fieldName];
+          if (i18n && originalValue) {
             try {
-              const res = await cacheRepo.findOne(
-                {
-                  where: { key: cacheKey },
-                },
-                {
-                  entity: "cache",
-                  source: cacheDefaultSource,
-                }
-              );
-
-              cachedTranslation = res?.value;
-            } catch (error) {
-              console.warn("Cache lookup failed:", error);
-            }
-
-            if (cachedTranslation) {
-              translatedEntity[fieldName] = cachedTranslation;
-              console.log(
-                `Translation from cache for ${fieldName}: ${cachedTranslation}`
-              );
-            } else {
+              const llmEntity = options?.required.llm.entity || "LLMEntity";
               const llmDefaultSource =
-                entityConfigs["llm"]?.defaultSource || "openrouter";
-              const llmRepo = getRepo("LLMEntity", llmDefaultSource);
-              const prompt = `${typedFieldConfig.i18n.prompt || "请翻译以下内容"} 翻译成${languageMap[targetLanguage as keyof typeof languageMap]}:\n\n${originalValue}`;
+                options?.required.llm.source ||
+                entityConfigs["llm"]?.defaultSource ||
+                "openrouter";
+              const llmRepo = getRepo(llmEntity, llmDefaultSource);
+              const prompt = `${i18n.prompt || "Please translate the following content"}, translate to ${languageMap[targetLanguage as keyof typeof languageMap]}:\n\n${originalValue}`;
               console.log("prompt:===>", prompt);
               const translationResponse = await llmRepo.create(
                 {
                   data: {
-                    model: typedFieldConfig.i18n.model || "openai/gpt-4o",
+                    model: i18n.model || "openai/gpt-4o-mini",
                     prompt: prompt,
                   },
                 },
@@ -117,41 +170,55 @@ export function i18nAIMiddleware<
               const translatedValue =
                 translationResponse.output || originalValue;
               translatedEntity[fieldName] = translatedValue;
-              console.log(`Translation for ${fieldName}: ${translatedValue}`);
-
-              try {
-                await cacheRepo.create(
-                  {
-                    data: {
-                      key: cacheKey,
-                      value: translatedValue,
-                      ttl:
-                        typedFieldConfig.i18n.cache?.ttl || 1000 * 60 * 60 * 24, // 默认 24 小时
-                    },
-                  },
-                  {
-                    entity: "cache",
-                    source: cacheDefaultSource,
-                  }
-                );
-              } catch (error) {
-                console.warn("Failed to cache translation:", error);
-              }
+              console.log(`Translation for "${fieldName}": ${translatedValue}`);
+            } catch (error) {
+              console.warn(
+                `Translation failed for field "${fieldName}":`,
+                error
+              );
+              translatedEntity[fieldName] = originalValue;
             }
-          } catch (error) {
-            console.warn(`Translation failed for field ${fieldName}:`, error);
-            translatedEntity[fieldName] = originalValue;
           }
         }
+
+        return translatedEntity;
+      };
+
+      // Process result (handle both single entity and array)
+      let translatedResult;
+      if (Array.isArray(originalResult)) {
+        translatedResult = await Promise.all(originalResult.map(processEntity));
+      } else {
+        translatedResult = await processEntity(originalResult);
       }
 
-      return translatedEntity;
-    };
+      // Cache the translated result
+      try {
+        // Getting TTL from entity-level configuration
+        const ttl = entityConfig?.cache?.ttl || 1000 * 60 * 60 * 24; // Default 24 hours
+        await cacheRepo.create(
+          {
+            data: {
+              key: cacheKey,
+              value: translatedResult,
+              ttl: ttl,
+            },
+          },
+          {
+            entity: "cache",
+            source: cacheDefaultSource,
+          }
+        );
+        console.log("Translation cached successfully");
+      } catch (error) {
+        console.warn("Failed to cache translation:", error);
+      }
 
-    if (Array.isArray(result)) {
-      return await Promise.all(result.map(processEntity));
-    } else {
-      return await processEntity(result);
+      return translatedResult;
+    } catch (error) {
+      console.warn("Translation process failed:", error);
+      // If translation fails, return original data
+      return await next();
     }
   };
 

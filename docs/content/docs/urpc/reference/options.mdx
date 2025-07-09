@@ -172,8 +172,17 @@ type MiddlewareContext<T extends Record<string, any>> = {
   operation: "findMany" | "findOne" | "create" | "update" | "delete";
   args: any;
   result?: any;
-  adapter: DataSourceAdapter<T>;
+  metadata?: MiddlewareMetadata;
 };
+
+interface MiddlewareMetadata {
+  entity: string;
+  source?: string;
+  context?: {
+    language?: string;
+    [key: string]: any;
+  };
+}
 
 type MiddlewareOptions = {
   position?: "before" | "after" | "around";
@@ -319,14 +328,14 @@ Configuration options for initializing URPC server.
 interface URPCConfig {
   app?: Hono;
   plugins?: Plugin[];
-  middleware?: Middleware<any>[];
+  middlewares?: Middleware<any>[];
 }
 ```
 
 **Properties:**
 - `app` - Optional external Hono app instance
 - `plugins` - Array of plugins containing entities and adapters
-- `middleware` - Array of global middleware to apply
+- `middlewares` - Array of global middleware to apply
 
 ## Automatic Route Generation
 
@@ -643,7 +652,7 @@ Configuration options for Next.js integration.
 ```typescript
 interface URPCConfig {
   plugins?: Plugin[];
-  middleware?: Middleware<any>[];
+  middlewares?: Middleware<any>[];
 }
 ```
 

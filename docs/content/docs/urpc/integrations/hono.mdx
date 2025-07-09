@@ -175,11 +175,11 @@ import { createHookMiddleware, Logging } from "@unilab/urpc-core/middleware";
 
 const HookMiddleware = createHookMiddleware((hookManager) => {
   hookManager
-    .beforeCreate(async (args, _, context) => {
-      console.log("Before create:", args);
+    .beforeCreate(async (context) => {
+      console.log("Before create:", context);
     })
-    .afterCreate(async (args, result, context) => {
-      console.log("After create:", result);
+    .afterCreate(async (context) => {
+      console.log("After create:", context);
     });
 });
 

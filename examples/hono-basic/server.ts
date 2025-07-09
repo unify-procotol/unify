@@ -3,83 +3,29 @@ import { UserAdapter } from "./adapters/user";
 import { PostAdapter } from "./adapters/post";
 import { UserEntity } from "./entities/user";
 import { PostEntity } from "./entities/post";
-import { createHookMiddleware, Logging } from "@unilab/urpc-core/middleware";
+import { createHookMiddleware } from "@unilab/urpc-core/middleware";
 import { Plugin } from "@unilab/urpc-core";
 
 const HookMiddleware = createHookMiddleware((hookManager) => {
   hookManager
-    .beforeCreate(async (args, _, context) => {
-      console.log(
-        "🚀 Builder: Before Create Hook",
-        "args: ",
-        args,
-        "context: ",
-        context
-      );
+    .beforeCreate(async (context) => {
+      console.log("🚀 Builder: Before Create Hook", "context: ", context);
     })
-    .afterCreate(async (args, result, context) => {
-      console.log(
-        "✨ Builder: After Create Hook",
-        "result: ",
-        result,
-        "context: ",
-        context
-      );
+    .afterCreate(async (context) => {
+      console.log("✨ Builder: After Create Hook", "context: ", context);
     })
-    .beforeUpdate(async (args, _, context) => {
-      console.log(
-        "🔄 Builder: Before Update Hook",
-        "args: ",
-        args,
-        "context: ",
-        context
-      );
+    .beforeUpdate(async (context) => {
+      console.log("🔄 Builder: Before Update Hook", "context: ", context);
     })
-    .afterUpdate(async (args, result, context) => {
-      console.log(
-        "✅ Builder: After Update Hook",
-        "result: ",
-        result,
-        "context: ",
-        context
-      );
+    .afterUpdate(async (context) => {
+      console.log("✅ Builder: After Update Hook", "context: ", context);
     })
-    .beforeDelete(async (args, _, context) => {
-      console.log(
-        "🗑️ Builder: Before Delete Hook",
-        "args: ",
-        args,
-        "context: ",
-        context
-      );
+    .beforeDelete(async (context) => {
+      console.log("🗑️ Builder: Before Delete Hook", "context: ", context);
     })
-    .afterDelete(async (args, result, context) => {
-      console.log(
-        "💀 Builder: After Delete Hook",
-        "result: ",
-        result,
-        "context: ",
-        context
-      );
+    .afterDelete(async (context) => {
+      console.log("💀 Builder: After Delete Hook", "context: ", context);
     });
-  // .beforeAny(async (args, _, context) => {
-  //   console.log(
-  //     "🔄 Builder: Before Any Hook",
-  //     "args: ",
-  //     args,
-  //     "context: ",
-  //     context
-  //   );
-  // })
-  // .afterAny(async (args, result, context) => {
-  //   console.log(
-  //     "✅ Builder: After Any Hook",
-  //     "result: ",
-  //     result,
-  //     "context: ",
-  //     context
-  //   );
-  // });
 });
 
 const MyPlugin: Plugin = {
@@ -92,7 +38,7 @@ const MyPlugin: Plugin = {
 
 const app = URPC.init({
   plugins: [MyPlugin],
-  middlewares: [HookMiddleware, Logging()],
+  middlewares: [HookMiddleware],
 });
 
 // // Use repo on the server side

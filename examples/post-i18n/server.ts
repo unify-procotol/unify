@@ -1,7 +1,7 @@
 import { URPC } from "@unilab/urpc-hono";
 import { Plugin } from "@unilab/urpc-core";
 import { GhostAdapter } from "./adapters/ghost";
-import { i18nAIMiddleware } from "@unilab/urpc-core/middleware";
+import { i18nAIMiddleware, Logging } from "@unilab/urpc-core/middleware";
 import { PostEntity } from "./entities/post";
 import { UserEntity } from "./entities/user";
 import { UserAdapter } from "./adapters/user";
@@ -47,30 +47,43 @@ const LLMPlugin: Plugin = {
 
 const app = URPC.init({
   plugins: [GhostPlugin, CachePlugin, LLMPlugin],
-  middlewares: [i18nAIMiddleware()],
+  middlewares: [
+    i18nAIMiddleware({
+      required: {
+        cache: {
+          entity: "CacheEntity",
+          source: "memory",
+        },
+        llm: {
+          entity: "LLMEntity",
+          source: "openrouter",
+        },
+      },
+    }),
+    Logging()
+  ],
   entityConfigs: {
     cache: {
       defaultSource: "memory",
-      exclude: ['i18nAIMiddleware'],
+      exclude: ["i18nAIMiddleware"],
     },
     llm: {
       defaultSource: "openrouter",
       exclude: ["i18nAIMiddleware"],
     },
     post: {
+      cache: { ttl: 1000 * 60 * 5 },
       fields: {
         title: {
           i18n: {
-            prompt: "100字以内",
-            model: "openai/gpt-4",
-            cache: { ttl: 1000 * 60 * 5 },
+            prompt: "100 words or less",
+            model: "openai/gpt-4o-mini",
           },
         },
         content: {
           i18n: {
-            prompt: "200字以内",
-            model: "openai/gpt-4",
-            cache: { ttl: 1000 * 60 * 5 },
+            prompt: "200 words or less",
+            model: "openai/gpt-4o-mini",
           },
         },
       },

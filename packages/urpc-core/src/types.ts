@@ -84,7 +84,6 @@ export type MiddlewareContext<T extends Record<string, any>> = {
   operation: "findMany" | "findOne" | "create" | "update" | "delete";
   args: any;
   result?: any;
-  adapter: DataSourceAdapter<T>;
   metadata?: MiddlewareMetadata;
 };
 
@@ -147,9 +146,6 @@ export type JoinRepoOptions<
 export interface I18nConfig {
   prompt?: string;
   model?: string;
-  cache?: {
-    ttl?: number;
-  };
 }
 
 export interface FieldConfig {
@@ -159,6 +155,9 @@ export interface FieldConfig {
 export interface EntityConfig {
   defaultSource?: string;
   exclude?: string[];
+  cache?: {
+    ttl?: number;
+  };
   fields?: {
     [fieldName: string]: FieldConfig;
   };
