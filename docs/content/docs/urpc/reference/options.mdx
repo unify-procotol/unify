@@ -179,8 +179,7 @@ interface MiddlewareMetadata {
   entity: string;
   source?: string;
   context?: {
-    language?: string;
-    [key: string]: any;
+    lang?: string;
   };
 }
 
@@ -188,6 +187,9 @@ type MiddlewareOptions = {
   position?: "before" | "after" | "around";
   priority?: number;
   name?: string;
+  required?: {
+    entities: string[];
+  };
 };
 ```
 

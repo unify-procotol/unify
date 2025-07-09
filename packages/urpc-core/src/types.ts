@@ -76,7 +76,6 @@ export interface MiddlewareMetadata {
   source?: string;
   context?: {
     lang?: string;
-    [key: string]: any;
   };
 }
 
