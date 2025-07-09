@@ -44,7 +44,6 @@ const WeatherPlugin: Plugin = {
 };
 
 URPC.init({
-  // enableDebug: true,
   plugins: [WeatherPlugin],
 });
 

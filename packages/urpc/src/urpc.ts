@@ -9,9 +9,8 @@ import type {
   SchemaObject,
   AdapterRegistration,
   Middleware,
-  RepoOptions,
-  JoinRepoOptions,
   EntityConfigs,
+  GlobalAdapterRegistration,
 } from "@unilab/urpc-core";
 import {
   generateSchemas,
@@ -22,19 +21,18 @@ import {
   getGlobalMiddlewareManager,
   simplifyEntityName,
 } from "@unilab/urpc-core";
-import type { URPCConfig } from "./types";
+import type { URPCConfig, RepoOptions, JoinRepoOptions } from "./types";
 import { BuiltinPlugin } from "@unilab/builtin-plugin";
 
 export class URPC {
-  private enableDebug: boolean = false;
   private entitySchemas: Record<string, SchemaObject> = {};
   private entitySources: Record<string, string[]> = {};
   private entityConfigs: EntityConfigs = {};
   private entityNames: string[] = [];
 
   constructor(config: URPCConfig) {
-    this.enableDebug = config.enableDebug || false;
     this.initFromPlugins([...config.plugins, BuiltinPlugin(URPC)]);
+    this.registerGlobalAdapters(config.globalAdapters);
     this.setEntityConfigs(config.entityConfigs);
     this.applyMiddlewareToRepos(config.middlewares);
   }
@@ -96,6 +94,29 @@ export class URPC {
     }
   }
 
+  private registerGlobalAdapters(
+    globalAdapters: GlobalAdapterRegistration[] = []
+  ) {
+    if (globalAdapters.length > 0) {
+      globalAdapters.forEach(({ source, adapter }) => {
+        // For global adapters, we register them for all entities
+        this.entityNames.forEach((entityName) => {
+          registerAdapter(entityName, source, adapter);
+        });
+      });
+      console.log(
+        `✅ Registered global adapters: ${globalAdapters
+          .map((a) => {
+            const adapterName =
+              (a.adapter.constructor as any).adapterName ||
+              a.adapter.constructor.name;
+            return `${adapterName}`;
+          })
+          .join(", ")}`
+      );
+    }
+  }
+
   private analyzeEntitySources(
     adapters: AdapterRegistration[]
   ): Record<string, string[]> {
@@ -110,25 +131,29 @@ export class URPC {
   }
 
   createRepositoryProxy<T extends Record<string, any>>(
-    options: RepoOptions
+    options: RepoOptions<T>
   ): Repository<T> {
     return new Proxy({} as Repository<T>, {
       get: (target, prop: string) => {
         const { entity, context } = options;
+        const isEntityClass = typeof entity === "function" && "name" in entity;
+        const entityName = isEntityClass
+          ? simplifyEntityName(entity.name)
+          : entity;
         const source =
-          options.source || this.entityConfigs[entity]?.defaultSource;
+          options.source || this.entityConfigs[entityName]?.defaultSource;
 
         if (!source) {
-          throw new Error(`Source is required for entity ${entity}`);
+          throw new Error(`Source is required for entity ${entityName}`);
         }
 
-        const repo = getRepo(entity, source);
+        const repo = getRepo(entityName, source);
 
         switch (prop) {
           case "findMany":
             return async (args: FindManyArgs<T> = {}) => {
               const result = await repo.findMany(args, {
-                entity,
+                entity: entityName,
                 source,
                 context,
               });
@@ -137,13 +162,20 @@ export class URPC {
                 return await this.loadRelationsForMany(result, args.include);
               }
 
+              if (isEntityClass) {
+                return result.map((item) => {
+                  const entityInstance = new entity();
+                  Object.assign(entityInstance, item);
+                  return entityInstance;
+                });
+              }
               return result;
             };
 
           case "findOne":
             return async (args: FindOneArgs<T>) => {
               const result = await repo.findOne(args, {
-                entity,
+                entity: entityName,
                 source,
                 context,
               });
@@ -152,29 +184,48 @@ export class URPC {
                 return await this.loadRelations(result, args.include);
               }
 
+              if (isEntityClass) {
+                const entityInstance = new entity();
+                Object.assign(entityInstance, result);
+                return entityInstance;
+              }
               return result;
             };
 
           case "create":
             return async (args: CreationArgs<T>) => {
-              return repo.create(args, {
-                entity,
+              const result = await repo.create(args, {
+                entity: entityName,
                 source,
               });
+
+              if (isEntityClass) {
+                const entityInstance = new entity();
+                Object.assign(entityInstance, result);
+                return entityInstance;
+              }
+              return result;
             };
 
           case "update":
             return async (args: UpdateArgs<T>) => {
-              return repo.update(args, {
-                entity,
+              const result = await repo.update(args, {
+                entity: entityName,
                 source,
               });
+
+              if (isEntityClass) {
+                const entityInstance = new entity();
+                Object.assign(entityInstance, result);
+                return entityInstance;
+              }
+              return result;
             };
 
           case "delete":
             return async (args: DeletionArgs<T>) => {
               return repo.delete(args, {
-                entity,
+                entity: entityName,
                 source,
               });
             };
@@ -261,7 +312,7 @@ export class URPC {
   }
 
   static repo<T extends Record<string, any>>(
-    options: RepoOptions
+    options: RepoOptions<T>
   ): Repository<T> {
     return URPC.getGlobalClient().createRepositoryProxy<T>(options);
   }
@@ -302,7 +353,7 @@ export class URPC {
 }
 
 export function repo<T extends Record<string, any>>(
-  options: RepoOptions
+  options: RepoOptions<T>
 ): Repository<T> {
   return URPC.repo<T>(options);
 }

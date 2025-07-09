@@ -5,6 +5,7 @@ import { UserEntity } from "./entities/user";
 import { PostEntity } from "./entities/post";
 import { createHookMiddleware } from "@unilab/urpc-core/middleware";
 import { Plugin } from "@unilab/urpc-core";
+import { MemoryAdapter } from "@unilab/urpc-adapters";
 
 const HookMiddleware = createHookMiddleware((hookManager) => {
   hookManager
@@ -30,10 +31,10 @@ const HookMiddleware = createHookMiddleware((hookManager) => {
 
 const MyPlugin: Plugin = {
   entities: [UserEntity, PostEntity],
-  adapters: [
-    { source: "demo", entity: "UserEntity", adapter: new UserAdapter() },
-    { source: "demo", entity: "PostEntity", adapter: new PostAdapter() },
-  ],
+  // adapters: [
+  //   { source: "demo", entity: "UserEntity", adapter: new UserAdapter() },
+  //   { source: "demo", entity: "PostEntity", adapter: new PostAdapter() },
+  // ],
 };
 
 const app = URPC.init({
@@ -47,6 +48,12 @@ const app = URPC.init({
       defaultSource: "demo",
     },
   },
+  globalAdapters: [
+    {
+      source: "memory",
+      adapter: new MemoryAdapter(),
+    },
+  ],
 });
 
 // // Use repo on the server side

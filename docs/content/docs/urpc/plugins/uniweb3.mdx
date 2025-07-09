@@ -82,7 +82,6 @@ import { Logging } from "@unilab/urpc-core/middleware";
 
 // Initialize URPC with Web3 plugin for browser or node.js
 URPC.init({
-  enableDebug: true,
   plugins: [WalletPlugin],
   middlewares: [Logging()],
 });

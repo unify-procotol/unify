@@ -1,15 +1,6 @@
 import { Fields } from "@unilab/urpc-core";
 
 export class UserEntity {
-  constructor(args: {
-    id: string;
-    name: string;
-    email: string;
-    avatar: string;
-  }) {
-    Object.assign(this, args);
-  }
-
   @Fields.string()
   id = "";
 
@@ -37,7 +28,6 @@ export class UserEntity {
     },
   })
   click(name: string) {
-    this.name = name;
     console.log("click=>", this.name);
   }
 
@@ -56,6 +46,6 @@ export class UserEntity {
     },
   })
   greet(message: string) {
-    return `Hello ${this.name}! ${message}`;
+    console.log("greet=>", `Hello ${this.name}! ${message}`);
   }
 }

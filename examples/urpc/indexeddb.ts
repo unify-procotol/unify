@@ -1,5 +1,32 @@
-import { repo } from "@unilab/ustore";
 import { UserEntity } from "./entities/user";
+import { repo, URPC } from "@unilab/urpc";
+import { WalletPlugin } from "@unilab/uniweb3";
+import { Plugin } from "@unilab/urpc-core";
+import { Logging } from "@unilab/urpc-core/middleware";
+import { IndexedDBAdapter } from "@unilab/urpc-adapters";
+
+const MyPlugin: Plugin = {
+  entities: [UserEntity],
+};
+
+URPC.init({
+  plugins: [MyPlugin, WalletPlugin],
+  middlewares: [Logging()],
+  entityConfigs: {
+    user: {
+      defaultSource: "demo",
+    },
+    post: {
+      defaultSource: "demo",
+    },
+  },
+  globalAdapters: [
+    {
+      source: "indexeddb",
+      adapter: new IndexedDBAdapter(),
+    },
+  ],
+});
 
 declare global {
   interface Window {
@@ -46,7 +73,10 @@ window.createUser = async () => {
       avatar: getAvatar(),
     });
 
-    const user = await repo(UserEntity, "indexeddb").create({
+    const user = await repo({
+      entity: UserEntity,
+      source: "indexeddb",
+    }).create({
       data: {
         id: getId(),
         name: getName(),
@@ -65,13 +95,16 @@ window.findUser = async () => {
   try {
     const { getId } = getInputValues();
 
-    const user = await repo(UserEntity, "indexeddb").findOne({
+    const user = await repo({
+      entity: UserEntity,
+      source: "indexeddb",
+    }).findOne({
       where: { id: getId() },
     });
 
     if (user) {
       log(`✅ User found: ${JSON.stringify(user, null, 2)}`);
-      log(`🗣️ User greeting: ${user.greet("Welcome to IndexedDB!")}`);
+      user.greet("Welcome to IndexedDB!");
     } else {
       log(`❌ User not found with ID: ${getId()}`);
     }
@@ -84,7 +117,10 @@ window.updateUser = async () => {
   try {
     const { getId, getName, getEmail, getAvatar } = getInputValues();
 
-    const updatedUser = await repo(UserEntity, "indexeddb").update({
+    const updatedUser = await repo({
+      entity: UserEntity,
+      source: "indexeddb",
+    }).update({
       where: { id: getId() },
       data: {
         name: getName(),
@@ -93,7 +129,9 @@ window.updateUser = async () => {
       },
     });
 
-    log(`✅ User updated successfully: ${JSON.stringify(updatedUser, null, 2)}`);
+    log(
+      `✅ User updated successfully: ${JSON.stringify(updatedUser, null, 2)}`
+    );
   } catch (error) {
     log(`❌ Failed to update user: ${error}`);
   }
@@ -103,7 +141,10 @@ window.deleteUser = async () => {
   try {
     const { getId } = getInputValues();
 
-    const deleted = await repo(UserEntity, "indexeddb").delete({
+    const deleted = await repo({
+      entity: UserEntity,
+      source: "indexeddb",
+    }).delete({
       where: { id: getId() },
     });
 
@@ -119,7 +160,10 @@ window.deleteUser = async () => {
 
 window.listAllUsers = async () => {
   try {
-    const users = await repo(UserEntity, "indexeddb").findMany();
+    const users = await repo({
+      entity: UserEntity,
+      source: "indexeddb",
+    }).findMany();
 
     if (users.length > 0) {
       log(`✅ Found ${users.length} users:`);
@@ -134,22 +178,18 @@ window.listAllUsers = async () => {
   }
 };
 
-window.countUsers = async () => {
-  try {
-    const count = await repo(UserEntity, "indexeddb").count();
-    log(`📊 Total users in database: ${count}`);
-  } catch (error) {
-    log(`❌ Failed to count users: ${error}`);
-  }
-};
-
 window.clearDatabase = async () => {
   try {
-    // Get all users and delete them
-    const users = await repo(UserEntity, "indexeddb").findMany();
+    const users = await repo({
+      entity: UserEntity,
+      source: "indexeddb",
+    }).findMany();
 
     for (const user of users) {
-      await repo(UserEntity, "indexeddb").delete({
+      await repo({
+        entity: UserEntity,
+        source: "indexeddb",
+      }).delete({
         where: { id: user.id },
       });
     }

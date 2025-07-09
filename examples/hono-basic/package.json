@@ -13,6 +13,7 @@
     "@unilab/urpc-client": "workspace:*",
     "@unilab/urpc-core": "workspace:*",
     "@unilab/urpc-hono": "workspace:*",
+    "@unilab/urpc-adapters": "workspace:*",
     "hono": "^4.7.11"
   },
   "devDependencies": {

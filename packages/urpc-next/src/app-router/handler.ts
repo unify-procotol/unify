@@ -8,6 +8,7 @@ import {
   EntityConfigs,
   getGlobalMiddlewareManager,
   simplifyEntityName,
+  GlobalAdapterRegistration,
 } from "@unilab/urpc-core";
 import {
   generateSchemas,
@@ -44,6 +45,10 @@ export class URPC {
     if (!this.initialized) {
       if (config.plugins) {
         this.initFromPlugins([...config.plugins, BuiltinPlugin(this)]);
+      }
+
+      if (config.globalAdapters) {
+        this.registerGlobalAdapters(config.globalAdapters);
       }
 
       if (config.entityConfigs) {
@@ -90,6 +95,29 @@ export class URPC {
         })
         .join(", ")}`
     );
+  }
+
+  private static registerGlobalAdapters(
+    globalAdapters: GlobalAdapterRegistration[] = []
+  ) {
+    if (globalAdapters.length > 0) {
+      globalAdapters.forEach(({ source, adapter }) => {
+        // For global adapters, we register them for all entities
+        this.entityNames.forEach((entityName) => {
+          registerAdapter(entityName, source, adapter);
+        });
+      });
+      console.log(
+        `✅ Registered global adapters: ${globalAdapters
+          .map((a) => {
+            const adapterName =
+              (a.adapter.constructor as any).adapterName ||
+              a.adapter.constructor.name;
+            return `${adapterName}`;
+          })
+          .join(", ")}`
+      );
+    }
   }
 
   private static applyMiddlewareToRepos(middlewares: Middleware<any>[]) {
