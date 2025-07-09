@@ -33,8 +33,8 @@ export class URPC {
   constructor(config: URPCConfig) {
     this.enableDebug = config.enableDebug || false;
     this.initFromPlugins([...config.plugins, BuiltinPlugin(URPC)]);
-    this.applyMiddlewareToRepos(config.middlewares);
     this.setEntityConfigs(config.entityConfigs);
+    this.applyMiddlewareToRepos(config.middlewares);
   }
 
   private log(...args: any[]): void {
