@@ -1,0 +1,439 @@
+---
+title: Form
+description: Navigate through records one at a time in a detailed form view with automatic URPC integration and smart data fetching
+---
+
+# Form
+
+The form layout displays data in a detailed form format with automatic URPC integration, showing one record at a time with easy navigation between records. Perfect for detailed viewing and editing of individual items. **Form layout automatically uses `findOne()` when a specific ID is provided in the query.**
+
+## 🎯 Basic Form Layout
+
+<Tabs items={['Preview', 'Code']}>
+<Tab value="Preview">
+<UniRenderExample type="form" />
+</Tab>
+<Tab value="Code">
+```tsx
+import { UniRender } from '@unilab/ukit';
+
+<UniRender
+  entity="user"
+  source="demo"
+  layout="form"
+  query={{
+    where: { id: "1" }  // Automatically uses findOne()
+  }}
+  config={{
+    firstName: { label: 'First Name' },
+    lastName: { label: 'Last Name' },
+    email: { label: 'Email Address' },
+    phone: { label: 'Phone Number' },
+    department: { label: 'Department' },
+    joinDate: { 
+      label: 'Join Date',
+      render: (value) => new Date(value).toLocaleDateString()
+    },
+    isManager: { 
+      label: 'Management Role',
+      render: (value) => (
+        <span className={`px-2 py-1 rounded text-xs font-semibold ${
+          value ? 'bg-purple-100 text-purple-800' : 'bg-gray-100 text-gray-800'
+        }`}>
+          {value ? 'Manager' : 'Team Member'}
+        </span>
+      )
+    }
+  }}
+/>
+```
+</Tab>
+</Tabs>
+
+## 🔍 Form with Multiple Records
+
+Navigate through multiple records in form view:
+
+<Tabs items={['Preview', 'Code']}>
+<Tab value="Preview">
+<UniRenderExample type="form" />
+</Tab>
+<Tab value="Code">
+```tsx
+import { UniRender } from '@unilab/ukit';
+
+// Show all active users in form view (uses findMany)
+<UniRender
+  entity="user"
+  source="demo"
+  layout="form"
+  query={{
+    where: { isActive: true },
+    orderBy: { name: "asc" },
+    limit: 10
+  }}
+  config={{
+    name: { label: 'Full Name' },
+    email: { label: 'Email Address' },
+    role: { 
+      label: 'Role',
+      render: (value) => (
+        <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">
+          {value}
+        </span>
+      )
+    },
+    department: { label: 'Department' },
+    joinDate: { 
+      label: 'Join Date',
+      render: (value) => new Date(value).toLocaleDateString()
+    }
+  }}
+/>
+```
+</Tab>
+</Tabs>
+
+## ✏️ Editable Form
+
+Enable form editing with automatic URPC integration:
+
+<Tabs items={['Preview', 'Code']}>
+<Tab value="Preview">
+<UniRenderExample type="form" />
+</Tab>
+<Tab value="Code">
+```tsx
+import { UniRender } from '@unilab/ukit';
+
+function EditableFormExample() {
+  const handleEdit = async (updatedRecord, index) => {
+    // This will automatically call your adapter's update method
+    console.log('Updated record:', updatedRecord);
+  };
+
+  return (
+    <UniRender
+      entity="user"
+      source="demo"
+      layout="form"
+      query={{
+        where: { id: "1" }  // Edit specific user
+      }}
+      config={{
+        firstName: { 
+          label: 'First Name',
+          editable: true,
+          required: true,
+          type: 'text'
+        },
+        lastName: { 
+          label: 'Last Name',
+          editable: true,
+          required: true,
+          type: 'text'
+        },
+        email: { 
+          label: 'Email Address',
+          editable: true,
+          required: true,
+          type: 'email'
+        },
+        phone: { 
+          label: 'Phone Number',
+          editable: true,
+          type: 'text'
+        },
+        department: { 
+          label: 'Department',
+          editable: true,
+          type: 'select',
+          options: ['Engineering', 'Marketing', 'Sales', 'HR']
+        },
+        joinDate: { 
+          label: 'Join Date',
+          editable: true,
+          type: 'date'
+        },
+        isManager: { 
+          label: 'Is Manager',
+          editable: true,
+          type: 'checkbox'
+        }
+      }}
+      generalConfig={{
+        editable: true,
+        showActions: true,
+        actions: {
+          edit: true
+        }
+      }}
+      onEdit={handleEdit}
+    />
+  );
+}
+```
+</Tab>
+</Tabs>
+
+## 🎛️ Form Configuration
+
+### Field Layout and Smart Data Fetching
+
+```tsx
+// Single record form (automatically uses findOne)
+const singleUserQuery = {
+  where: { id: "user-123" }  // findOne when ID specified
+};
+
+// Multiple records form (uses findMany)
+const multipleUsersQuery = {
+  where: { 
+    department: "Engineering",
+    isActive: true 
+  },
+  orderBy: { name: "asc" },
+  limit: 5
+};
+
+const formConfig = {
+  // Text fields
+  firstName: {
+    label: 'First Name',
+    required: true,
+    editable: true,
+    type: 'text',
+    order: 1
+  },
+  
+  lastName: {
+    label: 'Last Name',
+    required: true,
+    editable: true,
+    type: 'text',
+    order: 2
+  },
+  
+  // Email with validation
+  email: {
+    label: 'Email Address',
+    type: 'email',
+    required: true,
+    editable: true,
+    order: 3
+  },
+  
+  // Phone number
+  phone: {
+    label: 'Phone Number',
+    type: 'text',
+    editable: true,
+    order: 4
+  },
+  
+  // Select dropdown
+  department: {
+    label: 'Department',
+    type: 'select',
+    options: ['Engineering', 'Marketing', 'Sales', 'HR'],
+    editable: true,
+    order: 5
+  },
+  
+  // Date picker
+  joinDate: {
+    label: 'Join Date',
+    type: 'date',
+    editable: true,
+    order: 6,
+    render: (value) => new Date(value).toLocaleDateString()
+  },
+  
+  // Checkbox
+  isManager: {
+    label: 'Is Manager',
+    type: 'checkbox',
+    editable: true,
+    order: 7,
+    render: (value) => (
+      <span className={`px-2 py-1 rounded text-xs font-semibold ${
+        value ? 'bg-purple-100 text-purple-800' : 'bg-gray-100 text-gray-800'
+      }`}>
+        {value ? 'Manager' : 'Team Member'}
+      </span>
+    )
+  },
+  
+  // Textarea for longer text
+  bio: {
+    label: 'Biography',
+    type: 'textarea',
+    editable: true,
+    order: 8
+  },
+  
+  // Hidden fields
+  id: {
+    hidden: true
+  }
+};
+```
+
+## 🧭 Navigation Controls
+
+The form layout includes built-in navigation controls when displaying multiple records:
+
+- **Previous/Next buttons**: Navigate between records
+- **Record counter**: Shows current position (e.g., "2 of 10")
+- **Direct navigation**: Jump to specific record by number
+- **Keyboard shortcuts**: Arrow keys for navigation
+
+### Navigation Features
+
+```tsx
+// Navigation is automatically included for multiple records
+<UniRender
+  entity="user"
+  source="demo"
+  layout="form"
+  query={{
+    where: { isActive: true },
+    limit: 10  // Multiple records = navigation enabled
+  }}
+  // ... other props
+/>
+
+// Single record = no navigation needed
+<UniRender
+  entity="user"
+  source="demo"
+  layout="form"
+  query={{
+    where: { id: "user-123" }  // Single record = no navigation
+  }}
+  // ... other props
+/>
+```
+
+## 🔄 Smart Query Handling
+
+Form layout automatically optimizes queries based on your needs:
+
+```tsx
+// Scenario 1: Edit specific user (findOne)
+<UniRender
+  entity="user"
+  source="demo"
+  layout="form"
+  query={{
+    where: { id: "user-123" }  // ✅ Uses findOne()
+  }}
+/>
+
+// Scenario 2: Browse users (findMany)
+<UniRender
+  entity="user"
+  source="demo"
+  layout="form"
+  query={{
+    where: { 
+      department: "Engineering" 
+    },  // ✅ Uses findMany()
+    limit: 10
+  }}
+/>
+
+// Scenario 3: First record from filtered set (findMany)
+<UniRender
+  entity="user"
+  source="demo"
+  layout="form"
+  query={{
+    where: { role: "admin" },
+    limit: 1  // ✅ Uses findMany() but shows as form
+  }}
+/>
+```
+
+## 🎨 Form Styling
+
+### Field Grouping
+
+Organize related fields into visual groups:
+
+```tsx
+const groupedConfig = {
+  // Personal Information Group
+  firstName: { label: 'First Name', group: 'personal' },
+  lastName: { label: 'Last Name', group: 'personal' },
+  email: { label: 'Email', group: 'personal' },
+  
+  // Work Information Group
+  department: { label: 'Department', group: 'work' },
+  joinDate: { label: 'Join Date', group: 'work' },
+  isManager: { label: 'Manager Status', group: 'work' },
+  
+  // Additional Information
+  bio: { label: 'Biography', group: 'additional' }
+};
+```
+
+### Custom Field Rendering
+
+```tsx
+const config = {
+  avatar: {
+    label: 'Profile Picture',
+    render: (value, record) => (
+      <div className="flex items-center space-x-3">
+        <img 
+          src={value} 
+          alt={record.name}
+          className="w-16 h-16 rounded-full object-cover"
+        />
+        <div>
+          <p className="font-medium">{record.name}</p>
+          <p className="text-sm text-gray-500">{record.role}</p>
+        </div>
+      </div>
+    )
+  },
+  
+  status: {
+    label: 'Account Status',
+    render: (value, record) => {
+      const statusConfig = {
+        active: { color: 'green', label: 'Active' },
+        inactive: { color: 'red', label: 'Inactive' },
+        pending: { color: 'yellow', label: 'Pending Approval' }
+      };
+      
+      const config = statusConfig[value] || statusConfig.inactive;
+      
+      return (
+        <div className="flex items-center space-x-2">
+          <div className={`w-3 h-3 rounded-full bg-${config.color}-400`}></div>
+          <span className={`text-${config.color}-700 font-medium`}>
+            {config.label}
+          </span>
+        </div>
+      );
+    }
+  }
+};
+```
+
+## 🎯 Best Practices
+
+1. **Use findOne for specific records**: When editing a known record, use ID in query
+2. **Organize fields logically**: Group related fields together
+3. **Provide clear navigation**: For multiple records, ensure navigation is intuitive
+4. **Handle loading states**: Show loading indicators during data fetching
+5. **Implement proper validation**: Use field types and required flags appropriately
+6. **Mobile-friendly**: Ensure forms work well on mobile devices
+
+## 🔗 Related Components
+
+- [Table Layout](/docs/ukit/components/table-layout) - List view of multiple records
+- [Card Layout](/docs/ukit/components/card-layout) - Visual card display
+- [Grid Layout](/docs/ukit/components/grid) - Grid-based layouts 

@@ -1,0 +1,400 @@
+---
+title: Table
+description: Display data in a structured table format with sorting, filtering, and editing capabilities using URPC integration
+---
+
+# Table
+
+The table layout provides a traditional spreadsheet-like view for displaying structured data with automatic URPC integration. It's ideal for showing multiple records with clear column headers and easy comparison between entries.
+
+## 🎯 Basic Table
+
+<Tabs items={['Preview', 'Code']}>
+<Tab value="Preview">
+<UniRenderExample type="basic" />
+</Tab>
+<Tab value="Code">
+```tsx
+import { UniRender } from '@unilab/ukit';
+
+<UniRender
+  entity="user"
+  source="demo"
+  layout="table"
+  config={{
+    id: { label: 'ID', width: '60px' },
+    name: { label: 'Full Name' },
+    email: { label: 'Email Address' },
+    role: { label: 'Role' },
+    isActive: { 
+      label: 'Status',
+      render: (value) => (
+        <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+          value ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+        }`}>
+          {value ? 'Active' : 'Inactive'}
+        </span>
+      )
+    }
+  }}
+  generalConfig={{
+    showActions: true,
+    actions: {
+      edit: true,
+      delete: true
+    }
+  }}
+/>
+```
+</Tab>
+</Tabs>
+
+## 🔍 Filtered Table
+
+Filter and paginate data using query parameters:
+
+<Tabs items={['Preview', 'Code']}>
+<Tab value="Preview">
+<UniRenderExample type="basic" />
+</Tab>
+<Tab value="Code">
+```tsx
+import { UniRender } from '@unilab/ukit';
+
+<UniRender
+  entity="user"
+  source="demo"
+  layout="table"
+  query={{
+    where: { 
+      role: "admin",
+      isActive: true 
+    },
+    orderBy: { name: "asc" },
+    limit: 10,
+    skip: 0
+  }}
+  config={{
+    id: { label: 'ID', width: '60px' },
+    name: { label: 'Full Name' },
+    email: { label: 'Email Address' },
+    role: { 
+      label: 'Role',
+      render: (value) => (
+        <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">
+          {value}
+        </span>
+      )
+    },
+    isActive: { 
+      label: 'Status',
+      render: (value) => (
+        <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+          value ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+        }`}>
+          {value ? 'Active' : 'Inactive'}
+        </span>
+      )
+    }
+  }}
+/>
+```
+</Tab>
+</Tabs>
+
+## ✏️ Editable Table
+
+Enable inline editing with automatic URPC integration:
+
+<Tabs items={['Preview', 'Code']}>
+<Tab value="Preview">
+<UniRenderExample type="table-editable" />
+</Tab>
+<Tab value="Code">
+```tsx
+import { UniRender } from '@unilab/ukit';
+
+function EditableTableExample() {
+  const handleEdit = async (updatedRecord, index) => {
+    // This will automatically call your adapter's update method
+    console.log('Updated record:', updatedRecord);
+  };
+
+  const handleDelete = async (record, index) => {
+    // This will automatically call your adapter's delete method
+    console.log('Deleted record:', record);
+  };
+
+  return (
+    <UniRender
+      entity="user"
+      source="demo"
+      layout="table"
+      config={{
+        id: { label: 'ID', width: '60px', editable: false },
+        name: { 
+          label: 'Full Name', 
+          editable: true,
+          required: true,
+          type: 'text'
+        },
+        email: { 
+          label: 'Email Address', 
+          editable: true,
+          required: true,
+          type: 'email'
+        },
+        role: { 
+          label: 'Role',
+          editable: true,
+          type: 'select',
+          options: ['Admin', 'User', 'Manager']
+        },
+        isActive: { 
+          label: 'Status',
+          editable: true,
+          type: 'checkbox',
+          render: (value) => (
+            <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+              value ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+            }`}>
+              {value ? 'Active' : 'Inactive'}
+            </span>
+          )
+        }
+      }}
+      generalConfig={{
+        editable: true,
+        showActions: true,
+        actions: {
+          edit: true,
+          delete: true
+        }
+      }}
+      onEdit={handleEdit}
+      onDelete={handleDelete}
+    />
+  );
+}
+```
+</Tab>
+</Tabs>
+
+## 🎛️ Table Configuration
+
+### Column Configuration
+
+```tsx
+const columnConfig = {
+  // Basic column settings
+  id: {
+    label: 'ID',
+    width: '60px',
+    align: 'center',
+    editable: false
+  },
+  
+  // Text input
+  name: {
+    label: 'Full Name',
+    editable: true,
+    required: true,
+    type: 'text'
+  },
+  
+  // Email input with validation
+  email: {
+    label: 'Email Address',
+    editable: true,
+    required: true,
+    type: 'email'
+  },
+  
+  // Select dropdown
+  role: {
+    label: 'Role',
+    editable: true,
+    type: 'select',
+    options: ['Admin', 'User', 'Manager', 'Guest']
+  },
+  
+  // Number input
+  salary: {
+    label: 'Salary',
+    editable: true,
+    type: 'number',
+    align: 'right',
+    render: (value) => `$${value.toLocaleString()}`
+  },
+  
+  // Date picker
+  joinDate: {
+    label: 'Join Date',
+    editable: true,
+    type: 'date',
+    render: (value) => new Date(value).toLocaleDateString()
+  },
+  
+  // Checkbox
+  isActive: {
+    label: 'Status',
+    editable: true,
+    type: 'checkbox',
+    render: (value) => (
+      <span className={`px-2 py-1 rounded-full text-xs ${
+        value ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+      }`}>
+        {value ? 'Active' : 'Inactive'}
+      </span>
+    )
+  }
+};
+```
+
+### Query Parameters
+
+Control data fetching with powerful query options:
+
+```tsx
+// Basic filtering
+const basicQuery = {
+  where: { 
+    isActive: true,
+    role: "admin" 
+  }
+};
+
+// Advanced filtering with operators
+const advancedQuery = {
+  where: {
+    role: { $in: ["admin", "moderator"] },
+    createdAt: { $gte: "2024-01-01" },
+    name: { $contains: "john" }
+  },
+  orderBy: { createdAt: "desc" },
+  limit: 20,
+  skip: 0
+};
+
+// Include related data
+const withRelations = {
+  where: { isActive: true },
+  include: {
+    posts: true,
+    profile: true
+  }
+};
+
+<UniRender
+  entity="user"
+  source="demo"
+  layout="table"
+  query={advancedQuery}
+  // ... other props
+/>
+```
+
+## 🔄 Loading and Error States
+
+UniRender automatically handles loading and error states:
+
+```tsx
+// Automatic loading state while fetching
+<UniRender
+  entity="user"
+  source="demo"
+  layout="table"
+  // Loading state is automatic
+/>
+
+// Override with custom loading
+<UniRender
+  entity="user"
+  source="demo"
+  layout="table"
+  loading={customLoading}
+  error={customError}
+/>
+```
+
+## 🎨 Advanced Table Features
+
+### Row Actions
+
+```tsx
+const generalConfig = {
+  showActions: true,
+  actions: {
+    edit: true,
+    delete: true,
+    custom: [
+      {
+        label: 'View Profile',
+        icon: <UserIcon />,
+        onClick: (record, index) => {
+          window.open(`/profile/${record.id}`, '_blank');
+        },
+        className: 'text-blue-600 hover:text-blue-800'
+      },
+      {
+        label: 'Send Email',
+        icon: <MailIcon />,
+        onClick: (record, index) => {
+          window.location.href = `mailto:${record.email}`;
+        },
+        className: 'text-green-600 hover:text-green-800'
+      }
+    ]
+  }
+};
+```
+
+### Responsive Design
+
+Tables automatically adapt to screen sizes:
+
+- **Desktop**: Full table with all columns
+- **Tablet**: Condensed view with important columns
+- **Mobile**: Card-like rows with stacked information
+
+### Custom Cell Rendering
+
+```tsx
+const config = {
+  avatar: {
+    label: 'Avatar',
+    render: (value, record) => (
+      <img 
+        src={value} 
+        alt={record.name}
+        className="w-8 h-8 rounded-full object-cover"
+      />
+    )
+  },
+  
+  status: {
+    label: 'Status',
+    render: (value, record) => {
+      const statusColors = {
+        active: 'bg-green-100 text-green-800',
+        inactive: 'bg-red-100 text-red-800',
+        pending: 'bg-yellow-100 text-yellow-800'
+      };
+      
+      return (
+        <span className={`px-2 py-1 rounded-full text-xs font-semibold ${statusColors[value]}`}>
+          {value.charAt(0).toUpperCase() + value.slice(1)}
+        </span>
+      );
+    }
+  }
+};
+```
+
+## 🎯 Best Practices
+
+1. **Use meaningful labels**: Make column headers descriptive
+2. **Implement proper loading states**: Let users know data is being fetched
+3. **Handle errors gracefully**: Provide clear error messages
+4. **Optimize for mobile**: Ensure tables work well on small screens
+5. **Use consistent formatting**: Apply consistent styling across all tables 

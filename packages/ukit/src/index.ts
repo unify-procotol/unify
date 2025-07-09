@@ -13,6 +13,9 @@ export type {
   EditModalProps
 } from './types';
 
+// Ref interfaces
+export type { UniRenderRef } from './components/UniRender';
+
 // Layout components (for advanced usage)
 export { TableLayout } from './components/TableLayout';
 export { FormLayout } from './components/FormLayout';

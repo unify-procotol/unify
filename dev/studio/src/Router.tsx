@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Layout, StudioHome } from "./components";
-import StoryPage from "./components/StoryPage";
 
 // Simple router implementation
 export const Router: React.FC = () => {
@@ -24,8 +23,6 @@ export const Router: React.FC = () => {
   // Route components
   const renderRoute = () => {
     switch (currentPath) {
-      case '/story':
-        return <StoryPage />;
       case '/':
       default:
         return (
@@ -45,16 +42,6 @@ export const Router: React.FC = () => {
                         }`}
                       >
                         Studio
-                      </button>
-                      <button
-                        onClick={() => navigate('/story')}
-                        className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${
-                          currentPath === '/story' 
-                            ? 'bg-primary text-primary-foreground shadow-sm' 
-                            : 'text-muted-foreground hover:text-foreground hover:bg-muted'
-                        }`}
-                      >
-                        Storybook
                       </button>
                     </nav>
                   </div>

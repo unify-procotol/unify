@@ -183,7 +183,7 @@ export const ListLayout: React.FC<LayoutProps> = ({
           </div>
           <h3 className="text-lg font-semibold">No records found</h3>
           <p className="text-sm text-muted-foreground mt-1">
-            There are no {entity.name.toLowerCase()} records to display in list view.
+            There are no {entity.name?.toLowerCase() || 'records'} to display in list view.
           </p>
         </div>
       )}

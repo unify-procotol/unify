@@ -1,6 +1,7 @@
 {
   "name": "urpc-studio",
   "version": "0.0.1",
+  "type": "module",
   "description": "Lightweight browser-only client library for URPC without HTTP functionality",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -39,8 +40,7 @@
     "@radix-ui/react-slot": "^1.2.3",
     "@radix-ui/react-tabs": "^1.1.12",
     "@unilab/urpc-client": "workspace:*",
-    "@unilab/unify-ui": "workspace:*",
-    "@vitejs/plugin-react": "^4.2.0",
+    "@unilab/ukit": "workspace:*",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.525.0",
@@ -53,6 +53,7 @@
     "zod": "^3.25.57"
   },
   "devDependencies": {
+    "@vitejs/plugin-react": "^4.6.0",
     "@tailwindcss/vite": "^4.1.11",
     "@types/node": "^20",
     "@types/react": "^18.2.0",
@@ -81,5 +82,8 @@
     "access": "public"
   },
   "preferGlobal": true,
-  "browser": false
+  "browser": false,
+  "overrides": {
+    "rollup": "4.29.2"
+  }
 }

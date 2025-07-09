@@ -86,13 +86,33 @@ export interface GeneralConfig {
 }
 
 /**
+ * Query parameters for data fetching
+ */
+export interface QueryParams {
+  /** WHERE clause for filtering */
+  where?: Record<string, any>;
+  /** Fields to include in the response */
+  select?: string[];
+  /** Number of records to skip */
+  skip?: number;
+  /** Number of records to limit */
+  limit?: number;
+  /** Sorting configuration */
+  orderBy?: Record<string, 'asc' | 'desc'>;
+  /** Include relations */
+  include?: Record<string, any>;
+}
+
+/**
  * Main props interface for UniRender component
  */
 export interface UniRenderProps {
-  /** Entity schema definition */
-  entity: Entity;
-  /** Array of data records to display */
-  data: any[];
+  /** Entity name (string) */
+  entity: string;
+  /** Data source (optional) */
+  source?: string;
+  /** Query parameters for data fetching */
+  query?: QueryParams;
   /** Layout type for rendering */
   layout: LayoutType;
   /** Field-specific configuration */

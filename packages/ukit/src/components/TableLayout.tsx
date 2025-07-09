@@ -118,9 +118,9 @@ export const TableLayout: React.FC<LayoutProps> = ({
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div className="space-y-1">
-            <h2 className="text-2xl font-bold tracking-tight">{entity.name}</h2>
+            <h2 className="text-2xl font-bold tracking-tight">{entity.name || 'Records'}</h2>
             <p className="text-muted-foreground">
-              Table view for {entity.name.toLowerCase()} records
+              Table view for {entity.name?.toLowerCase() || 'records'}
             </p>
           </div>
         </div>
@@ -131,7 +131,7 @@ export const TableLayout: React.FC<LayoutProps> = ({
           </div>
           <h3 className="text-lg font-semibold">No records found</h3>
           <p className="text-sm text-muted-foreground mt-1">
-            There are no {entity.name.toLowerCase()} records to display in table view.
+            There are no {entity.name?.toLowerCase() || 'records'} to display in table view.
           </p>
         </div>
       </div>
@@ -141,15 +141,6 @@ export const TableLayout: React.FC<LayoutProps> = ({
   return (
     <>
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div className="space-y-1">
-            <h2 className="text-2xl font-bold tracking-tight">{entity.name}</h2>
-            <p className="text-muted-foreground">
-              {data.length} record{data.length !== 1 ? 's' : ''} in table view
-            </p>
-          </div>
-        </div>
-
         <Card>
           <div className="overflow-x-auto">
             <Table>

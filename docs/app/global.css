@@ -1,8 +1,8 @@
 @import "tailwindcss";
 @import "fumadocs-ui/css/neutral.css";
 @import "fumadocs-ui/css/preset.css";
-@source '../../packages/unify-ui/dist/**/*.{js,ts,jsx,tsx}';
-@source '../../packages/unify-ui/src/**/*.{js,ts,jsx,tsx}';
+@source '../../packages/ukit/dist/**/*.{js,ts,jsx,tsx}';
+@source '../../packages/ukit/src/**/*.{js,ts,jsx,tsx}';
 
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);

@@ -1,33 +1,47 @@
 "use client";
 
-import { UniRender } from "@unilab/unify-ui";
-import type { UniRenderProps } from "@unilab/unify-ui";
-import { useState } from "react";
+import { UniRender } from "@unilab/ukit";
+import { repo, URPC } from "@unilab/urpc-client";
+import { useState, useEffect } from "react";
 
 interface ExampleProps {
   type: 'basic' | 'table-editable' | 'card' | 'form' | 'grid' | 'list' | 'dashboard' | 'loading' | 'error' | 'empty';
 }
 
+URPC.init({
+  baseUrl: `${window.location.origin}/api`,
+});
+
 export function UniRenderExample({ type }: ExampleProps) {
-  // State for editable table example
-  const [tableData, setTableData] = useState([
-    { id: 1, name: 'John Doe', email: 'john@example.com', role: 'Admin', isActive: true },
-    { id: 2, name: 'Jane Smith', email: 'jane@example.com', role: 'User', isActive: true },
-    { id: 3, name: 'Bob Johnson', email: 'bob@example.com', role: 'User', isActive: false }
-  ]);
+  const [isInitialized, setIsInitialized] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const initializeData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        setIsInitialized(true);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to initialize data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (!isInitialized) {
+      initializeData();
+    }
+  }, [isInitialized]);
 
   const handleEdit = async (updatedRecord: any, index: number) => {
-    const newData = [...tableData];
-    newData[index] = updatedRecord;
-    setTableData(newData);
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 500));
     console.log('Updated record:', updatedRecord);
   };
 
   const handleDelete = async (record: any, index: number) => {
-    const newData = tableData.filter((_, i) => i !== index);
-    setTableData(newData);
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 500));
     console.log('Deleted record:', record);
@@ -35,21 +49,7 @@ export function UniRenderExample({ type }: ExampleProps) {
 
   const examples = {
     basic: {
-      entity: {
-        name: 'User',
-        fields: [
-          { name: 'id', type: 'number', required: true },
-          { name: 'name', type: 'string', required: true },
-          { name: 'email', type: 'string', required: true },
-          { name: 'role', type: 'string' },
-          { name: 'isActive', type: 'boolean' }
-        ]
-      },
-      data: [
-        { id: 1, name: 'John Doe', email: 'john@example.com', role: 'Admin', isActive: true },
-        { id: 2, name: 'Jane Smith', email: 'jane@example.com', role: 'User', isActive: true },
-        { id: 3, name: 'Bob Johnson', email: 'bob@example.com', role: 'User', isActive: false }
-      ],
+      entity: "user",
       layout: 'table' as const,
       config: {
         id: { label: 'ID', width: '60px' },
@@ -76,17 +76,7 @@ export function UniRenderExample({ type }: ExampleProps) {
       }
     },
     'table-editable': {
-      entity: {
-        name: 'User',
-        fields: [
-          { name: 'id', type: 'number', required: true },
-          { name: 'name', type: 'string', required: true },
-          { name: 'email', type: 'string', required: true },
-          { name: 'role', type: 'string' },
-          { name: 'isActive', type: 'boolean' }
-        ]
-      },
-      data: tableData,
+      entity: "user",
       layout: 'table' as const,
       config: {
         id: { label: 'ID', width: '60px', editable: false },
@@ -133,43 +123,8 @@ export function UniRenderExample({ type }: ExampleProps) {
       onDelete: handleDelete
     },
     card: {
-      entity: {
-        name: 'Product',
-        fields: [
-          { name: 'id', type: 'number', required: true },
-          { name: 'name', type: 'string', required: true },
-          { name: 'price', type: 'number', required: true },
-          { name: 'category', type: 'string' },
-          { name: 'inStock', type: 'boolean' },
-          { name: 'description', type: 'string' }
-        ]
-      },
-      data: [
-        { 
-          id: 1, 
-          name: 'Wireless Headphones', 
-          price: 199.99, 
-          category: 'Electronics', 
-          inStock: true, 
-          description: 'High-quality wireless headphones with noise cancellation' 
-        },
-        { 
-          id: 2, 
-          name: 'Smart Watch', 
-          price: 299.99, 
-          category: 'Electronics', 
-          inStock: false, 
-          description: 'Feature-rich smartwatch with health tracking' 
-        },
-        { 
-          id: 3, 
-          name: 'Coffee Maker', 
-          price: 149.99, 
-          category: 'Home', 
-          inStock: true, 
-          description: 'Programmable coffee maker with thermal carafe' 
-        }
-      ],
+      entity: "user",
+      
       layout: 'card' as const,
       config: {
         price: { 
@@ -201,41 +156,11 @@ export function UniRenderExample({ type }: ExampleProps) {
       }
     },
     form: {
-      entity: {
-        name: 'User Profile',
-        fields: [
-          { name: 'id', type: 'number', required: true },
-          { name: 'firstName', type: 'string', required: true },
-          { name: 'lastName', type: 'string', required: true },
-          { name: 'email', type: 'string', required: true },
-          { name: 'phone', type: 'string' },
-          { name: 'department', type: 'string' },
-          { name: 'joinDate', type: 'date' },
-          { name: 'isManager', type: 'boolean' }
-        ]
+      entity: "user",
+      
+      query: {
+        where: { id: "1" }
       },
-      data: [
-        { 
-          id: 1, 
-          firstName: 'Alice', 
-          lastName: 'Johnson', 
-          email: 'alice.johnson@company.com', 
-          phone: '+1-555-0123',
-          department: 'Engineering',
-          joinDate: '2023-01-15',
-          isManager: true
-        },
-        { 
-          id: 2, 
-          firstName: 'Bob', 
-          lastName: 'Smith', 
-          email: 'bob.smith@company.com', 
-          phone: '+1-555-0124',
-          department: 'Marketing',
-          joinDate: '2023-03-20',
-          isManager: false
-        }
-      ],
       layout: 'form' as const,
       config: {
         firstName: { label: 'First Name' },
@@ -260,51 +185,8 @@ export function UniRenderExample({ type }: ExampleProps) {
       }
     },
     grid: {
-      entity: {
-        name: 'Gallery Item',
-        fields: [
-          { name: 'id', type: 'number', required: true },
-          { name: 'title', type: 'string', required: true },
-          { name: 'image', type: 'string' },
-          { name: 'category', type: 'string' },
-          { name: 'views', type: 'number' },
-          { name: 'likes', type: 'number' }
-        ]
-      },
-      data: [
-        { 
-          id: 1, 
-          title: 'Mountain Landscape', 
-          image: '/images/mountain.jpg',
-          category: 'Nature', 
-          views: 1250, 
-          likes: 89 
-        },
-        { 
-          id: 2, 
-          title: 'City Sunset', 
-          image: '/images/city.jpg',
-          category: 'Urban', 
-          views: 987, 
-          likes: 156 
-        },
-        { 
-          id: 3, 
-          title: 'Ocean Waves', 
-          image: '/images/ocean.jpg',
-          category: 'Nature', 
-          views: 2100, 
-          likes: 203 
-        },
-        { 
-          id: 4, 
-          title: 'Forest Path', 
-          image: '/images/forest.jpg',
-          category: 'Nature', 
-          views: 743, 
-          likes: 67 
-        }
-      ],
+      entity: "user",
+      
       layout: 'grid' as const,
       config: {
         title: { label: 'Title' },
@@ -327,47 +209,8 @@ export function UniRenderExample({ type }: ExampleProps) {
       }
     },
     list: {
-      entity: {
-        name: 'Message',
-        fields: [
-          { name: 'id', type: 'number', required: true },
-          { name: 'sender', type: 'string', required: true },
-          { name: 'subject', type: 'string', required: true },
-          { name: 'preview', type: 'string' },
-          { name: 'timestamp', type: 'date', required: true },
-          { name: 'isRead', type: 'boolean' },
-          { name: 'priority', type: 'string' }
-        ]
-      },
-      data: [
-        { 
-          id: 1, 
-          sender: 'Alice Johnson', 
-          subject: 'Project Update', 
-          preview: 'The quarterly report is ready for review...',
-          timestamp: '2024-01-15T10:30:00Z',
-          isRead: false,
-          priority: 'high'
-        },
-        { 
-          id: 2, 
-          sender: 'Bob Smith', 
-          subject: 'Meeting Request', 
-          preview: 'Would you be available for a quick call...',
-          timestamp: '2024-01-15T09:15:00Z',
-          isRead: true,
-          priority: 'medium'
-        },
-        { 
-          id: 3, 
-          sender: 'Carol Davis', 
-          subject: 'Weekly Summary', 
-          preview: 'Here are the key metrics from this week...',
-          timestamp: '2024-01-14T16:45:00Z',
-          isRead: true,
-          priority: 'low'
-        }
-      ],
+      entity: "user",
+      
       layout: 'list' as const,
       config: {
         sender: { label: 'From' },
@@ -402,51 +245,8 @@ export function UniRenderExample({ type }: ExampleProps) {
       }
     },
     dashboard: {
-      entity: {
-        name: 'Business Metrics',
-        fields: [
-          { name: 'metric', type: 'string', required: true },
-          { name: 'value', type: 'number', required: true },
-          { name: 'change', type: 'number' },
-          { name: 'trend', type: 'string' },
-          { name: 'target', type: 'number' },
-          { name: 'period', type: 'string' }
-        ]
-      },
-      data: [
-        { 
-          metric: 'Total Revenue', 
-          value: 245000, 
-          change: 12.5,
-          trend: 'up',
-          target: 250000,
-          period: 'This Month'
-        },
-        { 
-          metric: 'New Customers', 
-          value: 1847, 
-          change: -3.2,
-          trend: 'down',
-          target: 2000,
-          period: 'This Month'
-        },
-        { 
-          metric: 'Conversion Rate', 
-          value: 3.45, 
-          change: 0.8,
-          trend: 'up',
-          target: 4.0,
-          period: 'This Month'
-        },
-        { 
-          metric: 'Average Order Value', 
-          value: 127.50, 
-          change: 8.3,
-          trend: 'up',
-          target: 135.0,
-          period: 'This Month'
-        }
-      ],
+      entity: "user",
+      
       layout: 'dashboard' as const,
       config: {
         metric: { label: 'Metric' },
@@ -492,55 +292,49 @@ export function UniRenderExample({ type }: ExampleProps) {
       }
     },
     loading: {
-      entity: {
-        name: 'Posts',
-        fields: [
-          { name: 'id', type: 'number', required: true },
-          { name: 'title', type: 'string', required: true },
-          { name: 'content', type: 'string' },
-          { name: 'author', type: 'string' },
-          { name: 'publishedAt', type: 'date' }
-        ]
-      },
-      data: [],
+      entity: "user",
+      
       layout: 'table' as const,
       loading: true
     },
     error: {
-      entity: {
-        name: 'Orders',
-        fields: [
-          { name: 'id', type: 'number', required: true },
-          { name: 'customer', type: 'string', required: true },
-          { name: 'total', type: 'number' },
-          { name: 'status', type: 'string' },
-          { name: 'orderDate', type: 'date' }
-        ]
-      },
-      data: [],
+      entity: "user",
+      
       layout: 'table' as const,
       loading: false,
       error: "Failed to load orders: Network connection timeout"
     },
     empty: {
-      entity: {
-        name: 'Messages',
-        fields: [
-          { name: 'id', type: 'number', required: true },
-          { name: 'subject', type: 'string', required: true },
-          { name: 'sender', type: 'string' },
-          { name: 'content', type: 'string' },
-          { name: 'receivedAt', type: 'date' }
-        ]
+      entity: "user",
+      
+      query: {
+        where: { id: "nonexistent" }
       },
-      data: [],
       layout: 'table' as const,
       loading: false,
       error: null
     }
   };
 
-  const props = examples[type] as UniRenderProps;
+  const baseProps = examples[type];
   
-  return <UniRender {...props} />;
+  // 动态创建最终的 props，避免类型错误
+  const finalProps: any = { ...baseProps };
+  
+  // 对于非特殊状态的示例，使用当前的 loading 和 error 状态
+  if (type !== 'loading' && type !== 'error' && type !== 'empty') {
+    finalProps.loading = loading;
+    finalProps.error = error;
+  }
+  
+  // 确保必需属性存在
+  finalProps.entity = finalProps.entity || "user";
+  finalProps.layout = finalProps.layout || "table";
+  
+  // 添加调试信息
+  if (process.env.NODE_ENV === 'development') {
+    console.log('UniRender props:', finalProps);
+  }
+  
+  return <UniRender {...finalProps} />;
 } 

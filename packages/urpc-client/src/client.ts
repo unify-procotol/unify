@@ -11,6 +11,7 @@ import type {
 import type { ClientConfig, HttpRequestOptions } from "./types";
 
 export class URPC {
+  private static classId = Math.random().toString(36).substr(2, 9);
   private config: ClientConfig;
 
   constructor(config: ClientConfig) {

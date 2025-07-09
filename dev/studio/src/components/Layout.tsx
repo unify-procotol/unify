@@ -29,11 +29,16 @@ export function Layout({ children }: LayoutProps) {
         timeout: 10000,
       });
       
-      // Test connection by making a simple request
-      const response = await fetch(`${url}/health`).catch(() => null);
-      setIsConnected(response?.ok || false);
+      // Test connection by making a URPC request to get schemas
+      await repo<any>({
+        entity: "schema",
+        source: "_global",
+      }).findMany();
+      
+      setIsConnected(true);
       setBaseUrl(url);
     } catch (error) {
+      console.error("Connection failed:", error);
       setIsConnected(false);
     } finally {
       setIsConnecting(false);

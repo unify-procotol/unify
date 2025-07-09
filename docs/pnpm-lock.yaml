@@ -14,7 +14,7 @@ importers:
       '@shikijs/transformers':
         specifier: ^1.24.2
         version: 1.29.2
-      '@unilab/unify-ui':
+      '@unilab/ukit':
         specifier: ^0.0.3
         version: 0.0.3(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(tailwindcss@4.1.11)
       fumadocs-core:
@@ -1784,7 +1784,7 @@ packages:
   '@ungap/structured-clone@1.3.0':
     resolution: {integrity: sha512-WmoN8qaIAo7WTYWbAZuG8PYEhn5fkz7dZrqTBZ7dtt//lL2Gwms1IcnQ5yHqjDfX8Ft5j4YzDM23f87zBfDe9g==}
 
-  '@unilab/unify-ui@0.0.3':
+  '@unilab/ukit@0.0.3':
     resolution: {integrity: sha512-SJPji0R4rViT4hsnjl5PfbINDm8EPwIy9dzm43NJz2l8NiN74AC0SxYbJqJ+nGm5IX/Pg4CkPF3FkqinfLDSxw==}
     peerDependencies:
       react: '>=16.8.0'
@@ -5611,7 +5611,7 @@ snapshots:
 
   '@ungap/structured-clone@1.3.0': {}
 
-  '@unilab/unify-ui@0.0.3(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(tailwindcss@4.1.11)':
+  '@unilab/ukit@0.0.3(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(tailwindcss@4.1.11)':
     dependencies:
       clsx: 2.1.1
       react: 19.1.0

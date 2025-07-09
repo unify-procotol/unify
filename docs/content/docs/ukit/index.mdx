@@ -1,0 +1,253 @@
+---
+title: Introduction
+description: Universal data rendering components for React applications with URPC integration
+---
+
+# 🎨 Unify UI
+
+Unify UI is a powerful React component library that provides universal data rendering capabilities with seamless URPC integration. It automatically fetches and transforms your data into beautiful, interactive layouts without writing repetitive UI code.
+
+## ✨ Key Features
+
+- **🔄 URPC Integration**: Automatic data fetching with entity-based queries
+- **🎯 Entity-First Design**: Define your entity once, render everywhere
+- **📱 Multiple Layouts**: Table, Card, Grid, List, Form, and Dashboard layouts
+- **🎨 Customizable**: Full control over styling and behavior
+- **⚡ TypeScript Ready**: Built with TypeScript for excellent developer experience
+- **📦 Zero Config**: Works out of the box with sensible defaults
+- **🧠 Smart Queries**: Automatic findMany/findOne selection based on layout
+
+## 🎯 Core Concepts
+
+### URPC Entity Integration
+UniRender automatically integrates with your URPC entities:
+
+```tsx
+// No need to define entity schema manually
+// UniRender fetches it from global schema
+<UniRender
+  entity="user"           // Entity name string
+  source="demo"           // Optional data source
+  layout="table"
+  query={{
+    where: { role: "admin" },
+    limit: 10
+  }}
+/>
+```
+
+### Smart Data Fetching
+The component automatically:
+- Fetches entity schema from global schema
+- Calls `repo.findMany()` for list layouts (table, card, grid, list, dashboard)
+- Calls `repo.findOne()` for form layout when specific ID provided
+- Handles loading, error, and empty states
+
+### Query Parameters
+Control data fetching with flexible query options:
+
+```tsx
+const query = {
+  where: { 
+    status: "active",
+    role: { $in: ["admin", "moderator"] }
+  },
+  orderBy: { createdAt: "desc" },
+  limit: 20,
+  skip: 0,
+  include: {
+    posts: true
+  }
+};
+```
+
+### Layout System
+Choose from 6 built-in layouts:
+
+- **Table**: Traditional data table with sorting and filtering
+- **Card**: Card-based layout for rich content display
+- **Grid**: Responsive grid layout
+- **List**: Vertical list with detailed view
+- **Form**: Form-based editing interface (auto-uses findOne)
+- **Dashboard**: Metrics and KPI display
+
+### Field Configuration
+Customize field behavior and appearance:
+
+```tsx
+const fieldConfig = {
+  email: {
+    label: 'Email Address',
+    render: (value) => <a href={`mailto:${value}`}>{value}</a>
+  },
+  status: {
+    render: (value) => (
+      <Badge variant={value ? 'success' : 'secondary'}>
+        {value ? 'Active' : 'Inactive'}
+      </Badge>
+    )
+  }
+};
+```
+
+## 🚀 Quick Start
+
+### 1. Initialize URPC
+```tsx
+import { URPC } from "@unilab/urpc";
+
+URPC.init({
+  enableDebug: true,
+  plugins: [YourPlugin],
+  middlewares: [],
+  entityConfigs: {
+    user: {
+      defaultSource: "demo",
+    },
+  },
+});
+```
+
+### 2. Use UniRender
+```tsx
+import { UniRender } from "@unilab/ukit";
+
+function UserTable() {
+  return (
+    <UniRender
+      entity="user"
+      source="demo"
+      layout="table"
+      config={{
+        name: { label: "Full Name" },
+        email: { label: "Email Address" },
+        role: { 
+          label: "Role",
+          render: (value) => (
+            <Badge variant="outline">{value}</Badge>
+          )
+        }
+      }}
+    />
+  );
+}
+```
+
+## 🎨 Layout Examples
+
+<Tabs items={['Table', 'Card', 'Form', 'Grid']}>
+<Tab value="Table">
+```tsx
+// All users in a table
+<UniRender
+  entity="user"
+  source="demo"
+  layout="table"
+  query={{
+    where: { isActive: true },
+    orderBy: { createdAt: "desc" }
+  }}
+/>
+```
+</Tab>
+<Tab value="Card">
+```tsx
+// Products in card layout
+<UniRender
+  entity="product"
+  source="demo"
+  layout="card"
+  query={{
+    where: { category: "electronics" },
+    limit: 12
+  }}
+/>
+```
+</Tab>
+<Tab value="Form">
+```tsx
+// Edit specific user (auto-uses findOne)
+<UniRender
+  entity="user"
+  source="demo"
+  layout="form"
+  query={{
+    where: { id: "user-123" }
+  }}
+/>
+```
+</Tab>
+<Tab value="Grid">
+```tsx
+// Gallery items in grid
+<UniRender
+  entity="gallery"
+  source="demo"
+  layout="grid"
+  query={{
+    where: { published: true },
+    orderBy: { likes: "desc" }
+  }}
+/>
+```
+</Tab>
+</Tabs>
+
+## 🛠️ Advanced Features
+
+### Custom Rendering
+Override default rendering for any field:
+
+```tsx
+const config = {
+  avatar: {
+    render: (value, record) => (
+      <Avatar src={value} alt={record.name} />
+    )
+  },
+  createdAt: {
+    render: (value) => (
+      <time className="text-muted-foreground">
+        {formatDistanceToNow(new Date(value))} ago
+      </time>
+    )
+  }
+};
+```
+
+### Event Handling
+Handle user interactions:
+
+```tsx
+<UniRender
+  entity="user"
+  source="demo"
+  layout="table"
+  onEdit={(record, index) => openEditModal(record)}
+  onDelete={(record, index) => confirmDelete(record)}
+  onAdd={(record) => createNewRecord(record)}
+/>
+```
+
+### Loading and Error States
+Built-in state management:
+
+```tsx
+<UniRender
+  entity="user"
+  source="demo"
+  layout="table"
+  loading={customLoading}  // Override auto-loading
+  error={customError}      // Override auto-error
+/>
+```
+
+## 🌟 What's Next?
+
+- [Getting Started](/docs/ukit/getting-started) - Detailed setup with URPC
+- [Table Layout](/docs/ukit/components/table-layout) - Complete table functionality
+- [Card Layout](/docs/ukit/components/card-layout) - Visual card displays
+- [Form Layout](/docs/ukit/components/form) - Form editing and validation
+- [Grid Layout](/docs/ukit/components/grid) - Responsive grid layouts
+- [List Layout](/docs/ukit/components/list) - Feed and timeline layouts
+- [Dashboard Layout](/docs/ukit/components/dashboard) - Metrics and KPIs

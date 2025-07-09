@@ -1,0 +1,303 @@
+---
+title: Getting Started
+description: Installation and setup guide for Unify UI with URPC integration
+---
+
+# Getting Started
+
+Get up and running with Unify UI and URPC integration in minutes. This guide will walk you through installation and basic setup.
+
+## 📦 Installation
+
+Install Unify UI and URPC dependencies:
+
+<Tabs items={['npm', 'yarn', 'pnpm', 'bun']}>
+<Tab value="npm">
+```bash
+npm install @unilab/ukit @unilab/urpc @unilab/urpc-core
+```
+</Tab>
+<Tab value="yarn">
+```bash
+yarn add @unilab/ukit @unilab/urpc @unilab/urpc-core
+```
+</Tab>
+<Tab value="pnpm">
+```bash
+pnpm add @unilab/ukit @unilab/urpc @unilab/urpc-core
+```
+</Tab>
+<Tab value="bun">
+```bash
+bun add @unilab/ukit @unilab/urpc @unilab/urpc-core
+```
+</Tab>
+</Tabs>
+
+## 🔧 Dependencies Setup
+
+Install peer dependencies (Tailwind CSS v4+ required):
+
+<Tabs items={['npm', 'yarn', 'pnpm', 'bun']}>
+<Tab value="npm">
+```bash
+npm install -D tailwindcss@^4.0.0 @tailwindcss/vite tailwindcss-animate
+npx tailwindcss init
+npx shadcn@latest init
+```
+</Tab>
+<Tab value="yarn">
+```bash
+yarn add -D tailwindcss@^4.0.0 @tailwindcss/vite tailwindcss-animate
+npx tailwindcss init
+npx shadcn@latest init
+```
+</Tab>
+<Tab value="pnpm">
+```bash
+pnpm add -D tailwindcss@^4.0.0 @tailwindcss/vite tailwindcss-animate
+npx tailwindcss init
+pnpm dlx shadcn@latest init
+```
+</Tab>
+<Tab value="bun">
+```bash
+bun add -D tailwindcss@^4.0.0 @tailwindcss/vite tailwindcss-animate
+npx tailwindcss init
+bunx shadcn@latest init
+```
+</Tab>
+</Tabs>
+
+> 🎉 **All shadcn/ui and Radix components are now built-in!** No need to install them separately.
+
+## 🎯 Vite Configuration (Optional)
+
+If you're using Vite, you can use the official Tailwind CSS Vite plugin:
+
+```typescript
+// vite.config.ts
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import tailwindcss from '@tailwindcss/vite'
+
+export default defineConfig({
+  plugins: [react(), tailwindcss()],
+})
+```
+
+## 🎨 CSS Setup
+
+Add Tailwind CSS and import Unify UI styles to your main CSS file:
+
+```css
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Import Unify UI styles from node_modules */
+@source '../../node_modules/@unilab/ukit/**/*.{js,ts,jsx,tsx}';
+```
+
+## 🔄 URPC Setup
+
+### 1. Define Your Entities
+
+```tsx
+// entities/user.ts
+import { Entity } from "@unilab/urpc-core";
+
+export class UserEntity implements Entity {
+  name = "UserEntity";
+  fields = [
+    { name: "id", type: "string", required: true },
+    { name: "name", type: "string", required: true },
+    { name: "email", type: "string", required: true },
+    { name: "role", type: "string" },
+    { name: "isActive", type: "boolean" },
+  ];
+}
+```
+
+### 2. Create Adapters
+
+```tsx
+// adapters/user.ts
+import { Adapter } from "@unilab/urpc-core";
+
+export class UserAdapter implements Adapter {
+  async findMany(query: any) {
+    // Your data fetching logic
+    return [
+      { id: "1", name: "John Doe", email: "john@example.com", role: "admin", isActive: true },
+      { id: "2", name: "Jane Smith", email: "jane@example.com", role: "user", isActive: true },
+    ];
+  }
+
+  async findOne(query: any) {
+    // Single record fetching
+    return { id: "1", name: "John Doe", email: "john@example.com", role: "admin", isActive: true };
+  }
+}
+```
+
+### 3. Initialize URPC
+
+```tsx
+// main.tsx or App.tsx
+import { URPC } from "@unilab/urpc";
+import { UserEntity } from "./entities/user";
+import { UserAdapter } from "./adapters/user";
+
+const MyPlugin = {
+  entities: [UserEntity],
+  adapters: [
+    {
+      source: "demo",
+      entity: "UserEntity",
+      adapter: new UserAdapter(),
+    },
+  ],
+};
+
+URPC.init({
+  enableDebug: true,
+  plugins: [MyPlugin],
+  middlewares: [],
+  entityConfigs: {
+    user: {
+      defaultSource: "demo",
+    },
+  },
+});
+```
+
+## 🚀 Basic Usage
+
+Now you can use UniRender with automatic data fetching:
+
+```tsx
+import { UniRender } from "@unilab/ukit";
+
+// Table view of all users
+function UserTable() {
+  return (
+    <UniRender
+      entity="user"
+      source="demo"
+      layout="table"
+      config={{
+        name: { label: "Full Name" },
+        email: { label: "Email Address" },
+        role: { 
+          label: "Role",
+          render: (value) => (
+            <span className={`px-2 py-1 rounded text-xs ${
+              value === 'admin' ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800'
+            }`}>
+              {value}
+            </span>
+          )
+        },
+        isActive: {
+          label: "Status",
+          render: (value) => (
+            <span className={`px-2 py-1 rounded text-xs ${
+              value ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+            }`}>
+              {value ? 'Active' : 'Inactive'}
+            </span>
+          )
+        }
+      }}
+      generalConfig={{
+        showActions: true,
+        actions: {
+          edit: true,
+          delete: true
+        }
+      }}
+    />
+  );
+}
+
+// Form view for editing specific user
+function UserForm() {
+  return (
+    <UniRender
+      entity="user"
+      source="demo"
+      layout="form"
+      query={{
+        where: { id: "1" }
+      }}
+      config={{
+        name: { label: "Full Name" },
+        email: { label: "Email Address" },
+        role: { label: "Role" },
+      }}
+    />
+  );
+}
+
+// Card view with filtering
+function AdminUsers() {
+  return (
+    <UniRender
+      entity="user"
+      source="demo"
+      layout="card"
+      query={{
+        where: { role: "admin", isActive: true },
+        limit: 10,
+        orderBy: { name: "asc" }
+      }}
+      config={{
+        name: { label: "Name" },
+        email: { label: "Email" },
+        role: { 
+          label: "Role",
+          render: (value) => (
+            <span className="px-2 py-1 bg-red-100 text-red-800 rounded text-xs">
+              {value}
+            </span>
+          )
+        }
+      }}
+    />
+  );
+}
+```
+
+## 🌙 Dark Mode Support (Optional)
+
+Unify UI comes with built-in dark mode support. Simply add the dark class to enable it:
+
+```css
+/* Optional: Custom theme overrides */
+@layer base {
+  :root {
+    /* Override any color you want - others use defaults */
+    --primary: 142 76% 36%;        /* Custom green */
+    --primary-foreground: 0 0% 98%;
+    /* No need to define all colors! */
+  }
+
+  .dark {
+    /* Add dark mode overrides if needed */
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+  }
+}
+```
+
+## 🎯 Next Steps
+
+You're now ready to use Unify UI with URPC! Explore the component documentation:
+
+- [Table Layout](/docs/ukit/components/table-layout) - Advanced table features
+- [Card Layout](/docs/ukit/components/card-layout) - Rich card displays
+- [Form Layout](/docs/ukit/components/form) - Interactive forms
+- [Grid Layout](/docs/ukit/components/grid) - Responsive grids
+- [List Layout](/docs/ukit/components/list) - List and feed layouts
+- [Dashboard Layout](/docs/ukit/components/dashboard) - Analytics dashboards

@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { cors } from "hono/cors";
 import { handleError, parseQueryParams, validateSource } from "./utils";
 import {
   registerAdapter,
@@ -42,6 +43,19 @@ export class URPC {
       this.app = new Hono();
       this.app.onError((err, c) => handleError(err, c));
     }
+
+    // Configure CORS for all routes
+    this.app.use(
+      "*",
+      cors({
+        origin: "*", // Allow all origins in development
+        allowHeaders: ["Content-Type", "Authorization"],
+        allowMethods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+        exposeHeaders: ["Content-Length", "X-Kuma-Revision"],
+        maxAge: 600,
+        credentials: true,
+      })
+    );
 
     if (config.plugins) {
       this.initFromPlugins([...config.plugins, BuiltinPlugin(this)]);

@@ -1,8 +1,7 @@
 // Studio Components Export
 export { Layout } from './Layout';
 export { StudioHome } from './StudioHome';
-export { default as StoryPage } from './StoryPage';
-export { UniRender } from '@unilab/unify-ui';
+export { UniRender } from '@unilab/ukit';
 
 // Types
 export interface EntityData {

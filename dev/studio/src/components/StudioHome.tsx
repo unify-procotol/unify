@@ -1,28 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { repo, URPC } from "@unilab/urpc-client";
-import { UniRender, Entity, LayoutType, FieldConfig } from "@unilab/unify-ui";
+import { UniRender, FieldConfig, UniRenderRef } from "@unilab/ukit";
 import { Button } from "./ui/button";
-import { Input } from "./ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { Card, CardContent } from "./ui/card";
 import { Badge } from "./ui/badge";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "./ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "./ui/dialog";
-import { ScrollArea } from "./ui/scroll-area";
-import { Separator } from "./ui/separator";
 import { cn } from "../lib/utils";
 
 // Entity schema type based on the API response
@@ -54,39 +35,31 @@ export function StudioHome({ isConnected, baseUrl }: StudioHomeProps) {
   const [sourceDataList, setSourceDataList] = useState<SourceData[]>([]);
   const [selectedEntity, setSelectedEntity] = useState<Schema | null>(null);
   const [selectedSource, setSelectedSource] = useState<string>("");
-  const [viewMode, setViewMode] = useState<"table" | "json" | "unirender">(
-    "table"
-  );
-  const [uniRenderLayout, setUniRenderLayout] = useState<LayoutType>("table");
   const [collapsedEntities, setCollapsedEntities] = useState<Set<string>>(
     new Set()
   );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Query and search state
-  const [searchField, setSearchField] = useState<string>("");
-  const [searchOperator, setSearchOperator] = useState<
-    | "contains"
-    | "equals"
-    | "startsWith"
-    | "endsWith"
-    | "gt"
-    | "lt"
-    | "gte"
-    | "lte"
-  >("contains");
-  const [searchValue, setSearchValue] = useState<string>("");
-  const [isSearching, setIsSearching] = useState(false);
+  // Query state
+  const [queryField, setQueryField] = useState<string>("");
+  const [queryValue, setQueryValue] = useState<string>("");
+  const [currentQuery, setCurrentQuery] = useState<Record<string, any>>({});
 
-  // Add row state
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [newRowData, setNewRowData] = useState<Record<string, any>>({});
-  const [addLoading, setAddLoading] = useState(false);
+  // Add Record modal state
+  const [showAddModal, setShowAddModal] = useState(false);
 
-  // Load entities when connection status or baseUrl changes
+  // UniRender ref for refreshing data
+  const uniRenderRef = useRef<UniRenderRef>(null);
+
+  // Initialize URPC and load entities when connection status or baseUrl changes
   useEffect(() => {
-    if (isConnected) {
+    if (isConnected && baseUrl) {
+      // Initialize URPC with the provided baseUrl
+      URPC.init({
+        baseUrl: baseUrl,
+        timeout: 10000,
+      });
       loadEntities();
     } else {
       // Reset state when disconnected
@@ -99,6 +72,13 @@ export function StudioHome({ isConnected, baseUrl }: StudioHomeProps) {
     }
   }, [isConnected, baseUrl]);
 
+  // Reset query when entity or source changes
+  useEffect(() => {
+    setQueryField("");
+    setQueryValue("");
+    setCurrentQuery({});
+  }, [selectedEntity, selectedSource]);
+
   const loadEntities = async () => {
     try {
       setLoading(true);
@@ -109,15 +89,21 @@ export function StudioHome({ isConnected, baseUrl }: StudioHomeProps) {
         entity: "schema",
         source: "_global",
       }).findMany();
+
+      console.log("Loaded entities:", entitiesInfo);
       setEntities(entitiesInfo);
 
       if (entitiesInfo.length > 0) {
+        console.log("Setting selected entity to:", entitiesInfo[0]);
         setSelectedEntity(entitiesInfo[0]);
         if (entitiesInfo[0].sources && entitiesInfo[0].sources.length > 0) {
+          console.log("Setting selected source to:", entitiesInfo[0].sources[0]);
           setSelectedSource(entitiesInfo[0].sources[0]);
         }
         // Ensure the first entity is expanded by default
         setCollapsedEntities(new Set());
+      } else {
+        console.log("No entities found!");
       }
 
       // Initialize source data state for each entity-source combination
@@ -186,11 +172,11 @@ export function StudioHome({ isConnected, baseUrl }: StudioHomeProps) {
         prev.map((item) =>
           item.entity === entity && item.source === source
             ? {
-                ...item,
-                loading: false,
-                error:
-                  err instanceof Error ? err.message : "Failed to load data",
-              }
+              ...item,
+              loading: false,
+              error:
+                err instanceof Error ? err.message : "Failed to load data",
+            }
             : item
         )
       );
@@ -221,212 +207,84 @@ export function StudioHome({ isConnected, baseUrl }: StudioHomeProps) {
   const isEntityCollapsed = (entity: string) =>
     collapsedEntities.has(entity);
 
-  // Execute search query on backend
-  const executeSearch = async () => {
-    if (!selectedEntity || !selectedSource) return;
-
-    setIsSearching(true);
-    try {
-      const entityName = selectedEntity.name;
-
-      // Build query parameters based on search criteria using proper urpc syntax
-      let findManyArgs: any = {};
-
-      if (searchField && searchValue.trim()) {
-        const whereCondition: any = {};
-
-        // Build the query based on operator
-        switch (searchOperator) {
-          case "contains":
-            // For string contains, we might need to use a different approach
-            // Since urpc might not support regex, we'll use equals for now
-            whereCondition[searchField] = searchValue;
-            break;
-          case "equals":
-            whereCondition[searchField] = searchValue;
-            break;
-          case "startsWith":
-            // For startsWith, we'll also use equals for now
-            whereCondition[searchField] = searchValue;
-            break;
-          case "endsWith":
-            // For endsWith, we'll also use equals for now
-            whereCondition[searchField] = searchValue;
-            break;
-          case "gt":
-            whereCondition[searchField] = {
-              $gt: isNaN(Number(searchValue))
-                ? searchValue
-                : Number(searchValue),
-            };
-            break;
-          case "lt":
-            whereCondition[searchField] = {
-              $lt: isNaN(Number(searchValue))
-                ? searchValue
-                : Number(searchValue),
-            };
-            break;
-          case "gte":
-            whereCondition[searchField] = {
-              $gte: isNaN(Number(searchValue))
-                ? searchValue
-                : Number(searchValue),
-            };
-            break;
-          case "lte":
-            whereCondition[searchField] = {
-              $lte: isNaN(Number(searchValue))
-                ? searchValue
-                : Number(searchValue),
-            };
-            break;
-        }
-
-        findManyArgs = {
-          where: whereCondition,
-        };
-      }
-
-      console.log("findManyArgs:", findManyArgs);
-
-      // Call the backend with proper urpc query syntax
-      const searchResults =
-        Object.keys(findManyArgs).length > 0
-          ? await repo<any>({
-              entity: entityName,
-              source: selectedSource,
-            }).findMany(findManyArgs)
-          : await repo<any>({
-              entity: entityName,
-              source: selectedSource,
-            }).findMany();
-
-      // Update the source data with search results
-      setSourceDataList((prev) =>
-        prev.map((item) =>
-          item.entity === selectedEntity.name &&
-          item.source === selectedSource
-            ? { ...item, data: searchResults, loading: false }
-            : item
-        )
-      );
-    } catch (err) {
-      setSourceDataList((prev) =>
-        prev.map((item) =>
-          item.entity === selectedEntity.name &&
-          item.source === selectedSource
-            ? {
-                ...item,
-                loading: false,
-                error: err instanceof Error ? err.message : "Search failed",
-              }
-            : item
-        )
-      );
-    } finally {
-      setIsSearching(false);
-    }
-  };
-
-  // Get available fields for filtering from current entity schema
+  // Get available fields for current entity
   const getAvailableFields = (): string[] => {
     if (!selectedEntity?.schema?.properties) return [];
-    return Object.keys(selectedEntity.schema.properties);
+    return Object.keys(selectedEntity.schema.properties).filter(field => {
+      const fieldDef = selectedEntity.schema.properties[field];
+      // Exclude relation fields
+      const isRelationField =
+        (fieldDef.type === 'array' && fieldDef.items?.type?.endsWith?.('Entity')) ||
+        (typeof fieldDef.type === 'string' && fieldDef.type.endsWith('Entity'));
+      return !isRelationField;
+    });
   };
 
-  // Add new row functionality
-  const handleAddRow = () => {
+  // Execute query
+  const executeQuery = () => {
+    if (!queryField || !queryValue.trim()) {
+      setCurrentQuery({});
+      return;
+    }
+
+    const query = {
+      where: {
+        [queryField]: queryValue.trim()
+      }
+    };
+    setCurrentQuery(query);
+  };
+
+  // Clear query
+  const clearQuery = () => {
+    setQueryField("");
+    setQueryValue("");
+    setCurrentQuery({});
+  };
+
+  // Handle add record
+  const handleAddRecord = () => {
+    console.log("Add Record button clicked", {
+      selectedEntity: selectedEntity?.name,
+      selectedSource,
+      showAddModal
+    });
+    setShowAddModal(true);
+  };
+
+  // Handle save new record
+  const handleSaveRecord = async (data: any) => {
     if (!selectedEntity) return;
 
-    // Initialize form with empty values based on entity schema
-    const initialData: Record<string, any> = {};
-    if (selectedEntity.schema && selectedEntity.schema.properties) {
-      Object.keys(selectedEntity.schema.properties).forEach((key) => {
-        const property = selectedEntity.schema.properties[key];
-        if (property.type === "string") {
-          initialData[key] = "";
-        } else if (property.type === "number") {
-          initialData[key] = 0;
-        } else if (property.type === "boolean") {
-          initialData[key] = false;
-        } else {
-          initialData[key] = "";
-        }
-      });
-    }
-
-    setNewRowData(initialData);
-    setShowAddForm(true);
-  };
-
-  const handleSaveRow = async () => {
-    if (!selectedEntity || !selectedSource) return;
-
-    setAddLoading(true);
     try {
-      const entity = selectedEntity.name;
-
-      // Create new record using urpc client
-      await repo<any>({
-        entity: entity,
+      await repo({
+        entity: selectedEntity.name,
         source: selectedSource,
-      }).create({ data: newRowData });
+      }).create({
+        data: data
+      });
 
-      // Reload data to show the new record
-      await loadSingleSourceData(selectedEntity.name, selectedSource);
+      // Close modal
+      setShowAddModal(false);
 
-      // Close form and reset
-      setShowAddForm(false);
-      setNewRowData({});
+      // Refresh UniRender data using ref
+      if (uniRenderRef.current) {
+        await uniRenderRef.current.refreshData();
+        console.log("UniRender data refreshed after save");
+      } else {
+        // Fallback: reload data the old way
+        await loadSingleSourceData(selectedEntity.name, selectedSource);
+        console.log("Fallback: reloaded data using loadSingleSourceData");
+      }
     } catch (err) {
-      console.error("Failed to add row:", err);
-      // You might want to show an error message here
-    } finally {
-      setAddLoading(false);
+      console.error("Failed to create record:", err);
+      // You can add error handling here if needed
     }
   };
 
-  const handleCancelAdd = () => {
-    setShowAddForm(false);
-    setNewRowData({});
-  };
 
-  const handleInputChange = (field: string, value: any) => {
-    setNewRowData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-  };
 
-  // Reset search when entity or source changes and reload data
-  useEffect(() => {
-    setSearchField("");
-    setSearchValue("");
-    // Reload original data when switching entity/source
-    if (selectedEntity && selectedSource) {
-      loadSingleSourceData(selectedEntity.name, selectedSource);
-    }
-  }, [selectedEntity, selectedSource]);
-
-  // Convert Schema to UniRender Entity format
-  const convertToUniRenderEntity = (Schema: Schema): Entity => {
-    const fields =
-      Schema.schema && Schema.schema.properties
-        ? Object.entries(Schema.schema.properties).map(([name, property]) => ({
-            name,
-            type: property.type || "string",
-            required: Schema.schema.required.includes(name),
-            description: property.description,
-          }))
-        : [];
-
-    return {
-      name: Schema.name,
-      fields,
-      schema: Schema.schema,
-    };
-  };
+  // Function removed - new UniRender API uses entity name directly
 
   // Example field configuration with custom rendering and ordering
   const getFieldConfig = (entity: string): Record<string, FieldConfig> => {
@@ -456,11 +314,10 @@ export function StudioHome({ isConnected, baseUrl }: StudioHomeProps) {
           align: "center",
           render: (value) => (
             <span
-              className={`px-2 py-1 rounded text-xs ${
-                value >= 18
-                  ? "bg-green-600/20 text-green-400"
-                  : "bg-yellow-600/20 text-yellow-400"
-              }`}
+              className={`px-2 py-1 rounded text-xs ${value >= 18
+                ? "bg-green-600/20 text-green-400"
+                : "bg-yellow-600/20 text-yellow-400"
+                }`}
             >
               {value}
             </span>
@@ -482,65 +339,7 @@ export function StudioHome({ isConnected, baseUrl }: StudioHomeProps) {
     return baseConfig;
   };
 
-  const formatJsonValue = (value: any, depth = 0): JSX.Element => {
-    const indent = "  ".repeat(depth);
 
-    if (value === null)
-      return <span className="text-muted-foreground">null</span>;
-    if (typeof value === "string")
-      return (
-        <span className="text-green-600 dark:text-green-400">"{value}"</span>
-      );
-    if (typeof value === "number")
-      return <span className="text-blue-600 dark:text-blue-400">{value}</span>;
-    if (typeof value === "boolean")
-      return (
-        <span className="text-purple-600 dark:text-purple-400">
-          {value.toString()}
-        </span>
-      );
-
-    if (Array.isArray(value)) {
-      return (
-        <div>
-          <span className="text-foreground">[</span>
-          {value.map((item, index) => (
-            <div key={index} className="ml-4">
-              {formatJsonValue(item, depth + 1)}
-              {index < value.length - 1 && (
-                <span className="text-foreground">,</span>
-              )}
-            </div>
-          ))}
-          <span className="text-foreground">]</span>
-        </div>
-      );
-    }
-
-    if (typeof value === "object") {
-      const entries = Object.entries(value);
-      return (
-        <div>
-          <span className="text-foreground">{"{"}</span>
-          {entries.map(([key, val], index) => (
-            <div key={key} className="ml-4">
-              <span className="text-orange-600 dark:text-orange-400">
-                "{key}"
-              </span>
-              <span className="text-foreground">: </span>
-              {formatJsonValue(val, depth + 1)}
-              {index < entries.length - 1 && (
-                <span className="text-foreground">,</span>
-              )}
-            </div>
-          ))}
-          <span className="text-foreground">{"}"}</span>
-        </div>
-      );
-    }
-
-    return <span className="text-foreground">{String(value)}</span>;
-  };
 
   if (loading) {
     return (
@@ -648,9 +447,8 @@ export function StudioHome({ isConnected, baseUrl }: StudioHomeProps) {
                         <span className="font-medium">{entity.name}</span>
                       </div>
                       <svg
-                        className={`w-4 h-4 transform transition-transform ${
-                          isCollapsed ? "rotate-0" : "rotate-90"
-                        }`}
+                        className={`w-4 h-4 transform transition-transform ${isCollapsed ? "rotate-0" : "rotate-90"
+                          }`}
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -744,11 +542,11 @@ export function StudioHome({ isConnected, baseUrl }: StudioHomeProps) {
                                       className={cn(
                                         "w-1.5 h-1.5 rounded-full",
                                         sourceStatus?.loading &&
-                                          "bg-yellow-400",
+                                        "bg-yellow-400",
                                         sourceStatus?.error && "bg-destructive",
                                         !sourceStatus?.loading &&
-                                          !sourceStatus?.error &&
-                                          "bg-green-500"
+                                        !sourceStatus?.error &&
+                                        "bg-green-500"
                                       )}
                                     ></div>
                                   </Button>
@@ -821,73 +619,22 @@ export function StudioHome({ isConnected, baseUrl }: StudioHomeProps) {
               </>
             )}
           </div>
-
-          {/* View Mode Toggle */}
-          {currentSourceData &&
-            !currentSourceData.loading &&
-            !currentSourceData.error &&
-            currentSourceData.data &&
-            currentSourceData.data.length > 0 && (
-              <div className="flex items-center space-x-2">
-                <Button
-                  variant={viewMode === "table" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setViewMode("table")}
-                >
-                  Table
-                </Button>
-                <Button
-                  variant={viewMode === "json" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setViewMode("json")}
-                >
-                  JSON
-                </Button>
-                <Button
-                  variant={viewMode === "unirender" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setViewMode("unirender")}
-                >
-                  UniRender
-                </Button>
-
-                {/* UniRender Layout Selector */}
-                {viewMode === "unirender" && (
-                  <select
-                    value={uniRenderLayout}
-                    onChange={(e) =>
-                      setUniRenderLayout(e.target.value as LayoutType)
-                    }
-                    className="h-8 bg-background border border-input rounded px-2 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                  >
-                    <option value="table">Table</option>
-                    <option value="card">Card</option>
-                    <option value="grid">Grid</option>
-                    <option value="list">List</option>
-                    <option value="form">Form</option>
-                    <option value="dashboard">Dashboard</option>
-                  </select>
-                )}
-              </div>
-            )}
         </Card>
 
         {/* Data Content */}
         <div className="flex-1 flex flex-col overflow-hidden">
-          {/* Filter Bar */}
-          {currentSourceData &&
-            !currentSourceData.loading &&
-            !currentSourceData.error && (
-              <Card className="rounded-none border-x-0 border-t-0 p-4">
+          {/* Query Bar */}
+          {selectedEntity && (
+            <Card className="rounded-none border-x-0 border-t-0 p-4">
+              <div className="flex items-center justify-between">
+                {/* Left side - Query controls */}
                 <div className="flex items-center space-x-4">
-                  {/* Field Selector */}
+                  {/* Field selector */}
                   <div className="flex items-center space-x-2">
-                    <span className="text-sm text-muted-foreground">
-                      Field:
-                    </span>
+                    <span className="text-sm text-muted-foreground">Field:</span>
                     <select
-                      value={searchField}
-                      onChange={(e) => setSearchField(e.target.value)}
+                      value={queryField}
+                      onChange={(e) => setQueryField(e.target.value)}
                       className="bg-background border border-input rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                     >
                       <option value="">Select Field</option>
@@ -899,260 +646,88 @@ export function StudioHome({ isConnected, baseUrl }: StudioHomeProps) {
                     </select>
                   </div>
 
-                  {/* Operator Selector */}
+                  {/* Value input */}
                   <div className="flex items-center space-x-2">
-                    <span className="text-sm text-muted-foreground">
-                      Operator:
-                    </span>
-                    <select
-                      value={searchOperator}
-                      onChange={(e) => setSearchOperator(e.target.value as any)}
-                      className="bg-background border border-input rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                    >
-                      <option value="contains">Contains</option>
-                      <option value="equals">Equals</option>
-                      <option value="startsWith">Starts With</option>
-                      <option value="endsWith">Ends With</option>
-                      <option value="gt">Greater Than</option>
-                      <option value="gte">Greater Than or Equal</option>
-                      <option value="lt">Less Than</option>
-                      <option value="lte">Less Than or Equal</option>
-                    </select>
-                  </div>
-
-                  {/* Search Value Input */}
-                  <div className="flex-1 max-w-md">
-                    <Input
+                    <span className="text-sm text-muted-foreground">=</span>
+                    <input
                       type="text"
-                      placeholder="Enter search value..."
-                      value={searchValue}
-                      onChange={(e) => setSearchValue(e.target.value)}
-                      onKeyPress={(e) => e.key === "Enter" && executeSearch()}
-                      className="text-sm"
+                      placeholder="Enter value..."
+                      value={queryValue}
+                      onChange={(e) => setQueryValue(e.target.value)}
+                      onKeyPress={(e) => e.key === "Enter" && executeQuery()}
+                      className="bg-background border border-input rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring w-48"
                     />
                   </div>
 
-                  {/* Search Button */}
+                  {/* Query buttons */}
                   <Button
-                    onClick={executeSearch}
-                    disabled={isSearching || !searchField}
+                    onClick={executeQuery}
+                    disabled={!queryField || !queryValue.trim()}
                     size="sm"
                   >
-                    {isSearching ? (
-                      <div className="flex items-center space-x-2">
-                        <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
-                        <span>Searching...</span>
-                      </div>
-                    ) : (
-                      <>
-                        <svg
-                          className="w-4 h-4 mr-2"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                          />
-                        </svg>
-                        Search
-                      </>
-                    )}
+                    Query
                   </Button>
 
-                  {/* Clear Button */}
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => {
-                      setSearchField("");
-                      setSearchValue("");
-                      if (selectedEntity && selectedSource) {
-                        loadSingleSourceData(
-                          selectedEntity.name,
-                          selectedSource
-                        );
-                      }
-                    }}
+                    onClick={clearQuery}
                   >
                     Clear
                   </Button>
 
-                  {/* Add Row Button */}
-                  <Button
-                    onClick={handleAddRow}
-                    size="sm"
-                    className="bg-green-600 hover:bg-green-700"
-                  >
-                    <svg
-                      className="w-4 h-4 mr-2"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M12 4v16m8-8H4"
-                      />
-                    </svg>
-                    Add Row
-                  </Button>
-
-                  {/* Results Count */}
-                  <Badge variant="outline" className="text-sm">
-                    {currentSourceData.data ? currentSourceData.data.length : 0}{" "}
-                    records
-                  </Badge>
+                  {/* Query indicator */}
+                  {Object.keys(currentQuery).length > 0 && (
+                    <Badge variant="secondary" className="text-xs">
+                      {queryField} = {queryValue}
+                    </Badge>
+                  )}
                 </div>
-              </Card>
-            )}
 
-          {/* Data Display Area */}
+                {/* Right side - Add Record button */}
+                <Button
+                  onClick={handleAddRecord}
+                  size="sm"
+                  className="bg-green-600 hover:bg-green-700"
+                >
+                  <svg
+                    className="w-4 h-4 mr-2"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M12 4v16m8-8H4"
+                    />
+                  </svg>
+                  Add Record
+                </Button>
+              </div>
+            </Card>
+          )}
+
+          {/* Data Display Area - Simplified to only use UniRender Table */}
           <div className="flex-1 overflow-auto">
-            {currentSourceData?.loading ? (
-              <div className="flex items-center justify-center h-64">
-                <Card className="p-6">
-                  <div className="text-center">
-                    <div className="animate-spin w-6 h-6 border-2 border-primary border-t-transparent rounded-full mx-auto mb-2"></div>
-                    <div className="text-muted-foreground">Loading data...</div>
-                  </div>
-                </Card>
-              </div>
-            ) : currentSourceData?.error ? (
-              <div className="flex items-center justify-center h-64">
-                <Card className="p-6">
-                  <div className="text-center">
-                    <div className="text-destructive mb-2">
-                      Error loading data
-                    </div>
-                    <div className="text-muted-foreground text-sm">
-                      {currentSourceData.error}
-                    </div>
-                  </div>
-                </Card>
-              </div>
-            ) : currentSourceData?.data && currentSourceData.data.length > 0 ? (
-              <div className="p-4">
-                {viewMode === "table" ? (
-                  /* Table View */
-                  <Card className="overflow-hidden">
-                    <div className="overflow-x-auto">
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead className="w-12">#</TableHead>
-                            {Object.keys(currentSourceData.data[0]).map(
-                              (key) => (
-                                <TableHead key={key}>{key}</TableHead>
-                              )
-                            )}
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {currentSourceData.data.map((item, index) => (
-                            <TableRow key={index}>
-                              <TableCell className="font-mono text-muted-foreground">
-                                {index + 1}
-                              </TableCell>
-                              {Object.entries(item).map(([key, value]) => (
-                                <TableCell key={key}>
-                                  <div
-                                    className="font-mono text-xs max-w-xs truncate"
-                                    title={JSON.stringify(value)}
-                                  >
-                                    {typeof value === "string" ? (
-                                      <span className="text-green-600 dark:text-green-400">
-                                        "{value}"
-                                      </span>
-                                    ) : typeof value === "number" ? (
-                                      <span className="text-blue-600 dark:text-blue-400">
-                                        {value}
-                                      </span>
-                                    ) : typeof value === "boolean" ? (
-                                      <span className="text-purple-600 dark:text-purple-400">
-                                        {value.toString()}
-                                      </span>
-                                    ) : value === null ? (
-                                      <span className="text-muted-foreground">
-                                        null
-                                      </span>
-                                    ) : (
-                                      <span className="text-orange-600 dark:text-orange-400">
-                                        {JSON.stringify(value)}
-                                      </span>
-                                    )}
-                                  </div>
-                                </TableCell>
-                              ))}
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </div>
-                    <Card className="rounded-none border-x-0 border-b-0 px-4 py-3">
-                      <div className="text-sm text-muted-foreground">
-                        Showing {currentSourceData.data.length} records
-                      </div>
-                    </Card>
-                  </Card>
-                ) : viewMode === "json" ? (
-                  /* JSON View */
-                  <div className="space-y-4">
-                    {currentSourceData.data.map((item, index) => (
-                      <Card key={index} className="p-4">
-                        <CardHeader className="p-0 pb-3">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-2">
-                              <Badge variant="outline" className="text-xs">
-                                ({index + 1})
-                              </Badge>
-                              <span className="text-muted-foreground text-sm font-mono">
-                                id: {item.id || `Document_${index + 1}`}
-                              </span>
-                            </div>
-                            <Badge variant="secondary" className="text-xs">
-                              {Object.keys(item).length} fields
-                            </Badge>
-                          </div>
-                        </CardHeader>
-                        <CardContent className="p-0">
-                          <Card className="bg-muted p-3 overflow-auto">
-                            <div className="font-mono text-sm">
-                              {formatJsonValue(item)}
-                            </div>
-                          </Card>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                ) : (
-                  /* UniRender View */
-                  <UniRender
-                    entity={convertToUniRenderEntity(selectedEntity!)}
-                    data={currentSourceData.data}
-                    layout={uniRenderLayout}
-                    config={getFieldConfig(selectedEntity!.name)}
-                    loading={currentSourceData.loading}
-                    error={currentSourceData.error}
-                  />
-                )}
-              </div>
+            {selectedEntity ? (
+              <UniRender
+                ref={uniRenderRef}
+                entity={selectedEntity.name}
+                source={selectedSource}
+                layout="table"
+                query={currentQuery}
+                config={getFieldConfig(selectedEntity.name)}
+                loading={currentSourceData?.loading}
+                error={currentSourceData?.error}
+              />
             ) : (
               <div className="flex items-center justify-center h-64">
                 <Card className="p-6">
                   <div className="text-center">
                     <div className="text-muted-foreground">
-                      No data available
-                    </div>
-                    <div className="text-muted-foreground text-sm mt-1">
-                      {selectedEntity && selectedSource
-                        ? `No records found in ${selectedSource} for ${selectedEntity.name}`
-                        : "Select an entity and source to view data"}
+                      Select an entity and source to view data
                     </div>
                   </div>
                 </Card>
@@ -1162,114 +737,55 @@ export function StudioHome({ isConnected, baseUrl }: StudioHomeProps) {
         </div>
       </div>
 
-      {/* Add Row Modal */}
-      {showAddForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <Card className="w-full max-w-2xl max-h-[80vh] overflow-y-auto m-4">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle>Add New Row</CardTitle>
-                <Button variant="ghost" size="sm" onClick={handleCancelAdd}>
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
+      {/* Add Record Modal */}
+      {(() => {
+        console.log("Modal render condition check:", {
+          showAddModal,
+          selectedEntity: selectedEntity?.name,
+          selectedSource,
+          shouldRender: showAddModal && selectedEntity
+        });
+        return showAddModal && selectedEntity;
+      })() && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <Card className="w-full max-w-2xl max-h-[80vh] overflow-y-auto m-4">
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-lg font-semibold">Add New {selectedEntity?.name}</h2>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowAddModal(false)}
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
-                </Button>
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </Button>
+                </div>
+
+                <UniRender
+                  entity={selectedEntity?.name || ""}
+                  source={selectedSource}
+                  layout="form"
+                  query={{}}
+                  config={getFieldConfig(selectedEntity?.name || "")}
+                  onSave={handleSaveRecord}
+                />
               </div>
-            </CardHeader>
+            </Card>
+          </div>
+        )}
 
-            <CardContent>
-              <div className="space-y-4">
-                {selectedEntity?.schema?.properties &&
-                  Object.entries(selectedEntity.schema.properties).map(
-                    ([field, property]) => (
-                      <div key={field} className="space-y-2">
-                        <label className="block text-sm font-medium text-foreground">
-                          {field}
-                          {selectedEntity.schema.required.includes(field) && (
-                            <span className="text-destructive ml-1">*</span>
-                          )}
-                        </label>
-
-                        {property.type === "boolean" ? (
-                          <select
-                            value={newRowData[field] ? "true" : "false"}
-                            onChange={(e) =>
-                              handleInputChange(
-                                field,
-                                e.target.value === "true"
-                              )
-                            }
-                            className="w-full px-3 py-2 bg-background border border-input rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                          >
-                            <option value="false">False</option>
-                            <option value="true">True</option>
-                          </select>
-                        ) : property.type === "number" ? (
-                          <Input
-                            type="number"
-                            value={newRowData[field] || ""}
-                            onChange={(e) =>
-                              handleInputChange(
-                                field,
-                                e.target.value ? Number(e.target.value) : 0
-                              )
-                            }
-                            placeholder={`Enter ${field}...`}
-                          />
-                        ) : (
-                          <Input
-                            type="text"
-                            value={newRowData[field] || ""}
-                            onChange={(e) =>
-                              handleInputChange(field, e.target.value)
-                            }
-                            placeholder={`Enter ${field}...`}
-                          />
-                        )}
-
-                        {property.description && (
-                          <p className="text-xs text-muted-foreground">
-                            {property.description}
-                          </p>
-                        )}
-                      </div>
-                    )
-                  )}
-              </div>
-
-              <div className="flex items-center justify-end space-x-3 mt-6 pt-4 border-t border-border">
-                <Button variant="outline" onClick={handleCancelAdd}>
-                  Cancel
-                </Button>
-                <Button
-                  onClick={handleSaveRow}
-                  disabled={addLoading}
-                  className="bg-green-600 hover:bg-green-700"
-                >
-                  {addLoading ? (
-                    <div className="flex items-center space-x-2">
-                      <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
-                      <span>Saving...</span>
-                    </div>
-                  ) : (
-                    "Save Row"
-                  )}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
     </div>
   );
 }

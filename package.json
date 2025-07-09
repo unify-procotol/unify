@@ -21,14 +21,22 @@
     "dev:urpc": "cd packages/urpc && bun run dev",
     "build:uniweb3": "cd packages/uniweb3 && bun run build",
     "dev:uniweb3": "cd packages/uniweb3 && bun run dev",
-    "build:unify-ui": "cd packages/unify-ui && bun run build",
+    "build:ukit": "cd packages/ukit && bun run build",
     "build:urpc-adapters": "cd packages/urpc-adapters && bun run build",
     "dev:urpc-adapters": "cd packages/urpc-adapters && bun run dev",
-    "build": "bun run build:urpc-core && bun run build:urpc-adapters && bun run build:urpc-hono && bun run build:urpc-next && bun run build:urpc-client && bun run build:urpc && bun run build:uniweb3 && bun run build:unify-ui"
+    "build:builtin-plugin": "cd packages/builtin-plugin && bun run build",
+    "dev:builtin-plugin": "cd packages/builtin-plugin && bun run dev",
+    "dev:studio": "cd dev/studio && bun run dev",
+    "build": "bun run build:urpc-core && bun run build:builtin-plugin && bun run build:urpc-hono && bun run build:urpc-next && bun run build:urpc-client && bun run build:urpc && bun run build:uniweb3 && bun run build:ukit"
   },
   "author": "",
   "license": "MIT",
   "dependencies": {
     "@typescript-eslint/typescript-estree": "^8.35.0"
+  },
+  "devDependencies": {
+    "vite": "^7.0.2",
+    "@vitejs/plugin-react": "^4.6.0",
+    "@tailwindcss/vite": "^4.1.11"
   }
 }

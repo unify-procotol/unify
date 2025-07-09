@@ -5,11 +5,12 @@ import { resolve } from 'path'
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  // @ts-ignore
   plugins: [react(), tailwindcss()],
   server: {
-    port: 3001,
+    port: 1234,
     open: true,
-    host: '0.0.0.0', // Allow external access
+    host: 'localhost', // Use localhost instead of 0.0.0.0 for Windows compatibility
   },
   build: {
     outDir: 'dist',

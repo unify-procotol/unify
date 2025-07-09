@@ -317,9 +317,9 @@ export const DashboardLayout: React.FC<LayoutProps> = ({
             <BarChart3 className="h-6 w-6 text-muted-foreground" />
           </div>
           <div className="space-y-1">
-            <h1 className="text-3xl font-bold tracking-tight">{entity.name} Dashboard</h1>
+                          <h1 className="text-3xl font-bold tracking-tight">{entity.name || 'Data'} Dashboard</h1>
             <p className="text-muted-foreground">
-              Analytics and insights for your {entity.name.toLowerCase()} data
+              Analytics and insights for your {entity.name?.toLowerCase() || 'data'}
             </p>
           </div>
         </div>
@@ -342,7 +342,7 @@ export const DashboardLayout: React.FC<LayoutProps> = ({
           </div>
           <h3 className="text-lg font-semibold">No data available</h3>
           <p className="text-sm text-muted-foreground mt-1">
-            Add some {entity.name.toLowerCase()} records to see analytics and insights.
+            Add some {entity.name?.toLowerCase() || 'records'} to see analytics and insights.
           </p>
         </div>
       )}

@@ -15,7 +15,7 @@ The list layout displays data in a vertical, scrollable list format. It's ideal 
 </Tab>
 <Tab value="Code">
 ```tsx
-import { UniRender } from '@unilab/unify-ui';
+import { UniRender } from '@unilab/ukit';
 
 <UniRender
   entity={{
@@ -279,11 +279,11 @@ const timelineConfig = {
 ### List Item Spacing
 
 ```css
-.unify-ui-render .list-layout {
+.ukit-render .list-layout {
   gap: 1rem;
 }
 
-.unify-ui-render .list-layout .list-item {
+.ukit-render .list-layout .list-item {
   padding: 1rem;
   border-radius: 8px;
   border: 1px solid #e5e7eb;
@@ -293,7 +293,7 @@ const timelineConfig = {
 ### Hover Effects
 
 ```css
-.unify-ui-render .list-layout .list-item:hover {
+.ukit-render .list-layout .list-item:hover {
   background-color: #f9fafb;
   border-color: #d1d5db;
   transform: translateX(4px);
@@ -304,12 +304,12 @@ const timelineConfig = {
 ### Read/Unread States
 
 ```css
-.unify-ui-render .list-layout .list-item.unread {
+.ukit-render .list-layout .list-item.unread {
   background-color: #fef3c7;
   border-left: 4px solid #f59e0b;
 }
 
-.unify-ui-render .list-layout .list-item.read {
+.ukit-render .list-layout .list-item.read {
   opacity: 0.7;
 }
 ```
@@ -402,7 +402,7 @@ const swipeActions = {
 For large datasets:
 
 ```tsx
-import { VirtualizedList } from '@unilab/unify-ui';
+import { VirtualizedList } from '@unilab/ukit';
 
 <VirtualizedList
   items={largeDataset}
@@ -462,9 +462,9 @@ const mobileListConfig = {
 
 ## 🔗 Related Components
 
-- [Table Layout](/docs/unify-ui/components/table-layout) - For structured data comparison
-- [Card Layout](/docs/unify-ui/components/card-layout) - For rich visual content
-- [Form Layout](/docs/unify-ui/components/form) - For detailed single-item editing
+- [Table Layout](/docs/ukit/components/table-layout) - For structured data comparison
+- [Card Layout](/docs/ukit/components/card-layout) - For rich visual content
+- [Form Layout](/docs/ukit/components/form) - For detailed single-item editing
 
 ## 📊 When to Use List Layout
 
