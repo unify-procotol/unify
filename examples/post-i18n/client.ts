@@ -39,7 +39,7 @@ const demo = async () => {
 
   const posts = await repo<PostEntity>({
     entity: "post",
-    source: "ghost",
+    // source: "ghost",
     context: { language: "zh" },
   }).findOne({
     where: {

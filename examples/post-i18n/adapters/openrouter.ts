@@ -28,7 +28,7 @@ export class OpenrouterAdapter extends BaseAdapter<LLMEntity> {
 }
 
 async function generateText({
-  model = "openai/gpt-4",
+  model = "openai/gpt-4o-mini",
   prompt,
 }: {
   model?: string;
