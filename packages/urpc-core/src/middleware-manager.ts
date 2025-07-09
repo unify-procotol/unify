@@ -56,10 +56,10 @@ class MiddlewareManager<T extends Record<string, any>>
       return operation();
     }
 
-    // Filter middlewares based on exclude configuration
+    // Filter middlewares based on excludeMiddlewares configuration
     const entityName = context.metadata?.entity;
     const entityConfig = entityName ? this.entityConfigs[entityName] : undefined;
-    const excludedMiddlewares = entityConfig?.exclude || [];
+    const excludedMiddlewares = entityConfig?.excludeMiddlewares || [];
 
     const filteredMiddlewares = this.middlewares.filter(
       (m) => !excludedMiddlewares.includes(m.options.name || "")

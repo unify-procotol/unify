@@ -66,11 +66,11 @@ const app = URPC.init({
   entityConfigs: {
     cache: {
       defaultSource: "memory",
-      exclude: ["i18nAIMiddleware"],
+      excludeMiddlewares: ["i18nAIMiddleware"],
     },
     llm: {
       defaultSource: "openrouter",
-      exclude: ["i18nAIMiddleware"],
+      excludeMiddlewares: ["i18nAIMiddleware"],
     },
     post: {
       defaultSource: "ghost",

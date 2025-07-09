@@ -154,7 +154,7 @@ export interface FieldConfig {
 
 export interface EntityConfig {
   defaultSource?: string;
-  exclude?: string[];
+  excludeMiddlewares?: string[];
   cache?: {
     ttl?: number;
   };
