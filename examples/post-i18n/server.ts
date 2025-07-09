@@ -51,14 +51,7 @@ const app = URPC.init({
   middlewares: [
     i18nAIMiddleware({
       required: {
-        cache: {
-          entity: "CacheEntity",
-          source: "memory",
-        },
-        llm: {
-          entity: "LLMEntity",
-          source: "openrouter",
-        },
+        entities: ["llm", "cache"],
       },
     }),
     Logging(),
@@ -66,11 +59,9 @@ const app = URPC.init({
   entityConfigs: {
     cache: {
       defaultSource: "memory",
-      excludeMiddlewares: ["i18nAIMiddleware"],
     },
     llm: {
       defaultSource: "openrouter",
-      excludeMiddlewares: ["i18nAIMiddleware"],
     },
     post: {
       defaultSource: "ghost",
@@ -83,9 +74,7 @@ const app = URPC.init({
           },
         },
         content: {
-          i18n: {
-            prompt: "200 words or less",
-          },
+          i18n: true,
         },
       },
     },

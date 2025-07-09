@@ -24,33 +24,14 @@ const languageMap = {
   hi: "Hindi",
 } as const;
 
-export interface I18nAIMiddlewareOptions {
+export function i18nAIMiddleware<T extends Record<string, any>>(options?: {
   required: {
-    cache: {
-      entity: string;
-      source: string;
-    };
-    llm: {
-      entity: string;
-      source: string;
-    };
+    entities: string[];
   };
-}
-
-export function i18nAIMiddleware<T extends Record<string, any>>(
-  options?: I18nAIMiddlewareOptions
-): Middleware<T> {
-  const middleware = async (
-    context: MiddlewareContext<T>,
-    next: MiddlewareNext<T>
-  ) => {
-    console.log(
-      "i18nAIMiddleware called with context:",
-      JSON.stringify(context, null, 2)
-    );
-
+}): Middleware<T> {
+  const fn = async (context: MiddlewareContext<T>, next: MiddlewareNext<T>) => {
     const metadata = context.metadata;
-    const targetLanguage = metadata?.context?.language;
+    const targetLanguage = metadata?.context?.lang;
 
     // If no target language specified, execute normally without translation
     if (!targetLanguage) {
@@ -62,9 +43,7 @@ export function i18nAIMiddleware<T extends Record<string, any>>(
 
     // If target language is English, return original value without translation
     if (targetLanguage === "en") {
-      console.log(
-        "Target language is English, executing without translation"
-      );
+      console.log("Target language is English, executing without translation");
       return await next();
     }
 
@@ -102,14 +81,11 @@ export function i18nAIMiddleware<T extends Record<string, any>>(
 
     // Build cache key from context
     const cacheKey = `i18n:${entityName}:${identifier}:${targetLanguage}`;
-    console.log("cacheKey:===>", cacheKey);
 
     try {
-      const cacheEntity = options?.required.cache.entity || "CacheEntity";
+      const cacheEntity = "CacheEntity";
       const cacheDefaultSource =
-        options?.required.cache.source ||
-        entityConfigs["cache"]?.defaultSource ||
-        "memory";
+        entityConfigs["cache"]?.defaultSource || "memory";
       const cacheRepo = getRepo(cacheEntity, cacheDefaultSource);
 
       // First check for cached translations
@@ -154,18 +130,22 @@ export function i18nAIMiddleware<T extends Record<string, any>>(
           const originalValue = entity[fieldName];
           if (i18n && originalValue) {
             try {
-              const llmEntity = options?.required.llm.entity || "LLMEntity";
+              const llmEntity = "LLMEntity";
               const llmDefaultSource =
-                options?.required.llm.source ||
-                entityConfigs["llm"]?.defaultSource ||
-                "openrouter";
+                entityConfigs["llm"]?.defaultSource || "openrouter";
               const llmRepo = getRepo(llmEntity, llmDefaultSource);
-              const prompt = `${i18n.prompt || "Please translate the following content"}, translate to ${languageMap[targetLanguage as keyof typeof languageMap]}:\n\n${originalValue}`;
-              console.log("prompt:===>", prompt);
+              const promptText =
+                typeof i18n === "object" && i18n.prompt
+                  ? i18n.prompt
+                  : "Please translate the following content";
+              const prompt = `${promptText}, translate to ${languageMap[targetLanguage as keyof typeof languageMap]}:\n\n${originalValue}`;
+
               const translationResponse = await llmRepo.create(
                 {
                   data: {
-                    model: i18n.model || "openai/gpt-4o-mini",
+                    model:
+                      (typeof i18n === "object" && i18n.model) ||
+                      "openai/gpt-4o-mini",
                     prompt: prompt,
                   },
                 },
@@ -230,12 +210,11 @@ export function i18nAIMiddleware<T extends Record<string, any>>(
     }
   };
 
-  Object.defineProperty(middleware, "name", {
-    value: "i18nAIMiddleware",
-    writable: false,
-    enumerable: false,
-    configurable: true,
-  });
-
-  return middleware;
+  return {
+    fn,
+    name: "i18nAIMiddleware",
+    required: {
+      entities: options?.required?.entities || ["cache", "llm"],
+    },
+  };
 }

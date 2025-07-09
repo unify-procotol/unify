@@ -28,6 +28,10 @@ export function getRepoRegistry() {
 }
 
 function getRepoKey(entity: string, source: string) {
-  const entityNameWithoutEntity = entity.replace(/Entity$/i, "").toLowerCase();
-  return `${entityNameWithoutEntity}:${source}`;
+  const simplifiedEntityName = simplifyEntityName(entity);
+  return `${simplifiedEntityName}:${source}`;
+}
+
+export function simplifyEntityName(entity: string) {
+  return entity.replace(/Entity$/i, "").toLowerCase();
 }

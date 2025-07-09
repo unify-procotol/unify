@@ -42,7 +42,6 @@ const app = URPC.init({
   entityConfigs: {
     user: {
       defaultSource: "demo",
-      // excludeMiddlewares: ["HookMiddleware"],
     },
     post: {
       defaultSource: "demo",

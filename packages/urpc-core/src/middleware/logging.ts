@@ -3,10 +3,7 @@ import { Middleware, MiddlewareContext, MiddlewareNext } from "../types";
 export function Logging<T extends Record<string, any>>(
   logger: (message: string, context?: any) => void = console.log
 ): Middleware<T> {
-  const middleware = async (
-    context: MiddlewareContext<T>,
-    next: MiddlewareNext<T>
-  ) => {
+  const fn = async (context: MiddlewareContext<T>, next: MiddlewareNext<T>) => {
     const startTime = Date.now();
     logger(`[${context.operation}] Starting operation`, { args: context.args });
     try {
@@ -25,13 +22,8 @@ export function Logging<T extends Record<string, any>>(
     }
   };
 
-  // The name attribute needs to be set
-  Object.defineProperty(middleware, "name", {
-    value: "LoggingMiddleware",
-    writable: false,
-    enumerable: false,
-    configurable: true,
-  });
-
-  return middleware;
+  return {
+    fn,
+    name: "LoggingMiddleware",
+  };
 }

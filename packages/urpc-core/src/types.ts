@@ -75,7 +75,7 @@ export interface MiddlewareMetadata {
   entity: string;
   source?: string;
   context?: {
-    language?: string;
+    lang?: string;
     [key: string]: any;
   };
 }
@@ -89,15 +89,21 @@ export type MiddlewareContext<T extends Record<string, any>> = {
 
 export type MiddlewareNext<T extends Record<string, any>> = () => Promise<any>;
 
-export type Middleware<T extends Record<string, any>> = (
-  context: MiddlewareContext<T>,
-  next: MiddlewareNext<T>
-) => Promise<any>;
+export type Middleware<T extends Record<string, any>> = {
+  name: string;
+  required?: {
+    entities: string[];
+  };
+  fn: (context: MiddlewareContext<T>, next: MiddlewareNext<T>) => Promise<any>;
+};
 
 export type MiddlewareOptions = {
   position?: "before" | "after" | "around";
   priority?: number;
   name?: string;
+  required?: {
+    entities: string[];
+  };
 };
 
 export interface MiddlewareManagerInterface<T extends Record<string, any>> {
@@ -133,8 +139,7 @@ export interface RepoOptions {
   entity: string;
   source?: string;
   context?: {
-    language?: string;
-    [key: string]: any;
+    lang?: string;
   };
 }
 
@@ -149,12 +154,11 @@ export interface I18nConfig {
 }
 
 export interface FieldConfig {
-  i18n?: I18nConfig;
+  i18n?: I18nConfig | boolean;
 }
 
 export interface EntityConfig {
   defaultSource?: string;
-  excludeMiddlewares?: string[];
   cache?: {
     ttl?: number;
   };

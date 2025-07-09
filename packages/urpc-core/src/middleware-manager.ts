@@ -56,20 +56,23 @@ class MiddlewareManager<T extends Record<string, any>>
       return operation();
     }
 
-    // Filter middlewares based on excludeMiddlewares configuration
-    const entityName = context.metadata?.entity;
-    const entityConfig = entityName ? this.entityConfigs[entityName] : undefined;
-    const excludedMiddlewares = entityConfig?.excludeMiddlewares || [];
+    const entity = context.metadata?.entity;
+    const entityConfig = entity ? this.entityConfigs[entity] : undefined;
+    const hasI18n = entityConfig?.fields
+      ? Object.values(entityConfig.fields).some((field) => field.i18n)
+      : false;
 
-    const filteredMiddlewares = this.middlewares.filter(
-      (m) => !excludedMiddlewares.includes(m.options.name || "")
-    );
+    const filteredMiddlewares = this.middlewares.filter((m) => {
+      if (!hasI18n && m.options.name === "i18nAIMiddleware") {
+        return false;
+      }
+      return true;
+    });
 
     if (filteredMiddlewares.length === 0) {
       return operation();
     }
 
-    // Filter middlewares based on position
     const beforeMiddlewares = filteredMiddlewares.filter(
       (m) => m.options.position === "before"
     );
@@ -82,7 +85,7 @@ class MiddlewareManager<T extends Record<string, any>>
 
     // Execute before middlewares
     for (const { middleware } of beforeMiddlewares) {
-      await middleware(context, async () => {});
+      await middleware.fn(context, async () => {});
     }
 
     // Execute around middlewares with the operation
@@ -93,7 +96,7 @@ class MiddlewareManager<T extends Record<string, any>>
       const { middleware } = aroundMiddlewares[i];
       const currentOperation = finalOperation;
       finalOperation = async () => {
-        return middleware(context, currentOperation);
+        return middleware.fn(context, currentOperation);
       };
     }
 
@@ -103,7 +106,7 @@ class MiddlewareManager<T extends Record<string, any>>
 
     // Execute after middlewares
     for (const { middleware } of afterMiddlewares) {
-      await middleware(context, async () => result);
+      await middleware.fn(context, async () => result);
     }
 
     return result;
@@ -145,9 +148,11 @@ export function useGlobalMiddleware<T extends Record<string, any>>(
   middleware: Middleware<T>,
   options?: MiddlewareOptions
 ): void {
+  middleware;
   const middlewareOptions = {
     ...options,
-    name: options?.name || middleware.name || `middleware_${Date.now()}`
+    required: options?.required || middleware.required,
+    name: options?.name || middleware.name || `middleware_${Date.now()}`,
   };
   GlobalMiddleware.use(middleware, middlewareOptions);
 }

@@ -145,28 +145,20 @@ export function createHookMiddleware<T extends Record<string, any>>(
     setupHooks(hookManager);
   }
 
-  const middleware = async (
-    context: MiddlewareContext<T>,
-    next: MiddlewareNext<T>
-  ) => {
+  const fn = async (context: MiddlewareContext<T>, next: MiddlewareNext<T>) => {
     await hookManager.executeBefore(context);
 
     const result = await next();
 
     context.result = result;
-    
+
     await hookManager.executeAfter(context);
 
     return result;
   };
 
-  // The name attribute needs to be set
-  Object.defineProperty(middleware, "name", {
-    value: "HookMiddleware",
-    writable: false,
-    enumerable: false,
-    configurable: true,
-  });
-
-  return middleware;
+  return {
+    fn,
+    name: "HookMiddleware",
+  };
 }

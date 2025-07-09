@@ -20,6 +20,7 @@ import {
   registerAdapter,
   useGlobalMiddleware,
   getGlobalMiddlewareManager,
+  simplifyEntityName,
 } from "@unilab/urpc-core";
 import type { URPCConfig } from "./types";
 import { BuiltinPlugin } from "@unilab/builtin-plugin";
@@ -29,6 +30,7 @@ export class URPC {
   private entitySchemas: Record<string, SchemaObject> = {};
   private entitySources: Record<string, string[]> = {};
   private entityConfigs: EntityConfigs = {};
+  private entityNames: string[] = [];
 
   constructor(config: URPCConfig) {
     this.enableDebug = config.enableDebug || false;
@@ -43,6 +45,7 @@ export class URPC {
 
     if (entities.length > 0) {
       this.entitySchemas = generateSchemas(entities);
+      this.entityNames = entities.map((e) => simplifyEntityName(e.name));
     }
     this.entitySources = this.analyzeEntitySources(adapters);
 
@@ -64,7 +67,22 @@ export class URPC {
 
   private applyMiddlewareToRepos(middlewares: Middleware<any>[] = []) {
     if (middlewares.length > 0) {
-      middlewares.forEach((m) => useGlobalMiddleware(m));
+      middlewares.forEach((m) => {
+        const requiredEntities = m.required?.entities;
+        if (requiredEntities) {
+          const missingEntities = requiredEntities.filter(
+            (entity) => !this.entityNames.includes(simplifyEntityName(entity))
+          );
+          if (missingEntities.length > 0) {
+            throw new Error(
+              `Middleware ${m.name} requires entities: ${missingEntities.join(
+                ", "
+              )}`
+            );
+          }
+        }
+        useGlobalMiddleware(m);
+      });
       console.log(
         `✅ Registered middlewares: ${middlewares.map((m) => m.name).join(", ")}`
       );

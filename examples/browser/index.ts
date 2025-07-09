@@ -58,11 +58,9 @@ URPC.init({
   entityConfigs: {
     user: {
       defaultSource: "demo",
-      // excludeMiddlewares: ["HookMiddleware"],
     },
     post: {
       defaultSource: "demo",
-      // excludeMiddlewares: ["LoggingMiddleware"],
     },
   },
 });

@@ -7,6 +7,7 @@ import {
   getRepoRegistry,
   EntityConfigs,
   getGlobalMiddlewareManager,
+  simplifyEntityName,
 } from "@unilab/urpc-core";
 import {
   generateSchemas,
@@ -36,6 +37,7 @@ export class URPC {
   private static entitySchemas: Record<string, SchemaObject> = {};
   private static entitySources: Record<string, string[]> = {};
   private static entityConfigs: EntityConfigs = {};
+  private static entityNames: string[] = [];
   private static initialized = false;
 
   static init(config: URPCConfig): URPCAPI {
@@ -70,6 +72,7 @@ export class URPC {
 
     if (entities.length > 0) {
       this.entitySchemas = generateSchemas(entities);
+      this.entityNames = entities.map((e) => simplifyEntityName(e.name));
     }
     this.entitySources = this.analyzeEntitySources(adapters);
 
@@ -90,7 +93,22 @@ export class URPC {
   }
 
   private static applyMiddlewareToRepos(middlewares: Middleware<any>[]) {
-    middlewares.forEach((m) => useGlobalMiddleware(m));
+    middlewares.forEach((m) => {
+      const requiredEntities = m.required?.entities;
+      if (requiredEntities) {
+        const missingEntities = requiredEntities.filter(
+          (entity) => !this.entityNames.includes(simplifyEntityName(entity))
+        );
+        if (missingEntities.length > 0) {
+          throw new Error(
+            `Middleware ${m.name} requires entities: ${missingEntities.join(
+              ", "
+            )}`
+          );
+        }
+      }
+      useGlobalMiddleware(m);
+    });
     console.log(
       `✅ Registered middlewares: ${middlewares.map((m) => m.name).join(", ")}`
     );
