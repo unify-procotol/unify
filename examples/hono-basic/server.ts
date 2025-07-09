@@ -39,6 +39,15 @@ const MyPlugin: Plugin = {
 const app = URPC.init({
   plugins: [MyPlugin],
   middlewares: [HookMiddleware],
+  entityConfigs: {
+    user: {
+      defaultSource: "demo",
+      // exclude: ["HookMiddleware"],
+    },
+    post: {
+      defaultSource: "demo",
+    },
+  },
 });
 
 // // Use repo on the server side

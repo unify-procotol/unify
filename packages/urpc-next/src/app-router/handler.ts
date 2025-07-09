@@ -5,7 +5,6 @@ import {
   registerAdapter,
   getRepo,
   getRepoRegistry,
-  RepoOptions,
   EntityConfigs,
   getGlobalMiddlewareManager,
 } from "@unilab/urpc-core";
@@ -97,7 +96,10 @@ export class URPC {
     );
   }
 
-  static repo<T extends Record<string, any>>(options: RepoOptions) {
+  static repo<T extends Record<string, any>>(options: {
+    entity: string;
+    source: string;
+  }) {
     return getRepo(options.entity, options.source) as Repository<T>;
   }
 
@@ -124,7 +126,9 @@ export class URPC {
       }
 
       const url = new URL(request.url);
-      const source = url.searchParams.get("source");
+      const source =
+        url.searchParams.get("source") ||
+        this.entityConfigs[entity]?.defaultSource;
 
       const sourceError = validateSource(source);
       if (sourceError) {
@@ -169,7 +173,7 @@ export class URPC {
         context,
       });
 
-      return NextResponse.json({ data: result, entity, source });
+      return NextResponse.json({ data: result });
     } catch (error) {
       return handleError(error);
     }
@@ -201,7 +205,7 @@ export class URPC {
         }
       );
 
-      return NextResponse.json({ data: result, entity, source });
+      return NextResponse.json({ data: result });
     } catch (error) {
       return handleError(error);
     }
@@ -232,10 +236,7 @@ export class URPC {
         }
       );
 
-      return NextResponse.json(
-        { data: result, entity, source },
-        { status: 201 }
-      );
+      return NextResponse.json({ data: result }, { status: 201 });
     } catch (error) {
       return handleError(error);
     }
@@ -267,7 +268,7 @@ export class URPC {
         }
       );
 
-      return NextResponse.json({ data: result, entity, source });
+      return NextResponse.json({ data: result });
     } catch (error) {
       return handleError(error);
     }

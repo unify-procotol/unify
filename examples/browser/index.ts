@@ -26,60 +26,28 @@ const MyPlugin: Plugin = {
 const HookMiddleware = createHookMiddleware((hookManager) => {
   hookManager
     .beforeCreate(async (context) => {
-      console.log(
-        "🚀 Builder: Before Create Hook",
-        "context: ",
-        context
-      );
+      console.log("🚀 Builder: Before Create Hook", "context: ", context);
     })
     .afterCreate(async (context) => {
-      console.log(
-        "✨ Builder: After Create Hook",
-        "context: ",
-        context
-      );
+      console.log("✨ Builder: After Create Hook", "context: ", context);
     })
     .beforeUpdate(async (context) => {
-      console.log(
-        "🔄 Builder: Before Update Hook",
-        "context: ",
-        context
-      );
+      console.log("🔄 Builder: Before Update Hook", "context: ", context);
     })
     .afterUpdate(async (context) => {
-      console.log(
-        "✅ Builder: After Update Hook",
-        "context: ",
-        context
-      );
+      console.log("✅ Builder: After Update Hook", "context: ", context);
     })
     .beforeDelete(async (context) => {
-      console.log(
-        "🗑️ Builder: Before Delete Hook",
-        "context: ",
-        context
-      );
+      console.log("🗑️ Builder: Before Delete Hook", "context: ", context);
     })
     .afterDelete(async (context) => {
-      console.log(
-        "💀 Builder: After Delete Hook",
-        "context: ",
-        context
-      );
+      console.log("💀 Builder: After Delete Hook", "context: ", context);
     })
     .beforeAny(async (context) => {
-      console.log(
-        "🔄 Builder: Before Any Hook",
-        "context: ",
-        context
-      );
+      console.log("🔄 Builder: Before Any Hook", "context: ", context);
     })
     .afterAny(async (context) => {
-      console.log(
-        "✅ Builder: After Any Hook",
-        "context: ",
-        context
-      );
+      console.log("✅ Builder: After Any Hook", "context: ", context);
     });
 });
 
@@ -87,23 +55,33 @@ URPC.init({
   enableDebug: true,
   plugins: [MyPlugin, WalletPlugin],
   middlewares: [HookMiddleware, Logging()],
+  entityConfigs: {
+    user: {
+      defaultSource: "demo",
+      // exclude: ["HookMiddleware"],
+    },
+    post: {
+      defaultSource: "demo",
+      // exclude: ["LoggingMiddleware"],
+    },
+  },
 });
 
 const fetchUser = async () => {
   const data = await repo<UserEntity>({
     entity: "user",
-    source: "demo",
+    // source: "demo",
   }).findMany({
-    // where: {
-    //   id: "1",
-    //   // email: "john.doe@example.com",
-    // },
+    where: {
+      id: "1",
+      // email: "john.doe@example.com",
+    },
     include: {
       posts: (userList) => {
         const ids = userList.map((user) => user.id);
         return joinRepo<PostEntity, UserEntity>({
           entity: "post",
-          source: "demo",
+          // source: "demo",
           localField: "id",
           foreignField: "userId",
         }).findMany({

@@ -17,13 +17,3 @@ export interface ApiResponse<T = any> {
   success: boolean;
   message?: string;
 }
-
-// 扩展 RepoOptions 类型来支持 context
-export interface RepoOptions {
-  entity: string;
-  source: string;
-  context?: {
-    language?: string;
-    [key: string]: any;
-  };
-}

@@ -131,7 +131,7 @@ export interface RelationMapping<
 
 export interface RepoOptions {
   entity: string;
-  source: string;
+  source?: string;
   context?: {
     language?: string;
     [key: string]: any;

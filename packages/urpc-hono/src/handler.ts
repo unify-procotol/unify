@@ -4,7 +4,6 @@ import {
   registerAdapter,
   getRepo,
   getRepoRegistry,
-  RepoOptions,
   EntityConfigs,
   getGlobalMiddlewareManager,
 } from "@unilab/urpc-core";
@@ -90,7 +89,10 @@ export class URPC {
     );
   }
 
-  static repo<T extends Record<string, any>>(options: RepoOptions) {
+  static repo<T extends Record<string, any>>(options: {
+    entity: string;
+    source: string;
+  }) {
     return getRepo(options.entity, options.source) as Repository<T>;
   }
 
@@ -98,7 +100,8 @@ export class URPC {
     this.app.get("/:entity/list", async (c) => {
       try {
         const entity = c.req.param("entity");
-        const source = c.req.query("source");
+        const source =
+          c.req.query("source") || this.entityConfigs[entity]?.defaultSource;
         const contextStr = c.req.query("context");
         const context = contextStr ? JSON.parse(contextStr) : undefined;
 
@@ -122,7 +125,8 @@ export class URPC {
     this.app.get("/:entity/find_one", async (c) => {
       try {
         const entity = c.req.param("entity");
-        const source = c.req.query("source");
+        const source =
+          c.req.query("source") || this.entityConfigs[entity]?.defaultSource;
         const contextStr = c.req.query("context");
         const context = contextStr ? JSON.parse(contextStr) : undefined;
 
@@ -156,7 +160,8 @@ export class URPC {
     this.app.post("/:entity/create", async (c) => {
       try {
         const entity = c.req.param("entity");
-        const source = c.req.query("source");
+        const source =
+          c.req.query("source") || this.entityConfigs[entity]?.defaultSource;
 
         const sourceError = validateSource(source, c);
         if (sourceError) return sourceError;
@@ -186,7 +191,8 @@ export class URPC {
     this.app.patch("/:entity/update", async (c) => {
       try {
         const entity = c.req.param("entity");
-        const source = c.req.query("source");
+        const source =
+          c.req.query("source") || this.entityConfigs[entity]?.defaultSource;
 
         const sourceError = validateSource(source, c);
         if (sourceError) return sourceError;
@@ -217,7 +223,8 @@ export class URPC {
     this.app.delete("/:entity/delete", async (c) => {
       try {
         const entity = c.req.param("entity");
-        const source = c.req.query("source");
+        const source =
+          c.req.query("source") || this.entityConfigs[entity]?.defaultSource;
 
         const sourceError = validateSource(source, c);
         if (sourceError) return sourceError;

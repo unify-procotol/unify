@@ -31,10 +31,7 @@ const postData = [
 class PostAdapter extends BaseAdapter<PostEntity> {
   async findMany(args?: FindManyArgs<PostEntity>): Promise<PostEntity[]> {
     const where = args?.where || {};
-    console.log(
-      "PostAdapter.findMany called with where:",
-      JSON.stringify(where, null, 2)
-    );
+  
 
     // 如果有 id 条件，按 id 过滤
     if (where.id) {

@@ -37,12 +37,6 @@ export class URPC {
     this.applyMiddlewareToRepos(config.middlewares);
   }
 
-  private log(...args: any[]): void {
-    if (this.enableDebug) {
-      console.log("[URPC]", ...args);
-    }
-  }
-
   private initFromPlugins(plugins: Plugin[]) {
     const entities = plugins.flatMap((p) => p.entities || []);
     const adapters = plugins.flatMap((p) => p.adapters || []);
@@ -102,14 +96,19 @@ export class URPC {
   ): Repository<T> {
     return new Proxy({} as Repository<T>, {
       get: (target, prop: string) => {
-        const { entity, source, context } = options;
-        const repo = getRepo(entity, source!);
+        const { entity, context } = options;
+        const source =
+          options.source || this.entityConfigs[entity]?.defaultSource;
+
+        if (!source) {
+          throw new Error(`Source is required for entity ${entity}`);
+        }
+
+        const repo = getRepo(entity, source);
 
         switch (prop) {
           case "findMany":
             return async (args: FindManyArgs<T> = {}) => {
-              this.log(`findMany called for ${entity}:${source}`, args);
-
               const result = await repo.findMany(args, {
                 entity,
                 source,
@@ -125,8 +124,6 @@ export class URPC {
 
           case "findOne":
             return async (args: FindOneArgs<T>) => {
-              this.log(`findOne called for ${entity}:${source}`, args);
-
               const result = await repo.findOne(args, {
                 entity,
                 source,
@@ -142,7 +139,6 @@ export class URPC {
 
           case "create":
             return async (args: CreationArgs<T>) => {
-              this.log(`create called for ${entity}:${source}`, args);
               return repo.create(args, {
                 entity,
                 source,
@@ -151,7 +147,6 @@ export class URPC {
 
           case "update":
             return async (args: UpdateArgs<T>) => {
-              this.log(`update called for ${entity}:${source}`, args);
               return repo.update(args, {
                 entity,
                 source,
@@ -160,7 +155,6 @@ export class URPC {
 
           case "delete":
             return async (args: DeletionArgs<T>) => {
-              this.log(`delete called for ${entity}:${source}`, args);
               return repo.delete(args, {
                 entity,
                 source,
@@ -185,7 +179,6 @@ export class URPC {
           const relationData = await callback(entity);
           result[key] = relationData;
         } catch (error) {
-          this.log(`Error loading relation ${key}:`, error);
           result[key] = null;
         }
       }

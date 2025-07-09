@@ -65,7 +65,9 @@ export function handleError(error: unknown): NextResponse {
   );
 }
 
-export function validateSource(source: string | null): NextResponse | null {
+export function validateSource(
+  source: string | null | undefined
+): NextResponse | null {
   if (!source) {
     return NextResponse.json(
       { error: "source parameter is required" },

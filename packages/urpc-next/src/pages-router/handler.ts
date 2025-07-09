@@ -9,7 +9,6 @@ import {
   registerAdapter,
   getRepo,
   getRepoRegistry,
-  RepoOptions,
   EntityConfigs,
   getGlobalMiddlewareManager,
 } from "@unilab/urpc-core";
@@ -88,7 +87,10 @@ export class URPC {
     );
   }
 
-  static repo<T extends Record<string, any>>(options: RepoOptions) {
+  static repo<T extends Record<string, any>>(options: {
+    entity: string;
+    source: string;
+  }) {
     return getRepo(options.entity, options.source) as Repository<T>;
   }
 
@@ -112,7 +114,8 @@ export class URPC {
         });
       }
 
-      const source = getSourceFromQuery(req);
+      const source =
+        getSourceFromQuery(req) || this.entityConfigs[entity]?.defaultSource;
 
       if (!validateSource(source, res)) {
         return;

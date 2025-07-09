@@ -81,7 +81,7 @@ URPC.init({
 const createUser = async () => {
   const data = await repo<UserEntity>({
     entity: "user",
-    source: "demo",
+    // source: "demo",
   }).create({
     data: {
       name: "John Doe",

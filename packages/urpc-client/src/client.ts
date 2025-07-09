@@ -6,8 +6,9 @@ import type {
   DeletionArgs,
   Repository,
   JoinRepoOptions,
+  RepoOptions,
 } from "@unilab/urpc-core";
-import type { ClientConfig, HttpRequestOptions, RepoOptions } from "./types";
+import type { ClientConfig, HttpRequestOptions } from "./types";
 
 export class URPC {
   private config: ClientConfig;
@@ -90,9 +91,10 @@ export class URPC {
               if (args.order_by) params.order_by = args.order_by;
               if (args.limit) params.limit = args.limit;
               if (args.offset) params.offset = args.offset;
-              
+
               // 传递 context 参数
-              if ((options as any).context) params.context = (options as any).context;
+              if ((options as any).context)
+                params.context = (options as any).context;
 
               const result = await this.request<T[]>({
                 method: "GET",
@@ -113,9 +115,10 @@ export class URPC {
                 source,
                 where: args.where,
               };
-              
+
               // 传递 context 参数
-              if ((options as any).context) params.context = (options as any).context;
+              if ((options as any).context)
+                params.context = (options as any).context;
 
               const result = await this.request<T | null>({
                 method: "GET",
@@ -250,9 +253,7 @@ export class URPC {
 
   private static getGlobalClient(): URPC {
     if (!URPC.globalClient) {
-      throw new Error(
-        "URPC not initialized. Call URPC.init() first."
-      );
+      throw new Error("URPC not initialized. Call URPC.init() first.");
     }
     return URPC.globalClient;
   }
