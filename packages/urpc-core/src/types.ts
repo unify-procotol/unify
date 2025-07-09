@@ -170,8 +170,3 @@ export interface EntityConfig {
 export interface EntityConfigs {
   [entityName: string]: EntityConfig;
 }
-
-export interface GlobalAdapterRegistration {
-  source: string;
-  adapter: DataSourceAdapter<any>;
-}

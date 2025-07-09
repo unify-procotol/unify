@@ -28,13 +28,13 @@ const HookMiddleware = createHookMiddleware((hookManager) => {
     })
     .afterDelete(async (context) => {
       console.log("💀 Builder: After Delete Hook", "context: ", context);
-    })
-    // .beforeAny(async (context) => {
-    //   console.log("🔄 Builder: Before Any Hook", "context: ", context);
-    // })
-    // .afterAny(async (context) => {
-    //   console.log("✅ Builder: After Any Hook", "context: ", context);
-    // });
+    });
+  // .beforeAny(async (context) => {
+  //   console.log("🔄 Builder: Before Any Hook", "context: ", context);
+  // })
+  // .afterAny(async (context) => {
+  //   console.log("✅ Builder: After Any Hook", "context: ", context);
+  // });
 });
 
 URPC.init({
@@ -42,18 +42,10 @@ URPC.init({
   middlewares: [HookMiddleware, Logging()],
   entityConfigs: {
     user: {
-      defaultSource: "demo",
-    },
-    post: {
-      defaultSource: "demo",
+      defaultSource: "memory",
     },
   },
-  globalAdapters: [
-    {
-      source: "memory",
-      adapter: new MemoryAdapter(),
-    },
-  ],
+  globalAdapters: [MemoryAdapter],
 });
 
 const demo = async () => {
@@ -97,70 +89,20 @@ const demo = async () => {
 
 demo();
 
-// 🗄️ IndexedDB Example
-// For persistent storage in the browser, check out the IndexedDB example:
-// - Run: bun run indexeddb-demo
-// - Or open: indexeddb-demo.html in your browser
-// - See: indexeddb-example.ts for the implementation
+const fetchUser = async () => {
+  const data = await repo<UserEntity>({
+    entity: "user",
+    // source: "memory",
+  }).findMany({
+    where: {
+      id: "1",
+      // email: "john.doe@example.com",
+    },
+  });
+  console.log("[1] =>", JSON.stringify(data, null, 2));
+};
 
-// const fetchUser = async () => {
-//   const data = await repo<UserEntity>({
-//     entity: "user",
-//     // source: "demo",
-//   }).findMany({
-//     where: {
-//       id: "1",
-//       // email: "john.doe@example.com",
-//     },
-//     include: {
-//       posts: (userList) => {
-//         const ids = userList.map((user) => user.id);
-//         return joinRepo<PostEntity, UserEntity>({
-//           entity: "post",
-//           // source: "demo",
-//           localField: "id",
-//           foreignField: "userId",
-//         }).findMany({
-//           where: {
-//             userId: {
-//               $in: ids,
-//             },
-//           },
-//         });
-//       },
-//     },
-//   });
-//   console.log("[1] =>", JSON.stringify(data, null, 2));
-// };
-
-// fetchUser();
-
-// const fetchPost = async () => {
-//   const data = await repo<PostEntity>({
-//     entity: "post",
-//     source: "demo",
-//   }).findOne({
-//     where: {
-//       id: "2",
-//     },
-//     include: {
-//       user: (post) => {
-//         const userId = post.userId;
-//         return repo<UserEntity>({
-//           entity: "user",
-//           source: "demo",
-//         }).findOne({
-//           where: {
-//             id: userId,
-//           },
-//         });
-//       },
-//     },
-//   });
-//   console.log("[2] =>", JSON.stringify(data, null, 2));
-// };
-
-// fetchPost();
+fetchUser();
 
 // const fetchEvmBalance = async () => {
 //   const data = await repo<WalletEntity>({

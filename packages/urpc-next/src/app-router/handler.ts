@@ -8,7 +8,7 @@ import {
   EntityConfigs,
   getGlobalMiddlewareManager,
   simplifyEntityName,
-  GlobalAdapterRegistration,
+  DataSourceAdapter,
 } from "@unilab/urpc-core";
 import {
   generateSchemas,
@@ -98,22 +98,19 @@ export class URPC {
   }
 
   private static registerGlobalAdapters(
-    globalAdapters: GlobalAdapterRegistration[] = []
+    globalAdapters: (new () => DataSourceAdapter<any>)[] = []
   ) {
     if (globalAdapters.length > 0) {
-      globalAdapters.forEach(({ source, adapter }) => {
-        // For global adapters, we register them for all entities
+      globalAdapters.forEach((Adapter) => {
+        const source = Adapter.name;
         this.entityNames.forEach((entityName) => {
-          registerAdapter(entityName, source, adapter);
+          registerAdapter(entityName, source, new Adapter());
         });
       });
       console.log(
         `✅ Registered global adapters: ${globalAdapters
           .map((a) => {
-            const adapterName =
-              (a.adapter.constructor as any).adapterName ||
-              a.adapter.constructor.name;
-            return `${adapterName}`;
+            return `${a.name}`;
           })
           .join(", ")}`
       );

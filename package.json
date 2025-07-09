@@ -5,6 +5,7 @@
   "workspaces": [
     "packages/*",
     "examples/*",
+    "dev/*",
     "docs"
   ],
   "scripts": {
@@ -21,9 +22,9 @@
     "build:uniweb3": "cd packages/uniweb3 && bun run build",
     "dev:uniweb3": "cd packages/uniweb3 && bun run dev",
     "build:unify-ui": "cd packages/unify-ui && bun run build",
-    "build:ustore": "cd packages/ustore && bun run build",
-    "dev:ustore": "cd packages/ustore && bun run dev",
-    "build": "bun run build:urpc-core && bun run build:urpc-hono && bun run build:urpc-next && bun run build:urpc-client && bun run build:urpc && bun run build:uniweb3 && bun run build:unify-ui && bun run build:ustore"
+    "build:urpc-adapters": "cd packages/urpc-adapters && bun run build",
+    "dev:urpc-adapters": "cd packages/urpc-adapters && bun run dev",
+    "build": "bun run build:urpc-core && bun run build:urpc-adapters && bun run build:urpc-hono && bun run build:urpc-next && bun run build:urpc-client && bun run build:urpc && bun run build:uniweb3 && bun run build:unify-ui"
   },
   "author": "",
   "license": "MIT",

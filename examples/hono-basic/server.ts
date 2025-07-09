@@ -1,11 +1,9 @@
 import { URPC } from "@unilab/urpc-hono";
-import { UserAdapter } from "./adapters/user";
-import { PostAdapter } from "./adapters/post";
 import { UserEntity } from "./entities/user";
 import { PostEntity } from "./entities/post";
 import { createHookMiddleware } from "@unilab/urpc-core/middleware";
 import { Plugin } from "@unilab/urpc-core";
-import { MemoryAdapter } from "@unilab/urpc-adapters";
+import { MockAdapter } from "@unilab/urpc-adapters";
 
 const HookMiddleware = createHookMiddleware((hookManager) => {
   hookManager
@@ -31,42 +29,46 @@ const HookMiddleware = createHookMiddleware((hookManager) => {
 
 const MyPlugin: Plugin = {
   entities: [UserEntity, PostEntity],
-  // adapters: [
-  //   { source: "demo", entity: "UserEntity", adapter: new UserAdapter() },
-  //   { source: "demo", entity: "PostEntity", adapter: new PostAdapter() },
-  // ],
 };
 
 const app = URPC.init({
   plugins: [MyPlugin],
-  middlewares: [HookMiddleware],
+  // middlewares: [HookMiddleware],
   entityConfigs: {
     user: {
-      defaultSource: "demo",
+      defaultSource: "mock",
     },
     post: {
-      defaultSource: "demo",
+      defaultSource: "mock",
     },
   },
-  globalAdapters: [
-    {
-      source: "memory",
-      adapter: new MemoryAdapter(),
-    },
-  ],
+  globalAdapters: [MockAdapter],
 });
 
-// // Use repo on the server side
-// const user = await URPC.repo<UserEntity>({
-//   entity: "UserEntity",
-//   source: "demo",
-// }).findOne({
-//   where: {
-//     id: "2",
-//   },
-// });
-
-// console.log("user =>", user);
+// Use repo on the server side
+// init data
+await URPC.repo<UserEntity>({
+  entity: "UserEntity",
+  source: "mock",
+}).create({
+  data: {
+    id: "1",
+    name: "John Doe",
+    email: "john.doe@example.com",
+    avatar: "https://example.com/avatar.png",
+  },
+});
+await URPC.repo<PostEntity>({
+  entity: "PostEntity",
+  source: "mock",
+}).create({
+  data: {
+    id: "1",
+    title: "Post 1",
+    content: "Content 1",
+    userId: "1",
+  },
+});
 
 export default {
   port: 3000,

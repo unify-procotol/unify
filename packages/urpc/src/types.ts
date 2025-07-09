@@ -2,7 +2,7 @@ import type {
   Middleware,
   Plugin,
   EntityConfigs,
-  GlobalAdapterRegistration,
+  DataSourceAdapter,
 } from "@unilab/urpc-core";
 
 export interface RepoOptions<T extends Record<string, any>> {
@@ -30,5 +30,5 @@ export interface URPCConfig {
   plugins: Plugin[];
   middlewares?: Middleware<any>[];
   entityConfigs?: EntityConfigs;
-  globalAdapters?: GlobalAdapterRegistration[];
+  globalAdapters?: (new () => DataSourceAdapter<any>)[];
 }

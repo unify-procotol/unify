@@ -6,13 +6,13 @@ import {
   UpdateArgs,
   DeletionArgs,
   UpsertArgs,
-  WhereCondition,
 } from "@unilab/urpc-core";
 import { matchesWhere, processFindManyArgs, performUpsert } from "../utils";
 
 export class MemoryAdapter<
   T extends Record<string, any>,
 > extends BaseAdapter<T> {
+  static name = "memory";
   private items: T[] = [];
 
   async findMany(args?: FindManyArgs<T>): Promise<T[]> {

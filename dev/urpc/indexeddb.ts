@@ -1,6 +1,5 @@
 import { UserEntity } from "./entities/user";
 import { repo, URPC } from "@unilab/urpc";
-import { WalletPlugin } from "@unilab/uniweb3";
 import { Plugin } from "@unilab/urpc-core";
 import { Logging } from "@unilab/urpc-core/middleware";
 import { IndexedDBAdapter } from "@unilab/urpc-adapters";
@@ -10,22 +9,14 @@ const MyPlugin: Plugin = {
 };
 
 URPC.init({
-  plugins: [MyPlugin, WalletPlugin],
+  plugins: [MyPlugin],
   middlewares: [Logging()],
   entityConfigs: {
     user: {
-      defaultSource: "demo",
-    },
-    post: {
-      defaultSource: "demo",
+      defaultSource: "indexeddb",
     },
   },
-  globalAdapters: [
-    {
-      source: "indexeddb",
-      adapter: new IndexedDBAdapter(),
-    },
-  ],
+  globalAdapters: [IndexedDBAdapter],
 });
 
 declare global {

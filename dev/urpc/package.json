@@ -4,6 +4,7 @@
   "description": "Basic browser example using @unilab/urpc",
   "main": "server.ts",
   "scripts": {
+    "mock": "bun run mock.ts",
     "memory": "bun run memory.ts",
     "indexeddb": "vite"
   },
