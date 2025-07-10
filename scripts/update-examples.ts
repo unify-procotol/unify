@@ -12,7 +12,7 @@ interface Config {
 const CONFIG: Config = {
   publishedPackages: [
     '@unilab/urpc-core',
-    '@unilab/urpc-client', 
+    '@unilab/urpc', 
     '@unilab/urpc-hono',
     '@unilab/urpc-next',
     '@unilab/urpc-adapters',

@@ -82,7 +82,7 @@ export default {
   fetch: app.fetch,
 };`;
 
-  const clientCode = `import { repo, URPC } from "@unilab/urpc-client";
+  const clientCode = `import { repo, URPC } from "@unilab/urpc";
 import { WalletEntity } from "@unilab/uniweb3/entities";
 
 URPC.init({

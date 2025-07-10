@@ -1,11 +1,6 @@
-import { repo, URPC } from "@unilab/urpc-client";
+import { repo, URPC } from "@unilab/urpc";
 import { WalletEntity } from "@unilab/uniweb3/entities";
 import { useEffect, useState } from "react";
-
-URPC.init({
-  baseUrl: "http://localhost:3000/api",
-  timeout: 10000,
-});
 
 export default function Home() {
   const [evmBalanceData, setEvmBalanceData] = useState<WalletEntity | null>(
@@ -17,6 +12,11 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    URPC.init({
+      baseUrl: "http://localhost:3000/api",
+      timeout: 10000,
+    });
+
     const fetchWalletData = async (
       source: "evm" | "solana",
       address: string,

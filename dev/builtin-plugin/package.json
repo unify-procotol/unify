@@ -1,7 +1,7 @@
 {
   "name": "global-example",
   "version": "1.0.0",
-  "description": "Global example using @unilab/urpc-hono and @unilab/urpc-client",
+  "description": "Global example using @unilab/urpc-hono and @unilab/urpc",
   "main": "server.ts",
   "scripts": {
     "dev": "bun run server.ts",
@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@hono/node-server": "^1.12.2",
-    "@unilab/urpc-client": "workspace:*",
+    "@unilab/urpc": "workspace:*",
     "@unilab/urpc-core": "workspace:*",
     "@unilab/urpc-hono": "workspace:*",
     "@unilab/builtin-plugin": "workspace:*",

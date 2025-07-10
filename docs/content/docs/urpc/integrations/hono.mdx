@@ -8,7 +8,7 @@ description: URPC provides seamless Hono integration. This guide shows you how t
 First, install the required dependency packages:
 
 ```package-install
-@unilab/urpc-hono @unilab/urpc-client @unilab/urpc-core @unilab/urpc-adapters hono @hono/node-server
+@unilab/urpc-hono @unilab/urpc @unilab/urpc-core @unilab/urpc-adapters hono @hono/node-server
 ```
 
 ## Project Structure
@@ -147,7 +147,7 @@ Use the URPC client to interact with your API with advanced relationship queries
 ```typescript
 import { UserEntity } from "./entities/user";
 import { PostEntity } from "./entities/post";
-import { repo, URPC, joinRepo } from "@unilab/urpc-client";
+import { repo, URPC, joinRepo } from "@unilab/urpc";
 
 URPC.init({
   baseUrl: "http://localhost:3000",

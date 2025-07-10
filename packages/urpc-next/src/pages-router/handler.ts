@@ -202,7 +202,7 @@ export class URPC {
         context,
       });
 
-      return res.status(200).json({ data: result, entity, source });
+      return res.status(200).json({ data: result });
     } catch (error) {
       return handleError(error, res);
     }
@@ -234,7 +234,7 @@ export class URPC {
         }
       );
 
-      return res.status(200).json({ data: result, entity, source });
+      return res.status(200).json({ data: result });
     } catch (error) {
       return handleError(error, res);
     }
@@ -265,7 +265,7 @@ export class URPC {
         }
       );
 
-      return res.status(201).json({ data: result, entity, source });
+      return res.status(201).json({ data: result });
     } catch (error) {
       return handleError(error, res);
     }
@@ -297,7 +297,7 @@ export class URPC {
         }
       );
 
-      return res.status(200).json({ data: result, entity, source });
+      return res.status(200).json({ data: result });
     } catch (error) {
       return handleError(error, res);
     }

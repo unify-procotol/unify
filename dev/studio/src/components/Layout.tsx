@@ -1,5 +1,5 @@
 import { ReactNode, useState, useEffect } from "react";
-import { repo, URPC } from "@unilab/urpc-client";
+import { repo, URPC } from "@unilab/urpc";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Card } from "./ui/card";

@@ -42,7 +42,7 @@ include: {
 The `joinRepo` function provides an optimized way to handle relations with explicit field mappings:
 
 ```typescript
-import { joinRepo } from "@unilab/urpc-client";
+import { joinRepo } from "@unilab/urpc";
 
 joinRepo<PostEntity, UserEntity>({
   entity: "post",
@@ -185,7 +185,7 @@ class PostAdapter extends BaseAdapter<PostEntity> {
 For straightforward relation queries where you have specific where conditions:
 
 ```typescript
-import { repo, URPC } from "@unilab/urpc-client";
+import { repo, URPC } from "@unilab/urpc";
 import { PostEntity, UserEntity } from "./entities";
 
 // Query a post with its author
@@ -213,7 +213,7 @@ const post = await repo<PostEntity>({
 When you need optimized relation mapping, especially for queries without specific where conditions, use `joinRepo`:
 
 ```typescript
-import { repo, URPC, joinRepo } from "@unilab/urpc-client";
+import { repo, URPC, joinRepo } from "@unilab/urpc";
 
 // Query users with their posts using joinRepo
 const fetchUser = async () => {
@@ -322,7 +322,7 @@ console.log("Users with posts:", users);
 Initialize the URPC client with your server configuration:
 
 ```typescript
-import { URPC } from "@unilab/urpc-client";
+import { URPC } from "@unilab/urpc";
 
 URPC.init({
   baseUrl: "http://localhost:3000",
@@ -337,7 +337,7 @@ Here's a complete working example from the hono-basic implementation:
 ```typescript
 import { UserEntity } from "./entities/user";
 import { PostEntity } from "./entities/post";
-import { repo, URPC, joinRepo } from "@unilab/urpc-client";
+import { repo, URPC, joinRepo } from "@unilab/urpc";
 
 URPC.init({
   baseUrl: "http://localhost:3000",

@@ -8,7 +8,7 @@ description: Learn how to set up URPC with plugins and middleware
 ### 1. Install Dependencies
 
 ```package-install
-@unilab/urpc-hono @unilab/urpc-client @unilab/urpc-core
+@unilab/urpc-hono @unilab/urpc @unilab/urpc-core
 ```
 
 ### 2. Create Server
@@ -51,7 +51,7 @@ await URPC.repo<WalletEntity>({
 
 ```typescript
 // client.ts
-import { repo, URPC } from "@unilab/urpc-client";
+import { repo, URPC } from "@unilab/urpc";
 import { WalletEntity } from "@unilab/uniweb3/entities";
 
 URPC.init({

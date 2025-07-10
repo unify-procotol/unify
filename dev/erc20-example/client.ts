@@ -1,5 +1,5 @@
 import { PairEntity } from "./entities/pair";
-import { repo, URPC } from "@unilab/urpc-client";
+import { repo, URPC } from "@unilab/urpc";
 
 URPC.init({
   baseUrl: "http://localhost:3000",

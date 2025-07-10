@@ -26,9 +26,31 @@ export type JoinRepoOptions<
   L extends Record<string, any> = Record<string, any>,
 > = RepoOptions<F> & RelationMapping<F, L>;
 
-export interface URPCConfig {
+export interface LocalConfig {
   plugins: Plugin[];
   middlewares?: Middleware<any>[];
   entityConfigs?: EntityConfigs;
   globalAdapters?: (new () => DataSourceAdapter<any>)[];
 }
+
+export interface HttpClientConfig {
+  baseUrl: string;
+  timeout?: number;
+  headers?: Record<string, string>;
+}
+
+export interface HttpRequestOptions {
+  method: "GET" | "POST" | "PATCH" | "DELETE";
+  url: string;
+  params?: Record<string, any>;
+  data?: any;
+  headers?: Record<string, string>;
+}
+
+export interface HttpResponse<T = any> {
+  data: T;
+  success: boolean;
+  message?: string;
+}
+
+export type URPCConfig = LocalConfig | HttpClientConfig;

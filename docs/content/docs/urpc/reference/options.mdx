@@ -1,6 +1,6 @@
 ---
 title: API Reference
-description: Complete API reference for URPC packages including @unilab/urpc-core, @unilab/urpc-hono, @unilab/urpc-client, @unilab/urpc-next, @unilab/urpc, and @unilab/uniweb3.
+description: Complete API reference for URPC packages including @unilab/urpc-core, @unilab/urpc-hono, @unilab/urpc, @unilab/urpc-next, @unilab/urpc, and @unilab/uniweb3.
 ---
 
 # @unilab/urpc-core
@@ -351,7 +351,7 @@ The URPC server automatically generates REST API endpoints based on registered p
 
 All routes require a `source` query parameter to specify the data source.
 
-# @unilab/urpc-client
+# @unilab/urpc
 
 HTTP client library for consuming URPC APIs with relation support.
 
@@ -402,7 +402,7 @@ static init(config: ClientConfig): void
 
 **Example:**
 ```typescript
-import { URPC } from "@unilab/urpc-client";
+import { URPC } from "@unilab/urpc";
 
 URPC.init({
   baseUrl: "http://localhost:3000",
@@ -430,7 +430,7 @@ static repo<T extends Record<string, any>>(
 
 **Example:**
 ```typescript
-import { URPC } from "@unilab/urpc-client";
+import { URPC } from "@unilab/urpc";
 import { WalletEntity } from "@unilab/uniweb3/entities";
 
 const walletRepo = URPC.repo<WalletEntity>({
@@ -540,7 +540,7 @@ function joinRepo<
 
 **Example:**
 ```typescript
-import { repo, URPC } from "@unilab/urpc-client";
+import { repo, URPC } from "@unilab/urpc";
 import { WalletEntity } from "@unilab/uniweb3/entities";
 
 // Initialize client first
@@ -906,7 +906,7 @@ export const { GET, POST, PATCH, DELETE } = api;
 ### Client Usage with Relations
 
 ```typescript
-import { URPC, repo } from "@unilab/urpc-client";
+import { URPC, repo } from "@unilab/urpc";
 import { WalletEntity } from "@unilab/uniweb3/entities";
 
 // Initialize client
