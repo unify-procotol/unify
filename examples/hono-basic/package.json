@@ -13,7 +13,7 @@
     "@unilab/urpc-client": "^0.0.1",
     "@unilab/urpc-core": "^0.0.1",
     "@unilab/urpc-hono": "^0.0.3",
-    "@unilab/urpc-adapters": "^0.0.3",
+    "@unilab/urpc-adapters": "^0.0.4",
     "hono": "^4.7.11"
   },
   "devDependencies": {
