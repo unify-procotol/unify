@@ -1,0 +1,39 @@
+{
+  "name": "unipost",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.ts",
+  "scripts": {
+    "dev": "bun run server.ts",
+    "start": "bun run server.ts",
+    "test-server": "bun run test-server.ts",
+    "client": "bun run client.ts",
+    "example:simple": "bun run example-simple-postgres.ts",
+    "example:generic": "bun run example-generic-postgres.ts",
+    "db:setup": "psql -d unipost -f schema.sql",
+    "db:create": "createdb unipost"
+  },
+  "dependencies": {
+    "@ai-sdk/openai": "^1.3.23",
+    "@hono/node-server": "^1.12.2",
+    "@tryghost/content-api": "^1.11.28",
+    "@unilab/urpc-client": "workspace:*",
+    "@unilab/urpc-core": "workspace:*",
+    "@unilab/urpc-hono": "workspace:*",
+    "hono": "^4.7.11",
+    "lru-cache": "^11.1.0",
+    "postgres": "^3.4.7"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.1.12",
+    "typescript": "^5.3.0"
+  },
+  "keywords": [
+    "hono",
+    "unilab",
+    "api",
+    "example"
+  ],
+  "author": "",
+  "license": "MIT"
+}
