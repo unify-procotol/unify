@@ -10,10 +10,10 @@
   },
   "dependencies": {
     "@hono/node-server": "^1.12.2",
-    "@unilab/urpc-client": "workspace:*",
-    "@unilab/urpc-core": "workspace:*",
-    "@unilab/urpc-hono": "workspace:*",
-    "@unilab/urpc-adapters": "workspace:*",
+    "@unilab/urpc-client": "^0.0.1",
+    "@unilab/urpc-core": "^0.0.1",
+    "@unilab/urpc-hono": "^0.0.3",
+    "@unilab/urpc-adapters": "^0.0.1",
     "hono": "^4.7.11"
   },
   "devDependencies": {

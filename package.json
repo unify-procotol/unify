@@ -26,8 +26,12 @@
     "dev:urpc-adapters": "cd packages/urpc-adapters && bun run dev",
     "build:builtin-plugin": "cd packages/builtin-plugin && bun run build",
     "dev:builtin-plugin": "cd packages/builtin-plugin && bun run dev",
+    "build:urpc-cli": "cd packages/urpc-cli && npm run build",
+    "dev:urpc-cli": "cd packages/urpc-cli && npm run dev",
     "dev:studio": "cd dev/studio && bun run dev",
-    "build": "bun run build:urpc-core && bun run build:builtin-plugin && bun run build:urpc-hono && bun run build:urpc-next && bun run build:urpc-client && bun run build:urpc && bun run build:uniweb3 && bun run build:ukit"
+    "update-examples": "bun scripts/update-examples.ts",
+    "update-examples:workspace": "bun scripts/update-examples.ts --workspace",
+    "build": "bun run build:urpc-core && bun run build:builtin-plugin && bun run build:urpc-hono && bun run build:urpc-next && bun run build:urpc-client && bun run build:urpc && bun run build:uniweb3 && bun run build:ukit && bun run build:urpc-cli"
   },
   "author": "",
   "license": "MIT",
