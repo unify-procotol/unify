@@ -1,6 +1,6 @@
 {
   "name": "@unilab/urpc-client",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "URPC Client",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -22,7 +22,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@unilab/urpc-core": "^0.0.1",
+    "@unilab/urpc-core": "^0.0.2",
     "zod": "^3.25.57"
   },
   "devDependencies": {

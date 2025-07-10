@@ -1,6 +1,6 @@
 {
   "name": "@unilab/builtin-plugin",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Builtin plugin for URPC",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -17,7 +17,7 @@
     "prepublishOnly": "bun run build"
   },
   "dependencies": {
-    "@unilab/urpc-core": "^0.0.1"
+    "@unilab/urpc-core": "^0.0.2"
   },
   "devDependencies": {
     "typescript": "^5.6.2"
