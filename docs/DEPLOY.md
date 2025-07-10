@@ -1,143 +1,143 @@
-# Cloudflare Pages部署指南
+# Cloudflare Pages Deployment Guide
 
-## 前置条件
+## Prerequisites
 
-1. 安装Cloudflare CLI工具 (wrangler)
-2. 拥有Cloudflare账号
-3. 配置好Cloudflare身份验证
+1. Install Cloudflare CLI tool (wrangler)
+2. Have a Cloudflare account
+3. Configure Cloudflare authentication
 
-## 部署步骤
+## Deployment Steps
 
-### 文档站点部署
+### Documentation Site Deployment
 
-#### 1. 登录Cloudflare
+#### 1. Login to Cloudflare
 ```bash
 npx wrangler login
 ```
 
-#### 2. 构建项目
+#### 2. Build Project
 ```bash
 pnpm run pages:build
 ```
 
-#### 3. 本地预览
+#### 3. Local Preview
 ```bash
 pnpm run preview
 ```
 
-#### 4. 部署到Cloudflare Pages
+#### 4. Deploy to Cloudflare Pages
 ```bash
 pnpm run deploy
 ```
 
-或使用指定项目名称：
+Or use a specified project name:
 ```bash
 pnpm run cf:deploy
 ```
 
-### Storybook部署
+### Storybook Deployment
 
-#### 1. 构建Storybook
+#### 1. Build Storybook
 ```bash
 pnpm run storybook:build
 ```
 
-#### 2. 本地预览Storybook
+#### 2. Local Preview Storybook
 ```bash
 pnpm run storybook:preview
 ```
 
-#### 3. 部署Storybook到Cloudflare Pages
+#### 3. Deploy Storybook to Cloudflare Pages
 ```bash
 pnpm run storybook:deploy
 ```
 
-或使用指定项目名称：
+Or use a specified project name:
 ```bash
 pnpm run storybook:cf:deploy
 ```
 
-## 配置说明
+## Configuration
 
-### 文档站点配置
-- 项目配置为静态导出模式 (`output: 'export'`)
-- 图片优化已禁用以兼容Cloudflare Pages
-- 已移除搜索功能以简化部署
+### Documentation Site Configuration
+- Project is configured for static export mode (`output: 'export'`)
+- Image optimization is disabled for Cloudflare Pages compatibility
+- Search functionality removed to simplify deployment
 
-### Storybook配置
-- 直接部署 `storybook-static/` 目录
-- 配置了合适的缓存策略和安全头
-- 无需额外的wrangler配置文件
+### Storybook Configuration
+- Direct deployment of `storybook-static/` directory
+- Configured with appropriate caching strategies and security headers
+- No additional wrangler configuration file needed
 
-### 构建产物
-- 文档站点：`.vercel/output/static/` 目录
-- Storybook：`storybook-static/` 目录
-- 所有页面都预渲染为静态HTML
-- 支持客户端路由
+### Build Artifacts
+- Documentation site: `.vercel/output/static/` directory
+- Storybook: `storybook-static/` directory
+- All pages are pre-rendered as static HTML
+- Supports client-side routing
 
-## 同时部署两个项目
+## Deploy Both Projects Simultaneously
 
-### 使用一键部署脚本
+### Using One-Click Deployment Script
 ```bash
 ./deploy-all.sh
 ```
 
-### 手动部署
+### Manual Deployment
 ```bash
-# 部署文档站点
+# Deploy documentation site
 pnpm run cf:deploy
 
-# 部署Storybook
+# Deploy Storybook
 pnpm run storybook:cf:deploy
 ```
 
-## 环境变量
+## Environment Variables
 
-如果需要环境变量，请在Cloudflare Dashboard中的Pages设置中添加。
+If environment variables are needed, please add them in the Pages settings in Cloudflare Dashboard.
 
-## 故障排除
+## Troubleshooting
 
-1. **构建失败**：请检查Next.js版本兼容性
-2. **部署失败**：请确认已正确登录Cloudflare
-3. **页面加载异常**：请检查静态资源路径
-4. **需要搜索功能**：请考虑使用客户端搜索解决方案
-5. **Storybook构建失败**：请检查addon版本兼容性
-6. **预览命令错误**：确保使用正确的命令格式，避免使用不支持的参数
+1. **Build Failed**: Please check Next.js version compatibility
+2. **Deployment Failed**: Please confirm you've logged in to Cloudflare correctly
+3. **Page Loading Issues**: Please check static resource paths
+4. **Need Search Functionality**: Please consider using client-side search solutions
+5. **Storybook Build Failed**: Please check addon version compatibility
+6. **Preview Command Error**: Ensure using correct command format, avoid using unsupported parameters
 
-## 配置文件
+## Configuration Files
 
-### 文档站点
-- `wrangler.toml`: Cloudflare Pages配置
-- `_headers`: HTTP头配置
-- `next.config.mjs`: Next.js静态导出配置
+### Documentation Site
+- `wrangler.toml`: Cloudflare Pages configuration
+- `_headers`: HTTP headers configuration
+- `next.config.mjs`: Next.js static export configuration
 
 ### Storybook
-- `storybook-static/_headers`: Storybook HTTP头配置
-- `.storybook/main.ts`: Storybook主配置
+- `storybook-static/_headers`: Storybook HTTP headers configuration
+- `.storybook/main.ts`: Storybook main configuration
 
-## 访问部署的站点
+## Access Deployed Sites
 
-部署成功后，你将得到两个URL：
-- 文档站点：`https://unify-docs.pages.dev`
-- Storybook：`https://unify-storybook.pages.dev`
+After successful deployment, you will get two URLs:
+- Documentation site: `https://unify-docs.pages.dev`
+- Storybook: `https://unify-storybook.pages.dev`
 
-你也可以在Cloudflare Dashboard的Pages部分查看和管理这些部署。
+You can also view and manage these deployments in the Pages section of the Cloudflare Dashboard.
 
-## 命令参考
+## Command Reference
 
-### 文档站点
+### Documentation Site
 ```bash
-pnpm run build              # 构建Next.js应用
-pnpm run pages:build        # 构建Cloudflare Pages
-pnpm run preview            # 本地预览
-pnpm run deploy             # 部署
-pnpm run cf:deploy          # 部署到指定项目
+pnpm run build              # Build Next.js application
+pnpm run pages:build        # Build for Cloudflare Pages
+pnpm run preview            # Local preview
+pnpm run deploy             # Deploy
+pnpm run cf:deploy          # Deploy to specified project
 ```
 
 ### Storybook
 ```bash
-pnpm run storybook:build    # 构建Storybook
-pnpm run storybook:preview  # 本地预览
-pnpm run storybook:deploy   # 部署
-pnpm run storybook:cf:deploy # 部署到指定项目
+pnpm run storybook:build    # Build Storybook
+pnpm run storybook:preview  # Local preview
+pnpm run storybook:deploy   # Deploy
+pnpm run storybook:cf:deploy # Deploy to specified project
 ``` 

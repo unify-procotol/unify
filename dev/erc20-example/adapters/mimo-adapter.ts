@@ -73,7 +73,7 @@ export class MimoAdapter extends BaseAdapter<PairEntity> {
         `🔍 Searching for pair: ${token0Symbol.toUpperCase()}/${token1Symbol.toUpperCase()}`
       );
 
-      // 获取token信息
+      // Get token information
       const tokenList = await this.getTokenList();
       const token0Info = this.findTokenBySymbol(tokenList, token0Symbol);
       const token1Info = this.findTokenBySymbol(tokenList, token1Symbol);
@@ -91,7 +91,7 @@ export class MimoAdapter extends BaseAdapter<PairEntity> {
         `📍 Found tokens - ${token0Info.symbol}: ${token0Info.address}, ${token1Info.symbol}: ${token1Info.address}`
       );
 
-      // 构建交易请求
+      // Build trade request
       const tradeRequest: MimoTradeRequest = {
         chainId: 4689,
         protocols: "v2,v3,mixed",
@@ -118,7 +118,7 @@ export class MimoAdapter extends BaseAdapter<PairEntity> {
         JSON.stringify(tradeRequest, null, 2)
       );
 
-      // 调用Mimo API
+      // Call Mimo API
       const response = await fetch(this.MIMO_TRADE_API, {
         method: "POST",
         headers: {
@@ -147,12 +147,12 @@ export class MimoAdapter extends BaseAdapter<PairEntity> {
         JSON.stringify(tradeData, null, 2)
       );
 
-      // 计算价格
+      // Calculate price
       const quote = parseFloat(tradeData.quote.numerator);
       const inputAmount = 1; // 1 token
       const price = quote / Math.pow(10, token1Info.decimals) / inputAmount;
 
-      // 构建返回对象
+      // Build return object
       const pairEntity = {
         pair: `${token0Symbol.toUpperCase()}/${token1Symbol.toUpperCase()}`,
         token0Symbol: token0Info.symbol,
@@ -176,7 +176,7 @@ export class MimoAdapter extends BaseAdapter<PairEntity> {
       return pairEntity;
     } catch (error) {
       console.error("❌ Error in MimoAdapter.findOne:", error);
-      // 简化错误处理，类似 post.ts 的做法
+      // Simplified error handling, similar to post.ts approach
       return null;
     }
   }
@@ -202,7 +202,7 @@ export class MimoAdapter extends BaseAdapter<PairEntity> {
       return tokenList;
     } catch (error) {
       console.error("❌ Error fetching token list:", error);
-      // 返回空数组，避免抛出错误
+      // Return empty array to avoid throwing error
       return [];
     }
   }
@@ -213,7 +213,7 @@ export class MimoAdapter extends BaseAdapter<PairEntity> {
   ): TokenInfo | null {
     const upperSymbol = symbol.toUpperCase();
 
-    // 特殊处理IOTX
+    // Special handling for IOTX
     if (upperSymbol === "IOTX") {
       return {
         id: "native-iotx",

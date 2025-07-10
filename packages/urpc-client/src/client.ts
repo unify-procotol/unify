@@ -1,12 +1,13 @@
-import type {
-  FindManyArgs,
-  FindOneArgs,
-  CreationArgs,
-  UpdateArgs,
-  DeletionArgs,
-  Repository,
-  JoinRepoOptions,
-  RepoOptions,
+import {
+  type FindManyArgs,
+  type FindOneArgs,
+  type CreationArgs,
+  type UpdateArgs,
+  type DeletionArgs,
+  type Repository,
+  type JoinRepoOptions,
+  type RepoOptions,
+  simplifyEntityName,
 } from "@unilab/urpc-core";
 import type { ClientConfig, HttpRequestOptions } from "./types";
 
@@ -81,21 +82,17 @@ export class URPC {
   ): Repository<T> {
     return new Proxy({} as Repository<T>, {
       get: (target, prop: string) => {
-        const { entity, source } = options;
-        const _entity = entity.replace(/Entity$/i, "").toLowerCase();
+        const { entity, source, context } = options;
+        const _entity = simplifyEntityName(entity);
         switch (prop) {
           case "findMany":
             return async (args: FindManyArgs<T> = {}) => {
-              const params: Record<string, any> = { source };
+              const params: Record<string, any> = { source, context };
 
               if (args.where) params.where = args.where;
               if (args.order_by) params.order_by = args.order_by;
               if (args.limit) params.limit = args.limit;
               if (args.offset) params.offset = args.offset;
-
-              // 传递 context 参数
-              if ((options as any).context)
-                params.context = (options as any).context;
 
               const result = await this.request<T[]>({
                 method: "GET",
@@ -114,12 +111,9 @@ export class URPC {
             return async (args: FindOneArgs<T>) => {
               const params: Record<string, any> = {
                 source,
+                context,
                 where: args.where,
               };
-
-              // 传递 context 参数
-              if ((options as any).context)
-                params.context = (options as any).context;
 
               const result = await this.request<T | null>({
                 method: "GET",
@@ -139,7 +133,7 @@ export class URPC {
               return this.request<T>({
                 method: "POST",
                 url: `/${_entity}/create`,
-                params: { source },
+                params: { source, context },
                 data: { data: args.data },
               });
             };
@@ -149,7 +143,7 @@ export class URPC {
               return this.request<T>({
                 method: "PATCH",
                 url: `/${_entity}/update`,
-                params: { source },
+                params: { source, context },
                 data: {
                   where: args.where,
                   data: args.data,
@@ -164,6 +158,7 @@ export class URPC {
                 url: `/${_entity}/delete`,
                 params: {
                   source,
+                  context,
                   where: args.where,
                 },
               });

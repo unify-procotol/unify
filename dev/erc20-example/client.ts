@@ -33,7 +33,7 @@ const fetchPair = async () => {
         `   ⏰ Timestamp: ${new Date(data.timestamp).toLocaleString()}`
       );
 
-      // 显示路由信息
+      // Display route information
       if (data.route.length > 0) {
         console.log(`   📍 Token Path:`);
         data.route[0].tokenPath.forEach((token: any, index: number) => {

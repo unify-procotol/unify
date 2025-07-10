@@ -51,13 +51,13 @@ async function generateText({
     );
 
     if (!response.ok) {
-      throw new Error(`HTTP错误! 状态: ${response.status}`);
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
 
     const data: any = await response.json();
     return data.choices[0].message.content;
   } catch (error: any) {
-    console.error("API请求错误:", error.message);
+    console.error("API request error:", error.message);
     return null;
   }
 }
