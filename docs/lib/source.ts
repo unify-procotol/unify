@@ -4,17 +4,17 @@ import { icons } from "lucide-react";
 import { createElement } from "react";
 import { attachFile } from "fumadocs-openapi/server";
 
-// 检测是否为 Windows 系统
+// Detect if the system is Windows
 const isWindows = typeof process !== 'undefined' && process.platform === 'win32';
 
-// Windows 路径标准化函数
+// Windows path normalization function
 function normalizeWindowsPaths(source: any) {
-  // 如果不是 Windows 系统，直接返回原始 source
+  // If not Windows system, return original source directly
   if (!isWindows) {
     return source;
   }
 
-  // 创建一个深拷贝并修复路径（仅 Windows）
+  // Create a deep copy and fix paths (Windows only)
   const normalizedSource = {
     ...source,
     getPages: () => {
@@ -27,16 +27,16 @@ function normalizeWindowsPaths(source: any) {
     getPage: (slugs?: string[]) => {
       if (!slugs) return source.getPage();
       
-      // 尝试原始路径
+      // Try original path
       let page = source.getPage(slugs);
       if (page) return page;
       
-      // 如果找不到，尝试 Windows 路径格式
+      // If not found, try Windows path format
       const windowsSlugs = slugs.map(slug => slug.replace(/\//g, '\\'));
       page = source.getPage(windowsSlugs);
       if (page) return page;
       
-      // 如果还是找不到，尝试混合格式
+      // If still not found, try mixed format
       const pages = source.getPages();
       for (const p of pages) {
         const normalizedSlugs = p.slugs?.map((s: string) => s.replace(/\\/g, '/'));

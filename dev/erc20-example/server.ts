@@ -2,7 +2,7 @@ import { URPC } from "@unilab/urpc-hono";
 import type { Plugin } from "@unilab/urpc-core";
 import { createHookMiddleware, Logging } from "@unilab/urpc-core/middleware";
 
-// 导入Mimo相关文件
+// Import Mimo related files
 import { PairEntity } from "./entities/pair";
 import { MimoAdapter } from "./adapters/mimo-adapter";
 
@@ -24,7 +24,7 @@ const HookMiddleware = createHookMiddleware((hookManager) => {
     });
 });
 
-// 定义Mimo插件
+// Define Mimo plugin
 const MimoPlugin: Plugin = {
   entities: [PairEntity],
   adapters: [
@@ -36,13 +36,13 @@ const MimoPlugin: Plugin = {
   ],
 };
 
-// 创建URPC应用并配置  
+// Create URPC app and configure
 const app = URPC.init({
   plugins: [MimoPlugin],
   middlewares: [HookMiddleware, Logging()],
 });
 
-// 添加健康检查端点
+// Add health check endpoint
 app.get("/", (c) => {
   return c.json({
     message: "Mimo Trading Pair Server",

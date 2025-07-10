@@ -1,55 +1,55 @@
 # Mimo Trading Pair Example
 
-这个示例演示了如何使用 URPC 框架创建一个 Mimo 交易对插件，从 Mimo Exchange 获取实时价格。
+This example demonstrates how to use the URPC framework to create a Mimo trading pair plugin that fetches real-time prices from Mimo Exchange.
 
-## 功能特性
+## Features
 
-- 💱 **Real-time Pricing**: 通过 Mimo Exchange API 获取实时交易对价格
-- 🔄 **Multi-pair Support**: 支持 IOTX/USDT, WIOTX/USDT, DWIN/USDT 等多种交易对
-- 📈 **Price Impact**: 获取价格冲击和滑点信息
-- 🛣️ **Route Information**: 显示最优交易路径
-- 🌐 **RESTful API**: 提供完整的 REST API 接口
-- 🚀 **Type Safe**: 完全类型安全的 TypeScript 实现
+- 💱 **Real-time Pricing**: Get real-time trading pair prices through Mimo Exchange API
+- 🔄 **Multi-pair Support**: Support for IOTX/USDT, WIOTX/USDT, DWIN/USDT and other trading pairs
+- 📈 **Price Impact**: Get price impact and slippage information
+- 🛣️ **Route Information**: Display optimal trading paths
+- 🌐 **RESTful API**: Provides complete REST API interface
+- 🚀 **Type Safe**: Fully type-safe TypeScript implementation
 
-## 快速开始
+## Getting Started
 
-### 安装依赖
+### Install Dependencies
 ```bash
 bun install
 ```
 
-### 启动服务器
+### Start Server
 ```bash
 bun run dev
 ```
 
-服务器将在 `http://localhost:3000` 启动。
+The server will start at `http://localhost:3000`.
 
-### 运行客户端示例
+### Run Client Example
 
-**Mimo 交易对价格演示：**
+**Mimo Trading Pair Price Demo:**
 ```bash
 bun run client
 ```
 
-**测试单个交易对：**
+**Test Single Trading Pair:**
 ```bash
 bun run test-pair iotx/usdt
 ```
 
-## API 端点
+## API Endpoints
 
 ### Mimo Trading RESTful API
-- `GET /PairEntity/find_one?source=mimo&where[pair]=iotx/usdt` - 获取交易对价格
+- `GET /PairEntity/find_one?source=mimo&where[pair]=iotx/usdt` - Get trading pair price
 
-### 演示端点
-- `GET /` - 健康检查和 API 文档
-- `GET /demo/price/:pair` - 获取交易对价格的演示 (例如: `/demo/price/iotx/usdt`)
+### Demo Endpoints
+- `GET /` - Health check and API documentation
+- `GET /demo/price/:pair` - Demo for getting trading pair price (e.g., `/demo/price/iotx/usdt`)
 
-## 支持的交易对
+## Supported Trading Pairs
 
-- `iotx/usdt` - IoTeX 原生代币 / Tether USD
+- `iotx/usdt` - IoTeX Native Token / Tether USD
 - `wiotx/usdt` - Wrapped IoTeX / Tether USD  
 - `dwin/usdt` - Drop Wireless Infrastructure / Tether USD
 - `iotx/wiotx` - IoTeX / Wrapped IoTeX
-- 以及其他在 IoTeX 网络上的代币对
+- And other token pairs on the IoTeX network

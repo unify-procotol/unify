@@ -10,10 +10,10 @@ import type {
 } from "@unilab/urpc-core";
 
 /**
- * 匹配 where 条件
- * @param item 数据项
- * @param where where 条件
- * @returns 是否匹配
+ * Match where conditions
+ * @param item Data item
+ * @param where Where condition
+ * @returns Whether it matches
  */
 export function matchesWhere<T extends Record<string, any>>(
   item: T,
@@ -36,10 +36,10 @@ export function matchesWhere<T extends Record<string, any>>(
 }
 
 /**
- * 应用排序
- * @param items 数据项数组
- * @param orderBy 排序条件
- * @returns 排序后的数组
+ * Apply sorting
+ * @param items Array of data items
+ * @param orderBy Sorting conditions
+ * @returns Sorted array
  */
 export function applySorting<T extends Record<string, any>>(
   items: T[],
@@ -63,11 +63,11 @@ export function applySorting<T extends Record<string, any>>(
 }
 
 /**
- * 应用分页
- * @param items 数据项数组
- * @param offset 偏移量
- * @param limit 限制数量
- * @returns 分页后的数组
+ * Apply pagination
+ * @param items Array of data items
+ * @param offset Offset
+ * @param limit Limit count
+ * @returns Paginated array
  */
 export function applyPagination<T>(
   items: T[],
@@ -87,10 +87,10 @@ export function applyPagination<T>(
 }
 
 /**
- * 处理 findMany 参数
- * @param items 数据项数组
- * @param args findMany 参数
- * @returns 处理后的数组
+ * Process findMany arguments
+ * @param items Array of data items
+ * @param args findMany arguments
+ * @returns Processed array
  */
 export function processFindManyArgs<T extends Record<string, any>>(
   items: T[],
@@ -115,12 +115,12 @@ export function processFindManyArgs<T extends Record<string, any>>(
 }
 
 /**
- * 执行 upsert 操作
- * @param args upsert 参数
- * @param findOne 查找单个实体的函数
- * @param update 更新实体的函数
- * @param create 创建实体的函数
- * @returns 实体
+ * Execute upsert operation
+ * @param args upsert arguments
+ * @param findOne Function to find single entity
+ * @param update Function to update entity
+ * @param create Function to create entity
+ * @returns Entity
  */
 export async function performUpsert<T extends Record<string, any>>(
   args: UpsertArgs<T>,
