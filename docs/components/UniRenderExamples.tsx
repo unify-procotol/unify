@@ -11,7 +11,7 @@ const MyPlugin: Plugin = {
   entities: [UserEntity],
 };
 
-// 全局变量跟踪当前会话的初始化状态
+// Global variable to track initialization status for current session
 let isSessionInitialized = false;
 
 interface ExampleProps {
@@ -29,10 +29,10 @@ export function UniRenderExample({ type }: ExampleProps) {
         setLoading(true);
         setError(null);
         
-        // 动态导入MockAdapter，避免SSR问题
+        // Dynamic import MockAdapter to avoid SSR issues
         const { MockAdapter } = await import("@unilab/urpc-adapters");
         
-        // 只在客户端初始化URPC
+        // Initialize URPC only on client side
         URPC.init({
           plugins: [MyPlugin],
           middlewares: [Logging()],
@@ -44,11 +44,11 @@ export function UniRenderExample({ type }: ExampleProps) {
           globalAdapters: [MockAdapter],
         });
 
-        // 使用全局变量检查当前会话是否已经初始化过数据
+        // Check if data has been initialized in current session using global variable
         if (!isSessionInitialized) {
           console.log("Creating initial mock data...");
           
-          // 创建一些mock数据
+          // Create some mock data
           await repo({
             entity: "user",
           }).create({
@@ -88,7 +88,7 @@ export function UniRenderExample({ type }: ExampleProps) {
             },
           });
           
-          // 标记当前会话已初始化
+          // Mark current session as initialized
           isSessionInitialized = true;
           console.log("Mock data created successfully");
         } else {
@@ -108,7 +108,7 @@ export function UniRenderExample({ type }: ExampleProps) {
     }
   }, [isInitialized]);
 
-  // 如果还在初始化或出错，显示对应状态
+  // Show corresponding states if still initializing or encountering errors
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -160,7 +160,7 @@ export function UniRenderExample({ type }: ExampleProps) {
     );
   }
 
-  // 只有在URPC完全初始化后才渲染UniRender组件
+  // Only render UniRender component after URPC is fully initialized
   if (!isInitialized) {
     return null;
   }
@@ -427,10 +427,10 @@ export function UniRenderExample({ type }: ExampleProps) {
 
   const baseProps = examples[type];
   
-  // 动态创建最终的 props，避免类型错误
+  // Dynamically create final props to avoid type errors
   const finalProps: any = { ...baseProps };
   
-  // 对于特殊状态的示例，保持原样
+  // For special states, keep as is
   if (type === 'loading') {
     finalProps.loading = true;
   } else if (type === 'error') {
@@ -440,16 +440,16 @@ export function UniRenderExample({ type }: ExampleProps) {
     finalProps.loading = false;
     finalProps.error = null;
   } else {
-    // 对于正常示例，URPC已经初始化完成，不需要loading状态
+    // For normal examples, URPC is fully initialized, no loading state needed
     finalProps.loading = false;
     finalProps.error = null;
   }
   
-  // 确保必需属性存在
+  // Ensure required properties exist
   finalProps.entity = finalProps.entity || "user";
   finalProps.layout = finalProps.layout || "table";
   
-  // 添加调试信息
+  // Add debug information
   if (process.env.NODE_ENV === 'development') {
     console.log('UniRender props:', finalProps);
   }
