@@ -11,7 +11,7 @@ import { matchesWhere, processFindManyArgs } from "../utils";
 export class IndexedDBAdapter<
   T extends Record<string, any>,
 > extends BaseAdapter<T> {
-  static name = "indexeddb";
+  static get name() { return "indexeddb"; }
   private dbName: string = "urpc_db";
   private storeName: string = "default_store";
   private db: IDBDatabase | null = null;

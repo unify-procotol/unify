@@ -21,7 +21,7 @@ export interface MockAdapterOptions {
 }
 
 export class MockAdapter<T extends Record<string, any>> extends BaseAdapter<T> {
-  static name = "mock";
+  static get name() { return "mock"; }
   private items: T[] = [];
   private options: MockAdapterOptions = {
     delay: 0,

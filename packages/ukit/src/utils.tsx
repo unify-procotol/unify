@@ -116,13 +116,13 @@ export function cn(...inputs: ClassValue[]) {
  * @returns Unique key string
  */
 export const generateRecordKey = (record: any, index: number): string => {
-  // Try to use id field if available
-  if (record.id !== undefined) {
-    return `record-${record.id}`;
+  // Always include index to ensure uniqueness, even if id exists
+  if (record.id !== undefined && record.id !== null) {
+    return `record-${record.id}-${index}`;
   }
   
-  // Fallback to index
-  return `record-${index}`;
+  // Fallback to index only
+  return `record-index-${index}`;
 };
 
 /**

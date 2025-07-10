@@ -9,6 +9,11 @@ import { ListLayout } from "./ListLayout";
 import { DashboardLayout } from "./DashboardLayout";
 
 /**
+ * Check if we're running on the client side
+ */
+const isClientSide = () => typeof window !== 'undefined';
+
+/**
  * Generate a default entity schema when global schema is not available
  */
 const generateDefaultEntitySchema = (entityName: string, sampleData: any[]): Entity => {
@@ -84,9 +89,21 @@ export const UniRender = forwardRef<UniRenderRef, UniRenderProps>(({
   const [entitySchema, setEntitySchema] = useState<Entity | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isClient, setIsClient] = useState(false);
+
+  // Set client-side flag after component mounts
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   // Fetch entity schema from global schema with fallback to default generation
   const fetchEntitySchema = async (sampleData?: any[]) => {
+    // Only fetch schema on client side to avoid SSR issues
+    if (!isClientSide()) {
+      // For SSR, wait for data to be available before generating schema
+      return;
+    }
+
     try {
       // Try to get specific entity schema from global schema
       const schemaResponse = await repo({
@@ -128,21 +145,32 @@ export const UniRender = forwardRef<UniRenderRef, UniRenderProps>(({
           schema: schemaResponse.schema,
         });
       } else {
-        // Fallback: generate default schema from entity name and sample data
-        console.warn(`Entity "${entityName}" not found in global schema, generating default schema`);
-        const defaultSchema = generateDefaultEntitySchema(entityName, sampleData || []);
-        setEntitySchema(defaultSchema);
+        // Don't generate default schema immediately if we don't have data
+        // Let fetchData handle schema generation based on actual data
+        if (sampleData && sampleData.length > 0) {
+          console.warn(`Entity "${entityName}" not found in global schema, generating default schema from data`);
+          const defaultSchema = generateDefaultEntitySchema(entityName, sampleData);
+          setEntitySchema(defaultSchema);
+        }
       }
     } catch (err) {
-      console.warn(`Failed to fetch entity schema: ${err}, generating default schema`);
-      // Generate default schema as fallback
-      const defaultSchema = generateDefaultEntitySchema(entityName, sampleData || []);
-      setEntitySchema(defaultSchema);
+      // Don't generate default schema immediately if we don't have data
+      // Let fetchData handle schema generation based on actual data
+      if (sampleData && sampleData.length > 0) {
+        console.warn(`Failed to fetch entity schema: ${err}, generating default schema from data`);
+        const defaultSchema = generateDefaultEntitySchema(entityName, sampleData);
+        setEntitySchema(defaultSchema);
+      }
     }
   };
 
   // Fetch data based on layout type (separated from schema fetching)
   const fetchData = async () => {
+    // Only fetch data on client side to avoid SSR issues
+    if (!isClientSide()) {
+      return;
+    }
+
     try {
       setLoading(true);
       setError(null);
@@ -158,11 +186,23 @@ export const UniRender = forwardRef<UniRenderRef, UniRenderProps>(({
         result = await repoInstance.findOne(query as any);
         const resultData = result ? [result] : [];
         setData(resultData);
+        
+        // Generate schema based on actual data if no schema exists or schema is empty
+        if (!entitySchema || !entitySchema.fields || entitySchema.fields.length === 0) {
+          const dataBasedSchema = generateDefaultEntitySchema(entityName, resultData);
+          setEntitySchema(dataBasedSchema);
+        }
       } else {
         // For other layouts, use findMany
         result = await repoInstance.findMany(query as any);
         const resultData = result || [];
         setData(resultData);
+        
+        // Generate schema based on actual data if no schema exists or schema is empty
+        if (!entitySchema || !entitySchema.fields || entitySchema.fields.length === 0) {
+          const dataBasedSchema = generateDefaultEntitySchema(entityName, resultData);
+          setEntitySchema(dataBasedSchema);
+        }
       }
     } catch (err) {
         const errorMessage = err instanceof Error ? err.message : String(err);
@@ -192,8 +232,11 @@ export const UniRender = forwardRef<UniRenderRef, UniRenderProps>(({
   }, [entityName]);
 
   useEffect(() => {
+    // Only fetch data when we're on client side
+    if (isClient) {
       fetchData();
-  }, [entityName, source, JSON.stringify(query)]);
+    }
+  }, [entityName, source, JSON.stringify(query), isClient]);
 
   // Use external loading/error states if provided
   const isLoading = externalLoading !== undefined ? externalLoading : loading;
@@ -340,6 +383,11 @@ export const UniRender = forwardRef<UniRenderRef, UniRenderProps>(({
   };
 
   // Handle different states
+  // For SSR, show loading state until client-side hydration
+  if (!isClient) {
+    return renderLoadingState();
+  }
+
   if (isLoading) {
     return renderLoadingState();
   }

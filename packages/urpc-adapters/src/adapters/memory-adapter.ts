@@ -12,7 +12,7 @@ import { matchesWhere, processFindManyArgs, performUpsert } from "../utils";
 export class MemoryAdapter<
   T extends Record<string, any>,
 > extends BaseAdapter<T> {
-  static name = "memory";
+  static get name() { return "memory"; }
   private items: T[] = [];
 
   async findMany(args?: FindManyArgs<T>): Promise<T[]> {
