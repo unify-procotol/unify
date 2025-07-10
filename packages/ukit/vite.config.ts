@@ -44,7 +44,7 @@ export default defineConfig({
         '@radix-ui/react-toggle',
         '@radix-ui/react-tooltip',
         '@unilab/urpc',
-        '@unilab/urpc-client',
+        '@unilab/urpc',
         'class-variance-authority',
         'clsx',
         'tailwind-merge',

@@ -1,4 +1,4 @@
-import { repo, URPC, joinRepo } from "@unilab/urpc-client";
+import { repo, URPC, joinRepo } from "@unilab/urpc";
 import { PostEntity } from "./entities/post";
 import { UserEntity } from "./entities/user";
 import { CacheEntity } from "./entities/cache";

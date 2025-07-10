@@ -9,6 +9,7 @@ const MyPlugin: Plugin = {
   entities: [UserEntity],
 };
 
+// Example 1: Using Local URPC Configuration
 URPC.init({
   plugins: [MyPlugin, WalletPlugin],
   middlewares: [Logging()],
@@ -76,20 +77,32 @@ const fetchUser = async () => {
 
 fetchUser();
 
-// const fetchEvmBalance = async () => {
-//   const data = await repo<WalletEntity>({
-//     entity: "wallet",
-//     source: "evm",
-//   }).findOne({
+// // Example 2: Using HTTP Client Configuration
+// URPC.init({
+//   baseUrl: "http://localhost:3000",
+//   timeout: 10000,
+//   headers: {
+//     Authorization: "Bearer your-token",
+//     "Content-Type": "application/json",
+//   },
+// });
+
+// // HTTP客户端模式的使用示例
+// const httpDemo = async () => {
+//   // 在HTTP模式下，数据通过HTTP API获取
+//   const users = await repo<UserEntity>({
+//     entity: "user",
+//     source: "api", // 可选，传给后端API
+//   }).findMany({
 //     where: {
-//       address: "0x...",
-//       network: "ethereum",
+//       name: "John",
 //     },
+//     limit: 10,
 //   });
-//   console.log("[3] =>", JSON.stringify(data, null, 2));
+//   console.log("HTTP users:", users);
 // };
 
-// fetchEvmBalance();
+// httpDemo();
 
 // const allEntities = await repo({
 //   entity: "schema",

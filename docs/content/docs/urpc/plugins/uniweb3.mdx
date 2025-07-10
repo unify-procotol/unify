@@ -22,7 +22,7 @@ For Hono server:
 
 For Next.js Pages Router:
 ```package-install
-@unilab/urpc-next @unilab/urpc-client @unilab/urpc-core @unilab/uniweb3 next react react-dom
+@unilab/urpc-next @unilab/urpc @unilab/urpc-core @unilab/uniweb3 next react react-dom
 ```
 
 Runs only in a browser or node environment:
@@ -92,7 +92,7 @@ URPC.init({
 ### Initializing the Client
 
 ```typescript
-import { repo, URPC } from "@unilab/urpc-client";
+import { repo, URPC } from "@unilab/urpc";
 import { WalletEntity } from "@unilab/uniweb3/entities";
 
 // Initialize the client (for standalone server)
@@ -155,7 +155,7 @@ console.log("Solana Wallet:", solanaWallet);
 Here's a complete React component example that fetches wallet balances:
 
 ```typescript
-import { repo, URPC } from "@unilab/urpc-client";
+import { repo, URPC } from "@unilab/urpc";
 import { WalletEntity } from "@unilab/uniweb3/entities";
 import { useEffect, useState } from "react";
 
@@ -232,7 +232,7 @@ export default function Home() {
 Here's a standalone Node.js example for querying balances:
 
 ```typescript
-import { repo, URPC } from "@unilab/urpc-client";
+import { repo, URPC } from "@unilab/urpc";
 import { WalletEntity } from "@unilab/uniweb3/entities";
 
 // Initialize the client for standalone server
@@ -340,7 +340,7 @@ cd my-web3-app
 
 2. Install the required dependencies:
 ```bash
-npm install @unilab/urpc-next @unilab/urpc-client @unilab/urpc-core @unilab/uniweb3
+npm install @unilab/urpc-next @unilab/urpc @unilab/urpc-core @unilab/uniweb3
 ```
 
 3. Create the API route at `pages/api/[...urpc].ts`:

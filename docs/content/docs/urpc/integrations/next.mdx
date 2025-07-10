@@ -9,7 +9,7 @@ description: URPC provides complete Next.js support, including both App Router a
 First, install the required dependency packages:
 
 ```package-install
-@unilab/urpc-next @unilab/urpc-client @unilab/urpc-core @unilab/uniweb3
+@unilab/urpc-next @unilab/urpc @unilab/urpc-core @unilab/uniweb3
 ```
 
 ### App Router Additional Dependencies
@@ -76,7 +76,7 @@ Using URPC client in page components:
 ```tsx
 "use client";
 
-import { repo, URPC } from "@unilab/urpc-client";
+import { repo, URPC } from "@unilab/urpc";
 import { WalletEntity } from "@unilab/uniweb3/entities";
 import { useEffect, useState } from "react";
 
@@ -185,7 +185,7 @@ export default handler;
 Using URPC client in page components:
 
 ```tsx
-import { repo, URPC } from "@unilab/urpc-client";
+import { repo, URPC } from "@unilab/urpc";
 import { WalletEntity } from "@unilab/uniweb3/entities";
 import { useEffect, useState } from "react";
 

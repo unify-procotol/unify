@@ -1,7 +1,7 @@
 {
   "name": "myprojet",
   "version": "1.0.0",
-  "description": "Basic Hono example using @unilab/urpc-hono and @unilab/urpc-client",
+  "description": "Basic Hono example using @unilab/urpc-hono and @unilab/urpc",
   "main": "server.ts",
   "scripts": {
     "dev": "bun run server.ts",
@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@hono/node-server": "^1.12.2",
-    "@unilab/urpc-client": "^0.0.1",
+    "@unilab/urpc": "^0.0.1",
     "@unilab/urpc-core": "^0.0.1",
     "@unilab/urpc-hono": "^0.0.3",
     "@unilab/urpc-adapters": "^0.0.3",

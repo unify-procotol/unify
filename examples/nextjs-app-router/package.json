@@ -9,10 +9,10 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@unilab/urpc-next": "^0.0.4",
-    "@unilab/urpc-client": "^0.0.1",
-    "@unilab/urpc-core": "^0.0.1",
-    "@unilab/uniweb3": "^0.0.5",
+    "@unilab/uniweb3": "^0.0.6",
+    "@unilab/urpc": "^0.0.3",
+    "@unilab/urpc-core": "^0.0.2",
+    "@unilab/urpc-next": "^0.0.5",
     "next": "^15.0.0",
     "react": "^19",
     "react-dom": "^19"
@@ -21,6 +21,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "autoprefixer": "^10.4.20",
     "eslint": "^8",
     "eslint-config-next": "^15.0.0",
     "postcss": "^8",

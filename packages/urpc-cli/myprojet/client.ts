@@ -1,6 +1,6 @@
 import { UserEntity } from "./entities/user";
 import { PostEntity } from "./entities/post";
-import { repo, URPC, joinRepo } from "@unilab/urpc-client";
+import { repo, URPC, joinRepo } from "@unilab/urpc";
 
 URPC.init({
   baseUrl: "http://localhost:3000",

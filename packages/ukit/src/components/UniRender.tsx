@@ -1,5 +1,5 @@
 import React, { useState, useEffect, forwardRef, useImperativeHandle } from "react";
-import { repo } from "@unilab/urpc-client";
+import { repo } from "@unilab/urpc";
 import { UniRenderProps, Entity } from "../types";
 import { TableLayout } from "./TableLayout";
 import { FormLayout } from "./FormLayout";

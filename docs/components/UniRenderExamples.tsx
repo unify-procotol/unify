@@ -1,7 +1,7 @@
 "use client";
 
 import { UniRender } from "@unilab/ukit";
-import { repo, URPC } from "@unilab/urpc-client";
+import { repo, URPC } from "@unilab/urpc";
 import { useState, useEffect } from "react";
 
 interface ExampleProps {

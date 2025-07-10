@@ -14,7 +14,7 @@ URPC Studio 是一个类似于 Prisma Studio 的可视化数据库浏览器，�
 
 ### 方法 1: 使用 CLI 命令（推荐）
 
-安装 `@unilab/urpc-client` 后，你可以直接运行：
+安装 `@unilab/urpc` 后，你可以直接运行：
 
 ```bash
 npx urpc-studio
@@ -23,16 +23,16 @@ npx urpc-studio
 或者全局安装后使用：
 
 ```bash
-npm install -g @unilab/urpc-client
+npm install -g @unilab/urpc
 urpc-studio
 ```
 
 ### 方法 2: 使用 npm scripts
 
-在安装了 `@unilab/urpc-client` 的项目中：
+在安装了 `@unilab/urpc` 的项目中：
 
 ```bash
-# 在 @unilab/urpc-client 目录下
+# 在 @unilab/urpc 目录下
 npm run studio
 ```
 
