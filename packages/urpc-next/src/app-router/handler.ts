@@ -342,7 +342,7 @@ export class URPC {
         }
       );
 
-      return NextResponse.json({ data: { success: result }, entity, source });
+      return NextResponse.json({ data: { success: result } });
     } catch (error) {
       return handleError(error);
     }

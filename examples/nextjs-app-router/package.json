@@ -10,9 +10,9 @@
   },
   "dependencies": {
     "@unilab/uniweb3": "^0.0.6",
-    "@unilab/urpc": "^0.0.3",
+    "@unilab/urpc": "^0.0.4",
     "@unilab/urpc-core": "^0.0.2",
-    "@unilab/urpc-next": "^0.0.5",
+    "@unilab/urpc-next": "^0.0.6",
     "next": "^15.0.0",
     "react": "^19",
     "react-dom": "^19"

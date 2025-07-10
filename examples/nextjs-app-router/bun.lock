@@ -5,7 +5,7 @@
       "name": "nextjs-app-router-example",
       "dependencies": {
         "@unilab/uniweb3": "^0.0.6",
-        "@unilab/urpc": "^0.0.3",
+        "@unilab/urpc": "^0.0.4",
         "@unilab/urpc-core": "^0.0.2",
         "@unilab/urpc-next": "^0.0.5",
         "next": "^15.0.0",
@@ -202,7 +202,7 @@
 
     "@unilab/uniweb3": ["@unilab/uniweb3@0.0.6", "", { "dependencies": { "@solana/web3.js": "^1.95.2", "@unilab/urpc-core": "^0.0.2", "ethers": "^6.13.2" } }, "sha512-iM4ytkCC1v/T5kQQ3WbupQ9YR7e1jjrtzUhGdkPQUSuYAla4A/ikcC/iOUtyHZPTHYAyzNf110L97UgwEasFww=="],
 
-    "@unilab/urpc": ["@unilab/urpc@0.0.3", "", { "dependencies": { "@unilab/builtin-plugin": "^0.0.2", "@unilab/urpc-core": "^0.0.2" } }, "sha512-n8jGSy9W526xXJtdrIhtOoyLWv1IQea6HlVzIHDN7ImKVgBLM+A2FIDag6owclhGm0WkbG/+B7c47wVz3boXgQ=="],
+    "@unilab/urpc": ["@unilab/urpc@0.0.4", "", { "dependencies": { "@unilab/builtin-plugin": "^0.0.2", "@unilab/urpc-core": "^0.0.2" } }, "sha512-gRX2SaRmERXe3ZcTKthXSaO9AP6N2BQ7BhYi0ICN0c2AyazC1MdE8MwdA5wKMnHItDcTGo4+94mdtYEDE6oiVw=="],
 
     "@unilab/urpc-core": ["@unilab/urpc-core@0.0.2", "", {}, "sha512-gv425ajJ9beA331jyGSAi0KAS8CeRK58U6shNauhQ0B2/GQDkDbNodNwZAbw3aWY6c/m2IyMiIBlcHSy5XKN2A=="],
 
