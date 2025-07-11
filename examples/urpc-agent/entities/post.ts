@@ -3,28 +3,28 @@ import type { UserEntity } from "./user";
 
 export class PostEntity {
   @Fields.string({
-    description: "文章ID",
+    description: "Post ID",
   })
   id = "";
 
   @Fields.string({
-    description: "文章标题",
+    description: "Post title",
   })
   title = "";
 
   @Fields.string({
-    description: "文章内容",
+    description: "Post content",
   })
   content = "";
 
   @Fields.string({
-    description: "作者ID",
+    description: "Author ID",
   })
   userId = "";
 
   @Fields.record(() => require("./user").UserEntity, {
     optional: true,
-    description: "作者信息",
+    description: "Author information",
   })
   user?: UserEntity;
 } 

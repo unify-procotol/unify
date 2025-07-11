@@ -35,8 +35,8 @@ export default function Home() {
   const [postData, setPostData] = useState<PostData[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // 快速操作命令
-  const quickCommands = ["查找所有用户", "创建用户王五", "删除用户张三"];
+  // Quick operation commands
+  const quickCommands = ["Find all users", "Create user John", "Delete user Mary"];
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -87,7 +87,7 @@ export default function Home() {
 
       setMessages((prev) => [...prev, assistantMessage]);
 
-      // 更新右侧数据显示
+      // Update right side data display
       if (data.entity) {
         if (data.entity === "user") {
           if (Array.isArray(data.data)) {
@@ -108,8 +108,8 @@ export default function Home() {
           } else if (data.operation === "create" && data.data) {
             setUserData((prev) => [...prev, data.data]);
           } else if (data.operation === "delete" && data.success) {
-            // 处理删除操作 - 从消息中提取用户名
-            const deleteMatch = textToSend.match(/删除用户(.+?)$/);
+            // Handle delete operation - extract user name from message
+            const deleteMatch = textToSend.match(/Delete user (.+?)$/);
             if (deleteMatch) {
               const userName = deleteMatch[1].trim();
               setUserData((prev) =>
@@ -136,10 +136,10 @@ export default function Home() {
           } else if (data.operation === "create" && data.data) {
             setPostData((prev) => [...prev, data.data]);
           } else if (data.operation === "delete" && data.success) {
-            // 处理删除文章操作
+            // Handle delete post operation
             const deleteMatch =
-              textToSend.match(/删除文章(.+?)$/) ||
-              textToSend.match(/删除ID为(.+?)的文章/);
+              textToSend.match(/Delete post (.+?)$/) ||
+              textToSend.match(/Delete post with ID (.+?)$/);
             if (deleteMatch) {
               const identifier = deleteMatch[1].trim();
               setPostData((prev) =>
@@ -155,7 +155,7 @@ export default function Home() {
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: "抱歉，处理请求时出现错误。请稍后再试。",
+        content: "Sorry, an error occurred while processing your request. Please try again later.",
         timestamp: new Date(),
       };
       setMessages((prev) => [...prev, errorMessage]);
@@ -173,50 +173,50 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* 头部 */}
+      {/* Header */}
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 py-6">
           <div className="text-center">
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              URPC智能Agent演示
+              URPC Intelligent Agent Demo
             </h1>
-            <p className="text-gray-600">通过自然语言与数据库进行智能交互</p>
+            <p className="text-gray-600">Intelligent database interaction through natural language</p>
           </div>
         </div>
       </div>
 
-      {/* 主要内容区域 */}
+      {/* Main content area */}
       <div className="max-w-7xl mx-auto px-4 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* 左侧聊天区域 */}
+          {/* Left chat area */}
           <div className="lg:col-span-2">
             <div className="bg-white rounded-lg shadow-md">
-              {/* 聊天头部 */}
+              {/* Chat header */}
               <div className="border-b p-4">
                 <div className="flex items-center space-x-3">
                   <div className="p-2 bg-blue-100 rounded-full">
                     <MessageSquare className="h-5 w-5 text-blue-600" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900">智能对话</h3>
+                    <h3 className="font-semibold text-gray-900">Smart Chat</h3>
                     <p className="text-sm text-gray-600">
-                      尝试说："查找所有用户"、"创建一个用户"、"删除某个用户"等
+                      Try: "Find all users", "Create a user", "Delete a user", etc.
                     </p>
                   </div>
                 </div>
               </div>
 
-              {/* 聊天消息区域 */}
+              {/* Chat messages area */}
               <div className="h-[calc(100vh-300px)] overflow-y-auto p-4 space-y-4">
                 {messages.length === 0 && (
                   <div className="text-center py-8">
                     <Bot className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-500 mb-4">开始与URPC Agent对话！</p>
+                    <p className="text-gray-500 mb-4">Start chatting with URPC Agent!</p>
 
-                    {/* 快速操作按钮 */}
+                    {/* Quick action buttons */}
                     <div className="space-y-2">
                       <p className="text-sm text-gray-400 mb-2">
-                        💡 试试这些命令：
+                        💡 Try these commands:
                       </p>
                       <div className="flex flex-wrap gap-2 justify-center">
                         {quickCommands.map((command, index) => (
@@ -252,20 +252,20 @@ export default function Home() {
                           <Bot className="h-4 w-4" />
                         )}
                         <span className="text-xs font-medium">
-                          {message.role === "user" ? "您" : "URPC助手"}
+                          {message.role === "user" ? "You" : "URPC Assistant"}
                         </span>
                       </div>
                       <div className="text-sm">{message.content}</div>
                       {message.urpcCode && (
                         <>
-                          {/* 显示URPC代码 */}
+                          {/* Display URPC code */}
                           <div className="mt-2 p-2 bg-gray-800 rounded text-green-400 text-xs font-mono">
-                            <div className="text-gray-400 mb-1">URPC代码:</div>
+                            <div className="text-gray-400 mb-1">URPC Code:</div>
                             {message.urpcCode}
                           </div>
-                          {/* 显示数据 */}
+                          {/* Display data */}
                           <div className="mt-2 p-2 bg-gray-800 rounded text-green-400 text-xs font-mono">
-                            <div className="text-gray-400 mb-1">数据:</div>
+                            <div className="text-gray-400 mb-1">Data:</div>
                             {JSON.stringify(message.data, null, 2)}
                           </div>
                         </>
@@ -279,7 +279,7 @@ export default function Home() {
                     <div className="max-w-md p-3 rounded-lg bg-gray-100 text-gray-800">
                       <div className="flex items-center space-x-2">
                         <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
-                        <span className="text-sm">正在处理...</span>
+                        <span className="text-sm">Processing...</span>
                       </div>
                     </div>
                   </div>
@@ -287,7 +287,7 @@ export default function Home() {
                 <div ref={messagesEndRef} />
               </div>
 
-              {/* 输入区域 */}
+              {/* Input area */}
               <div className="border-t p-4">
                 <div className="flex space-x-2">
                   <input
@@ -295,7 +295,7 @@ export default function Home() {
                     value={inputMessage}
                     onChange={(e) => setInputMessage(e.target.value)}
                     onKeyPress={handleKeyPress}
-                    placeholder="输入您的指令..."
+                    placeholder="Enter your command..."
                     className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     disabled={isLoading}
                   />
@@ -311,14 +311,14 @@ export default function Home() {
             </div>
           </div>
 
-          {/* 右侧数据展示区域 */}
+          {/* Right data display area */}
           <div className="space-y-6">
-            {/* 用户数据 */}
+            {/* User data */}
             <div className="bg-white rounded-lg shadow-md">
               <div className="border-b p-4">
                 <div className="flex items-center space-x-2">
                   <User className="h-5 w-5 text-blue-600" />
-                  <h3 className="font-semibold text-gray-900">用户数据</h3>
+                  <h3 className="font-semibold text-gray-900">User Data</h3>
                 </div>
               </div>
               <div className="p-4 space-y-3">
@@ -342,12 +342,12 @@ export default function Home() {
               </div>
             </div>
 
-            {/* 文章数据 */}
+            {/* Post data */}
             <div className="bg-white rounded-lg shadow-md">
               <div className="border-b p-4">
                 <div className="flex items-center space-x-2">
                   <Database className="h-5 w-5 text-green-600" />
-                  <h3 className="font-semibold text-gray-900">文章数据</h3>
+                  <h3 className="font-semibold text-gray-900">Post Data</h3>
                 </div>
               </div>
               <div className="p-4 space-y-3">
@@ -360,7 +360,7 @@ export default function Home() {
                       {post.content}
                     </div>
                     <div className="flex items-center space-x-4 text-xs text-gray-500">
-                      <span>作者ID: {post.userId}</span>
+                      <span>Author ID: {post.userId}</span>
                       <span>ID: {post.id}</span>
                     </div>
                   </div>

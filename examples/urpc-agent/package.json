@@ -1,7 +1,7 @@
 {
   "name": "urpc-agent",
   "version": "1.0.0",
-  "description": "URPC Agent - 智能数据操作助手",
+  "description": "URPC Agent - Intelligent Data Operations Assistant",
   "main": "server.ts",
   "scripts": {
     "dev": "next dev",
@@ -13,9 +13,9 @@
   "dependencies": {
     "@mastra/core": "^0.10.8",
     "@openrouter/ai-sdk-provider": "^0.7.2",
-    "@unilab/urpc-core": "workspace:*",
-    "@unilab/urpc": "workspace:*",
-    "@unilab/urpc-adapters": "workspace:*",
+    "@unilab/urpc-core": "^0.0.3",
+    "@unilab/urpc": "^0.0.5",
+    "@unilab/urpc-adapters": "^0.0.5",
     "dotenv": "^17.0.0",
     "zod": "^3.25.67",
     "next": "^14.0.0",

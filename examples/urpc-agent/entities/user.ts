@@ -3,28 +3,28 @@ import { PostEntity } from "./post";
 
 export class UserEntity {
   @Fields.string({
-    description: "用户ID",
+    description: "User ID",
   })
   id = "";
 
   @Fields.string({
-    description: "用户名",
+    description: "Username",
   })
   name = "";
 
   @Fields.string({
-    description: "邮箱",
+    description: "Email",
   })
   email = "";
 
   @Fields.string({
-    description: "头像",
+    description: "Avatar",
   })
   avatar = "";
 
   @Fields.array(() => PostEntity, {
     optional: true,
-    description: "文章列表",
+    description: "user's post list",
   })
   posts?: PostEntity[];
 } 

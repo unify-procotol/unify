@@ -7,7 +7,7 @@ import { PostEntity } from "../entities/post";
 import { MemoryAdapter } from "@unilab/urpc-adapters";
 import { convertSchemaToMarkdown } from "./entity-schema-to-markdown";
 
-// 定义插件配置
+// Define plugin configuration
 const DataPlugin: Plugin = {
   entities: [UserEntity, PostEntity],
 };
@@ -17,7 +17,7 @@ export class URPCAgent {
   private agent: Agent;
 
   constructor() {
-    // 初始化 URPC 客户端
+    // Initialize URPC client
     URPC.init({
       plugins: [DataPlugin],
       entityConfigs: {
@@ -31,16 +31,16 @@ export class URPCAgent {
       globalAdapters: [MemoryAdapter],
     });
 
-    // 初始化数据
+    // Initialize data
     repo({
       entity: "user",
       source: "memory",
     }).create({
       data: {
         id: "1",
-        name: "张三",
+        name: "Zhang San",
         email: "zhangsan@example.com",
-        avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=张三",
+        avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=ZhangSan",
       },
     });
 
@@ -50,8 +50,9 @@ export class URPCAgent {
     }).create({
       data: {
         id: "1",
-        title: "欢迎来到URPC Agent",
-        content: "这是第一篇示例文章，展示了URPC Agent的基本功能。",
+        title: "Welcome to URPC Agent",
+        content:
+          "This is the first sample article, demonstrating the basic functionality of URPC Agent.",
         userId: "1",
       },
     });
@@ -59,9 +60,9 @@ export class URPCAgent {
     this.instructions = this.generateInstructions();
 
     this.agent = new Agent({
-      name: "URPC智能数据助手",
+      name: "URPC Smart Data Assistant",
       description:
-        "基于URPC的智能数据操作助手，能够理解自然语言并执行相应的数据库操作",
+        "An intelligent data operation assistant based on URPC, capable of understanding natural language and executing corresponding database operations",
       instructions: this.instructions,
       model: createOpenRouter({
         apiKey: process.env.OPENROUTER_API_KEY!,
@@ -71,68 +72,69 @@ export class URPCAgent {
 
   private generateInstructions(): string {
     const schemas = URPC.getEntitySchemas();
+    // console.log("[Schemas]:", JSON.stringify(schemas, null, 2));
     const entityMarkdown = convertSchemaToMarkdown(schemas);
     console.log("[Entity Markdown]:", entityMarkdown);
     return `
-你是一个智能的数据操作助手，专门处理用户和文章数据的CRUD操作。你直接掌握URPC SDK的使用方法。
+You are an intelligent data operation assistant specialized in handling CRUD operations for user and article data. You have direct mastery of URPC SDK usage.
 
-## 核心能力
-你能够理解用户的自然语言请求，并将其转换为相应的URPC操作。你直接掌握以下操作模式：
+## Core Capabilities
+You can understand users' natural language requests and convert them into corresponding URPC operations. You directly master the following operation patterns:
 
-### 1. 查询操作 (READ)
-- 查找所有用户: repo({entity: "user", source: "memory"}).findMany()
-- 查找特定用户: repo({entity: "user", source: "memory"}).findOne({where: {id: "user-id"}})
-- 条件查询: repo({entity: "user", source: "memory"}).findMany({where: {name: "张三"}})
-- 分页查询: repo({entity: "user", source: "memory"}).findMany({limit: 10, offset: 0})
-- 排序查询: repo({entity: "user", source: "memory"}).findMany({order_by: {id: "desc"}})
+### 1. Query Operations (READ)
+- Find all users: repo({entity: "user", source: "memory"}).findMany()
+- Find specific user: repo({entity: "user", source: "memory"}).findOne({where: {id: "user-id"}})
+- Conditional query: repo({entity: "user", source: "memory"}).findMany({where: {name: "Zhang San"}})
+- Paginated query: repo({entity: "user", source: "memory"}).findMany({limit: 10, offset: 0})
+- Sorted query: repo({entity: "user", source: "memory"}).findMany({order_by: {id: "desc"}})
 
-### 2. 创建操作 (CREATE)
-- 创建用户: repo({entity: "user", source: "memory"}).create({data: {id: "uuid", name: "张三", email: "zhangsan@example.com", avatar: "avatar-url"}})
-- 创建文章: repo({entity: "post", source: "memory"}).create({data: {id: "uuid", title: "标题", content: "内容", userId: "user-id"}})
+### 2. Create Operations (CREATE)
+- Create user: repo({entity: "user", source: "memory"}).create({data: {id: "uuid", name: "Zhang San", email: "zhangsan@example.com", avatar: "avatar-url"}})
+- Create article: repo({entity: "post", source: "memory"}).create({data: {id: "uuid", title: "Title", content: "Content", userId: "user-id"}})
 
-### 3. 更新操作 (UPDATE)
-- 更新用户: repo({entity: "user", source: "memory"}).update({where: {id: "user-id"}, data: {name: "新名字"}})
-- 更新文章: repo({entity: "post", source: "memory"}).update({where: {id: "post-id"}, data: {title: "新标题"}})
+### 3. Update Operations (UPDATE)
+- Update user: repo({entity: "user", source: "memory"}).update({where: {id: "user-id"}, data: {name: "New Name"}})
+- Update article: repo({entity: "post", source: "memory"}).update({where: {id: "post-id"}, data: {title: "New Title"}})
 
-### 4. 删除操作 (DELETE)
-- 删除用户: repo({entity: "user", source: "memory"}).delete({where: {id: "user-id"}})
-- 删除文章: repo({entity: "post", source: "memory"}).delete({where: {id: "post-id"}})
+### 4. Delete Operations (DELETE)
+- Delete user: repo({entity: "user", source: "memory"}).delete({where: {id: "user-id"}})
+- Delete article: repo({entity: "post", source: "memory"}).delete({where: {id: "post-id"}})
 
-## 实体结构
+## Entity Structure
 ${entityMarkdown}
 
-## 响应格式
-始终返回JSON格式的结构化响应：
+## Response Format
+Always return JSON formatted structured response:
 {
   "success": true/false,
-  "operation": "操作类型", // findMany, findOne, create, update, delete
-  "entity": "实体名称",
-  "data": "返回的数据或null",
-  "message": "操作说明",
-  "urpc_code": "实际执行的URPC代码"
+  "operation": "operation type", // findMany, findOne, create, update, delete
+  "entity": "entity name",
+  "data": "returned data or null",
+  "message": "operation description",
+  "urpc_code": "actual executed URPC code"
 }
 
-## 处理流程
-1. 理解用户的自然语言请求
-2. 分析需要执行的操作类型和目标实体
-3. 构建相应的URPC操作
-4. 执行操作并返回结果
-5. 提供清晰的操作反馈
+## Processing Flow
+1. Understand user's natural language request
+2. Analyze the operation type and target entity to execute
+3. Build corresponding URPC operation
+4. Execute operation and return result
+5. Provide clear operation feedback
 
-## 示例对话
-用户："查找所有用户"
-你的理解：需要执行findMany操作查询所有用户
-URPC操作：repo({entity: "user", source: "memory"}).findMany()
+## Example Dialogue
+User: "Find all users"
+Your understanding: Need to execute findMany operation to query all users
+URPC operation: repo({entity: "user", source: "memory"}).findMany()
 
-用户："创建一个名为小明的用户"
-你的理解：需要执行create操作创建新用户
-URPC操作：repo({entity: "user", source: "memory"}).create({data: {id: "generated-id", name: "小明", email: "", avatar: ""}})
+User: "Create a user named Xiao Ming"
+Your understanding: Need to execute create operation to create new user
+URPC operation: repo({entity: "user", source: "memory"}).create({data: {id: "generated-id", name: "Xiao Ming", email: "", avatar: ""}})
 
-用户："为用户小明添加一篇文章，标题："test"， 内容：“小明test”"
-你的理解：需要执行create操作创建新文章
-URPC操作：repo({entity: "post", source: "memory"}).create({data: {id: "generated-id", title: "test", content: "小明test", userId: "user-id"}})
+User: "Add an article for user Xiao Ming, title: 'test', content: 'Xiao Ming test'"
+Your understanding: Need to execute create operation to create new article
+URPC operation: repo({entity: "post", source: "memory"}).create({data: {id: "generated-id", title: "test", content: "Xiao Ming test", userId: "user-id"}})
 
-记住：你不需要使用传统的tools，而是直接通过理解和执行URPC SDK的操作来响应用户请求。
+Remember: You don't need to use traditional tools, but directly respond to user requests through understanding and executing URPC SDK operations.
 `;
   }
 
@@ -158,7 +160,7 @@ URPC操作：repo({entity: "post", source: "memory"}).create({data: {id: "genera
         operation: "unknown",
         entity: "unknown",
         data: null,
-        message: `处理请求时发生错误: ${error.message}`,
+        message: `Error occurred while processing request: ${error.message}`,
         urpc_code: null,
       };
     }
@@ -166,8 +168,8 @@ URPC操作：repo({entity: "post", source: "memory"}).create({data: {id: "genera
 
   private async parseAndExecuteResponse(agentResponse: string): Promise<any> {
     try {
-      // 尝试从agent回复中提取URPC操作
-      // 改进的正则表达式，支持更复杂的参数结构
+      // Try to extract URPC operation from agent response
+      // Improved regex that supports more complex parameter structures
       const urpcCodeMatch = agentResponse.match(
         /repo\s*\(\s*\{[^}]+\}\s*\)\s*\.\s*\w+\s*\([^)]*\)/
       );
@@ -175,11 +177,11 @@ URPC操作：repo({entity: "post", source: "memory"}).create({data: {id: "genera
         let urpcCode = urpcCodeMatch[0];
         console.log("[Original rpcCode]:", urpcCode);
 
-        // 清理转义字符
+        // Clean escape characters
         urpcCode = urpcCode.replace(/\\"/g, '"');
         console.log("[Cleaned rpcCode]:", urpcCode);
 
-        // 为创建操作预先生成随机ID并替换urpcCode中的占位符
+        // Pre-generate random ID for create operations and replace placeholders in urpcCode
         let actualUrpcCode = urpcCode;
         if (urpcCode.includes("create") && urpcCode.includes("generated-id")) {
           const randomId = this.generateRandomId();
@@ -194,12 +196,12 @@ URPC操作：repo({entity: "post", source: "memory"}).create({data: {id: "genera
         const operation = this.extractOperation(urpcCode);
         const entity = this.extractEntity(urpcCode);
 
-        // 为创建操作生成更友好的消息
-        let message = "操作执行成功";
+        // Generate more friendly message for create operations
+        let message = "Operation executed successfully";
         if (operation === "create") {
-          const entityName = entity === "user" ? "用户" : "文章";
-          const name = result?.name || result?.title || "新记录";
-          message = `${entityName}${name}创建成功`;
+          const entityName = entity === "user" ? "User" : "Article";
+          const name = result?.name || result?.title || "New record";
+          message = `${entityName} ${name} created successfully`;
         }
 
         return {
@@ -212,7 +214,7 @@ URPC操作：repo({entity: "post", source: "memory"}).create({data: {id: "genera
         };
       }
 
-      // 如果没有找到URPC代码，返回agent的直接回复
+      // If no URPC code found, return agent's direct reply
       return {
         success: true,
         operation: "conversation",
@@ -227,15 +229,15 @@ URPC操作：repo({entity: "post", source: "memory"}).create({data: {id: "genera
         operation: "unknown",
         entity: "unknown",
         data: null,
-        message: `执行操作时发生错误: ${error.message}`,
+        message: `Error occurred while executing operation: ${error.message}`,
         urpc_code: null,
       };
     }
   }
 
   private async executeURPCCode(urpcCode: string): Promise<any> {
-    // 这里我们需要安全地执行URPC代码
-    // 为了简化，我们解析操作类型和参数
+    // Here we need to safely execute URPC code
+    // For simplification, we parse operation types and parameters
     try {
       if (urpcCode.includes("findMany")) {
         const entity = this.extractEntity(urpcCode);
@@ -259,7 +261,7 @@ URPC操作：repo({entity: "post", source: "memory"}).create({data: {id: "genera
         return await repo({ entity, source: "memory" }).delete(options);
       }
     } catch (error: any) {
-      throw new Error(`URPC操作执行失败: ${error.message}`);
+      throw new Error(`URPC operation execution failed: ${error.message}`);
     }
   }
 
@@ -278,65 +280,68 @@ URPC操作：repo({entity: "post", source: "memory"}).create({data: {id: "genera
   }
 
   private extractOptions(urpcCode: string): any {
-    // 改进的选项提取，支持所有URPC操作
+    // Improved option extraction, supporting all URPC operations
     try {
-      // 匹配方法调用的参数部分 - 使用更准确的正则表达式来匹配完整的参数
+      // Match parameter part of method call - use more accurate regex to match complete parameters
       const match = urpcCode.match(/\)\.(\w+)\((.+)\)$/);
       if (match) {
         const methodName = match[1];
         console.log("[MethodName]:", methodName);
         let paramsStr = match[2].trim();
 
-        // 如果没有参数，返回空对象
+        // If no parameters, return empty object
         if (!paramsStr) {
           return {};
         }
 
-        // 尝试解析参数
+        // Try to parse parameters
         try {
           return JSON.parse(paramsStr);
         } catch (parseError) {
-          // 如果JSON解析失败，尝试改进的对象解析
-          console.log("JSON解析失败，尝试改进解析:", paramsStr);
+          // If JSON parsing fails, try improved object parsing
+          console.log(
+            "JSON parsing failed, trying improved parsing:",
+            paramsStr
+          );
           return this.parseAdvancedObjectString(paramsStr);
         }
       }
       return {};
     } catch (error) {
-      console.log("参数提取失败:", error);
+      console.log("Parameter extraction failed:", error);
       return {};
     }
   }
 
   private parseAdvancedObjectString(str: string): any {
-    // 改进的对象字符串解析，支持嵌套对象
+    // Improved object string parsing, supporting nested objects
     try {
-      // 先尝试使用eval在安全的环境中解析（仅限于对象字面量）
-      // 但为了安全，我们需要先验证字符串只包含对象字面量语法
+      // First try to parse using eval in a safe environment (limited to object literals only)
+      // But for security, we need to first validate that the string contains only object literal syntax
       if (this.isValidObjectLiteral(str)) {
-        // 使用Function构造函数创建一个返回对象的函数
+        // Use Function constructor to create a function that returns an object
         const func = new Function(`"use strict"; return (${str});`);
         return func();
       }
 
-      // 如果不是有效的对象字面量，回退到简单解析
+      // If not a valid object literal, fall back to simple parsing
       return this.parseSimpleObjectString(str);
     } catch (error) {
-      console.log("改进对象解析失败:", error);
+      console.log("Improved object parsing failed:", error);
       return this.parseSimpleObjectString(str);
     }
   }
 
   private generateRandomId(): string {
-    // 生成随机ID - 使用时间戳和随机数的组合
+    // Generate random ID - using combination of timestamp and random number
     const timestamp = Date.now().toString(36);
     const randomStr = Math.random().toString(36).substring(2, 8);
     return `${timestamp}_${randomStr}`;
   }
 
   private isValidObjectLiteral(str: string): boolean {
-    // 验证字符串是否只包含对象字面量语法
-    // 这是一个简单的验证，可以根据需要扩展
+    // Validate whether string contains only object literal syntax
+    // This is a simple validation that can be extended as needed
     const dangerousPatterns = [
       /function\s*\(/,
       /=>\s*{/,
@@ -359,9 +364,9 @@ URPC操作：repo({entity: "post", source: "memory"}).create({data: {id: "genera
   }
 
   private parseSimpleObjectString(str: string): any {
-    // 简单的对象字符串解析，处理基本的键值对
+    // Simple object string parsing, handling basic key-value pairs
     try {
-      // 移除外层的花括号
+      // Remove outer braces
       str = str.replace(/^\{|\}$/g, "");
 
       const result: any = {};
@@ -373,7 +378,7 @@ URPC操作：repo({entity: "post", source: "memory"}).create({data: {id: "genera
           const cleanKey = key.replace(/['"]/g, "");
           const cleanValueStr = value.replace(/['"]/g, "");
 
-          // 尝试转换为合适的类型
+          // Try to convert to appropriate type
           let cleanValue: any;
           if (cleanValueStr === "true") {
             cleanValue = true;
@@ -391,7 +396,7 @@ URPC操作：repo({entity: "post", source: "memory"}).create({data: {id: "genera
 
       return result;
     } catch (error) {
-      console.log("简单对象解析失败:", error);
+      console.log("Simple object parsing failed:", error);
       return {};
     }
   }

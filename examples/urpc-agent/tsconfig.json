@@ -21,16 +21,16 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./*"]
     }
   },
   "include": [
     "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
     ".next/types/**/*.ts",
-    "src/**/*.ts",
-    "src/**/*.tsx",
+    "core/**/*.ts",
+    "core/**/*.tsx",
+    "entities/**/*.ts",
+    "entities/**/*.tsx",
     "app/**/*.ts",
     "app/**/*.tsx"
   ],

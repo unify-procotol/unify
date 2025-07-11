@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
 
     if (!message || typeof message !== "string") {
       return NextResponse.json(
-        { error: "请提供有效的消息内容" },
+        { error: "Please provide a valid message content" },
         { status: 400 }
       );
     }
@@ -26,14 +26,14 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(response, { status: 200 });
   } catch (error: any) {
-    console.error("Agent API错误:", error);
+    console.error("Agent API error:", error);
     return NextResponse.json(
       {
         success: false,
         operation: "error",
         entity: "unknown",
         data: null,
-        message: `处理请求时发生错误: ${error.message}`,
+        message: `An error occurred while processing the request: ${error.message}`,
         urpc_code: null,
       },
       { status: 500 }
@@ -45,10 +45,10 @@ export async function GET() {
   return NextResponse.json(
     {
       name: "URPC Agent API",
-      description: "URPC智能数据操作助手API",
+      description: "URPC intelligent data operation assistant API",
       version: "1.0.0",
       endpoints: {
-        POST: "/api/agent - 发送消息给Agent",
+        POST: "/api/agent - Send message to Agent",
       },
       status: "active",
     },
