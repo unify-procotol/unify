@@ -108,7 +108,8 @@ export async function startDevServer(
           output.includes('Local:') ||
           output.includes('localhost') ||
           output.includes(`http://localhost:${port}`) ||
-          output.includes('Server running')
+          output.includes('Server running') ||
+          output.includes('🚀 Server running')
         ) {
           if (!serverStarted) {
             serverStarted = true;

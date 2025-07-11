@@ -47,8 +47,12 @@ await URPC.repo<PostEntity>({
   },
 });
 
-export default {
+const server = {
   port: 3000,
   timeout: 30000,
   fetch: app.fetch,
 };
+
+console.log(`🚀 Server running on http://localhost:${server.port}`);
+
+export default server;
