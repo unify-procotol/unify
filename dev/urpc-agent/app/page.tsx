@@ -93,8 +93,8 @@ export default function Home() {
           if (Array.isArray(data.data)) {
             setUserData(data.data);
           } else if (
-            data.operation === "findOne" ||
-            data.operation === "update"
+            (data.operation === "findOne" || data.operation === "update") &&
+            data.data
           ) {
             setUserData((prev) => {
               const index = prev.findIndex((user) => user.id === data.data.id);
@@ -121,8 +121,8 @@ export default function Home() {
           if (Array.isArray(data.data)) {
             setPostData(data.data);
           } else if (
-            data.operation === "findOne" ||
-            data.operation === "update"
+            (data.operation === "findOne" || data.operation === "update") &&
+            data.data
           ) {
             setPostData((prev) => {
               const index = prev.findIndex((post) => post.id === data.data.id);
@@ -266,12 +266,10 @@ export default function Home() {
                       )}
 
                       {/* 显示数据 */}
-                      {message.data && (
-                        <div className="mt-2 p-2 bg-gray-800 rounded text-green-400 text-xs font-mono">
-                          <div className="text-gray-400 mb-1">数据:</div>
-                          {JSON.stringify(message.data, null, 2)}
-                        </div>
-                      )}
+                      <div className="mt-2 p-2 bg-gray-800 rounded text-green-400 text-xs font-mono">
+                        <div className="text-gray-400 mb-1">数据:</div>
+                        {JSON.stringify(message.data, null, 2)}
+                      </div>
                     </div>
                   </div>
                 ))}

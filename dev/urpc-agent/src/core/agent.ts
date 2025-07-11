@@ -5,6 +5,7 @@ import { Plugin } from "@unilab/urpc-core";
 import { UserEntity } from "../entities/user";
 import { PostEntity } from "../entities/post";
 import { MemoryAdapter } from "@unilab/urpc-adapters";
+import { convertSchemaToMarkdown } from "./entity-schema-to-markdown";
 
 // 定义插件配置
 const DataPlugin: Plugin = {
@@ -12,19 +13,10 @@ const DataPlugin: Plugin = {
 };
 
 export class URPCAgent {
+  private instructions: string;
   private agent: Agent;
 
   constructor() {
-    this.agent = new Agent({
-      name: "URPC智能数据助手",
-      description:
-        "基于URPC的智能数据操作助手，能够理解自然语言并执行相应的数据库操作",
-      instructions: this.generateInstructions(),
-      model: createOpenRouter({
-        apiKey: process.env.OPENROUTER_API_KEY!,
-      }).chat("openai/gpt-4o-mini"),
-    });
-
     // 初始化 URPC 客户端
     URPC.init({
       plugins: [DataPlugin],
@@ -63,9 +55,24 @@ export class URPCAgent {
         userId: "1",
       },
     });
+
+    this.instructions = this.generateInstructions();
+
+    this.agent = new Agent({
+      name: "URPC智能数据助手",
+      description:
+        "基于URPC的智能数据操作助手，能够理解自然语言并执行相应的数据库操作",
+      instructions: this.instructions,
+      model: createOpenRouter({
+        apiKey: process.env.OPENROUTER_API_KEY!,
+      }).chat("openai/gpt-4o-mini"),
+    });
   }
 
   private generateInstructions(): string {
+    const schemas = URPC.getEntitySchemas();
+    const entityMarkdown = convertSchemaToMarkdown(schemas);
+    console.log("[Entity Markdown]:", entityMarkdown);
     return `
 你是一个智能的数据操作助手，专门处理用户和文章数据的CRUD操作。你直接掌握URPC SDK的使用方法。
 
@@ -92,19 +99,7 @@ export class URPCAgent {
 - 删除文章: repo({entity: "post", source: "memory"}).delete({where: {id: "post-id"}})
 
 ## 实体结构
-### UserEntity:
-- id: string (用户唯一标识)
-- name: string (用户名)
-- email: string (邮箱)
-- avatar: string (头像URL)
-- posts?: PostEntity[] (用户的文章列表)
-
-### PostEntity:
-- id: string (文章唯一标识)
-- title: string (文章标题)
-- content: string (文章内容)
-- userId: string (作者ID)
-- user?: UserEntity (作者信息)
+${entityMarkdown}
 
 ## 响应格式
 始终返回JSON格式的结构化响应：
@@ -146,7 +141,7 @@ URPC操作：repo({entity: "post", source: "memory"}).create({data: {id: "genera
       const response = await this.agent.generate([
         {
           role: "system",
-          content: this.generateInstructions(),
+          content: this.instructions,
         },
         {
           role: "user",
@@ -289,6 +284,7 @@ URPC操作：repo({entity: "post", source: "memory"}).create({data: {id: "genera
       const match = urpcCode.match(/\)\.(\w+)\((.+)\)$/);
       if (match) {
         const methodName = match[1];
+        console.log("[MethodName]:", methodName);
         let paramsStr = match[2].trim();
 
         // 如果没有参数，返回空对象
@@ -404,7 +400,7 @@ URPC操作：repo({entity: "post", source: "memory"}).create({data: {id: "genera
     const stream = await this.agent.stream([
       {
         role: "system",
-        content: this.generateInstructions(),
+        content: this.instructions,
       },
       {
         role: "user",
