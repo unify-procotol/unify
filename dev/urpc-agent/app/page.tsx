@@ -92,6 +92,19 @@ export default function Home() {
         if (data.entity === "user") {
           if (Array.isArray(data.data)) {
             setUserData(data.data);
+          } else if (
+            data.operation === "findOne" ||
+            data.operation === "update"
+          ) {
+            setUserData((prev) => {
+              const index = prev.findIndex((user) => user.id === data.data.id);
+              if (index !== -1) {
+                prev[index] = data.data;
+              } else {
+                prev.push(data.data);
+              }
+              return prev;
+            });
           } else if (data.operation === "create" && data.data) {
             setUserData((prev) => [...prev, data.data]);
           } else if (data.operation === "delete" && data.success) {
@@ -107,6 +120,19 @@ export default function Home() {
         } else if (data.entity === "post") {
           if (Array.isArray(data.data)) {
             setPostData(data.data);
+          } else if (
+            data.operation === "findOne" ||
+            data.operation === "update"
+          ) {
+            setPostData((prev) => {
+              const index = prev.findIndex((post) => post.id === data.data.id);
+              if (index !== -1) {
+                prev[index] = data.data;
+              } else {
+                prev.push(data.data);
+              }
+              return prev;
+            });
           } else if (data.operation === "create" && data.data) {
             setPostData((prev) => [...prev, data.data]);
           } else if (data.operation === "delete" && data.success) {
@@ -236,6 +262,14 @@ export default function Home() {
                         <div className="mt-2 p-2 bg-gray-800 rounded text-green-400 text-xs font-mono">
                           <div className="text-gray-400 mb-1">URPC代码:</div>
                           {message.urpcCode}
+                        </div>
+                      )}
+
+                      {/* 显示数据 */}
+                      {message.data && (
+                        <div className="mt-2 p-2 bg-gray-800 rounded text-green-400 text-xs font-mono">
+                          <div className="text-gray-400 mb-1">数据:</div>
+                          {JSON.stringify(message.data, null, 2)}
                         </div>
                       )}
                     </div>
