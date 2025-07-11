@@ -1,27 +1,25 @@
 # URPC Agent - Intelligent Data Operations Assistant
 
-An intelligent data operations assistant built with **Mastra + URPC** that can understand natural language and execute corresponding database CRUD operations.
+An intelligent data operations assistant built with **Mastra + URPC** that understands natural language and executes corresponding database CRUD operations.
 
-## 🚀 Project Features
+## Features
 
-- **🤖 Intelligent Understanding**: Uses Mastra AI Agent to understand natural language requests
-- **🔧 Direct Operations**: Removes traditional tools layer, Agent directly masters URPC SDK usage
-- **📊 Real-time Feedback**: Displays actual executed URPC code and operation results
-- **🎨 Modern Interface**: Beautiful interface based on Next.js + Tailwind CSS
-- **⚡ High Performance**: Uses URPC unified data access layer for efficient data operations
+- **🤖 AI-Powered**: Uses Mastra AI Agent to understand natural language requests
+- **🔧 Direct Operations**: Agent directly uses URPC SDK without traditional tools layer
+- **📊 Real-time Feedback**: Shows executed URPC code and operation results
+- **🎨 Modern UI**: Next.js + Tailwind CSS interface
+- **⚡ High Performance**: URPC unified data access layer
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 - **Frontend**: Next.js 14, React 18, Tailwind CSS
 - **Backend**: Node.js, URPC SDK
 - **AI**: Mastra Core, OpenRouter
 - **Data**: Memory data storage (Memory Adapter)
-- **Styling**: Tailwind CSS, Lucide Icons
 
-## 📦 Install Dependencies
+## Installation
 
 ```bash
-# Install dependencies
 npm install
 # or
 yarn install
@@ -29,9 +27,9 @@ yarn install
 pnpm install
 ```
 
-## 🔑 Environment Configuration
+## Environment Setup
 
-Create a `.env.local` file and configure the following environment variables:
+Create a `.env.local` file:
 
 ```env
 # OpenRouter API Key
@@ -44,83 +42,55 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 NODE_ENV=development
 ```
 
-## 🚀 Start Project
+## Usage
 
 ```bash
-# Development mode
+# Development
 npm run dev
 
-# Build project
+# Build
 npm run build
 
-# Start production environment
+# Production
 npm run start
 
-# Run tests
+# Test
 npm run test
 ```
 
 Visit [http://localhost:3000](http://localhost:3000) to view the application.
 
-## 🎯 Feature Demo
+## Supported Operations
 
-### Supported Operation Types
+1. **Query**: `Find all users`, `Find user with ID 1`
+2. **Create**: `Create a new user named Tom with email tom@example.com`
+3. **Update**: `Update user 1's name to "John Smith"`
+4. **Delete**: `Delete user with ID 3`
 
-1. **Query Operations (READ)**
-   - `Find all users`
-   - `Find user with ID 1`
-   - `Show information for user John`
-
-2. **Create Operations (CREATE)**
-   - `Create a new user named Tom with email tom@example.com`
-   - `Add a post with title "Test Post" and content "This is test content"`
-
-3. **Update Operations (UPDATE)**
-   - `Update user 1's name to "John Smith"`
-   - `Modify post 2's title to "New Title"`
-
-4. **Delete Operations (DELETE)**
-   - `Delete user with ID 3`
-   - `Delete post with title "Test Post"`
-
-### Intelligent Understanding Examples
-
-The Agent can understand various natural language expressions:
+## Project Structure
 
 ```
-User Input: "Help me view all users"
-Agent Understanding: Execute findMany operation to query users
-URPC Code: repo({entity: "user", source: "memory"}).findMany()
-
-User Input: "Create a user named Mary"
-Agent Understanding: Execute create operation to create user
-URPC Code: repo({entity: "user", source: "memory"}).create({data: {...}})
-```
-
-## 🏗️ Project Structure
-
-```
-dev/urpc-agent/
+examples/urpc-agent/
 ├── app/                    # Next.js App Router
 │   ├── api/agent/         # Agent API routes
 │   ├── globals.css        # Global styles
 │   ├── layout.tsx         # Root layout
 │   └── page.tsx           # Main page
-├── src/                   # Source code
-│   ├── core/             # Core functionality
-│   │   └── agent.ts      # URPC Agent core implementation
-│   ├── entities/         # Data entities
-│   │   ├── user.ts       # User entity
-│   │   └── post.ts       # Post entity
-│   └── test/             # Test files
-│       └── agent-test.ts  # Agent tests
+├── core/                  # Core functionality
+│   ├── agent.ts          # URPC Agent implementation
+│   └── entity-schema-to-markdown.ts  # Schema utilities
+├── entities/             # Data entities
+│   ├── user.ts           # User entity
+│   └── post.ts           # Post entity
+├── test/                 # Test files
+│   └── agent-test.ts     # Agent tests
 ├── package.json          # Project configuration
 ├── tsconfig.json         # TypeScript configuration
 ├── tailwind.config.js    # Tailwind configuration
 └── README.md             # Project documentation
 ```
 
-## 🔧 Core Implementation
+## Core Implementation
 
 ### URPCAgent Class
 
@@ -163,37 +133,31 @@ export class PostEntity {
 }
 ```
 
-## 🧪 Testing
+## Example Usage
 
-Run built-in tests:
+```
+User Input: "Help me view all users"
+Agent Understanding: Execute findMany operation to query users
+URPC Code: repo({entity: "user", source: "memory"}).findMany()
+
+User Input: "Create a user named Mary"
+Agent Understanding: Execute create operation to create user
+URPC Code: repo({entity: "user", source: "memory"}).create({data: {...}})
+```
+
+## Testing
 
 ```bash
 npm run test
 ```
 
 Tests cover:
-- User query, create, update, delete
-- Post query, create, update, delete
-- Natural language understanding capabilities
+- User CRUD operations
+- Post CRUD operations
+- Natural language understanding
 - URPC code generation
 
-## 🎨 Interface Features
-
-- **Responsive Design**: Adapts to various device sizes
-- **Real-time Chat**: ChatGPT-like conversation interface
-- **Code Display**: Real-time display of executed URPC code
-- **Data Visualization**: Structured display of operation results
-- **Animation Effects**: Smooth interaction animations
-
-## 📚 Technical Highlights
-
-1. **Tool-less Design**: Agent directly understands URPC SDK, no traditional tools needed
-2. **Intelligent Code Generation**: Generates accurate URPC operation code from natural language
-3. **Real-time Code Display**: Users can see the actual executed code
-4. **Unified Data Access**: Uses URPC to unify access to different data sources
-5. **Type Safety**: Complete TypeScript type support
-
-## 🤝 Contributing
+## Contributing
 
 1. Fork this project
 2. Create feature branch: `git checkout -b feature/amazing-feature`
@@ -201,26 +165,17 @@ Tests cover:
 4. Push to branch: `git push origin feature/amazing-feature`
 5. Open Pull Request
 
-## 📄 License
+## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License.
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - [Mastra](https://mastra.ai) - AI Agent framework
 - [URPC](https://urpc.io) - Unified Remote Procedure Call
 - [OpenRouter](https://openrouter.ai) - AI model API provider
 - [Next.js](https://nextjs.org) - React framework
 - [Tailwind CSS](https://tailwindcss.com) - CSS framework
-
-## 📞 Support
-
-If you encounter any issues or have questions, please:
-
-1. Check the [Documentation](https://docs.urpc.io)
-2. Search [Issues](https://github.com/your-org/urpc-agent/issues)
-3. Create a new issue if needed
-4. Join our [Discord](https://discord.gg/urpc) community
 
 ---
 
