@@ -1,6 +1,5 @@
 import { UserEntity } from "./entities/user";
 import { repo, URPC } from "@unilab/urpc";
-import { WalletPlugin } from "@unilab/uniweb3";
 import { Plugin } from "@unilab/urpc-core";
 import { Logging } from "@unilab/urpc-core/middleware";
 import { MemoryAdapter } from "@unilab/urpc-adapters";
@@ -11,7 +10,7 @@ const MyPlugin: Plugin = {
 
 // Using Hybrid URPC Configuration (both local and HTTP fallback)
 URPC.init({
-  plugins: [MyPlugin, WalletPlugin],
+  plugins: [MyPlugin],
   // middlewares: [Logging()],
   entityConfigs: {
     user: {
