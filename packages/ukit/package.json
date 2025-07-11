@@ -1,6 +1,6 @@
 {
   "name": "@unilab/ukit",
-  "version": "0.0.3",
+  "version": "0.0.1",
   "description": "A flexible and elegant UI rendering library for dynamic data visualization with multiple layout options",
   "type": "module",
   "main": "dist/index.cjs",
