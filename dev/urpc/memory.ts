@@ -9,16 +9,23 @@ const MyPlugin: Plugin = {
   entities: [UserEntity],
 };
 
-// Example 1: Using Local URPC Configuration
+// Using Hybrid URPC Configuration (both local and HTTP fallback)
 URPC.init({
   plugins: [MyPlugin, WalletPlugin],
-  middlewares: [Logging()],
+  // middlewares: [Logging()],
   entityConfigs: {
     user: {
       defaultSource: "memory",
     },
   },
   globalAdapters: [MemoryAdapter],
+
+  baseUrl: "http://localhost:3000",
+  timeout: 10000,
+  headers: {
+    Authorization: "Bearer your-token",
+    "Content-Type": "application/json",
+  },
 });
 
 const demo = async () => {
@@ -62,47 +69,22 @@ const demo = async () => {
 
 demo();
 
-const fetchUser = async () => {
-  const data = await repo<UserEntity>({
+// HTTP客户端模式的使用示例
+const httpDemo = async () => {
+  // 在HTTP模式下，数据通过HTTP API获取
+  const users = await repo<UserEntity>({
     entity: "user",
-    // source: "memory",
+    source: "api-mock", // 可选，传给后端API
   }).findMany({
     where: {
       id: "1",
-      // email: "john.doe@example.com",
     },
+    limit: 10,
   });
-  console.log("[1] =>", JSON.stringify(data, null, 2));
+  console.log("HTTP users:", users);
 };
 
-fetchUser();
-
-// // Example 2: Using HTTP Client Configuration
-// URPC.init({
-//   baseUrl: "http://localhost:3000",
-//   timeout: 10000,
-//   headers: {
-//     Authorization: "Bearer your-token",
-//     "Content-Type": "application/json",
-//   },
-// });
-
-// // HTTP客户端模式的使用示例
-// const httpDemo = async () => {
-//   // 在HTTP模式下，数据通过HTTP API获取
-//   const users = await repo<UserEntity>({
-//     entity: "user",
-//     source: "api", // 可选，传给后端API
-//   }).findMany({
-//     where: {
-//       name: "John",
-//     },
-//     limit: 10,
-//   });
-//   console.log("HTTP users:", users);
-// };
-
-// httpDemo();
+httpDemo();
 
 // const allEntities = await repo({
 //   entity: "schema",

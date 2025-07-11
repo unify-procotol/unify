@@ -4,10 +4,11 @@
   "description": "Basic browser example using @unilab/urpc",
   "main": "server.ts",
   "scripts": {
+    "server": "bun run server.ts",
     "mock": "bun run mock.ts",
     "memory": "bun run memory.ts",
     "indexeddb": "vite",
-    "localstorage": "VITE_ENTRY=localstorage.html vite --port 3001"
+    "localstorage": "VITE_ENTRY=localstorage.html vite --port 3000"
   },
   "dependencies": {
     "@unilab/urpc": "workspace:*",

@@ -17,9 +17,6 @@ export function registerAdapter<T extends Record<string, any>>(
 export function getRepo(entity: string, source: string) {
   const key = getRepoKey(entity, source);
   const repo = REPO_REGISTRY.get(key);
-  if (!repo) {
-    throw new Error(`Unknown data source: ${source}`);
-  }
   return repo;
 }
 

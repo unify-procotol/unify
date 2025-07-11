@@ -87,6 +87,10 @@ export function i18nAIMiddleware<T extends Record<string, any>>(options?: {
       const cacheDefaultSource =
         entityConfigs["cache"]?.defaultSource || "memory";
       const cacheRepo = getRepo(cacheEntity, cacheDefaultSource);
+      if (!cacheRepo) {
+        console.log("Cache repo not found, executing without cache");
+        return await next();
+      }
 
       // First check for cached translations
       try {
@@ -134,31 +138,34 @@ export function i18nAIMiddleware<T extends Record<string, any>>(options?: {
               const llmDefaultSource =
                 entityConfigs["llm"]?.defaultSource || "openrouter";
               const llmRepo = getRepo(llmEntity, llmDefaultSource);
-              const promptText =
-                typeof i18n === "object" && i18n.prompt
-                  ? i18n.prompt
-                  : "Please translate the following content";
-              const prompt = `${promptText}, translate to ${languageMap[targetLanguage as keyof typeof languageMap]}:\n\n${originalValue}`;
+              if (llmRepo) {
+                const promptText =
+                  typeof i18n === "object" && i18n.prompt
+                    ? i18n.prompt
+                    : "Please translate the following content";
+                const prompt = `${promptText}, translate to ${languageMap[targetLanguage as keyof typeof languageMap]}:\n\n${originalValue}`;
 
-              const translationResponse = await llmRepo.create(
-                {
-                  data: {
-                    model:
-                      (typeof i18n === "object" && i18n.model) ||
-                      "openai/gpt-4o-mini",
-                    prompt: prompt,
+                const translationResponse = await llmRepo.create(
+                  {
+                    data: {
+                      model:
+                        (typeof i18n === "object" && i18n.model) ||
+                        "openai/gpt-4o-mini",
+                      prompt: prompt,
+                    },
                   },
-                },
-                {
-                  entity: "llm",
-                  source: llmDefaultSource,
-                }
-              );
-
-              const translatedValue =
-                translationResponse.output || originalValue;
-              translatedEntity[fieldName] = translatedValue;
-              console.log(`Translation for "${fieldName}": ${translatedValue}`);
+                  {
+                    entity: "llm",
+                    source: llmDefaultSource,
+                  }
+                );
+                const translatedValue =
+                  translationResponse.output || originalValue;
+                translatedEntity[fieldName] = translatedValue;
+                console.log(
+                  `Translation for "${fieldName}": ${translatedValue}`
+                );
+              }
             } catch (error) {
               console.warn(
                 `Translation failed for field "${fieldName}":`,

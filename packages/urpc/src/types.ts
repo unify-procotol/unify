@@ -39,6 +39,8 @@ export interface HttpClientConfig {
   headers?: Record<string, string>;
 }
 
+export interface HybridConfig extends LocalConfig, HttpClientConfig {}
+
 export interface HttpRequestOptions {
   method: "GET" | "POST" | "PATCH" | "DELETE";
   url: string;
@@ -53,4 +55,4 @@ export interface HttpResponse<T = any> {
   message?: string;
 }
 
-export type URPCConfig = LocalConfig | HttpClientConfig;
+export type URPCConfig = LocalConfig | HttpClientConfig | HybridConfig;

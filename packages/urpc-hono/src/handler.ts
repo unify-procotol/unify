@@ -166,6 +166,10 @@ export class URPC {
         if (sourceError) return sourceError;
 
         const repo = getRepo(entity, source!);
+        if (!repo) {
+          return c.json({ error: "Repository not found" }, 404);
+        }
+
         const params = parseQueryParams(c);
         const result = await repo.findMany(params, {
           entity,
@@ -196,6 +200,9 @@ export class URPC {
         }
 
         const repo = getRepo(entity, source!);
+        if (!repo) {
+          return c.json({ error: "Repository not found" }, 404);
+        }
 
         const result = await repo.findOne(
           {
@@ -229,6 +236,10 @@ export class URPC {
         }
 
         const repo = getRepo(entity, source!);
+        if (!repo) {
+          return c.json({ error: "Repository not found" }, 404);
+        }
+
         const result = await repo.create(
           {
             data: body.data,
@@ -260,6 +271,10 @@ export class URPC {
         }
 
         const repo = getRepo(entity, source!);
+        if (!repo) {
+          return c.json({ error: "Repository not found" }, 404);
+        }
+
         const result = await repo.update(
           {
             where: body.where,
@@ -292,6 +307,10 @@ export class URPC {
         }
 
         const repo = getRepo(entity, source!);
+        if (!repo) {
+          return c.json({ error: "Repository not found" }, 404);
+        }
+
         const result = await repo.delete(
           {
             where: params.where,
