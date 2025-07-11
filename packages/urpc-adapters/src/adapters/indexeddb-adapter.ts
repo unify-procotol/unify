@@ -11,7 +11,9 @@ import { matchesWhere, processFindManyArgs } from "../utils";
 export class IndexedDBAdapter<
   T extends Record<string, any>,
 > extends BaseAdapter<T> {
-  static get name() { return "indexeddb"; }
+  static get name() {
+    return "indexeddb";
+  }
   private dbName: string = "urpc_db";
   private storeName: string = "default_store";
   private db: IDBDatabase | null = null;
@@ -172,24 +174,62 @@ export class IndexedDBAdapter<
   }
 
   async delete(args: DeletionArgs<T>): Promise<boolean> {
-    const store = await this.getStore("readwrite");
-    const items = await this.getAllItems();
-    for (const item of items) {
-      if (matchesWhere(item, args.where)) {
-        const result = await new Promise<boolean>((resolve, reject) => {
-          const request = store.delete(item.id.toString());
-          request.onsuccess = () => {
-            resolve(true);
+    const db = await this.initDB();
+    const transaction = db.transaction([this.storeName], "readwrite");
+    const store = transaction.objectStore(this.storeName);
+
+    return new Promise((resolve, reject) => {
+      let deletedCount = 0;
+      let processed = 0;
+      let totalToProcess = 0;
+
+      const getAllRequest = store.getAll();
+
+      getAllRequest.onsuccess = () => {
+        const items = getAllRequest.result;
+        const itemsToDelete = items.filter((item) =>
+          matchesWhere(item, args.where)
+        );
+
+        if (itemsToDelete.length === 0) {
+          resolve(false);
+          return;
+        }
+
+        totalToProcess = itemsToDelete.length;
+
+        itemsToDelete.forEach((item) => {
+          const deleteRequest = store.delete(item.id.toString());
+
+          deleteRequest.onsuccess = () => {
+            deletedCount++;
+            processed++;
+
+            if (processed === totalToProcess) {
+              resolve(deletedCount > 0);
+            }
           };
-          request.onerror = () => {
-            reject(false);
+
+          deleteRequest.onerror = () => {
+            processed++;
+
+            if (processed === totalToProcess) {
+              resolve(deletedCount > 0);
+            }
           };
         });
-        return result;
-      }
-    }
+      };
 
-    return false;
+      getAllRequest.onerror = () => {
+        reject(
+          new Error(`Failed to get all items: ${getAllRequest.error?.message}`)
+        );
+      };
+
+      transaction.onerror = () => {
+        reject(new Error(`Transaction failed: ${transaction.error?.message}`));
+      };
+    });
   }
 
   async clearStore(): Promise<void> {

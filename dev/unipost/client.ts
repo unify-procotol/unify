@@ -1,4 +1,4 @@
-import { repo, URPC } from "@unilab/urpc-client";
+import { repo, URPC } from "@unilab/urpc";
 import { ProjectEntity } from "./entities/project";
 
 URPC.init({
