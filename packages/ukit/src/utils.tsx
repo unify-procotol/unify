@@ -44,20 +44,20 @@ export const renderFieldValue = (
 
   // Handle null/undefined values
   if (value === null || value === undefined) {
-    return <span className="text-gray-500 italic">null</span>;
+    return <span className="text-muted-foreground italic">null</span>;
   }
 
   // Type-specific rendering with syntax highlighting
   switch (field.type) {
     case 'string':
-      return <span className="text-green-600 dark:text-green-400">"{String(value)}"</span>;
+      return <span className="text-primary">"{String(value)}"</span>;
     
     case 'number':
-      return <span className="text-blue-600 dark:text-blue-400">{value}</span>;
+      return <span className="text-accent">{value}</span>;
     
     case 'boolean':
       return (
-        <span className={`${value ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+        <span className={`${value ? 'text-primary' : 'text-destructive'}`}>
           {value.toString()}
         </span>
       );
@@ -69,7 +69,7 @@ export const renderFieldValue = (
         return date.toISOString().split('T')[0] + ' ' + date.toISOString().split('T')[1].slice(0, 8);
       };
       return (
-        <span className="text-purple-600 dark:text-purple-400" title={dateValue.toISOString()}>
+        <span className="text-accent" title={dateValue.toISOString()}>
           {formatDate(dateValue)}
         </span>
       );
@@ -78,7 +78,7 @@ export const renderFieldValue = (
     case 'array':
       if (typeof value === 'object') {
         return (
-          <span className="text-orange-600 dark:text-orange-400" title={JSON.stringify(value, null, 2)}>
+          <span className="text-accent" title={JSON.stringify(value, null, 2)}>
             {JSON.stringify(value)}
           </span>
         );
@@ -89,15 +89,15 @@ export const renderFieldValue = (
       // Default string rendering
       if (typeof value === 'object') {
         return (
-          <span className="text-orange-600 dark:text-orange-400" title={JSON.stringify(value, null, 2)}>
+          <span className="text-accent" title={JSON.stringify(value, null, 2)}>
             {JSON.stringify(value)}
           </span>
         );
       }
-      return <span className="text-gray-800 dark:text-gray-200">{String(value)}</span>;
+      return <span className="text-foreground">{String(value)}</span>;
   }
   
-  return <span className="text-gray-800 dark:text-gray-200">{String(value)}</span>;
+  return <span className="text-foreground">{String(value)}</span>;
 };
 
 /**

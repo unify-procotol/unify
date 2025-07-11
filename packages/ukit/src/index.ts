@@ -23,7 +23,6 @@ export { CardLayout } from './components/CardLayout';
 export { GridLayout } from './components/GridLayout';
 export { ListLayout } from './components/ListLayout';
 export { DashboardLayout } from './components/DashboardLayout';
-export { EditModal } from './components/EditModal';
 
 // UI components (for custom styling)
 export { Button } from './components/ui/button';

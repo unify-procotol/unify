@@ -5,7 +5,8 @@
   "workspaces": [
     "packages/*",
     "dev/*",
-    "docs"
+    "docs",
+    "examples/*"
   ],
   "scripts": {
     "build:urpc-core": "cd packages/urpc-core && bun run build",
@@ -36,7 +37,7 @@
     "@typescript-eslint/typescript-estree": "^8.35.0"
   },
   "devDependencies": {
-    "vite": "^7.0.2",
+    "vite": "^7.0.4",
     "@vitejs/plugin-react": "^4.6.0",
     "@tailwindcss/vite": "^4.1.11"
   }

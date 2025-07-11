@@ -31,6 +31,14 @@ export const TEMPLATES: Template[] = [
     startScript: 'dev'
   },
   {
+    name:'react-todo',
+    displayName: 'React Todo App',
+    description: 'A simple todo list app with React and URPC',
+    githubPath: 'unify-procotol/unify',
+    defaultPort: 3000,
+    startScript: 'dev'
+  },
+  {
     name: 'nextjs-app-router',
     displayName: 'Next.js App Router',
     description: 'Next.js 13+ with App Router and URPC',

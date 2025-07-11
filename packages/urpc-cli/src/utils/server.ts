@@ -5,6 +5,7 @@ import fs from 'fs-extra';
 import path from 'path';
 import { Template, PackageManager, STUDIO_URL } from '../types';
 import { logInfo, logSuccess, logError, displayStudioMessage } from './logger';
+import { repo, URPC } from '@unilab/urpc';
 
 export async function installDependencies(
   targetDir: string,
@@ -146,9 +147,10 @@ export async function startDevServer(
 }
 
 export async function openStudio(port: number): Promise<void> {
+  return
   try {
     // Wait a bit for server to fully start
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise(resolve => setTimeout(resolve, 3000));
     
     // Check if server is actually running
     const isRunning = await checkServerHealth(port);
@@ -172,13 +174,17 @@ export async function openStudio(port: number): Promise<void> {
 
 async function checkServerHealth(port: number): Promise<boolean> {
   try {
-    const fetch = await import('node-fetch').then(mod => mod.default);
-    const response = await fetch(`http://localhost:${port}`, {
-      method: 'GET'
+    URPC.init({
+      baseUrl: `http://localhost:${port}`,
+      timeout: 5000,
     });
-    
-    return response.ok;
+    const allEntities = await repo({
+      entity: "schema",
+      source: "_global",
+    }).findMany();
+    return Array.isArray(allEntities);
   } catch (error) {
+    console.log("checkServerHealth error", error);
     return false;
   }
 }

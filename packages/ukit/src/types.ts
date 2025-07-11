@@ -79,9 +79,33 @@ export interface GeneralConfig {
     custom?: Array<{
       label: string;
       icon?: ReactNode;
-      onClick: (record: any, index: number) => void;
+      onClick: (record: any, index: number, entityInstance: any, refresh: () => Promise<void>) => Promise<void> | void;
       className?: string;
     }>;
+  };
+  
+  // Global layout configuration
+  /** Whether to show the add record button (applies to all layouts) */
+  showAddButton?: boolean;
+  /** Whether to show top controls (title, add button) (applies to all layouts) */
+  showTopControls?: boolean;
+  
+  // Table-specific configuration
+  table?: {
+    /** Whether to enable pagination */
+    enablePagination?: boolean;
+    /** Number of records per page */
+    pageSize?: number;
+    /** Whether to show the add record button (overrides global showAddButton) */
+    showAddButton?: boolean;
+    /** Whether to show top controls (title, add button) (overrides global showTopControls) */
+    showTopControls?: boolean;
+  };
+  
+  // Empty state configuration
+  emptyState?: {
+    /** Whether to show add record button in empty state */
+    showAddButton?: boolean;
   };
 }
 
@@ -107,8 +131,8 @@ export interface QueryParams {
  * Main props interface for UniRender component
  */
 export interface UniRenderProps {
-  /** Entity name (string) */
-  entity: string;
+  /** Entity name (string) or Entity class */
+  entity: string | any;
   /** Data source (optional) */
   source?: string;
   /** Query parameters for data fetching */
@@ -173,4 +197,6 @@ export interface EditModalProps {
   onSave?: (record: any, index: number) => Promise<void> | void;
   /** Index of the record being edited */
   index: number;
+  /** Mode of the modal (edit or add) */
+  mode?: 'edit' | 'add';
 } 

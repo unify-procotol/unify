@@ -1,14 +1,15 @@
 import chalk from 'chalk';
 import boxen from 'boxen';
-import figlet from 'figlet';
 import gradient from 'gradient-string';
 
 export function displayBanner() {
-  const banner = figlet.textSync('URPC CLI', {
-    font: 'ANSI Shadow',
-    horizontalLayout: 'default',
-    verticalLayout: 'default'
-  });
+  const banner = `
+██    ██ ██████  ██████   ██████     ██████ ██      ██ 
+██    ██ ██   ██ ██   ██ ██          ██     ██      ██ 
+██    ██ ██████  ██████  ██          ██     ██      ██ 
+██    ██ ██   ██ ██      ██          ██     ██      ██ 
+ ██████  ██   ██ ██       ██████     ██████ ███████ ██ 
+`;
   
   console.log(gradient.rainbow(banner));
   console.log(

@@ -1,8 +1,11 @@
 #!/usr/bin/env node
 
 import { program } from 'commander';
-import { createCommand } from './commands/create';
-import { displayBanner } from './utils/logger';
+import { createCommand } from './commands/create.js';
+import { displayBanner } from './utils/logger.js';
+import { readFileSync } from 'fs';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
 import packageJson from '../package.json';
 
 async function main() {

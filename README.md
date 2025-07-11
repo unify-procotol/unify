@@ -2,6 +2,10 @@
 
 Unify is a protocol focused on entity-first abstraction, aimed at resolving same-domain, cross-source complexity 🧭. Developers define unified entity models to seamlessly abstract over diverse implementations (APIs, protocols, schemas).
 
+## Get Started
+```bash
+npx urpc-cli create my-project
+```
 
 ## 🌐 Why Unify?
 Kills switch-case hell in multi-protocol apps 🧹

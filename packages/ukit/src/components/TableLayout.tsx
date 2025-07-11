@@ -1,146 +1,241 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { LayoutProps } from "../types";
 import { getSortedFields, renderFieldValue, generateRecordKey } from "../utils";
-import { EditModal } from "./EditModal";
+import { useLayoutActions } from "../hooks/useLayoutActions";
+import { ActionButtons } from "./common/ActionButtons";
+import { CommonModals } from "./common/CommonModals";
+import { EmptyState } from "./common/EmptyState";
+import { LayoutHeader } from "./common/LayoutHeader";
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
 import { Badge } from "./ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./ui/table";
-import { Edit3, Trash2, MoreHorizontal, Loader2, Database } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+
+// Extended LayoutProps to include pagination and add record functionality
+interface ExtendedLayoutProps extends LayoutProps {
+  // Pagination props
+  enablePagination?: boolean;
+  pageSize?: number;
+  currentPage?: number;
+  onPageChange?: (page: number) => void;
+  
+  // Add Record props
+  showAddButton?: boolean;
+  onAddRecord?: (record: any) => Promise<void>;
+  
+  // General table controls
+  showTopControls?: boolean;
+  
+  // Entity instance for custom actions
+  entityInstance?: any;
+  
+  // Refresh callback for custom actions
+  onRefresh?: () => Promise<void>;
+}
 
 /**
- * Table layout component for displaying data in a tabular format
+ * Table layout component for displaying data in a tabular format with pagination and add record functionality
  */
-export const TableLayout: React.FC<LayoutProps> = ({ 
+export const TableLayout: React.FC<ExtendedLayoutProps> = ({ 
   entity, 
   data, 
   config, 
   generalConfig,
   onEdit,
-  onDelete
+  onDelete,
+  // Pagination props
+  enablePagination = true,
+  pageSize = 10,
+  currentPage = 1,
+  onPageChange,
+  // Add Record props
+  showAddButton = true,
+  onAddRecord,
+  // General controls
+  showTopControls = true,
+  // Entity instance
+  entityInstance,
+  // Refresh callback
+  onRefresh
 }) => {
   const sortedFields = getSortedFields(entity, config);
-  const [editingRecord, setEditingRecord] = useState<{ record: any; index: number } | null>(null);
-  const [deletingIndex, setDeletingIndex] = useState<number | null>(null);
+  
+  // Use the common layout actions hook
+  const {
+    editingRecord,
+    deletingIndex,
+    showAddModal,
+    deleteConfirmation,
+    handleEdit,
+    handleDelete,
+    confirmDelete,
+    handleSaveEdit,
+    handleAddRecord,
+    handleSaveRecord,
+    createActionHandler,
+    setEditingRecord,
+    setShowAddModal,
+    setDeleteConfirmation
+  } = useLayoutActions({
+    onEdit,
+    onDelete,
+    onAddRecord,
+    entityInstance,
+    generalConfig,
+    onRefresh
+  });
+  
+  const [internalCurrentPage, setInternalCurrentPage] = useState(currentPage);
   
   const showActions = generalConfig?.showActions && (onEdit || onDelete || generalConfig?.actions?.custom);
 
-  /**
-   * Handle edit action for a record
-   */
-  const handleEdit = (record: any, index: number) => {
-    setEditingRecord({ record, index });
-  };
-
-  /**
-   * Handle delete action for a record
-   */
-  const handleDelete = async (record: any, index: number) => {
-    if (!onDelete) return;
-    
-    const confirmed = window.confirm('Are you sure you want to delete this record?');
-    if (!confirmed) return;
-    
-    setDeletingIndex(index);
-    try {
-      await onDelete(record, index);
-    } catch (error) {
-      console.error('Error deleting record:', error);
-      // TODO: Show error message to user
-    } finally {
-      setDeletingIndex(null);
+  // Use controlled or uncontrolled pagination
+  const activePage = onPageChange ? currentPage : internalCurrentPage;
+  const handlePageChange = (page: number) => {
+    if (onPageChange) {
+      onPageChange(page);
+    } else {
+      setInternalCurrentPage(page);
     }
   };
 
-  /**
-   * Handle save edit action
-   */
-  const handleSaveEdit = async (updatedRecord: any, index: number) => {
-    if (!onEdit) return;
-    await onEdit(updatedRecord, index);
-    setEditingRecord(null);
-  };
+  // Calculate pagination data
+  const paginationData = useMemo(() => {
+    if (!enablePagination) {
+      return {
+        paginatedData: data,
+        totalPages: 1,
+        startIndex: 0,
+        endIndex: data.length,
+        totalRecords: data.length,
+        adjustedPage: activePage
+      };
+    }
+
+    const totalPages = Math.ceil(data.length / pageSize);
+    
+    // Ensure current page doesn't exceed total pages after data refresh
+    let adjustedPage = activePage;
+    if (totalPages > 0 && activePage > totalPages) {
+      adjustedPage = totalPages;
+      // Auto-adjust page if current page exceeds total pages
+      setTimeout(() => {
+        handlePageChange(totalPages);
+      }, 0);
+    }
+
+    const startIndex = (adjustedPage - 1) * pageSize;
+    const endIndex = Math.min(startIndex + pageSize, data.length);
+    const paginatedData = data.slice(startIndex, endIndex);
+
+    return {
+      paginatedData,
+      totalPages,
+      startIndex,
+      endIndex,
+      totalRecords: data.length,
+      adjustedPage
+    };
+  }, [data, enablePagination, activePage, pageSize]);
 
   /**
-   * Render action buttons for a record
+   * Render pagination controls
    */
-  const renderActionButtons = (record: any, index: number) => (
-    <div className="flex items-center space-x-1">
-      {/* Edit button */}
-      {(generalConfig?.actions?.edit !== false && onEdit) && (
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => handleEdit(record, index)}
-          className="h-8 w-8 p-0"
-          title="Edit record"
-        >
-          <Edit3 className="h-4 w-4" />
-        </Button>
-      )}
-      
-      {/* Delete button */}
-      {(generalConfig?.actions?.delete !== false && onDelete) && (
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => handleDelete(record, index)}
-          disabled={deletingIndex === index}
-          className="h-8 w-8 p-0 text-destructive hover:text-destructive"
-          title="Delete record"
-        >
-          {deletingIndex === index ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <Trash2 className="h-4 w-4" />
-          )}
-        </Button>
-      )}
-      
-      {/* Custom actions */}
-      {generalConfig?.actions?.custom?.map((action, actionIndex) => (
-        <Button
-          key={actionIndex}
-          variant="ghost"
-          size="sm"
-          onClick={() => action.onClick(record, index)}
-          className={`h-8 w-8 p-0 ${action.className || ''}`}
-          title={action.label}
-        >
-          {action.icon || <MoreHorizontal className="h-4 w-4" />}
-        </Button>
-      ))}
-    </div>
-  );
+  const renderPagination = () => {
+    if (!enablePagination || paginationData.totalPages <= 1) return null;
+
+    const { totalPages, adjustedPage } = paginationData;
+    const currentPage = adjustedPage || activePage;
+    const maxVisible = 5;
+    const start = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+    const end = Math.min(totalPages, start + maxVisible - 1);
+
+    return (
+      <div className="flex items-center justify-between px-6 py-4 border-t">
+        <div className="text-sm text-muted-foreground">
+          Showing {paginationData.startIndex + 1} to {paginationData.endIndex} of {paginationData.totalRecords} records
+        </div>
+        
+        <div className="flex items-center space-x-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          
+          {Array.from({ length: end - start + 1 }, (_, i) => start + i).map(page => (
+            <Button
+              key={page}
+              variant={page === currentPage ? "default" : "outline"}
+              size="sm"
+              onClick={() => handlePageChange(page)}
+            >
+              {page}
+            </Button>
+          ))}
+          
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+    );
+  };
 
   if (data.length === 0) {
     return (
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div className="space-y-1">
-            <h2 className="text-2xl font-bold tracking-tight">{entity.name || 'Records'}</h2>
-            <p className="text-muted-foreground">
-              Table view for {entity.name?.toLowerCase() || 'records'}
-            </p>
-          </div>
-        </div>
-
-        <div className="flex flex-col items-center justify-center py-12">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted mb-4">
-            <Database className="h-6 w-6 text-muted-foreground" />
-          </div>
-          <h3 className="text-lg font-semibold">No records found</h3>
-          <p className="text-sm text-muted-foreground mt-1">
-            There are no {entity.name?.toLowerCase() || 'records'} to display in table view.
-          </p>
-        </div>
-      </div>
+      <>
+        <EmptyState
+          entity={entity}
+          showTopControls={showTopControls}
+          showAddButton={showAddButton}
+          onAddRecord={onAddRecord}
+          handleAddRecord={handleAddRecord}
+          viewName="Table"
+        />
+        
+        {/* Common Modals - needed even when data is empty */}
+        <CommonModals
+          editingRecord={editingRecord}
+          setEditingRecord={setEditingRecord}
+          entity={entity}
+          config={config}
+          handleSaveEdit={handleSaveEdit}
+          showAddModal={showAddModal}
+          setShowAddModal={setShowAddModal}
+          handleSaveRecord={handleSaveRecord}
+          deleteConfirmation={deleteConfirmation}
+          setDeleteConfirmation={setDeleteConfirmation}
+          confirmDelete={confirmDelete}
+          deletingIndex={deletingIndex}
+        />
+      </>
     );
   }
 
   return (
     <>
       <div className="space-y-6">
+        {/* Top Controls */}
+        <LayoutHeader
+          entity={entity}
+          data={data}
+          showTopControls={showTopControls}
+          showAddButton={showAddButton}
+          onAddRecord={onAddRecord}
+          handleAddRecord={handleAddRecord}
+          viewName="table"
+        />
+
         <Card>
           <div className="overflow-x-auto">
             <Table>
@@ -178,10 +273,10 @@ export const TableLayout: React.FC<LayoutProps> = ({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {data.map((record, index) => (
+                {paginationData.paginatedData.map((record, index) => (
                   <TableRow key={generateRecordKey(record, index)} className="group">
                     <TableCell className="font-mono text-sm text-muted-foreground text-center">
-                      {index + 1}
+                      {paginationData.startIndex + index + 1}
                     </TableCell>
                     {sortedFields.map(field => (
                       <TableCell 
@@ -201,7 +296,16 @@ export const TableLayout: React.FC<LayoutProps> = ({
                     ))}
                     {showActions && (
                       <TableCell className="text-center">
-                        {renderActionButtons(record, index)}
+                        <ActionButtons
+                          record={record}
+                          index={index}
+                          generalConfig={generalConfig}
+                          onEdit={handleEdit}
+                          onDelete={handleDelete}
+                          deletingIndex={deletingIndex}
+                          createActionHandler={createActionHandler}
+                          size="sm"
+                        />
                       </TableCell>
                     )}
                   </TableRow>
@@ -210,27 +314,26 @@ export const TableLayout: React.FC<LayoutProps> = ({
             </Table>
           </div>
           
-          {/* Footer with record count */}
-          <div className="border-t bg-muted/30 px-6 py-3">
-            <div className="text-sm text-muted-foreground">
-              Showing <span className="font-medium">{data.length}</span> record{data.length !== 1 ? 's' : ''}
-            </div>
-          </div>
+          {/* Pagination */}
+          {renderPagination()}
         </Card>
       </div>
 
-      {/* Edit Modal */}
-      {editingRecord && (
-        <EditModal
-          isOpen={true}
-          onClose={() => setEditingRecord(null)}
-          record={editingRecord.record}
-          entity={entity}
-          config={config}
-          onSave={handleSaveEdit}
-          index={editingRecord.index}
-        />
-      )}
+      {/* Common Modals */}
+      <CommonModals
+        editingRecord={editingRecord}
+        setEditingRecord={setEditingRecord}
+        entity={entity}
+        config={config}
+        handleSaveEdit={handleSaveEdit}
+        showAddModal={showAddModal}
+        setShowAddModal={setShowAddModal}
+        handleSaveRecord={handleSaveRecord}
+        deleteConfirmation={deleteConfirmation}
+        setDeleteConfirmation={setDeleteConfirmation}
+        confirmDelete={confirmDelete}
+        deletingIndex={deletingIndex}
+      />
     </>
   );
 }; 

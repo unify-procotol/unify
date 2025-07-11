@@ -1,32 +1,52 @@
 import React, { useState } from "react";
-import { EditModalProps } from "../types";
-import { getSortedFields } from "../utils";
-import { Button } from "./ui/button";
-import { Input } from "./ui/input";
-import { Label } from "./ui/label";
-import { Badge } from "./ui/badge";
+import { EditModalProps } from "../../types";
+import { getSortedFields } from "../../utils";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
+import { Badge } from "../ui/badge";
 import { 
   Dialog, 
   DialogContent, 
   DialogHeader, 
   DialogTitle, 
   DialogFooter 
-} from "./ui/dialog";
+} from "../ui/dialog";
 import { Save, Loader2, AlertCircle, Edit } from "lucide-react";
 
 /**
  * Modal component for editing records
  */
-export const EditModal: React.FC<EditModalProps> = ({ 
+export const EditModal: React.FC<EditModalProps & { mode?: 'add' | 'edit' }> = ({ 
   isOpen, 
   onClose, 
   record, 
   entity, 
   config, 
   onSave,
-  index
+  index,
+  mode = 'edit'
 }) => {
-  const [formData, setFormData] = useState(record);
+  const [formData, setFormData] = useState(() => {
+    if (mode === 'add') {
+      // Initialize with default values for add mode
+      const defaultData: any = {};
+      const fields = getSortedFields(entity, config);
+      fields.forEach(field => {
+        if (field.name === 'id') {
+          defaultData[field.name] = Date.now().toString();
+        } else if (field.type === 'boolean') {
+          defaultData[field.name] = false;
+        } else if (field.type === 'number') {
+          defaultData[field.name] = 0;
+        } else {
+          defaultData[field.name] = '';
+        }
+      });
+      return defaultData;
+    }
+    return record;
+  });
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   
@@ -227,10 +247,13 @@ export const EditModal: React.FC<EditModalProps> = ({
             </div>
             <div className="space-y-1">
               <DialogTitle className="text-xl font-semibold">
-                Edit {entity.name}
+                {mode === 'add' ? `Add New ${entity.name}` : `Edit ${entity.name}`}
               </DialogTitle>
               <p className="text-sm text-muted-foreground">
-                Record #{index + 1}
+                {mode === 'add' 
+                  ? `Fill in the fields below to add a new ${entity.name?.toLowerCase() || 'record'}.`
+                  : `Record #${index + 1}`
+                }
               </p>
             </div>
           </div>
@@ -300,12 +323,12 @@ export const EditModal: React.FC<EditModalProps> = ({
             {loading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Saving...
+                {mode === 'add' ? 'Adding...' : 'Saving...'}
               </>
             ) : (
               <>
                 <Save className="mr-2 h-4 w-4" />
-                Save Changes
+                {mode === 'add' ? 'Add Record' : 'Save Changes'}
               </>
             )}
           </Button>

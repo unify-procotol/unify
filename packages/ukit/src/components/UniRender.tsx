@@ -7,6 +7,9 @@ import { CardLayout } from "./CardLayout";
 import { GridLayout } from "./GridLayout";
 import { ListLayout } from "./ListLayout";
 import { DashboardLayout } from "./DashboardLayout";
+import { EditModal } from "./EditModal";
+import { Button } from "./ui/button";
+import { Plus } from "lucide-react";
 
 /**
  * Check if we're running on the client side
@@ -18,14 +21,14 @@ const isClientSide = () => typeof window !== 'undefined';
  */
 const generateDefaultEntitySchema = (entityName: string, sampleData: any[]): Entity => {
   const fields = [];
-  
+
   if (sampleData && sampleData.length > 0) {
     const firstRecord = sampleData[0];
-    
+
     // Generate fields from sample data
     for (const [key, value] of Object.entries(firstRecord)) {
       let type = 'string';
-      
+
       if (typeof value === 'number') {
         type = 'number';
       } else if (typeof value === 'boolean') {
@@ -37,7 +40,7 @@ const generateDefaultEntitySchema = (entityName: string, sampleData: any[]): Ent
       } else if (typeof value === 'object' && value !== null) {
         type = 'object';
       }
-      
+
       fields.push({
         name: key,
         type: type,
@@ -45,8 +48,52 @@ const generateDefaultEntitySchema = (entityName: string, sampleData: any[]): Ent
         description: `${key} field`
       });
     }
+  } else {
+    if (entityName.toLowerCase().includes('todo')) {
+      fields.push(
+        {
+          name: 'id',
+          type: 'string',
+          required: true,
+          description: 'Unique identifier'
+        },
+        {
+          name: 'title',
+          type: 'string',
+          required: true,
+          description: 'Todo title'
+        },
+        {
+          name: 'completed',
+          type: 'boolean',
+          required: false,
+          description: 'Completion status'
+        }
+      );
+    } else {
+      fields.push(
+        {
+          name: 'id',
+          type: 'string',
+          required: true,
+          description: 'Unique identifier'
+        },
+        {
+          name: 'name',
+          type: 'string',
+          required: true,
+          description: 'Name field'
+        },
+        {
+          name: 'description',
+          type: 'string',
+          required: false,
+          description: 'Description field'
+        }
+      );
+    }
   }
-  
+
   return {
     name: entityName,
     fields: fields,
@@ -71,7 +118,7 @@ export interface UniRenderRef {
  * Main UniRender component for rendering data in various layouts
  */
 export const UniRender = forwardRef<UniRenderRef, UniRenderProps>(({
-  entity: entityName,
+  entity: entityInput,
   source,
   query = {},
   layout,
@@ -91,6 +138,10 @@ export const UniRender = forwardRef<UniRenderRef, UniRenderProps>(({
   const [error, setError] = useState<string | null>(null);
   const [isClient, setIsClient] = useState(false);
 
+  const isEntityClass = typeof entityInput != 'string';
+  const entityName = isEntityClass ? entityInput.name || 'Entity' : entityInput;
+  const entityClass = isEntityClass ? entityInput : null;
+
   // Set client-side flag after component mounts
   useEffect(() => {
     setIsClient(true);
@@ -105,7 +156,6 @@ export const UniRender = forwardRef<UniRenderRef, UniRenderProps>(({
     }
 
     try {
-      // Try to get specific entity schema from global schema
       const schemaResponse = await repo({
         entity: "schema",
         source: "_global",
@@ -114,53 +164,65 @@ export const UniRender = forwardRef<UniRenderRef, UniRenderProps>(({
           name: entityName,
         },
       });
-      
+
       if (schemaResponse && schemaResponse.schema) {
-        // Convert schema.properties to fields array for UniRender
         const fields = [];
         const properties = schemaResponse.schema.properties || {};
         const required = schemaResponse.schema.required || [];
-        
+
         for (const [fieldName, fieldDef] of Object.entries(properties)) {
           const fieldInfo = fieldDef as any;
-          
-          // Skip relation fields (arrays with entity types or direct entity references)
-          const isRelationField = 
+
+          const isRelationField =
             (fieldInfo.type === 'array' && fieldInfo.items?.type?.endsWith?.('Entity')) ||
             (typeof fieldInfo.type === 'string' && fieldInfo.type.endsWith('Entity'));
-          
+
           if (!isRelationField) {
-            fields.push({
+            const newField = {
               name: fieldName,
               type: fieldInfo.type === 'array' ? 'array' : fieldInfo.type || 'string',
               required: required.includes(fieldName),
               description: fieldInfo.description || `${fieldName} field`
-            });
+            };
+            fields.push(newField);
           }
         }
-        
+
+        if (fields.length === 0) {
+          fields.push(
+            {
+              name: 'id',
+              type: 'string',
+              required: true,
+              description: 'Unique identifier'
+            },
+            {
+              name: 'title',
+              type: 'string',
+              required: true,
+              description: 'Title field'
+            },
+            {
+              name: 'completed',
+              type: 'boolean',
+              required: false,
+              description: 'Completion status'
+            }
+          );
+        }
+
         setEntitySchema({
           name: schemaResponse.name,
           fields: fields,
           schema: schemaResponse.schema,
         });
       } else {
-        // Don't generate default schema immediately if we don't have data
-        // Let fetchData handle schema generation based on actual data
-        if (sampleData && sampleData.length > 0) {
-          console.warn(`Entity "${entityName}" not found in global schema, generating default schema from data`);
-          const defaultSchema = generateDefaultEntitySchema(entityName, sampleData);
-          setEntitySchema(defaultSchema);
-        }
-      }
-    } catch (err) {
-      // Don't generate default schema immediately if we don't have data
-      // Let fetchData handle schema generation based on actual data
-      if (sampleData && sampleData.length > 0) {
-        console.warn(`Failed to fetch entity schema: ${err}, generating default schema from data`);
-        const defaultSchema = generateDefaultEntitySchema(entityName, sampleData);
+        const defaultSchema = generateDefaultEntitySchema(entityName, sampleData || []);
         setEntitySchema(defaultSchema);
       }
+    } catch (err) {
+      const defaultSchema = generateDefaultEntitySchema(entityName, sampleData || []);
+      setEntitySchema(defaultSchema);
     }
   };
 
@@ -176,7 +238,7 @@ export const UniRender = forwardRef<UniRenderRef, UniRenderProps>(({
       setError(null);
 
       const repoInstance = repo({
-        entity: entityName,
+        entity: entityClass || entityName,
         source: source,
       });
 
@@ -186,7 +248,7 @@ export const UniRender = forwardRef<UniRenderRef, UniRenderProps>(({
         result = await repoInstance.findOne(query as any);
         const resultData = result ? [result] : [];
         setData(resultData);
-        
+
         // Generate schema based on actual data if no schema exists or schema is empty
         if (!entitySchema || !entitySchema.fields || entitySchema.fields.length === 0) {
           const dataBasedSchema = generateDefaultEntitySchema(entityName, resultData);
@@ -197,7 +259,7 @@ export const UniRender = forwardRef<UniRenderRef, UniRenderProps>(({
         result = await repoInstance.findMany(query as any);
         const resultData = result || [];
         setData(resultData);
-        
+
         // Generate schema based on actual data if no schema exists or schema is empty
         if (!entitySchema || !entitySchema.fields || entitySchema.fields.length === 0) {
           const dataBasedSchema = generateDefaultEntitySchema(entityName, resultData);
@@ -205,8 +267,8 @@ export const UniRender = forwardRef<UniRenderRef, UniRenderProps>(({
         }
       }
     } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : String(err);
-        setError(`Failed to fetch data: ${errorMessage}`);
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      setError(`Failed to fetch data: ${errorMessage}`);
       setData([]);
     } finally {
       setLoading(false);
@@ -248,9 +310,9 @@ export const UniRender = forwardRef<UniRenderRef, UniRenderProps>(({
   const renderLoadingState = () => (
     <div className={`flex items-center justify-center h-64 ${className}`}>
       <div className="text-center">
-        <div className="animate-spin w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full mx-auto mb-4"></div>
-        <div className="text-gray-600 font-medium">Loading data...</div>
-        <div className="text-gray-400 text-sm mt-1">
+        <div className="animate-spin w-8 h-8 border-2 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
+        <div className="text-foreground font-medium">Loading data...</div>
+        <div className="text-muted-foreground text-sm mt-1">
           Please wait while we fetch your {entityName} data
         </div>
       </div>
@@ -278,16 +340,16 @@ export const UniRender = forwardRef<UniRenderRef, UniRenderProps>(({
             />
           </svg>
         </div>
-        <div className="text-red-600 text-lg font-semibold mb-2">
+        <div className="text-destructive text-lg font-semibold mb-2">
           Oops! Something went wrong
         </div>
-        <p className="text-gray-600 mb-4">{currentError}</p>
+        <p className="text-muted-foreground mb-4">{currentError}</p>
         <button
           onClick={() => {
             setError(null);
             fetchData();
           }}
-          className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm"
+          className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors text-sm"
         >
           Try Again
         </button>
@@ -296,54 +358,63 @@ export const UniRender = forwardRef<UniRenderRef, UniRenderProps>(({
   );
 
   /**
-   * Render empty state
+   * Handle add record functionality
    */
-  const renderEmptyState = () => (
-    <div className={`flex items-center justify-center h-64 ${className}`}>
-      <div className="text-center">
-        <div className="w-16 h-16 mx-auto mb-4 text-gray-400">
-          <svg
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            className="w-full h-full"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-            />
-          </svg>
-        </div>
-        <div className="text-gray-600 text-lg font-medium mb-2">
-          No data found
-        </div>
-        <p className="text-gray-500 mb-4">No records found for {entityName}</p>
-        {onAdd && (
-          <button
-            onClick={() => onAdd({})}
-            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm inline-flex items-center"
-          >
-            <svg
-              className="w-4 h-4 mr-2"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M12 4v16m8-8H4"
-              />
-            </svg>
-            Add First Record
-          </button>
-        )}
-      </div>
-    </div>
-  );
+  const handleAddRecord = async (newRecord: any) => {
+    try {
+      await repo({
+        entity: entityClass || entityName,
+        source: source,
+      }).create({
+        data: newRecord
+      });
+
+      await fetchData();
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  /**
+   * Handle edit record functionality
+   */
+  const handleEditRecord = async (updatedRecord: any, index: number) => {
+    if (onEdit) {
+      await onEdit(updatedRecord, index);
+    } else {
+      try {
+        await repo({
+          entity: entityClass || entityName,
+          source: source,
+        }).update({
+          where: { id: updatedRecord.id },
+          data: updatedRecord
+        });
+
+        await fetchData();
+      } catch (error) {
+        throw error;
+      }
+    }
+  };
+
+  /**
+   * Handle delete record functionality
+   */
+  const handleDeleteRecord = async (record: any, index: number) => {
+    try {
+      await repo({
+        entity: entityName,
+        source: source,
+      }).delete({
+        where: { id: record.id }
+      });
+      await fetchData();
+      onDelete?.(record, index);
+    } catch (error) {
+      throw error;
+    }
+  };
 
   /**
    * Render the appropriate layout component
@@ -351,34 +422,93 @@ export const UniRender = forwardRef<UniRenderRef, UniRenderProps>(({
   const renderLayout = () => {
     if (!entitySchema) return null;
 
+    const getEntityInstance = async (record: any) => {
+      if (!entityClass) {
+        return null;
+      }
+
+      const repoInstance = repo({
+        entity: entityClass,
+        source: source,
+      });
+
+      const entityInstance = await repoInstance.findOne({
+        where: { id: record.id },
+      });
+      return entityInstance;
+    };
+
     const layoutProps = {
       entity: entitySchema,
       data,
       config,
       generalConfig,
-      onEdit,
-      onDelete,
+      onEdit: handleEditRecord,
+      onDelete: handleDeleteRecord,
       onSave,
+    };
+
+    // Get common configuration for all layouts
+    const commonConfig = {
+      showAddButton: generalConfig?.showAddButton ?? true,
+      showTopControls: generalConfig?.showTopControls ?? true,
+      onAddRecord: handleAddRecord,
+      entityInstance: getEntityInstance,
+      onRefresh: fetchData,
+    };
+
+    // Get table-specific configuration
+    const tableConfig = generalConfig?.table || {};
+    const {
+      enablePagination = true,
+      pageSize = 10,
+      showAddButton: tableShowAddButton,
+      showTopControls: tableShowTopControls,
+    } = tableConfig;
+
+    // Table layout uses specific config if provided, otherwise uses common config
+    const tableExtendedConfig = {
+      ...commonConfig,
+      showAddButton: tableShowAddButton ?? commonConfig.showAddButton,
+      showTopControls: tableShowTopControls ?? commonConfig.showTopControls,
+      entityInstance: getEntityInstance,
+      onRefresh: fetchData,
     };
 
     switch (layout) {
       case "table":
-        return <TableLayout {...layoutProps} />;
+        return <TableLayout
+          {...layoutProps}
+          {...tableExtendedConfig}
+          enablePagination={enablePagination}
+          pageSize={pageSize}
+        />;
       case "form":
         return <FormLayout {...layoutProps} />;
       case "card":
-        return <CardLayout {...layoutProps} />;
+        return <CardLayout
+          {...layoutProps}
+          {...commonConfig}
+        />;
       case "grid":
-        return <GridLayout {...layoutProps} />;
+        return <GridLayout
+          {...layoutProps}
+          {...commonConfig}
+        />;
       case "list":
-        return <ListLayout {...layoutProps} />;
+        return <ListLayout
+          {...layoutProps}
+          {...commonConfig}
+        />;
       case "dashboard":
         return <DashboardLayout {...layoutProps} />;
       default:
-        console.warn(
-          `Unknown layout type: ${layout}. Falling back to table layout.`
-        );
-        return <TableLayout {...layoutProps} />;
+        return <TableLayout
+          {...layoutProps}
+          {...tableExtendedConfig}
+          enablePagination={enablePagination}
+          pageSize={pageSize}
+        />;
     }
   };
 
@@ -400,10 +530,12 @@ export const UniRender = forwardRef<UniRenderRef, UniRenderProps>(({
     return renderLoadingState();
   }
 
-  if (!data || data.length === 0) {
-    return renderEmptyState();
-  }
-
+  // Always render the layout component, let it handle empty state
   // Render the main content
-  return <div className={`ukit-render ${className}`}>{renderLayout()}</div>;
+  return (
+    <>
+      <div className={`ukit-render ${className}`}>{renderLayout()}</div>
+
+    </>
+  );
 });

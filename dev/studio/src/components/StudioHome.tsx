@@ -688,7 +688,6 @@ export function StudioHome({ isConnected, baseUrl }: StudioHomeProps) {
                 <Button
                   onClick={handleAddRecord}
                   size="sm"
-                  className="bg-green-600 hover:bg-green-700"
                 >
                   <svg
                     className="w-4 h-4 mr-2"
