@@ -6,7 +6,7 @@ export default defineConfig(({ command, mode }) => {
 
   return {
     server: {
-      port: htmlFile === "localstorage.html" ? 3001 : 3000,
+      port: 3000,
       open: true,
     },
     build: {

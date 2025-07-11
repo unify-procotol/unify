@@ -179,6 +179,9 @@ export class URPC {
       }
 
       const repo = getRepo(entity, source!);
+      if (!repo) {
+        return NextResponse.json({ error: "Repository not found" }, { status: 404 });
+      }
 
       switch (`${method}:${action}`) {
         case "GET:list":
