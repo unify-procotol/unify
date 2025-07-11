@@ -256,20 +256,20 @@ export default function Home() {
                         </span>
                       </div>
                       <div className="text-sm">{message.content}</div>
-
-                      {/* 显示URPC代码 */}
                       {message.urpcCode && (
-                        <div className="mt-2 p-2 bg-gray-800 rounded text-green-400 text-xs font-mono">
-                          <div className="text-gray-400 mb-1">URPC代码:</div>
-                          {message.urpcCode}
-                        </div>
+                        <>
+                          {/* 显示URPC代码 */}
+                          <div className="mt-2 p-2 bg-gray-800 rounded text-green-400 text-xs font-mono">
+                            <div className="text-gray-400 mb-1">URPC代码:</div>
+                            {message.urpcCode}
+                          </div>
+                          {/* 显示数据 */}
+                          <div className="mt-2 p-2 bg-gray-800 rounded text-green-400 text-xs font-mono">
+                            <div className="text-gray-400 mb-1">数据:</div>
+                            {JSON.stringify(message.data, null, 2)}
+                          </div>
+                        </>
                       )}
-
-                      {/* 显示数据 */}
-                      <div className="mt-2 p-2 bg-gray-800 rounded text-green-400 text-xs font-mono">
-                        <div className="text-gray-400 mb-1">数据:</div>
-                        {JSON.stringify(message.data, null, 2)}
-                      </div>
                     </div>
                   </div>
                 ))}
