@@ -1,6 +1,6 @@
 {
   "name": "@unilab/urpc-adapters",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Common adapters for URPC",
   "main": "dist/index.js",
   "module": "dist/index.js",

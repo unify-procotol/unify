@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LocalStorage Adapter Example</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        background: #f5f5f5;
+      }
+      .container {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+      button {
+        background: #28a745;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        margin: 5px;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      button:hover {
+        background: #218838;
+      }
+      .storage-button {
+        background: #ffc107;
+        color: #212529;
+      }
+      .storage-button:hover {
+        background: #e0a800;
+      }
+      .output {
+        background: #f8f8f8;
+        border: 1px solid #ddd;
+        padding: 15px;
+        margin: 10px 0;
+        border-radius: 4px;
+        white-space: pre-wrap;
+        font-family: monospace;
+        max-height: 300px;
+        overflow-y: auto;
+      }
+      .input-group {
+        margin: 10px 0;
+      }
+      .input-group label {
+        display: inline-block;
+        width: 100px;
+        font-weight: bold;
+      }
+      .input-group input {
+        padding: 5px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        width: 200px;
+      }
+      .button-section {
+        margin: 20px 0;
+        padding: 10px 0;
+        border-top: 1px solid #eee;
+      }
+      .button-section h3 {
+        margin: 0 0 10px 0;
+        color: #333;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>LocalStorage Adapter Example</h1>
+      <p>
+        This example demonstrates how to use LocalStorage adapter for browser
+        persistent storage. Data is stored in localStorage and persists across
+        browser sessions.
+      </p>
+
+      <div class="input-group">
+        <label>ID:</label>
+        <input type="text" id="userId" placeholder="User ID" value="1" />
+      </div>
+      <div class="input-group">
+        <label>Name:</label>
+        <input
+          type="text"
+          id="userName"
+          placeholder="User Name"
+          value="张三"
+        />
+      </div>
+      <div class="input-group">
+        <label>Email:</label>
+        <input
+          type="text"
+          id="userEmail"
+          placeholder="Email"
+          value="zhangsan@example.com"
+        />
+      </div>
+      <div class="input-group">
+        <label>Avatar:</label>
+        <input
+          type="text"
+          id="userAvatar"
+          placeholder="Avatar URL"
+          value="avatar.png"
+        />
+      </div>
+
+      <div class="button-section">
+        <h3>CRUD Operations</h3>
+        <button onclick="createUser()">Create User</button>
+        <button onclick="findUser()">Find User</button>
+        <button onclick="updateUser()">Update User</button>
+        <button onclick="deleteUser()">Delete User</button>
+        <button onclick="listAllUsers()">List All Users</button>
+        <button onclick="clearDatabase()">Clear Database</button>
+      </div>
+
+      <div class="button-section">
+        <h3>LocalStorage Specific Functions</h3>
+        <button class="storage-button" onclick="checkStorageQuota()">
+          Check Storage Quota
+        </button>
+        <button class="storage-button" onclick="getStorageSize()">
+          Get Storage Size
+        </button>
+      </div>
+
+      <div id="output" class="output">Waiting for operation...</div>
+
+      <div style="margin-top: 20px; padding: 10px; background: #e9ecef; border-radius: 4px;">
+        <strong>💡 Tips:</strong>
+        <ul>
+          <li>Open DevTools → Application → Storage → Local Storage to view data</li>
+          <li>Data persists across browser sessions</li>
+          <li>LocalStorage has a ~5-10MB limit per domain</li>
+          <li>Use the quota check function to monitor storage usage</li>
+        </ul>
+      </div>
+    </div>
+
+    <script type="module" src="/localstorage.ts"></script>
+  </body>
+</html> 

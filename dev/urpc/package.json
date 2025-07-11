@@ -6,7 +6,8 @@
   "scripts": {
     "mock": "bun run mock.ts",
     "memory": "bun run memory.ts",
-    "indexeddb": "vite"
+    "indexeddb": "vite",
+    "localstorage": "VITE_ENTRY=localstorage.html vite --port 3001"
   },
   "dependencies": {
     "@unilab/urpc": "workspace:*",

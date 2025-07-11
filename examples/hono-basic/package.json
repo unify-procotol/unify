@@ -1,7 +1,7 @@
 {
   "name": "hono-basic-example",
   "version": "1.0.0",
-  "description": "Basic Hono example using @unilab/urpc-hono and @unilab/urpc-client",
+  "description": "Basic Hono example using @unilab/urpc-hono and @unilab/urpc",
   "main": "server.ts",
   "scripts": {
     "dev": "bun run server.ts",
