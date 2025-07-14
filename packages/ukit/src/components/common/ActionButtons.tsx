@@ -29,7 +29,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
   const buttonSize = size === 'sm' ? 'h-8 w-8' : 'h-6 w-6';
 
   return (
-    <div className={`flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 ${className}`}>
+    <div className={`flex items-center space-x-1 transition-opacity duration-200 ${className}`}>
       {/* Edit button */}
       {(generalConfig?.actions?.edit !== false && onEdit) && (
         <Button

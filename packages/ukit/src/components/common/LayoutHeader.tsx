@@ -1,11 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '../ui/button';
-import { Plus } from 'lucide-react';
-import { Entity } from '../../types';
+import { Input } from '../ui/input';
+import { Plus, Search } from 'lucide-react';
+import { Entity, FieldConfig } from '../../types';
+import { SimpleTableFilter, FilterConfig } from './SimpleTableFilter';
 
 interface LayoutHeaderProps {
   entity: Entity;
   data: any[];
+  config?: Record<string, FieldConfig>;
   showTopControls?: boolean;
   showAddButton?: boolean;
   onAddRecord?: (record: any) => Promise<void>;
@@ -13,39 +16,55 @@ interface LayoutHeaderProps {
   viewName?: string;
   title?: string;
   description?: string;
+  // Filter props
+  showFilter?: boolean;
+  filterConfig?: FilterConfig;
+  onFilteredDataChange?: (filteredData: any[]) => void;
 }
 
 export const LayoutHeader: React.FC<LayoutHeaderProps> = ({
   entity,
   data,
+  config,
   showTopControls = true,
   showAddButton = true,
   onAddRecord,
   handleAddRecord,
   viewName = 'records',
   title,
-  description
+  description,
+  showFilter = true,
+  filterConfig,
+  onFilteredDataChange
 }) => {
+  const [filteredData, setFilteredData] = useState(data);
+
   if (!showTopControls) return null;
 
   const defaultTitle = title || entity.name;
+  const recordCount = filteredData.length;
+  const totalCount = data.length;
   const defaultDescription = description || 
-    `${data.length} record${data.length !== 1 ? 's' : ''} in ${viewName} view`;
+    `${recordCount}${recordCount !== totalCount ? ` of ${totalCount}` : ''} record${recordCount !== 1 ? 's' : ''}`;
+
+  const handleFilterChange = (newFilteredData: any[]) => {
+    setFilteredData(newFilteredData);
+    onFilteredDataChange?.(newFilteredData);
+  };
 
   return (
-    <div className="flex items-center justify-between">
-      <div className="space-y-1">
-        <h2 className="text-2xl font-bold tracking-tight">{defaultTitle}</h2>
-        <p className="text-muted-foreground">{defaultDescription}</p>
-      </div>
-      {showAddButton && onAddRecord && (
-        <Button
-          onClick={handleAddRecord}
-          size="sm"
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          Add Record
-        </Button>
+    <div className="space-y-3">
+      {showFilter && (
+        <SimpleTableFilter
+          entity={entity}
+          data={data}
+          config={config}
+          filterConfig={filterConfig}
+          onFilterChange={handleFilterChange}
+          showAddButton={showAddButton}
+          onAddRecord={onAddRecord}
+          handleAddRecord={handleAddRecord}
+        />
       )}
     </div>
   );

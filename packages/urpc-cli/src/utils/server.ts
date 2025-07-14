@@ -147,7 +147,6 @@ export async function startDevServer(
 }
 
 export async function openStudio(port: number): Promise<void> {
-  return
   try {
     // Wait a bit for server to fully start
     await new Promise(resolve => setTimeout(resolve, 3000));
@@ -156,7 +155,7 @@ export async function openStudio(port: number): Promise<void> {
     const isRunning = await checkServerHealth(port);
     
     if (isRunning) {
-      const studioUrl = `${STUDIO_URL}?local=http://localhost:${port}`;
+      const studioUrl = `${STUDIO_URL}?endpoint=http://localhost:${port}`;
       
       displayStudioMessage(studioUrl);
       

@@ -50,7 +50,7 @@ export const renderFieldValue = (
   // Type-specific rendering with syntax highlighting
   switch (field.type) {
     case 'string':
-      return <span className="text-primary">"{String(value)}"</span>;
+      return <span className="text-primary">{String(value)}</span>;
     
     case 'number':
       return <span className="text-accent">{value}</span>;

@@ -41,10 +41,7 @@ export function StudioHome({ isConnected, baseUrl }: StudioHomeProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Query state
-  const [queryField, setQueryField] = useState<string>("");
-  const [queryValue, setQueryValue] = useState<string>("");
-  const [currentQuery, setCurrentQuery] = useState<Record<string, any>>({});
+
 
   // Add Record modal state
   const [showAddModal, setShowAddModal] = useState(false);
@@ -72,12 +69,7 @@ export function StudioHome({ isConnected, baseUrl }: StudioHomeProps) {
     }
   }, [isConnected, baseUrl]);
 
-  // Reset query when entity or source changes
-  useEffect(() => {
-    setQueryField("");
-    setQueryValue("");
-    setCurrentQuery({});
-  }, [selectedEntity, selectedSource]);
+
 
   const loadEntities = async () => {
     try {
@@ -207,40 +199,7 @@ export function StudioHome({ isConnected, baseUrl }: StudioHomeProps) {
   const isEntityCollapsed = (entity: string) =>
     collapsedEntities.has(entity);
 
-  // Get available fields for current entity
-  const getAvailableFields = (): string[] => {
-    if (!selectedEntity?.schema?.properties) return [];
-    return Object.keys(selectedEntity.schema.properties).filter(field => {
-      const fieldDef = selectedEntity.schema.properties[field];
-      // Exclude relation fields
-      const isRelationField =
-        (fieldDef.type === 'array' && fieldDef.items?.type?.endsWith?.('Entity')) ||
-        (typeof fieldDef.type === 'string' && fieldDef.type.endsWith('Entity'));
-      return !isRelationField;
-    });
-  };
 
-  // Execute query
-  const executeQuery = () => {
-    if (!queryField || !queryValue.trim()) {
-      setCurrentQuery({});
-      return;
-    }
-
-    const query = {
-      where: {
-        [queryField]: queryValue.trim()
-      }
-    };
-    setCurrentQuery(query);
-  };
-
-  // Clear query
-  const clearQuery = () => {
-    setQueryField("");
-    setQueryValue("");
-    setCurrentQuery({});
-  };
 
   // Handle add record
   const handleAddRecord = () => {
@@ -623,104 +582,27 @@ export function StudioHome({ isConnected, baseUrl }: StudioHomeProps) {
 
         {/* Data Content */}
         <div className="flex-1 flex flex-col overflow-hidden">
-          {/* Query Bar */}
-          {selectedEntity && (
-            <Card className="rounded-none border-x-0 border-t-0 p-4">
-              <div className="flex items-center justify-between">
-                {/* Left side - Query controls */}
-                <div className="flex items-center space-x-4">
-                  {/* Field selector */}
-                  <div className="flex items-center space-x-2">
-                    <span className="text-sm text-muted-foreground">Field:</span>
-                    <select
-                      value={queryField}
-                      onChange={(e) => setQueryField(e.target.value)}
-                      className="bg-background border border-input rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                    >
-                      <option value="">Select Field</option>
-                      {getAvailableFields().map((field) => (
-                        <option key={field} value={field}>
-                          {field}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  {/* Value input */}
-                  <div className="flex items-center space-x-2">
-                    <span className="text-sm text-muted-foreground">=</span>
-                    <input
-                      type="text"
-                      placeholder="Enter value..."
-                      value={queryValue}
-                      onChange={(e) => setQueryValue(e.target.value)}
-                      onKeyPress={(e) => e.key === "Enter" && executeQuery()}
-                      className="bg-background border border-input rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring w-48"
-                    />
-                  </div>
-
-                  {/* Query buttons */}
-                  <Button
-                    onClick={executeQuery}
-                    disabled={!queryField || !queryValue.trim()}
-                    size="sm"
-                  >
-                    Query
-                  </Button>
-
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={clearQuery}
-                  >
-                    Clear
-                  </Button>
-
-                  {/* Query indicator */}
-                  {Object.keys(currentQuery).length > 0 && (
-                    <Badge variant="secondary" className="text-xs">
-                      {queryField} = {queryValue}
-                    </Badge>
-                  )}
-                </div>
-
-                {/* Right side - Add Record button */}
-                <Button
-                  onClick={handleAddRecord}
-                  size="sm"
-                >
-                  <svg
-                    className="w-4 h-4 mr-2"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M12 4v16m8-8H4"
-                    />
-                  </svg>
-                  Add Record
-                </Button>
-              </div>
-            </Card>
-          )}
-
           {/* Data Display Area - Simplified to only use UniRender Table */}
           <div className="flex-1 overflow-auto">
             {selectedEntity ? (
-              <UniRender
-                ref={uniRenderRef}
-                entity={selectedEntity.name}
-                source={selectedSource}
-                layout="table"
-                query={currentQuery}
-                config={getFieldConfig(selectedEntity.name)}
-                loading={currentSourceData?.loading}
-                error={currentSourceData?.error}
-              />
+              <div className="p-6">
+                <UniRender
+                  ref={uniRenderRef}
+                  entity={selectedEntity.name}
+                  source={selectedSource}
+                  layout="table"
+                  config={getFieldConfig(selectedEntity.name)}
+                  generalConfig={{
+                    showActions: true,
+                    actions: {
+                      delete: true,
+                      edit: true,
+                    }
+                  }}
+                  loading={currentSourceData?.loading}
+                  error={currentSourceData?.error}
+                />
+              </div>
             ) : (
               <div className="flex items-center justify-center h-64">
                 <Card className="p-6">

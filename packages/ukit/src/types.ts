@@ -100,6 +100,16 @@ export interface GeneralConfig {
     showAddButton?: boolean;
     /** Whether to show top controls (title, add button) (overrides global showTopControls) */
     showTopControls?: boolean;
+    /** Whether to show filter controls */
+    showFilter?: boolean;
+    /** Filter configuration */
+    filterConfig?: {
+      showFieldFilter?: boolean;
+      showSearch?: boolean;
+      showToggle?: boolean;
+      placeholder?: string;
+      defaultExpanded?: boolean;
+    };
   };
   
   // Empty state configuration

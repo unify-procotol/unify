@@ -27,6 +27,16 @@ interface ExtendedLayoutProps extends LayoutProps {
   // General table controls
   showTopControls?: boolean;
   
+  // Filter props
+  showFilter?: boolean;
+  filterConfig?: {
+    showFieldFilter?: boolean;
+    showSearch?: boolean;
+    showToggle?: boolean;
+    placeholder?: string;
+    defaultExpanded?: boolean;
+  };
+  
   // Entity instance for custom actions
   entityInstance?: any;
   
@@ -54,12 +64,18 @@ export const TableLayout: React.FC<ExtendedLayoutProps> = ({
   onAddRecord,
   // General controls
   showTopControls = true,
+  // Filter props
+  showFilter = generalConfig?.table?.showFilter ?? true,
+  filterConfig = generalConfig?.table?.filterConfig,
   // Entity instance
   entityInstance,
   // Refresh callback
   onRefresh
 }) => {
   const sortedFields = getSortedFields(entity, config);
+  
+  // Filter state
+  const [filteredData, setFilteredData] = useState(data);
   
   // Use the common layout actions hook
   const {
@@ -100,20 +116,25 @@ export const TableLayout: React.FC<ExtendedLayoutProps> = ({
     }
   };
 
+  // Update filtered data when original data changes
+  React.useEffect(() => {
+    setFilteredData(data);
+  }, [data]);
+
   // Calculate pagination data
   const paginationData = useMemo(() => {
     if (!enablePagination) {
       return {
-        paginatedData: data,
+        paginatedData: filteredData,
         totalPages: 1,
         startIndex: 0,
-        endIndex: data.length,
-        totalRecords: data.length,
+        endIndex: filteredData.length,
+        totalRecords: filteredData.length,
         adjustedPage: activePage
       };
     }
 
-    const totalPages = Math.ceil(data.length / pageSize);
+    const totalPages = Math.ceil(filteredData.length / pageSize);
     
     // Ensure current page doesn't exceed total pages after data refresh
     let adjustedPage = activePage;
@@ -126,18 +147,18 @@ export const TableLayout: React.FC<ExtendedLayoutProps> = ({
     }
 
     const startIndex = (adjustedPage - 1) * pageSize;
-    const endIndex = Math.min(startIndex + pageSize, data.length);
-    const paginatedData = data.slice(startIndex, endIndex);
+    const endIndex = Math.min(startIndex + pageSize, filteredData.length);
+    const paginatedData = filteredData.slice(startIndex, endIndex);
 
     return {
       paginatedData,
       totalPages,
       startIndex,
       endIndex,
-      totalRecords: data.length,
+      totalRecords: filteredData.length,
       adjustedPage
     };
-  }, [data, enablePagination, activePage, pageSize]);
+  }, [filteredData, enablePagination, activePage, pageSize]);
 
   /**
    * Render pagination controls
@@ -229,11 +250,15 @@ export const TableLayout: React.FC<ExtendedLayoutProps> = ({
         <LayoutHeader
           entity={entity}
           data={data}
+          config={config}
           showTopControls={showTopControls}
           showAddButton={showAddButton}
           onAddRecord={onAddRecord}
           handleAddRecord={handleAddRecord}
           viewName="table"
+          showFilter={showFilter}
+          filterConfig={filterConfig}
+          onFilteredDataChange={setFilteredData}
         />
 
         <Card>
@@ -241,7 +266,6 @@ export const TableLayout: React.FC<ExtendedLayoutProps> = ({
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-16 text-center">#</TableHead>
                   {sortedFields.map(field => (
                     <TableHead 
                       key={field.name}
@@ -275,9 +299,6 @@ export const TableLayout: React.FC<ExtendedLayoutProps> = ({
               <TableBody>
                 {paginationData.paginatedData.map((record, index) => (
                   <TableRow key={generateRecordKey(record, index)} className="group">
-                    <TableCell className="font-mono text-sm text-muted-foreground text-center">
-                      {paginationData.startIndex + index + 1}
-                    </TableCell>
                     {sortedFields.map(field => (
                       <TableCell 
                         key={field.name}

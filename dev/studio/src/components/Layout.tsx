@@ -4,7 +4,7 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Card } from "./ui/card";
 import { cn } from "../lib/utils";
-import { Server, Loader2 } from "lucide-react";
+import { Server, Loader2, Search } from "lucide-react";
 
 interface LayoutProps {
   children: ReactNode | ((props: { isConnected: boolean; baseUrl: string }) => ReactNode);
@@ -18,7 +18,23 @@ export function Layout({ children }: LayoutProps) {
 
   // Initialize connection on mount
   useEffect(() => {
-    connectToServer(baseUrl);
+    // Check for endpoint in URL parameters first
+    const urlParams = new URLSearchParams(window.location.search);
+    const endpointParam = urlParams.get('endpoint');
+    
+    if (endpointParam) {
+      setInputUrl(endpointParam);
+      connectToServer(endpointParam);
+    } else {
+      // Check localStorage for saved endpoint
+      const savedEndpoint = localStorage.getItem('urpc-studio-endpoint');
+      if (savedEndpoint) {
+        setInputUrl(savedEndpoint);
+        connectToServer(savedEndpoint);
+      } else {
+        connectToServer(baseUrl);
+      }
+    }
   }, []);
 
   const connectToServer = async (url: string) => {
@@ -37,6 +53,9 @@ export function Layout({ children }: LayoutProps) {
       
       setIsConnected(true);
       setBaseUrl(url);
+      
+      // Save successful endpoint to localStorage
+      localStorage.setItem('urpc-studio-endpoint', url);
     } catch (error) {
       console.error("Connection failed:", error);
       setIsConnected(false);
@@ -54,6 +73,72 @@ export function Layout({ children }: LayoutProps) {
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       handleConnect();
+    }
+  };
+
+  // Detect endpoint from URL or environment
+  const detectEndpoint = () => {
+    try {
+      // Priority 1: Check URL query parameters
+      const urlParams = new URLSearchParams(window.location.search);
+      const endpointParam = urlParams.get('endpoint');
+      if (endpointParam) {
+        setInputUrl(endpointParam);
+        return;
+      }
+
+      // Priority 2: Check URL hash for endpoint
+      const hash = window.location.hash;
+      const hashMatch = hash.match(/[#&]endpoint=([^&]+)/);
+      if (hashMatch) {
+        const hashEndpoint = decodeURIComponent(hashMatch[1]);
+        setInputUrl(hashEndpoint);
+        return;
+      }
+
+      // Priority 3: Check localStorage for saved endpoint
+      const savedEndpoint = localStorage.getItem('urpc-studio-endpoint');
+      if (savedEndpoint && savedEndpoint !== inputUrl) {
+        setInputUrl(savedEndpoint);
+        return;
+      }
+
+      // Priority 4: Smart detection based on current environment
+      const currentDomain = window.location.hostname;
+      const currentProtocol = window.location.protocol;
+      
+      // Common development ports to try
+      const commonPorts = ['3000', '8080', '3001', '5000', '4000', '8000', '9000'];
+      
+      // If on localhost or 127.0.0.1, try common dev ports
+      if (currentDomain === 'localhost' || currentDomain === '127.0.0.1') {
+        for (const port of commonPorts) {
+          const testUrl = `${currentProtocol}//${currentDomain}:${port}`;
+          if (testUrl !== inputUrl) {
+            setInputUrl(testUrl);
+            return;
+          }
+        }
+      } else {
+        // For production domains, try the same domain with common ports
+        const testUrl = `${currentProtocol}//${currentDomain}:3000`;
+        if (testUrl !== inputUrl) {
+          setInputUrl(testUrl);
+          return;
+        }
+      }
+
+      // Priority 5: Check common environment variables (if accessible)
+      // This would work in development environments
+      const envEndpoint = process.env.REACT_APP_URPC_ENDPOINT || process.env.NEXT_PUBLIC_URPC_ENDPOINT;
+      if (envEndpoint && envEndpoint !== inputUrl) {
+        setInputUrl(envEndpoint);
+        return;
+      }
+
+      console.log('No endpoint detected, current URL remains:', inputUrl);
+    } catch (error) {
+      console.error('Error detecting endpoint:', error);
     }
   };
 
@@ -100,6 +185,16 @@ export function Layout({ children }: LayoutProps) {
                 placeholder="http://localhost:3000"
                 className="w-52 h-8 font-mono text-sm"
               />
+              <Button
+                onClick={detectEndpoint}
+                disabled={isConnecting}
+                variant="outline"
+                size="sm"
+                className="shadow-sm px-2"
+                title="Detect endpoint from URL or environment"
+              >
+                <Search className="w-3 h-3" />
+              </Button>
               <Button
                 onClick={handleConnect}
                 disabled={isConnecting}
