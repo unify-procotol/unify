@@ -9,9 +9,9 @@ export function convertSchemaToMarkdown(
     markdown += `### ${entityName}:\n`;
 
     for (const [propertyName, propertySchema] of Object.entries(
-      entitySchema.properties
+      entitySchema.properties ?? {}
     )) {
-      const isRequired = entitySchema.required.includes(propertyName);
+      const isRequired = entitySchema.required?.includes(propertyName) ?? false;
       const type = getTypeString(propertySchema);
       const description = propertySchema.description;
 

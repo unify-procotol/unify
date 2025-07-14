@@ -1,141 +1,136 @@
 import { Agent } from "@mastra/core/agent";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { URPC, repo } from "@unilab/urpc";
-import { Plugin } from "@unilab/urpc-core";
-import { UserEntity } from "../entities/user";
-import { PostEntity } from "../entities/post";
-import { MemoryAdapter } from "@unilab/urpc-adapters";
 import { convertSchemaToMarkdown } from "./entity-schema-to-markdown";
+import { convertEntitySourcesToMarkdown } from "./entity-source-to-markdown";
 
-// Define plugin configuration
-const DataPlugin: Plugin = {
-  entities: [UserEntity, PostEntity],
-};
+export interface URPCAgentOptions {
+  name?: string;
+  description?: string;
+  model?: string;
+  openrouterApiKey?: string;
+  debug?: boolean;
+}
 
 export class URPCAgent {
   private instructions: string;
   private agent: Agent;
+  private debug: boolean;
 
-  constructor() {
-    // Initialize URPC client
-    URPC.init({
-      plugins: [DataPlugin],
-      entityConfigs: {
-        user: {
-          defaultSource: "memory",
-        },
-        post: {
-          defaultSource: "memory",
-        },
-      },
-      globalAdapters: [MemoryAdapter],
-    });
-
-    // Initialize data
-    repo({
-      entity: "user",
-      source: "memory",
-    }).create({
-      data: {
-        id: "1",
-        name: "John Doe",
-        email: "john@example.com",
-        avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=JohnDoe",
-      },
-    });
-
-    repo({
-      entity: "post",
-      source: "memory",
-    }).create({
-      data: {
-        id: "1",
-        title: "Welcome to URPC Agent",
-        content:
-          "This is the first sample article, demonstrating the basic functionality of URPC Agent.",
-        userId: "1",
-      },
-    });
-
+  constructor({
+    name = "URPC Smart Data Assistant",
+    description = "An intelligent data operation assistant based on URPC, capable of understanding natural language and executing corresponding database operations",
+    model = "openai/gpt-4o-mini",
+    openrouterApiKey,
+    debug = false,
+  }: URPCAgentOptions = {}) {
+    this.debug = debug;
     this.instructions = this.generateInstructions();
 
     this.agent = new Agent({
-      name: "URPC Smart Data Assistant",
-      description:
-        "An intelligent data operation assistant based on URPC, capable of understanding natural language and executing corresponding database operations",
+      name,
+      description,
       instructions: this.instructions,
       model: createOpenRouter({
-        apiKey: process.env.OPENROUTER_API_KEY!,
-      }).chat("openai/gpt-4o"),
-      // .chat("anthropic/claude-3.7-sonnet"),
+        apiKey: openrouterApiKey || process.env.OPENROUTER_API_KEY,
+      }).chat(model),
     });
   }
 
   private generateInstructions(): string {
     const schemas = URPC.getEntitySchemas();
-    console.log("[Schemas]:\n", JSON.stringify(schemas, null, 2));
+    const entitySources = URPC.getEntitySources();
     const entityMarkdown = convertSchemaToMarkdown(schemas);
-    console.log("[Entity Markdown]:\n", entityMarkdown);
+    const entitySourcesMarkdown = convertEntitySourcesToMarkdown(entitySources);
+
+    if (this.debug) {
+      console.log("[Schemas]:\n", JSON.stringify(schemas, null, 2));
+      console.log("[Entity Markdown]:\n", entityMarkdown);
+      console.log("[Entity Sources Markdown]:\n", entitySourcesMarkdown);
+    }
+
     return `
 You are an intelligent data operation assistant specialized in handling CRUD operations for user and article data. You have direct mastery of URPC SDK usage.
+
+## Entity Structure
+
+${entityMarkdown}
+
+## Entity Supported Sources
+${entitySourcesMarkdown}
+
+## Entity Name Mapping
+When users mention "users" or "user", use entity: "user"
+When users mention "posts", "articles", or "post", use entity: "post"
 
 ## Core Capabilities
 You can understand users' natural language requests and convert them into corresponding URPC operations. You directly master the following operation patterns:
 
 ### 1. Query Operations (READ)
-- Find all users: repo({entity: "user", source: "memory"}).findMany()
-- Find specific user: repo({entity: "user", source: "memory"}).findOne({where: {id: "user-id"}})
-- Conditional query: repo({entity: "user", source: "memory"}).findMany({where: {name: "Zhang San"}})
-- Paginated query: repo({entity: "user", source: "memory"}).findMany({limit: 10, offset: 0})
-- Sorted query: repo({entity: "user", source: "memory"}).findMany({order_by: {id: "desc"}})
+- Find all users: repo({entity: "user", source: "[select from supported sources]"}).findMany()
+- Find specific user: repo({entity: "user", source: "[select from supported sources]"}).findOne({where: {id: "user-id"}})
+- Conditional query: repo({entity: "user", source: "[select from supported sources]"}).findMany({where: {name: "jack"}})
+- Paginated query: repo({entity: "user", source: "[select from supported sources]"}).findMany({limit: 10, offset: 0})
+- Sorted query: repo({entity: "user", source: "[select from supported sources]"}).findMany({order_by: {id: "desc"}})
 
 ### 2. Create Operations (CREATE)
-- Create user: repo({entity: "user", source: "memory"}).create({data: {id: "uuid", name: "Zhang San", email: "zhangsan@example.com", avatar: "avatar-url"}})
-- Create article: repo({entity: "post", source: "memory"}).create({data: {id: "uuid", title: "Title", content: "Content", userId: "user-id"}})
+- Create user: repo({entity: "user", source: "[select from supported sources]"}).create({data: {id: "uuid", name: "jack", email: "jack@example.com", avatar: "avatar-url"}})
+- Create article: repo({entity: "post", source: "[select from supported sources]"}).create({data: {id: "uuid", title: "Title", content: "Content", userId: "user-id"}})
 
 ### 3. Update Operations (UPDATE)
-- Update user: repo({entity: "user", source: "memory"}).update({where: {id: "user-id"}, data: {name: "New Name"}})
-- Update article: repo({entity: "post", source: "memory"}).update({where: {id: "post-id"}, data: {title: "New Title"}})
+- Update user: repo({entity: "user", source: "[select from supported sources]"}).update({where: {id: "user-id"}, data: {name: "New Name"}})
+- Update article: repo({entity: "post", source: "[select from supported sources]"}).update({where: {id: "post-id"}, data: {title: "New Title"}})
 
 ### 4. Delete Operations (DELETE)
-- Delete user: repo({entity: "user", source: "memory"}).delete({where: {id: "user-id"}})
-- Delete article: repo({entity: "post", source: "memory"}).delete({where: {id: "post-id"}})
+- Delete user: repo({entity: "user", source: "[select from supported sources]"}).delete({where: {id: "user-id"}})
+- Delete article: repo({entity: "post", source: "[select from supported sources]"}).delete({where: {id: "post-id"}})
 
-## Entity Structure
-${entityMarkdown}
+## IMPORTANT: Response Format
+You MUST respond with natural language that includes the actual URPC code to be executed. 
+DO NOT return JSON format. Instead, use this pattern:
 
-## Response Format
-Always return JSON formatted structured response:
-{
-  "success": true/false,
-  "operation": "operation type", // findMany, findOne, create, update, delete
-  "entity": "entity name",
-  "data": "returned data or null",
-  "message": "operation description",
-  "urpc_code": "actual executed URPC code"
-}
+For the request "Find all posts", you should respond:
+"I understand you want to find all posts. I will execute the following URPC operation: repo({entity: "post", source: "[correct source for PostEntity]"}).findMany()"
+
+For the request "Create a user named jack", you should respond:
+"I understand you want to create a new user named jack. I will execute the following URPC operation: repo({entity: "user", source: "[correct source for UserEntity]"}).create({data: {id: "generated-id", name: "jack", email: "jack@example.com", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=jack"}})"
+
+For the request "Find user with ID 1", you should respond:
+"I understand you want to find a user with ID 1. I will execute the following URPC operation: repo({entity: "user", source: "[correct source for UserEntity]"}).findOne({where: {id: "1"}})"
+
+## Key Rules:
+1. **CRITICAL**: Always select the correct source parameter based on the "Entity Supported Sources" section above. Each entity has specific supported sources - you MUST use one of the supported sources for each entity.
+2. **CRITICAL**: Always use the correct entity parameter: "user" for user operations, "post" for post/article operations
+3. Map user natural language to correct entity names: user/users → "user", post/posts/article/articles → "post"
+4. Look up the correct source for each entity from "Entity Supported Sources" section
+5. Always include the actual URPC code in your response using the exact format: repo({entity: "[correct-entity]", source: "[correct-source]"}).methodName(...)
+6. Use "generated-id" as placeholder for new record IDs in create operations
+7. For create operations, always include all required fields based on the entity schema
+8. Respond in natural language that explains what you're doing, followed by the URPC code
+9. Never return JSON format - always use descriptive text with embedded URPC code
 
 ## Processing Flow
 1. Understand user's natural language request
-2. Analyze the operation type and target entity to execute
-3. Build corresponding URPC operation
-4. Execute operation and return result
-5. Provide clear operation feedback
+2. Map user's intent to correct entity name (user/post)
+3. Look up the correct source for that entity from "Entity Supported Sources"
+4. Analyze the operation type to execute
+5. Build corresponding URPC operation with correct entity and source
+6. Explain what you're doing and include the URPC code in your response
 
-## Example Dialogue
+## Example Responses:
 User: "Find all users"
-Your understanding: Need to execute findMany operation to query all users
-URPC operation: repo({entity: "user", source: "memory"}).findMany()
+Your response: "I understand you want to find all users. I will execute the following URPC operation: repo({entity: "user", source: "[correct source for UserEntity]"}).findMany()"
 
-User: "Create a user named Xiao Ming"
-Your understanding: Need to execute create operation to create new user
-URPC operation: repo({entity: "user", source: "memory"}).create({data: {id: "generated-id", name: "Xiao Ming", email: "", avatar: ""}})
+User: "Create a user named jack with email jack@test.com"
+Your response: "I understand you want to create a new user named jack with email jack@test.com. I will execute the following URPC operation: repo({entity: "user", source: "[correct source for UserEntity]"}).create({data: {id: "generated-id", name: "jack", email: "jack@test.com", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=jack"}})"
 
-User: "Add an article for user Xiao Ming, title: 'test', content: 'Xiao Ming test'"
-Your understanding: Need to execute create operation to create new article
-URPC operation: repo({entity: "post", source: "memory"}).create({data: {id: "generated-id", title: "test", content: "Xiao Ming test", userId: "user-id"}})
+User: "Find all posts"
+Your response: "I understand you want to find all posts. I will execute the following URPC operation: repo({entity: "post", source: "[correct source for PostEntity]"}).findMany()"
 
-Remember: You don't need to use traditional tools, but directly respond to user requests through understanding and executing URPC SDK operations.
+Remember: 
+- Always include the actual URPC code in your natural language response, never return JSON format
+- ALWAYS use the correct source parameter based on the Entity Supported Sources section
+- Replace [correct source for EntityName] with the actual source value from the supported sources list
 `;
   }
 
@@ -151,8 +146,6 @@ Remember: You don't need to use traditional tools, but directly respond to user 
           content: userMessage,
         },
       ]);
-
-      console.log("[Agent Response]:", response.text);
 
       return this.parseAndExecuteResponse(response.text);
     } catch (error: any) {
@@ -176,23 +169,24 @@ Remember: You don't need to use traditional tools, but directly respond to user 
       );
       if (urpcCodeMatch) {
         let urpcCode = urpcCodeMatch[0];
-        console.log("[Original rpcCode]:", urpcCode);
-
-        // Clean escape characters
-        urpcCode = urpcCode.replace(/\\"/g, '"');
-        console.log("[Cleaned rpcCode]:", urpcCode);
+        if (this.debug) {
+          console.log("[URPC Code]:", urpcCode);
+        }
 
         // Pre-generate random ID for create operations and replace placeholders in urpcCode
         let actualUrpcCode = urpcCode;
         if (urpcCode.includes("create") && urpcCode.includes("generated-id")) {
           const randomId = this.generateRandomId();
           actualUrpcCode = urpcCode.replace(/generated-id/g, randomId);
-          console.log("[Generated rpcCode]:", actualUrpcCode);
+          if (this.debug) {
+            console.log("[Generated rpcCode]:", actualUrpcCode);
+          }
         }
 
-        // repo({entity: \"user\", source: \"memory\"}).findMany()"
         const result = await this.executeURPCCode(actualUrpcCode);
-        console.log("[Result]:", result);
+        if (this.debug) {
+          console.log("[Result]:", result);
+        }
 
         const operation = this.extractOperation(urpcCode);
         const entity = this.extractEntity(urpcCode);
@@ -242,24 +236,29 @@ Remember: You don't need to use traditional tools, but directly respond to user 
     try {
       if (urpcCode.includes("findMany")) {
         const entity = this.extractEntity(urpcCode);
+        const source = this.extractSource(urpcCode);
         const options = this.extractOptions(urpcCode);
-        return await repo({ entity, source: "memory" }).findMany(options);
+        return await repo({ entity, source }).findMany(options);
       } else if (urpcCode.includes("findOne")) {
         const entity = this.extractEntity(urpcCode);
+        const source = this.extractSource(urpcCode);
         const options = this.extractOptions(urpcCode);
-        return await repo({ entity, source: "memory" }).findOne(options);
+        return await repo({ entity, source }).findOne(options);
       } else if (urpcCode.includes("create")) {
         const entity = this.extractEntity(urpcCode);
+        const source = this.extractSource(urpcCode);
         const options = this.extractOptions(urpcCode);
-        return await repo({ entity, source: "memory" }).create(options);
+        return await repo({ entity, source }).create(options);
       } else if (urpcCode.includes("update")) {
         const entity = this.extractEntity(urpcCode);
+        const source = this.extractSource(urpcCode);
         const options = this.extractOptions(urpcCode);
-        return await repo({ entity, source: "memory" }).update(options);
+        return await repo({ entity, source }).update(options);
       } else if (urpcCode.includes("delete")) {
         const entity = this.extractEntity(urpcCode);
+        const source = this.extractSource(urpcCode);
         const options = this.extractOptions(urpcCode);
-        return await repo({ entity, source: "memory" }).delete(options);
+        return await repo({ entity, source }).delete(options);
       }
     } catch (error: any) {
       throw new Error(`URPC operation execution failed: ${error.message}`);
@@ -280,6 +279,11 @@ Remember: You don't need to use traditional tools, but directly respond to user 
     return match ? match[1] : "unknown";
   }
 
+  private extractSource(urpcCode: string): string {
+    const match = urpcCode.match(/source:\s*"([^"]+)"/);
+    return match ? match[1] : "memory";
+  }
+
   private extractOptions(urpcCode: string): any {
     // Improved option extraction, supporting all URPC operations
     try {
@@ -287,7 +291,9 @@ Remember: You don't need to use traditional tools, but directly respond to user 
       const match = urpcCode.match(/\)\.(\w+)\((.+)\)$/);
       if (match) {
         const methodName = match[1];
-        console.log("[MethodName]:", methodName);
+        if (this.debug) {
+          console.log("[MethodName]:", methodName);
+        }
         let paramsStr = match[2].trim();
 
         // If no parameters, return empty object
@@ -300,10 +306,12 @@ Remember: You don't need to use traditional tools, but directly respond to user 
           return JSON.parse(paramsStr);
         } catch (parseError) {
           // If JSON parsing fails, try improved object parsing
-          console.log(
-            "JSON parsing failed, trying improved parsing:",
-            paramsStr
-          );
+          if (this.debug) {
+            console.log(
+              "JSON parsing failed, trying improved parsing:",
+              paramsStr
+            );
+          }
           return this.parseAdvancedObjectString(paramsStr);
         }
       }
@@ -319,6 +327,7 @@ Remember: You don't need to use traditional tools, but directly respond to user 
     try {
       // First try to parse using eval in a safe environment (limited to object literals only)
       // But for security, we need to first validate that the string contains only object literal syntax
+
       if (this.isValidObjectLiteral(str)) {
         // Use Function constructor to create a function that returns an object
         const func = new Function(`"use strict"; return (${str});`);

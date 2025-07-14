@@ -9,10 +9,10 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@unilab/uniweb3": "^0.0.6",
-    "@unilab/urpc": "^0.0.4",
-    "@unilab/urpc-core": "^0.0.2",
-    "@unilab/urpc-next": "^0.0.6",
+    "@unilab/uniweb3": "workspace:*",
+    "@unilab/urpc": "workspace:*",
+    "@unilab/urpc-core": "workspace:*",
+    "@unilab/urpc-next": "workspace:*",
     "next": "^15.0.0",
     "react": "^19",
     "react-dom": "^19"

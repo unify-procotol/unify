@@ -4,7 +4,6 @@ import type {
   CreationArgs,
   UpdateArgs,
   DeletionArgs,
-  AdapterRegistration,
 } from "@unilab/urpc-core";
 import { simplifyEntityName, getRepo } from "@unilab/urpc-core";
 import type {
@@ -67,19 +66,6 @@ export function createEntityInstances<T extends Record<string, any>>(
     });
   }
   return dataArray;
-}
-
-export function analyzeEntitySources(
-  adapters: AdapterRegistration[]
-): Record<string, string[]> {
-  const entitySources: Record<string, string[]> = {};
-  adapters.forEach(({ source, entity }) => {
-    if (!entitySources[entity]) {
-      entitySources[entity] = [];
-    }
-    entitySources[entity].push(source);
-  });
-  return entitySources;
 }
 
 export async function makeHttpRequest<T>(
