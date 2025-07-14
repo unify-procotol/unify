@@ -8,7 +8,6 @@ import type {
 } from "@unilab/urpc-core";
 import {
   generateSchemas,
-  getRepoRegistry,
   registerAdapter,
   useGlobalMiddleware,
   getGlobalMiddlewareManager,
@@ -23,12 +22,7 @@ import type {
   JoinRepoOptions,
 } from "./types";
 import { BuiltinPlugin } from "@unilab/builtin-plugin";
-import {
-  isHttpClientConfig,
-  isLocalConfig,
-  isHybridConfig,
-  analyzeEntitySources,
-} from "./utils";
+import { isHttpClientConfig, isLocalConfig, isHybridConfig } from "./utils";
 import {
   createHttpRepositoryProxy,
   createLocalRepositoryProxy,
@@ -45,7 +39,6 @@ export class URPC {
   private entitySchemas: Record<string, SchemaObject> = {};
   private entitySources: Record<string, string[]> = {};
   private entityConfigs: EntityConfigs = {};
-  private entityNames: string[] = [];
   private httpConfig: HttpClientConfig | null = null;
   private mode: Mode = Mode.Local;
 
@@ -69,10 +62,21 @@ export class URPC {
     this.mode = Mode.Hybrid;
 
     //  Initializing the Local Configuration
-    this.initFromPlugins([...config.plugins, BuiltinPlugin(URPC)]);
-    this.registerGlobalAdapters(config.globalAdapters);
+    const plugins = [...config.plugins, BuiltinPlugin(URPC)];
+    this.registerPluginAdapters(plugins);
+    this.registerGlobalAdapters({
+      plugins: plugins,
+      globalAdapters: config.globalAdapters,
+    });
     this.setEntityConfigs(config.entityConfigs);
-    this.applyMiddlewareToRepos(config.middlewares);
+    this.applyMiddlewareToRepos({
+      plugins: plugins,
+      middlewares: config.middlewares || [],
+    });
+    this.analyzeEntities({
+      plugins: plugins,
+      globalAdapters: config.globalAdapters,
+    });
 
     // Initializing the HTTP Configuration
     this.httpConfig = {
@@ -98,45 +102,127 @@ export class URPC {
 
   private setupLocalMode(config: LocalConfig): void {
     this.mode = Mode.Local;
-    this.initFromPlugins([...config.plugins, BuiltinPlugin(URPC)]);
-    this.registerGlobalAdapters(config.globalAdapters);
+    const plugins = [...config.plugins, BuiltinPlugin(URPC)];
+    this.registerPluginAdapters(plugins);
+    this.registerGlobalAdapters({
+      plugins: plugins,
+      globalAdapters: config.globalAdapters,
+    });
     this.setEntityConfigs(config.entityConfigs);
-    this.applyMiddlewareToRepos(config.middlewares);
+    this.applyMiddlewareToRepos({
+      plugins: plugins,
+      middlewares: config.middlewares || [],
+    });
+    this.analyzeEntities({
+      plugins: plugins,
+      globalAdapters: config.globalAdapters,
+    });
   }
 
-  private initFromPlugins(plugins: Plugin[]): void {
+  private registerPluginAdapters(plugins: Plugin[]) {
+    const adapters = plugins.flatMap((p) => p.adapters || []);
+    if (adapters.length) {
+      adapters.forEach(({ entity, source, adapter }) =>
+        registerAdapter(entity, source, adapter)
+      );
+      console.log(
+        `✅ Registered Plugin Adapters: ${adapters
+          .map((a) => {
+            const adapterName =
+              (a.adapter.constructor as any).adapterName ||
+              a.adapter.constructor.name;
+            return `${adapterName}`;
+          })
+          .join(", ")}`
+      );
+    }
+  }
+
+  private registerGlobalAdapters({
+    plugins,
+    globalAdapters = [],
+  }: {
+    plugins: Plugin[];
+    globalAdapters?: (new () => DataSourceAdapter<any>)[];
+  }): void {
+    if (globalAdapters.length > 0) {
+      const entities = plugins.flatMap((p) => p.entities || []);
+      globalAdapters.forEach((Adapter) => {
+        const source = Adapter.name;
+        entities.forEach((entity) => {
+          const entityName = entity.name;
+          registerAdapter(entityName, source, new Adapter());
+        });
+      });
+      console.log(
+        `✅ Registered global adapters: ${globalAdapters
+          .map((a) => `${a.name}`)
+          .join(", ")}`
+      );
+    }
+  }
+
+  private setEntityConfigs(entityConfigs: any): void {
+    if (entityConfigs) {
+      this.entityConfigs = entityConfigs;
+      getGlobalMiddlewareManager().setEntityConfigs(entityConfigs);
+    }
+  }
+
+  private analyzeEntities({
+    plugins,
+    globalAdapters,
+  }: {
+    plugins: Plugin[];
+    globalAdapters?: (new () => DataSourceAdapter<any>)[];
+  }) {
     const entities = plugins.flatMap((p) => p.entities || []);
     const adapters = plugins.flatMap((p) => p.adapters || []);
 
     if (entities.length > 0) {
       this.entitySchemas = generateSchemas(entities);
-      this.entityNames = entities.map((e) => simplifyEntityName(e.name));
     }
-    this.entitySources = analyzeEntitySources(adapters);
 
-    adapters.forEach(({ entity, source, adapter }) =>
-      registerAdapter(entity, source, adapter)
-    );
+    const entitySources: Record<string, string[]> = {};
 
-    console.log(
-      `✅ Registered adapters: ${adapters
-        .map((a) => {
-          const adapterName =
-            (a.adapter.constructor as any).adapterName ||
-            a.adapter.constructor.name;
-          return `${adapterName}`;
-        })
-        .join(", ")}`
-    );
+    adapters.forEach(({ source, entity }) => {
+      if (!entitySources[entity]) {
+        entitySources[entity] = [];
+      }
+      entitySources[entity].push(source);
+    });
+
+    if (globalAdapters && entities) {
+      globalAdapters.forEach((adapter) => {
+        entities.forEach((entity) => {
+          const entityName = entity.name;
+          const source = adapter.name;
+          if (!entitySources[entityName]) {
+            entitySources[entityName] = [];
+          }
+          entitySources[entityName].push(source);
+        });
+      });
+    }
+
+    this.entitySources = entitySources;
   }
 
-  private applyMiddlewareToRepos(middlewares: Middleware<any>[] = []): void {
+  private applyMiddlewareToRepos({
+    plugins,
+    middlewares,
+  }: {
+    plugins: Plugin[];
+    middlewares: Middleware<any>[];
+  }): void {
     if (middlewares.length > 0) {
       middlewares.forEach((m) => {
         const requiredEntities = m.required?.entities;
         if (requiredEntities) {
+          const entities = plugins.flatMap((p) => p.entities || []);
+          const entityNames = entities.map((e) => simplifyEntityName(e.name));
           const missingEntities = requiredEntities.filter(
-            (entity) => !this.entityNames.includes(simplifyEntityName(entity))
+            (entity) => !entityNames.includes(simplifyEntityName(entity))
           );
           if (missingEntities.length > 0) {
             throw new Error(
@@ -150,31 +236,6 @@ export class URPC {
       });
       console.log(
         `✅ Registered middlewares: ${middlewares.map((m) => m.name).join(", ")}`
-      );
-    }
-  }
-
-  private setEntityConfigs(entityConfigs: any): void {
-    if (entityConfigs) {
-      this.entityConfigs = entityConfigs;
-      getGlobalMiddlewareManager().setEntityConfigs(entityConfigs);
-    }
-  }
-
-  private registerGlobalAdapters(
-    globalAdapters: (new () => DataSourceAdapter<any>)[] = []
-  ): void {
-    if (globalAdapters.length > 0) {
-      globalAdapters.forEach((Adapter) => {
-        const source = Adapter.name;
-        this.entityNames.forEach((entityName) => {
-          registerAdapter(entityName, source, new Adapter());
-        });
-      });
-      console.log(
-        `✅ Registered global adapters: ${globalAdapters
-          .map((a) => `${a.name}`)
-          .join(", ")}`
       );
     }
   }
@@ -244,10 +305,6 @@ export class URPC {
 
   static getEntitySchemas(): Record<string, SchemaObject> {
     return URPC.getGlobalInstance().entitySchemas;
-  }
-
-  static getAdapters(): string[] {
-    return Object.keys(getRepoRegistry());
   }
 
   static getEntitySources(): Record<string, string[]> {

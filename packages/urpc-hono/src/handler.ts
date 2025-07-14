@@ -4,7 +4,6 @@ import { handleError, parseQueryParams, validateSource } from "./utils";
 import {
   registerAdapter,
   getRepo,
-  getRepoRegistry,
   EntityConfigs,
   getGlobalMiddlewareManager,
   simplifyEntityName,
@@ -23,7 +22,7 @@ import { BuiltinPlugin } from "@unilab/builtin-plugin";
 
 export interface URPCConfig {
   app?: Hono;
-  plugins?: Plugin[];
+  plugins: Plugin[];
   middlewares?: Middleware<any>[];
   entityConfigs?: EntityConfigs;
   globalAdapters?: (new () => DataSourceAdapter<any>)[];
@@ -34,7 +33,6 @@ export class URPC {
   private static entitySchemas: Record<string, SchemaObject> = {};
   private static entitySources: Record<string, string[]> = {};
   private static entityConfigs: EntityConfigs = {};
-  private static entityNames: string[] = [];
 
   static init(config: URPCConfig) {
     if (config.app) {
@@ -44,26 +42,12 @@ export class URPC {
       this.app.onError((err, c) => handleError(err, c));
     }
 
-    // Configure CORS for all routes
-    this.app.use(
-      "*",
-      cors({
-        origin: "*", // Allow all origins in development
-        allowHeaders: ["Content-Type", "Authorization"],
-        allowMethods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-        exposeHeaders: ["Content-Length", "X-Kuma-Revision"],
-        maxAge: 600,
-        credentials: true,
-      })
-    );
-
-    if (config.plugins) {
-      this.initFromPlugins([...config.plugins, BuiltinPlugin(this)]);
-    }
-
-    if (config.globalAdapters) {
-      this.registerGlobalAdapters(config.globalAdapters);
-    }
+    const plugins = [...(config.plugins || []), BuiltinPlugin(this)];
+    this.registerPluginAdapters(plugins);
+    this.registerGlobalAdapters({
+      plugins: plugins,
+      globalAdapters: config.globalAdapters,
+    });
 
     if (config.entityConfigs) {
       this.entityConfigs = config.entityConfigs;
@@ -71,65 +55,79 @@ export class URPC {
     }
 
     if (config.middlewares) {
-      this.applyMiddlewareToRepos(config.middlewares);
+      this.applyMiddlewareToRepos({
+        plugins: plugins,
+        middlewares: config.middlewares,
+      });
     }
+
+    this.analyzeEntities({
+      plugins: plugins,
+      globalAdapters: config.globalAdapters,
+    });
 
     this.setupRoutes();
 
     return this.app;
   }
 
-  private static initFromPlugins(plugins: Plugin[]) {
-    const entities = plugins.flatMap((p) => p.entities || []);
+  private static registerPluginAdapters(plugins: Plugin[]) {
     const adapters = plugins.flatMap((p) => p.adapters || []);
-    if (entities.length > 0) {
-      this.entitySchemas = generateSchemas(entities);
-      this.entityNames = entities.map((e) => simplifyEntityName(e.name));
-    }
-    this.entitySources = this.analyzeEntitySources(adapters);
-
-    adapters.forEach(({ entity, source, adapter }) =>
-      registerAdapter(entity, source, adapter)
-    );
-
-    console.log(
-      `✅ Registered adapters: ${adapters
-        .map((a) => {
-          const adapterName =
-            (a.adapter.constructor as any).adapterName ||
-            a.adapter.constructor.name;
-          return `${adapterName}`;
-        })
-        .join(", ")}`
-    );
-  }
-
-  private static registerGlobalAdapters(
-    globalAdapters: (new () => DataSourceAdapter<any>)[] = []
-  ) {
-    if (globalAdapters.length > 0) {
-      globalAdapters.forEach((Adapter) => {
-        const source = Adapter.name;
-        this.entityNames.forEach((entityName) => {
-          registerAdapter(entityName, source, new Adapter());
-        });
-      });
+    if (adapters.length) {
+      adapters.forEach(({ entity, source, adapter }) =>
+        registerAdapter(entity, source, adapter)
+      );
       console.log(
-        `✅ Registered global adapters: ${globalAdapters
+        `✅ Registered Plugin Adapters: ${adapters
           .map((a) => {
-            return `${a.name}`;
+            const adapterName =
+              (a.adapter.constructor as any).adapterName ||
+              a.adapter.constructor.name;
+            return `${adapterName}`;
           })
           .join(", ")}`
       );
     }
   }
 
-  private static applyMiddlewareToRepos(middlewares: Middleware<any>[]) {
+  private static registerGlobalAdapters({
+    plugins,
+    globalAdapters = [],
+  }: {
+    plugins: Plugin[];
+    globalAdapters?: (new () => DataSourceAdapter<any>)[];
+  }): void {
+    if (globalAdapters.length > 0) {
+      const entities = plugins.flatMap((p) => p.entities || []);
+      globalAdapters.forEach((Adapter) => {
+        const source = Adapter.name;
+        entities.forEach((entity) => {
+          const entityName = entity.name;
+          registerAdapter(entityName, source, new Adapter());
+        });
+      });
+      console.log(
+        `✅ Registered global adapters: ${globalAdapters
+          .map((a) => `${a.name}`)
+          .join(", ")}`
+      );
+    }
+  }
+
+  private static applyMiddlewareToRepos({
+    plugins,
+    middlewares,
+  }: {
+    plugins: Plugin[];
+    middlewares: Middleware<any>[];
+  }) {
+    const entities = plugins.flatMap((p) => p.entities || []);
     middlewares.forEach((m) => {
       const requiredEntities = m.required?.entities;
       if (requiredEntities) {
+        const entityNames = entities.map((e) => simplifyEntityName(e.name));
         const missingEntities = requiredEntities.filter(
-          (entity) => !this.entityNames.includes(simplifyEntityName(entity))
+          (entity) => !entityNames.includes(simplifyEntityName(entity))
         );
         if (missingEntities.length > 0) {
           throw new Error(
@@ -144,6 +142,45 @@ export class URPC {
     console.log(
       `✅ Registered middlewares: ${middlewares.map((m) => m.name).join(", ")}`
     );
+  }
+
+  private static analyzeEntities({
+    plugins,
+    globalAdapters,
+  }: {
+    plugins: Plugin[];
+    globalAdapters?: (new () => DataSourceAdapter<any>)[];
+  }) {
+    const entities = plugins.flatMap((p) => p.entities || []);
+    const adapters = plugins.flatMap((p) => p.adapters || []);
+
+    if (entities.length > 0) {
+      this.entitySchemas = generateSchemas(entities);
+    }
+
+    const entitySources: Record<string, string[]> = {};
+
+    adapters.forEach(({ source, entity }) => {
+      if (!entitySources[entity]) {
+        entitySources[entity] = [];
+      }
+      entitySources[entity].push(source);
+    });
+
+    if (globalAdapters && entities) {
+      globalAdapters.forEach((adapter) => {
+        entities.forEach((entity) => {
+          const entityName = entity.name;
+          const source = adapter.name;
+          if (!entitySources[entityName]) {
+            entitySources[entityName] = [];
+          }
+          entitySources[entityName].push(source);
+        });
+      });
+    }
+
+    this.entitySources = entitySources;
   }
 
   static repo<T extends Record<string, any>>(options: {
@@ -336,24 +373,7 @@ export class URPC {
     return this.entitySchemas;
   }
 
-  static getAdapters(): string[] {
-    return Array.from(getRepoRegistry().keys());
-  }
-
   static getEntitySources(): Record<string, string[]> {
     return this.entitySources;
-  }
-
-  private static analyzeEntitySources(
-    adapters: AdapterRegistration[]
-  ): Record<string, string[]> {
-    const entitySources: Record<string, string[]> = {};
-    adapters.forEach(({ source, entity }) => {
-      if (!entitySources[entity]) {
-        entitySources[entity] = [];
-      }
-      entitySources[entity].push(source);
-    });
-    return entitySources;
   }
 }

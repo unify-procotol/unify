@@ -20,45 +20,55 @@ export default function Home() {
     useState<WalletEntity | null>(null);
 
   useEffect(() => {
-    const fetchEvmBalance = async () => {
-      try {
-        const data = await repo<WalletEntity>({
-          entity: "wallet",
-          source: "evm",
-        }).findOne({
-          where: {
-            address: "0x8E76cAEbaca6c0e390F825fa44Dfd1fCb74B9C36",
-            network: "ethereum",
-          },
-        });
-        if (data) {
-          setEvmBalanceData(data);
-        }
-      } catch (error) {
-        console.error(error);
-      }
+    const fetchAllEntities = async () => {
+      const allEntities = await repo({
+        entity: "schema",
+        source: "_global",
+      }).findMany();
+      console.log("All entities:", JSON.stringify(allEntities, null, 2));
     };
 
-    const fetchSolanaBalance = async () => {
-      try {
-        const data = await repo<WalletEntity>({
-          entity: "wallet",
-          source: "solana",
-        }).findOne({
-          where: {
-            address: "11111111111111111111111111111112",
-          },
-        });
-        if (data) {
-          setSolanaBalanceData(data);
-        }
-      } catch (error) {
-        console.error(error);
-      }
-    };
+    fetchAllEntities();
 
-    fetchEvmBalance();
-    fetchSolanaBalance();
+    // const fetchEvmBalance = async () => {
+    //   try {
+    //     const data = await repo<WalletEntity>({
+    //       entity: "wallet",
+    //       source: "evm",
+    //     }).findOne({
+    //       where: {
+    //         address: "0x8E76cAEbaca6c0e390F825fa44Dfd1fCb74B9C36",
+    //         network: "ethereum",
+    //       },
+    //     });
+    //     if (data) {
+    //       setEvmBalanceData(data);
+    //     }
+    //   } catch (error) {
+    //     console.error(error);
+    //   }
+    // };
+
+    // const fetchSolanaBalance = async () => {
+    //   try {
+    //     const data = await repo<WalletEntity>({
+    //       entity: "wallet",
+    //       source: "solana",
+    //     }).findOne({
+    //       where: {
+    //         address: "11111111111111111111111111111112",
+    //       },
+    //     });
+    //     if (data) {
+    //       setSolanaBalanceData(data);
+    //     }
+    //   } catch (error) {
+    //     console.error(error);
+    //   }
+    // };
+
+    // fetchEvmBalance();
+    // fetchSolanaBalance();
   }, []);
 
   return (
