@@ -83,4 +83,4 @@ export const PACKAGE_MANAGERS: PackageManager[] = [
   }
 ];
 
-export const STUDIO_URL = 'https://studio.unify.io'; 
+export const STUDIO_URL = 'https://studio.uni-labs.org'; 

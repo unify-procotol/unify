@@ -1,6 +1,6 @@
 {
   "name": "@unilab/urpc-cli",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "CLI tool for creating URPC projects",
   "main": "dist/index.cjs",
   "publishConfig": {

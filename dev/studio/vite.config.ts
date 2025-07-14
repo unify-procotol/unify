@@ -14,19 +14,8 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
-    lib: {
-      entry: {
-        studio: resolve(__dirname, 'src/main.tsx'),
-        components: resolve(__dirname, 'src/components/index.ts'),
-      },
-      name: 'URPC Studio',
-      formats: ['es', 'cjs'],
-    },
+    // Remove lib configuration for SPA deployment
     rollupOptions: {
-      input: {
-        // Main app entry
-        main: resolve(__dirname, 'index.html'),
-      },
       output: {
         // Separate chunks for better caching
         manualChunks: {

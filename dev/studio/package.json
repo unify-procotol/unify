@@ -15,7 +15,10 @@
     "build": "vite build",
     "dev": "vite",
     "preview": "vite preview",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "pages:build": "vite build",
+    "deploy": "npm run pages:build && npx wrangler pages deploy dist --project-name=unify-studio",
+    "cf:deploy": "npm run pages:build && npx wrangler pages deploy dist --project-name=unify-studio"
   },
   "keywords": [
     "api",
