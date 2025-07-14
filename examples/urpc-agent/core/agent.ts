@@ -38,9 +38,9 @@ export class URPCAgent {
     }).create({
       data: {
         id: "1",
-        name: "Zhang San",
-        email: "zhangsan@example.com",
-        avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=ZhangSan",
+        name: "John Doe",
+        email: "john@example.com",
+        avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=JohnDoe",
       },
     });
 
@@ -66,13 +66,14 @@ export class URPCAgent {
       instructions: this.instructions,
       model: createOpenRouter({
         apiKey: process.env.OPENROUTER_API_KEY!,
-      }).chat("openai/gpt-4o-mini"),
+      }).chat("openai/gpt-4o"),
+      // .chat("anthropic/claude-3.7-sonnet"),
     });
   }
 
   private generateInstructions(): string {
     const schemas = URPC.getEntitySchemas();
-    // console.log("[Schemas]:", JSON.stringify(schemas, null, 2));
+    console.log("[Schemas]:", JSON.stringify(schemas, null, 2));
     const entityMarkdown = convertSchemaToMarkdown(schemas);
     console.log("[Entity Markdown]:", entityMarkdown);
     return `

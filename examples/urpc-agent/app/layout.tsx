@@ -6,8 +6,8 @@ import './globals.css'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'URPC Agent - 智能数据操作助手',
-  description: '基于Mastra + URPC的智能数据操作助手，能够理解自然语言并执行相应的数据库操作',
+  title: 'URPC Agent - Intelligent Data Operation Assistant',
+  description: 'An intelligent data operation assistant based on Mastra + URPC, capable of understanding natural language and executing corresponding database operations',
 }
 
 export default function RootLayout({
@@ -16,7 +16,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="zh">
+    <html lang="en">
       <body className={inter.className}>
         <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
           {children}
