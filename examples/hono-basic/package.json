@@ -14,6 +14,7 @@
     "@unilab/urpc-core": "workspace:*",
     "@unilab/urpc-hono": "workspace:*",
     "@unilab/urpc-adapters": "workspace:*",
+    "@unilab/uniweb3": "workspace:*",
     "hono": "^4.7.11"
   },
   "devDependencies": {

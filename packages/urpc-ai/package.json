@@ -1,6 +1,6 @@
 {
   "name": "@unilab/urpc-ai",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "AI integration for the Unify RPC framework",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -27,7 +27,7 @@
   "dependencies": {
     "@mastra/core": "^0.10.12",
     "@openrouter/ai-sdk-provider": "^0.7.2",
-    "@unilab/urpc-core": "^0.0.3"
+    "@unilab/urpc-core": "^0.0.4"
   },
   "devDependencies": {
     "@types/node": "^20.10.0",

@@ -6,5 +6,3 @@ export const api = URPC.init({
   plugins: [WalletPlugin],
   middlewares: [Logging()],
 });
-
-console.log(URPC.getEntitySchemas());

@@ -1,3 +1,5 @@
+import "reflect-metadata";
+
 export interface SchemaObject {
   type?: string | string[];
   properties?: Record<string, SchemaObject>;
@@ -32,8 +34,8 @@ export interface SchemaObject {
   pattern?: string;
 }
 
-const schemaMetadata = new Map<any, Map<string, FieldMetadata>>();
-const relationMetadata = new Map<any, Map<string, RelationMetadata>>();
+// Metadata keys for reflect-metadata
+const FIELD_METADATA_KEY = Symbol("field:metadata");
 
 export interface FieldMetadata {
   type:
@@ -51,59 +53,77 @@ export interface FieldMetadata {
   returns?: any; // For action return type
 }
 
-export interface RelationMetadata {
-  type: "toOne" | "toMany";
-  target: () => any;
-  optional?: boolean;
-}
-
-// Fields decorators
 export const Fields = {
   string: (options?: { optional?: boolean; description?: string }) => {
-    return (target: any, propertyKey: string) => {
+    const decorator = function stringFieldDecorator(
+      target: any,
+      propertyKey: string
+    ) {
       setFieldMetadata(target.constructor, propertyKey, {
         type: "string",
         optional: options?.optional,
         description: options?.description,
       });
     };
+    Object.defineProperty(decorator, "name", { value: "stringFieldDecorator" });
+    return decorator;
   },
 
   number: (options?: { optional?: boolean; description?: string }) => {
-    return (target: any, propertyKey: string) => {
+    const decorator = function numberFieldDecorator(
+      target: any,
+      propertyKey: string
+    ) {
       setFieldMetadata(target.constructor, propertyKey, {
         type: "number",
         optional: options?.optional,
         description: options?.description,
       });
     };
+    Object.defineProperty(decorator, "name", { value: "numberFieldDecorator" });
+    return decorator;
   },
 
   boolean: (options?: { optional?: boolean; description?: string }) => {
-    return (target: any, propertyKey: string) => {
+    const decorator = function booleanFieldDecorator(
+      target: any,
+      propertyKey: string
+    ) {
       setFieldMetadata(target.constructor, propertyKey, {
         type: "boolean",
         optional: options?.optional,
         description: options?.description,
       });
     };
+    Object.defineProperty(decorator, "name", {
+      value: "booleanFieldDecorator",
+    });
+    return decorator;
   },
 
   date: (options?: { optional?: boolean; description?: string }) => {
-    return (target: any, propertyKey: string) => {
+    const decorator = function dateFieldDecorator(
+      target: any,
+      propertyKey: string
+    ) {
       setFieldMetadata(target.constructor, propertyKey, {
         type: "date",
         optional: options?.optional,
         description: options?.description,
       });
     };
+    Object.defineProperty(decorator, "name", { value: "dateFieldDecorator" });
+    return decorator;
   },
 
   array: (
     target: () => any,
     options?: { optional?: boolean; description?: string }
   ) => {
-    return (targetClass: any, propertyKey: string) => {
+    const decorator = function arrayFieldDecorator(
+      targetClass: any,
+      propertyKey: string
+    ) {
       setFieldMetadata(targetClass.constructor, propertyKey, {
         type: "array",
         target,
@@ -111,13 +131,18 @@ export const Fields = {
         description: options?.description,
       });
     };
+    Object.defineProperty(decorator, "name", { value: "arrayFieldDecorator" });
+    return decorator;
   },
 
   record: (
     target: () => any,
     options?: { optional?: boolean; description?: string }
   ) => {
-    return (targetClass: any, propertyKey: string) => {
+    const decorator = function recordFieldDecorator(
+      targetClass: any,
+      propertyKey: string
+    ) {
       setFieldMetadata(targetClass.constructor, propertyKey, {
         type: "record",
         target,
@@ -125,6 +150,8 @@ export const Fields = {
         description: options?.description,
       });
     };
+    Object.defineProperty(decorator, "name", { value: "recordFieldDecorator" });
+    return decorator;
   },
 
   action: (options: {
@@ -133,7 +160,10 @@ export const Fields = {
     params?: Record<string, any>;
     returns?: any;
   }) => {
-    return (target: any, propertyKey: string) => {
+    const decorator = function actionFieldDecorator(
+      target: any,
+      propertyKey: string
+    ) {
       setFieldMetadata(target.constructor, propertyKey, {
         type: "action",
         description: options.description,
@@ -141,67 +171,33 @@ export const Fields = {
         returns: options.returns,
       });
     };
+    Object.defineProperty(decorator, "name", { value: "actionFieldDecorator" });
+    return decorator;
   },
 };
 
-// Relations decorators
-export const Relations = {
-  toOne: (target: () => any, options?: { optional?: boolean }) => {
-    return (targetClass: any, propertyKey: string) => {
-      setRelationMetadata(targetClass.constructor, propertyKey, {
-        type: "toOne",
-        target,
-        optional: options?.optional,
-      });
-    };
-  },
-
-  toMany: (target: () => any, options?: { optional?: boolean }) => {
-    return (targetClass: any, propertyKey: string) => {
-      setRelationMetadata(targetClass.constructor, propertyKey, {
-        type: "toMany",
-        target,
-        optional: options?.optional,
-      });
-    };
-  },
-};
-
-// Metadata helper functions
+// Metadata helper functions using reflect-metadata
 function setFieldMetadata(
   target: any,
   propertyKey: string,
   metadata: FieldMetadata
 ) {
-  if (!schemaMetadata.has(target)) {
-    schemaMetadata.set(target, new Map());
-  }
-  schemaMetadata.get(target)!.set(propertyKey, metadata);
+  const existingMetadata =
+    Reflect.getMetadata(FIELD_METADATA_KEY, target) || {};
+  existingMetadata[propertyKey] = metadata;
+  Reflect.defineMetadata(FIELD_METADATA_KEY, existingMetadata, target);
 }
 
 function getFieldMetadata(
   target: any,
   propertyKey: string
 ): FieldMetadata | undefined {
-  return schemaMetadata.get(target)?.get(propertyKey);
+  const metadata = Reflect.getMetadata(FIELD_METADATA_KEY, target);
+  return metadata?.[propertyKey];
 }
 
-function setRelationMetadata(
-  target: any,
-  propertyKey: string,
-  metadata: RelationMetadata
-) {
-  if (!relationMetadata.has(target)) {
-    relationMetadata.set(target, new Map());
-  }
-  relationMetadata.get(target)!.set(propertyKey, metadata);
-}
-
-function getRelationMetadata(
-  target: any,
-  propertyKey: string
-): RelationMetadata | undefined {
-  return relationMetadata.get(target)?.get(propertyKey);
+function getAllFieldMetadata(target: any): Record<string, FieldMetadata> {
+  return Reflect.getMetadata(FIELD_METADATA_KEY, target) || {};
 }
 
 // Helper function to get entity class name from target function
@@ -219,14 +215,12 @@ function getEntityTypeName(targetFunction: () => any): string {
 
 // Schema generation using custom SchemaObject interface
 export function generateSchema(entityClass: any): SchemaObject {
-  const fields = schemaMetadata.get(entityClass) || new Map();
-  const relations = relationMetadata.get(entityClass) || new Map();
+  const fields = getAllFieldMetadata(entityClass);
 
   const properties: Record<string, SchemaObject> = {};
   const required: string[] = [];
 
-  // Process field metadata
-  for (const [propertyKey, metadata] of fields) {
+  for (const [propertyKey, metadata] of Object.entries(fields)) {
     let property: SchemaObject;
 
     if (metadata.type === "array" && metadata.target) {
@@ -235,7 +229,7 @@ export function generateSchema(entityClass: any): SchemaObject {
         type: "array",
         items: {
           type: relatedEntityName,
-        } as any, // Cast to any to allow custom type names
+        } as any,
         description: metadata.description,
       };
     } else if (metadata.type === "record" && metadata.target) {
@@ -243,7 +237,7 @@ export function generateSchema(entityClass: any): SchemaObject {
       property = {
         type: relatedEntityName,
         description: metadata.description,
-      } as any; // Cast to any to allow custom type names
+      } as any;
     } else {
       property = {
         type: metadata.type === "date" ? "string" : (metadata.type as any),
@@ -252,35 +246,11 @@ export function generateSchema(entityClass: any): SchemaObject {
 
       if (metadata.type === "array" && !metadata.target) {
         property.type = "array";
-        property.items = { type: "string" }; // default item type
+        property.items = { type: "string" };
       }
     }
 
     properties[propertyKey] = property;
-
-    if (!metadata.optional) {
-      required.push(propertyKey);
-    }
-  }
-
-  // Process relation metadata
-  for (const [propertyKey, metadata] of relations) {
-    const relatedEntityName = getEntityTypeName(metadata.target);
-
-    if (metadata.type === "toOne") {
-      properties[propertyKey] = {
-        type: relatedEntityName,
-        description: `Related ${propertyKey} entity`,
-      } as any; // Cast to any to allow custom type names
-    } else if (metadata.type === "toMany") {
-      properties[propertyKey] = {
-        type: "array",
-        items: {
-          type: relatedEntityName,
-          description: `Related ${propertyKey} entities`,
-        } as any, // Cast to any to allow custom type names
-      };
-    }
 
     if (!metadata.optional) {
       required.push(propertyKey);
