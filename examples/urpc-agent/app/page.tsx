@@ -42,7 +42,7 @@ export default function Home() {
     "Find all users",
     "Find user with ID 1",
     "Create a new user named Jack with email jack@example.com",
-    "Find all posts by users with ID 1",
+    "Find all posts by users with userId 1",
     'Create an article with title "Test Article", content "This is a test article", author is user 1',
     'Update user 1\'s name to "John Doe"',
     "Delete article with ID 1",

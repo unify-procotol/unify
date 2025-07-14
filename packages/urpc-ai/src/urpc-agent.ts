@@ -1,86 +1,54 @@
 import { Agent } from "@mastra/core/agent";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { URPC, repo } from "@unilab/urpc";
-import { Plugin } from "@unilab/urpc-core";
-import { UserEntity } from "../entities/user";
-import { PostEntity } from "../entities/post";
-import { MemoryAdapter } from "@unilab/urpc-adapters";
 import { convertSchemaToMarkdown } from "./entity-schema-to-markdown";
 import { convertEntitySourcesToMarkdown } from "./entity-source-to-markdown";
 
-// Define plugin configuration
-const DataPlugin: Plugin = {
-  entities: [UserEntity, PostEntity],
-};
+export interface URPCAgentOptions {
+  name?: string;
+  description?: string;
+  model?: string;
+  openrouterApiKey?: string;
+  debug?: boolean;
+}
 
 export class URPCAgent {
   private instructions: string;
   private agent: Agent;
+  private debug: boolean;
 
-  constructor() {
-    // Initialize URPC client
-    URPC.init({
-      plugins: [DataPlugin],
-      entityConfigs: {
-        user: {
-          defaultSource: "memory",
-        },
-        post: {
-          defaultSource: "memory",
-        },
-      },
-      globalAdapters: [MemoryAdapter],
-    });
-
-    // Initialize data
-    repo({
-      entity: "user",
-      source: "memory",
-    }).create({
-      data: {
-        id: "1",
-        name: "John",
-        email: "john@example.com",
-        avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=John",
-      },
-    });
-
-    repo({
-      entity: "post",
-      source: "memory",
-    }).create({
-      data: {
-        id: "1",
-        title: "Welcome to URPC Agent",
-        content:
-          "This is the first sample article, demonstrating the basic functionality of URPC Agent.",
-        userId: "1",
-      },
-    });
-
+  constructor({
+    name = "URPC Smart Data Assistant",
+    description = "An intelligent data operation assistant based on URPC, capable of understanding natural language and executing corresponding database operations",
+    model = "openai/gpt-4o-mini",
+    openrouterApiKey,
+    debug = false,
+  }: URPCAgentOptions = {}) {
+    this.debug = debug;
     this.instructions = this.generateInstructions();
 
     this.agent = new Agent({
-      name: "URPC Smart Data Assistant",
-      description:
-        "An intelligent data operation assistant based on URPC, capable of understanding natural language and executing corresponding database operations",
+      name,
+      description,
       instructions: this.instructions,
       model: createOpenRouter({
-        // apiKey: process.env.OPENROUTER_API_KEY!,
-        apiKey:
-          "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",
-      }).chat("openai/gpt-4o-mini"),
+        apiKey: openrouterApiKey || process.env.OPENROUTER_API_KEY,
+      }).chat(model),
     });
   }
 
   private generateInstructions(): string {
     const schemas = URPC.getEntitySchemas();
     const entitySources = URPC.getEntitySources();
-    console.log("[Schemas]:\n", JSON.stringify(schemas, null, 2));
     const entityMarkdown = convertSchemaToMarkdown(schemas);
-    console.log("[Entity Markdown]:\n", entityMarkdown);
     const entitySourcesMarkdown = convertEntitySourcesToMarkdown(entitySources);
-    console.log("[Entity Sources Markdown]:\n", entitySourcesMarkdown);
+
+    if (this.debug) {
+      console.log("[Schemas]:\n", JSON.stringify(schemas, null, 2));
+      console.log("[Entity Markdown]:\n", entityMarkdown);
+      console.log("[Entity Sources Markdown]:\n", entitySourcesMarkdown);
+    }
+
     return `
 You are an intelligent data operation assistant specialized in handling CRUD operations for user and article data. You have direct mastery of URPC SDK usage.
 
@@ -179,8 +147,6 @@ Remember:
         },
       ]);
 
-      console.log("[Agent Response]:", response.text);
-
       return this.parseAndExecuteResponse(response.text);
     } catch (error: any) {
       return {
@@ -203,18 +169,24 @@ Remember:
       );
       if (urpcCodeMatch) {
         let urpcCode = urpcCodeMatch[0];
-        console.log("[Original rpcCode]:", urpcCode);
+        if (this.debug) {
+          console.log("[URPC Code]:", urpcCode);
+        }
 
         // Pre-generate random ID for create operations and replace placeholders in urpcCode
         let actualUrpcCode = urpcCode;
         if (urpcCode.includes("create") && urpcCode.includes("generated-id")) {
           const randomId = this.generateRandomId();
           actualUrpcCode = urpcCode.replace(/generated-id/g, randomId);
-          console.log("[Generated rpcCode]:", actualUrpcCode);
+          if (this.debug) {
+            console.log("[Generated rpcCode]:", actualUrpcCode);
+          }
         }
 
         const result = await this.executeURPCCode(actualUrpcCode);
-        console.log("[Result]:", result);
+        if (this.debug) {
+          console.log("[Result]:", result);
+        }
 
         const operation = this.extractOperation(urpcCode);
         const entity = this.extractEntity(urpcCode);
@@ -319,7 +291,9 @@ Remember:
       const match = urpcCode.match(/\)\.(\w+)\((.+)\)$/);
       if (match) {
         const methodName = match[1];
-        console.log("[MethodName]:", methodName);
+        if (this.debug) {
+          console.log("[MethodName]:", methodName);
+        }
         let paramsStr = match[2].trim();
 
         // If no parameters, return empty object
@@ -332,10 +306,12 @@ Remember:
           return JSON.parse(paramsStr);
         } catch (parseError) {
           // If JSON parsing fails, try improved object parsing
-          console.log(
-            "JSON parsing failed, trying improved parsing:",
-            paramsStr
-          );
+          if (this.debug) {
+            console.log(
+              "JSON parsing failed, trying improved parsing:",
+              paramsStr
+            );
+          }
           return this.parseAdvancedObjectString(paramsStr);
         }
       }
@@ -351,6 +327,7 @@ Remember:
     try {
       // First try to parse using eval in a safe environment (limited to object literals only)
       // But for security, we need to first validate that the string contains only object literal syntax
+
       if (this.isValidObjectLiteral(str)) {
         // Use Function constructor to create a function that returns an object
         const func = new Function(`"use strict"; return (${str});`);
