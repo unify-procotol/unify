@@ -73,9 +73,9 @@ export class URPCAgent {
 
   private generateInstructions(): string {
     const schemas = URPC.getEntitySchemas();
-    console.log("[Schemas]:", JSON.stringify(schemas, null, 2));
+    console.log("[Schemas]:\n", JSON.stringify(schemas, null, 2));
     const entityMarkdown = convertSchemaToMarkdown(schemas);
-    console.log("[Entity Markdown]:", entityMarkdown);
+    console.log("[Entity Markdown]:\n", entityMarkdown);
     return `
 You are an intelligent data operation assistant specialized in handling CRUD operations for user and article data. You have direct mastery of URPC SDK usage.
 

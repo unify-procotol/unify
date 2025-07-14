@@ -36,12 +36,12 @@ export default function Home() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Quick operation commands
-  const quickCommands = ["Find all users", "Create user John"];
+  const quickCommands = ["Find all users", "Find all posts by users with ID 1"];
 
   const testCases = [
     "Find all users",
     "Find user with ID 1",
-    "Create a new user named John with email john@example.com",
+    "Create a new user named Jack with email jack@example.com",
     "Find all posts by users with ID 1",
     'Create an article with title "Test Article", content "This is a test article", author is user 1',
     'Update user 1\'s name to "John Doe"',
