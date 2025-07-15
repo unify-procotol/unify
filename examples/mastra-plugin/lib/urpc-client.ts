@@ -6,10 +6,6 @@ export function initUrpcClient() {
     initialized = true;
     URPC.init({
       baseUrl: "http://localhost:3000/api",
-      timeout: 10000,
-      headers: {
-        Authorization: "Bearer your-token-here",
-      },
     });
   }
   return initialized;

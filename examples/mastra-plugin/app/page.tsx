@@ -163,9 +163,7 @@ export default function Home() {
             setPostData((prev) => [...prev, output.data]);
           } else if (output.operation === "delete" && output.success) {
             // Handle delete post operation
-            const deleteMatch =
-              textToSend.match(/Delete post (.+?)$/) ||
-              textToSend.match(/Delete post with ID (.+?)$/);
+            const deleteMatch = textToSend.match(/ID (.+?)$/);
             if (deleteMatch) {
               const identifier = deleteMatch[1].trim();
               setPostData((prev) =>

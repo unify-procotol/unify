@@ -498,7 +498,7 @@ export function createHybridRepositoryProxy<T extends Record<string, any>>(
                     method: "POST",
                     url: `/${entityName}/call`,
                     params: { source, context },
-                    data: args,
+                    data: { data: args },
                   },
                   httpConfig
                 );

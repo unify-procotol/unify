@@ -17,6 +17,7 @@
     "@unilab/urpc-adapters": "^0.0.7",
     "@unilab/urpc-core": "^0.0.5",
     "@unilab/urpc-next": "^0.0.10",
+    "@unilab/mastra-plugin": "^0.0.2",
     "autoprefixer": "^10.4.16",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
