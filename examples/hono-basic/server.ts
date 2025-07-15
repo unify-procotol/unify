@@ -4,11 +4,15 @@ import { PostEntity } from "./entities/post";
 import { Plugin } from "@unilab/urpc-core";
 import { MockAdapter } from "@unilab/urpc-adapters";
 import { Hono } from "hono";
+import { cors } from "hono/cors";
 
 const MyPlugin: Plugin = {
   entities: [UserEntity, PostEntity],
 };
+
 const app = new Hono();
+
+app.use(cors())
 
 URPC.init({
   plugins: [MyPlugin],
