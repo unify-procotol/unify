@@ -9,10 +9,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@unilab/ukit": "workspace:*",
-    "@unilab/urpc": "workspace:*",
-    "@unilab/urpc-adapters": "workspace:*",
-    "@unilab/urpc-core": "workspace:*",
+    "@unilab/ukit": "^0.0.2",
+    "@unilab/urpc": "^0.0.7",
+    "@unilab/urpc-adapters": "^0.0.6",
+    "@unilab/urpc-core": "^0.0.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.525.0",

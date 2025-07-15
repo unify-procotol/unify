@@ -83,4 +83,17 @@ export const PACKAGE_MANAGERS: PackageManager[] = [
   }
 ];
 
-export const STUDIO_URL = 'https://studio.uni-labs.org'; 
+export const STUDIO_URL = 'https://studio.uni-labs.org';
+
+/**
+ * Get the correct command for the current platform
+ * On Windows, npm/yarn/pnpm are .cmd files
+ */
+export function getPlatformCommand(command: string): string {
+  if (process.platform === 'win32') {
+    if (['npm', 'yarn', 'pnpm'].includes(command)) {
+      return `${command}.cmd`;
+    }
+  }
+  return command;
+} 

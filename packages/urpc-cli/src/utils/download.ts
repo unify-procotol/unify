@@ -57,7 +57,8 @@ async function executeCommand(command: string, args: string[]): Promise<boolean>
   return new Promise((resolve) => {
     const process = spawn(command, args, {
       stdio: 'inherit',
-      shell: true
+      shell: true,
+      windowsVerbatimArguments: false
     });
     
     process.on('close', (code) => {

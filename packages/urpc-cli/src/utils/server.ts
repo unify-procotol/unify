@@ -3,7 +3,7 @@ import detectPort from 'detect-port';
 import open from 'open';
 import fs from 'fs-extra';
 import path from 'path';
-import { Template, PackageManager, STUDIO_URL } from '../types';
+import { Template, PackageManager, STUDIO_URL, getPlatformCommand } from '../types';
 import { logInfo, logSuccess, logError, displayStudioMessage } from './logger';
 import { repo, URPC } from '@unilab/urpc';
 
@@ -16,13 +16,14 @@ export async function installDependencies(
     
     // Parse the install command to get command and args
     const installCommandParts = packageManager.installCommand.split(' ');
-    const command = installCommandParts[0];
+    const command = getPlatformCommand(installCommandParts[0]);
     const args = installCommandParts.slice(1);
     
     const installProcess = spawn(command, args, {
       cwd: targetDir,
       stdio: 'inherit',
-      shell: true
+      shell: true,
+      windowsVerbatimArguments: false
     });
     
     return new Promise((resolve) => {
@@ -86,13 +87,14 @@ export async function startDevServer(
     
     // Parse the run command to get command and args
     const runCommandParts = packageManager.runCommand.split(' ');
-    const command = runCommandParts[0];
+    const command = getPlatformCommand(runCommandParts[0]);
     const args = [...runCommandParts.slice(1), template.startScript];
     
     const devProcess = spawn(command, args, {
       cwd: targetDir,
       stdio: 'pipe',
-      shell: true
+      shell: true,
+      windowsVerbatimArguments: false
     });
     
     // Monitor server startup

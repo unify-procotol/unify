@@ -25,6 +25,7 @@ const CONFIG: Config = {
   
   exampleDirs: [
     'examples/hono-basic',
+    'examples/react-todo',
     'examples/nextjs-app-router',
     'examples/nextjs-pages-router'
   ]
