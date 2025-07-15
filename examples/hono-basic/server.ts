@@ -3,15 +3,16 @@ import { UserEntity } from "./entities/user";
 import { PostEntity } from "./entities/post";
 import { Plugin } from "@unilab/urpc-core";
 import { MockAdapter } from "@unilab/urpc-adapters";
-import { cors } from "hono/cors";
+import { Hono } from "hono";
 
 const MyPlugin: Plugin = {
   entities: [UserEntity, PostEntity],
 };
+const app = new Hono();
 
-const app = URPC.init({
+URPC.init({
   plugins: [MyPlugin],
-  // middlewares: [HookMiddleware],
+  app,
   entityConfigs: {
     user: {
       defaultSource: "mock",
@@ -23,7 +24,6 @@ const app = URPC.init({
   globalAdapters: [MockAdapter],
 });
 
-app.use(cors())
 // Use repo on the server side
 // init data
 await URPC.repo<UserEntity>({
