@@ -4,7 +4,7 @@ Unify is a protocol focused on entity-first abstraction, aimed at resolving same
 
 ## Get Started
 ```bash
-npx urpc-cli create my-project
+npx @unilab/urpc-cli create my-project
 ```
 
 ## 🌐 Why Unify?
