@@ -1,7 +1,7 @@
 {
-  "name": "urpc-agent",
+  "name": "mastra-plugin-demo",
   "version": "1.0.0",
-  "description": "URPC Agent - Intelligent Data Operations Assistant",
+  "description": "Mastra Plugin Demo",
   "main": "server.ts",
   "scripts": {
     "dev": "next dev",
@@ -13,10 +13,10 @@
   "dependencies": {
     "@mastra/core": "^0.10.8",
     "@openrouter/ai-sdk-provider": "^0.7.2",
-    "@unilab/urpc": "workspace:*",
-    "@unilab/urpc-adapters": "workspace:*",
-    "@unilab/urpc-core": "workspace:*",
-    "@unilab/urpc-ai": "workspace:*",
+    "@unilab/urpc": "^0.0.8",
+    "@unilab/urpc-adapters": "^0.0.7",
+    "@unilab/urpc-core": "^0.0.5",
+    "@unilab/urpc-next": "^0.0.10",
     "autoprefixer": "^10.4.16",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",

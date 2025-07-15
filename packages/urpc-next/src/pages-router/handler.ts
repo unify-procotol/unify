@@ -102,7 +102,7 @@ export class URPC {
         });
       });
       console.log(
-        `✅ Registered global adapters: ${globalAdapters
+        `✅ Registered Global Adapters: ${globalAdapters
           .map((a) => `${a.name}`)
           .join(", ")}`
       );
@@ -228,6 +228,8 @@ export class URPC {
           return await this.handleUpdate(req, res, repo, entity, source!);
         case "DELETE:delete":
           return await this.handleDelete(req, res, repo, entity, source!);
+        case "POST:call":
+          return await this.handleCall(req, res, repo, entity, source!);
         default:
           return res.status(400).json({
             error: `Unsupported operation: ${method}:${action}`,
@@ -387,11 +389,65 @@ export class URPC {
     }
   }
 
+  private static async handleCall(
+    req: NextApiRequest,
+    res: NextApiResponse,
+    repo: Repository<any>,
+    entity: string,
+    source: string
+  ): Promise<void> {
+    try {
+      const body = req.body as { data?: any };
+      if (!body || !body.data) {
+        return res.status(400).json({
+          error: "data field is required",
+        });
+      }
+
+      const { context } = parseQueryParams(req);
+
+      const result = await repo.call(
+        body.data,
+        {
+          entity,
+          source,
+          context,
+        },
+        {
+          nextApiRequest: req,
+          stream: context?.stream,
+        }
+      );
+
+      // Check if result is a Pages Router stream response from adapter
+      if (result && typeof result === 'object' && (result as any).__isPageRouterStream) {
+        const streamResult = result as any;
+        await streamResult.streamHandler(res);
+        return;
+      }
+
+      if (result instanceof Response) {
+        // TODO: stream response, not supported yet
+        return res
+          .status(200)
+          .json({ data: null, message: "stream response not supported yet" });
+      }
+
+      return res.status(200).json({ data: result });
+    } catch (error) {
+      return handleError(error, res);
+    }
+  }
+
   static getEntitySchemas(): Record<string, SchemaObject> {
     return this.entitySchemas;
   }
 
   static getEntitySources(): Record<string, string[]> {
     return this.entitySources;
+  }
+
+  static getEntityConfigs(): EntityConfigs {
+    return this.entityConfigs;
   }
 }

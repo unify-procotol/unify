@@ -63,12 +63,30 @@ export interface DeletionArgs<T extends Record<string, any>> {
   where: WhereCondition<T>;
 }
 
+export type CallArgs<T extends Record<string, any>> = Partial<T>;
+
+export type ReqCtx = {
+  stream?: boolean;
+  honoCtx?: any;
+  nextRequest?: any;
+  nextApiRequest?: any;
+};
+
+export interface PageRouterStreamResponse {
+  __isPageRouterStream: true;
+  streamHandler: (res: any) => Promise<void>;
+}
+
 export interface DataSourceAdapter<T extends Record<string, any>> {
   findMany(args?: FindManyArgs<T>): Promise<T[]>;
   findOne(args: FindOneArgs<T>): Promise<T | null>;
   create(args: CreationArgs<T>): Promise<T>;
   update(args: UpdateArgs<T>): Promise<T>;
   delete(args: DeletionArgs<T>): Promise<boolean>;
+  call(
+    args: CallArgs<T>,
+    ctx?: ReqCtx
+  ): Promise<T | Response | PageRouterStreamResponse>;
 }
 
 export interface MiddlewareMetadata {
@@ -80,7 +98,7 @@ export interface MiddlewareMetadata {
 }
 
 export type MiddlewareContext<T extends Record<string, any>> = {
-  operation: "findMany" | "findOne" | "create" | "update" | "delete";
+  operation: "findMany" | "findOne" | "create" | "update" | "delete" | "call";
   args: any;
   result?: any;
   metadata?: MiddlewareMetadata;

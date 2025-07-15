@@ -2,6 +2,9 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { Send, User, Bot, Database, MessageSquare, Zap } from "lucide-react";
+import { initUrpcClient } from "@/lib/urpc-client";
+import { repo } from "@unilab/urpc";
+import { ChatEntity } from "@unilab/mastra-plugin/entities";
 
 interface Message {
   id: string;
@@ -26,6 +29,8 @@ interface PostData {
   userId: string;
   user?: UserData;
 }
+
+initUrpcClient();
 
 export default function Home() {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -72,52 +77,61 @@ export default function Home() {
     setIsLoading(true);
 
     try {
-      const response = await fetch("/api/agent", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ message: textToSend }),
+      const result = await repo<ChatEntity>({
+        entity: "chat",
+        source: "mastra",
+        // context: {
+        //   stream: true,
+        // },
+      }).call({
+        input: textToSend,
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to get response");
+      if (result instanceof Response) {
+        // stream response, not supported yet
+        return;
       }
 
-      const data = await response.json();
+      const output = result.output;
+
+      if (!output) {
+        return;
+      }
 
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: data.message,
+        content: output.message,
         timestamp: new Date(),
-        data: data.data,
-        urpcCode: data.urpc_code,
+        data: output.data,
+        urpcCode: output.urpc_code || "",
       };
 
       setMessages((prev) => [...prev, assistantMessage]);
 
       // Update right side data display
-      if (data.entity) {
-        if (data.entity === "user") {
-          if (Array.isArray(data.data)) {
-            setUserData(data.data);
+      if (output.entity) {
+        if (output.entity === "user") {
+          if (Array.isArray(output.data)) {
+            setUserData(output.data);
           } else if (
-            (data.operation === "findOne" || data.operation === "update") &&
-            data.data
+            (output.operation === "findOne" || output.operation === "update") &&
+            output.data
           ) {
             setUserData((prev) => {
-              const index = prev.findIndex((user) => user.id === data.data.id);
+              const index = prev.findIndex(
+                (user) => user.id === output.data.id
+              );
               if (index !== -1) {
-                prev[index] = data.data;
+                prev[index] = output.data;
               } else {
-                prev.push(data.data);
+                prev.push(output.data);
               }
               return prev;
             });
-          } else if (data.operation === "create" && data.data) {
-            setUserData((prev) => [...prev, data.data]);
-          } else if (data.operation === "delete" && data.success) {
+          } else if (output.operation === "create" && output.data) {
+            setUserData((prev) => [...prev, output.data]);
+          } else if (output.operation === "delete" && output.success) {
             // Handle delete operation - extract user name from message
             const deleteMatch = textToSend.match(/Delete user (.+?)$/);
             if (deleteMatch) {
@@ -127,25 +141,27 @@ export default function Home() {
               );
             }
           }
-        } else if (data.entity === "post") {
-          if (Array.isArray(data.data)) {
-            setPostData(data.data);
+        } else if (output.entity === "post") {
+          if (Array.isArray(output.data)) {
+            setPostData(output.data);
           } else if (
-            (data.operation === "findOne" || data.operation === "update") &&
-            data.data
+            (output.operation === "findOne" || output.operation === "update") &&
+            output.data
           ) {
             setPostData((prev) => {
-              const index = prev.findIndex((post) => post.id === data.data.id);
+              const index = prev.findIndex(
+                (post) => post.id === output.data.id
+              );
               if (index !== -1) {
-                prev[index] = data.data;
+                prev[index] = output.data;
               } else {
-                prev.push(data.data);
+                prev.push(output.data);
               }
               return prev;
             });
-          } else if (data.operation === "create" && data.data) {
-            setPostData((prev) => [...prev, data.data]);
-          } else if (data.operation === "delete" && data.success) {
+          } else if (output.operation === "create" && output.data) {
+            setPostData((prev) => [...prev, output.data]);
+          } else if (output.operation === "delete" && output.success) {
             // Handle delete post operation
             const deleteMatch =
               textToSend.match(/Delete post (.+?)$/) ||

@@ -111,7 +111,7 @@ export class URPC {
         });
       });
       console.log(
-        `✅ Registered global adapters: ${globalAdapters
+        `✅ Registered Global Adapters: ${globalAdapters
           .map((a) => `${a.name}`)
           .join(", ")}`
       );
@@ -245,6 +245,8 @@ export class URPC {
           return await URPC.handleUpdate(request, repo, entity, source!);
         case "DELETE:delete":
           return await URPC.handleDelete(request, repo, entity, source!);
+        case "POST:call":
+          return await URPC.handleCall(request, repo, entity, source!);
         default:
           return NextResponse.json(
             { error: `Unsupported operation: ${method}:${action}` },
@@ -402,11 +404,55 @@ export class URPC {
     }
   }
 
+  private static async handleCall(
+    request: NextRequest,
+    repo: Repository<any>,
+    entity: string,
+    source: string
+  ): Promise<NextResponse> {
+    try {
+      const body = (await request.json()) as { data?: any };
+      if (!body.data) {
+        return NextResponse.json(
+          { error: "data field is required" },
+          { status: 400 }
+        );
+      }
+
+      const { context } = parseQueryParams(request);
+
+      const result = await repo.call(
+        body.data,
+        {
+          entity,
+          source,
+          context,
+        },
+        {
+          nextRequest: request,
+          stream: context?.stream,
+        }
+      );
+
+      if (context?.stream) {
+        return result;
+      }
+
+      return NextResponse.json({ data: result });
+    } catch (error) {
+      return handleError(error);
+    }
+  }
+
   static getEntitySchemas(): Record<string, SchemaObject> {
     return this.entitySchemas;
   }
 
   static getEntitySources(): Record<string, string[]> {
     return this.entitySources;
+  }
+
+  static getEntityConfigs(): EntityConfigs {
+    return this.entityConfigs;
   }
 }

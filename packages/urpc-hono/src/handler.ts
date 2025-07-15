@@ -1,5 +1,4 @@
 import { Hono } from "hono";
-import { cors } from "hono/cors";
 import { handleError, parseQueryParams, validateSource } from "./utils";
 import {
   registerAdapter,
@@ -15,7 +14,6 @@ import {
   SchemaObject,
   Middleware,
   Plugin,
-  AdapterRegistration,
   useGlobalMiddleware,
 } from "@unilab/urpc-core";
 import { BuiltinPlugin } from "@unilab/builtin-plugin";
@@ -107,7 +105,7 @@ export class URPC {
         });
       });
       console.log(
-        `✅ Registered global adapters: ${globalAdapters
+        `✅ Registered Global Adapters: ${globalAdapters
           .map((a) => `${a.name}`)
           .join(", ")}`
       );
@@ -363,6 +361,53 @@ export class URPC {
         return handleError(error, c);
       }
     });
+
+    this.app.post("/:entity/call", async (c) => {
+      try {
+        const entity = c.req.param("entity");
+        const source =
+          c.req.query("source") || this.entityConfigs[entity]?.defaultSource;
+        const contextStr = c.req.query("context");
+        const context = contextStr ? JSON.parse(contextStr) : undefined;
+
+        if (!source) {
+          return c.json({ error: "source parameter is required" }, 400);
+        }
+
+        const body = await c.req.json();
+        if (!body.data) {
+          return c.json({ error: "data field is required" }, 400);
+        }
+
+        const repo = getRepo(entity, source!);
+        if (!repo) {
+          return c.json({ error: "Repository not found" }, 404);
+        }
+
+        const result = await repo.call(
+          body.data,
+          {
+            entity,
+            source,
+            context,
+          },
+          {
+            honoCtx: c,
+            stream: context?.stream,
+          }
+        );
+
+        // If the result is a Response object (stream), return it directly
+        if (result instanceof Response) {
+          return result;
+        }
+
+        // Otherwise, wrap it in a JSON response
+        return c.json({ data: result });
+      } catch (error) {
+        return handleError(error, c);
+      }
+    });
   }
 
   static getApp() {
@@ -375,5 +420,9 @@ export class URPC {
 
   static getEntitySources(): Record<string, string[]> {
     return this.entitySources;
+  }
+
+  static getEntityConfigs(): EntityConfigs {
+    return this.entityConfigs;
   }
 }

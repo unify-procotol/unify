@@ -1,11 +1,15 @@
 {
-  "name": "@unilab/urpc-ai",
+  "name": "@unilab/mastra-plugin",
   "version": "0.0.2",
-  "description": "AI integration for the Unify RPC framework",
+  "description": "Mastra plugin for the Unify RPC framework",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {
-    ".": "./dist/index.js"
+    ".": "./dist/index.js",
+    "./entities": "./dist/entities/index.js",
+    "./hono": "./dist/hono/index.js",
+    "./next-app-router": "./dist/next-app-router/index.js",
+    "./next-pages-router": "./dist/next-pages-router/index.js"
   },
   "publishConfig": {
     "access": "public"
@@ -19,15 +23,15 @@
   "keywords": [
     "unify",
     "urpc",
-    "ai",
-    "integration"
+    "mastra",
+    "plugin"
   ],
   "author": "",
   "license": "MIT",
   "dependencies": {
     "@mastra/core": "^0.10.12",
     "@openrouter/ai-sdk-provider": "^0.7.2",
-    "@unilab/urpc-core": "^0.0.4"
+    "@unilab/urpc-core": "^0.0.5"
   },
   "devDependencies": {
     "@types/node": "^20.10.0",
@@ -40,6 +44,6 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/unifi-lab/unify.git",
-    "directory": "packages/urpc-ai"
+    "directory": "packages/mastra-plugin"
   }
 }
