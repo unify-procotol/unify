@@ -80,9 +80,7 @@ export class URPC {
       console.log(
         `✅ Registered Plugin Adapters: ${adapters
           .map((a) => {
-            const adapterName =
-              (a.adapter.constructor as any).adapterName ||
-              a.adapter.constructor.name;
+            const adapterName = extractAdapterName(a.adapter);
             return `${adapterName}`;
           })
           .join(", ")}`

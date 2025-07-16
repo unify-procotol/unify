@@ -13,6 +13,7 @@ import { GridLayout } from "./GridLayout";
 import { ListLayout } from "./ListLayout";
 import { DashboardLayout } from "./DashboardLayout";
 import { CustomLayout } from "./CustomLayout";
+import { extractEntityClassName } from "@unilab/urpc-core";
 
 /**
  * Check if we're running on the client side
@@ -155,7 +156,7 @@ export const UniRender = forwardRef<UniRenderRef, UniRenderProps>(
 
     const isEntityClass = typeof entityInput != "string";
     const entityName = isEntityClass
-      ? entityInput.name || "Entity"
+      ? extractEntityClassName(entityInput)
       : entityInput;
     const entityClass = isEntityClass ? entityInput : null;
 

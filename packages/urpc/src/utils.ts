@@ -6,7 +6,11 @@ import type {
   DeletionArgs,
   CallArgs,
 } from "@unilab/urpc-core";
-import { simplifyEntityName, getRepo } from "@unilab/urpc-core";
+import {
+  simplifyEntityName,
+  getRepo,
+  extractEntityClassName,
+} from "@unilab/urpc-core";
 import type {
   LocalConfig,
   HttpClientConfig,
@@ -30,21 +34,19 @@ export function isHybridConfig(config: URPCConfig): config is HybridConfig {
   return "plugins" in config && "baseUrl" in config;
 }
 
-export function getEntityName<T extends Record<string, any>>(
-  entity: RepoOptions<T>["entity"]
-): string {
-  const isEntityClass = typeof entity === "function" && "name" in entity;
-  return simplifyEntityName(isEntityClass ? entity.name : entity);
+export function getEntityName(entity: any): string {
+  return simplifyEntityName(
+    isEntityClass(entity) ? extractEntityClassName(entity) : entity
+  );
 }
 
-export function isEntityClass<T extends Record<string, any>>(
-  entity: RepoOptions<T>["entity"]
-): entity is new () => T {
-  return typeof entity === "function" && "name" in entity;
+export function isEntityClass(entity: any) {
+  const isEntityClass = typeof entity != "string";
+  return isEntityClass;
 }
 
 export function createEntityInstance<T extends Record<string, any>>(
-  entity: RepoOptions<T>["entity"],
+  entity: any,
   data: T
 ): T {
   if (isEntityClass(entity)) {
@@ -56,7 +58,7 @@ export function createEntityInstance<T extends Record<string, any>>(
 }
 
 export function createEntityInstances<T extends Record<string, any>>(
-  entity: RepoOptions<T>["entity"],
+  entity: any,
   dataArray: T[]
 ): T[] {
   if (isEntityClass(entity)) {
