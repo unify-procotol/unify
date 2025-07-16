@@ -257,7 +257,7 @@ Remember:
         source: source,
         urpc_code: urpc_code,
         data: null,
-        message: `[urpc code]: ${urpc_code}, error occurred while executing operation.`,
+        message: `Error occurred while executing operation.`,
       };
     }
   }
