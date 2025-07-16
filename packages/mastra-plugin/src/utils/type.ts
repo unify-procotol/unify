@@ -11,7 +11,7 @@ export interface URPC {
 }
 
 export interface MastraOptions {
-  model?: string;
+  defaultModel?: string;
   openrouterApiKey?: string;
   debug?: boolean;
 }

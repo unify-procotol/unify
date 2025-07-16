@@ -83,14 +83,6 @@ export class URPC {
       adapters.forEach(({ entity, source, adapter }) =>
         registerAdapter(entity, source, adapter)
       );
-      console.log(
-        `✅ Registered Plugin Adapters: ${adapters
-          .map((a) => {
-            const adapterName = extractAdapterName(a.adapter);
-            return `${adapterName}`;
-          })
-          .join(", ")}`
-      );
     }
   }
 
@@ -112,11 +104,6 @@ export class URPC {
           registerAdapter(entityName, source, new Adapter());
         });
       });
-      console.log(
-        `✅ Registered Global Adapters: ${globalAdapters
-          .map((a) => `${extractAdapterName(a)}`)
-          .join(", ")}`
-      );
     }
   }
 

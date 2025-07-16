@@ -20,7 +20,7 @@ const app = URPC.init({
   plugins: [
     MyPlugin,
     MastraPlugin({
-      model: "openai/gpt-4o-mini",
+      defaultModel: "openai/gpt-4o-mini",
       openrouterApiKey: process.env.OPENROUTER_API_KEY,
       debug: true,
     }),

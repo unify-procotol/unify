@@ -1,6 +1,6 @@
 {
   "name": "@unilab/mastra-plugin",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Mastra plugin for the Unify RPC framework",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

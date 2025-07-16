@@ -5,6 +5,7 @@ import { convertEntitySourcesToMarkdown } from "./entity-source-to-markdown";
 import { MastraOptions, Output, URPC } from "./type";
 
 export class URPCAgent {
+  private openrouterApiKey: string;
   private instructions: string = "";
   private agent: Agent;
   private debug: boolean;
@@ -13,16 +14,12 @@ export class URPCAgent {
   constructor(options: MastraOptions & { URPC: URPC }) {
     this.URPC = options.URPC;
     this.debug = options.debug || false;
+    this.openrouterApiKey =
+      options.openrouterApiKey || process.env.OPENROUTER_API_KEY || "";
     this.instructions = this.generateInstructions();
-    this.agent = new Agent({
-      name: "URPC Smart Data Assistant",
-      description:
-        "An intelligent data operation assistant based on URPC, capable of understanding natural language and executing corresponding data operations",
-      instructions: this.instructions,
-      model: createOpenRouter({
-        apiKey: options.openrouterApiKey || process.env.OPENROUTER_API_KEY,
-      }).chat(options.model || "openai/gpt-4o-mini"),
-    });
+    this.agent = this.newAgent(
+      options.defaultModel || "google/gemini-2.0-flash-001"
+    );
   }
 
   private generateInstructions(): string {
@@ -147,8 +144,24 @@ Remember:
 `;
   }
 
-  async processRequest(userMessage: string): Promise<Output> {
+  private newAgent(model: string) {
+    return new Agent({
+      name: "URPC Smart Data Assistant",
+      description:
+        "An intelligent data operation assistant based on URPC, capable of understanding natural language and executing corresponding data operations",
+      instructions: this.instructions,
+      model: createOpenRouter({
+        apiKey: this.openrouterApiKey,
+      }).chat(model),
+    });
+  }
+
+  async processRequest(userMessage: string, model?: string): Promise<Output> {
     try {
+      if (model) {
+        this.agent = this.newAgent(model);
+      }
+
       const response = await this.agent.generate([
         {
           role: "system",
@@ -177,6 +190,10 @@ Remember:
   private async parseAndExecuteResponse(
     agentResponse: string
   ): Promise<Output> {
+    let entity = "",
+      source = "",
+      urpc_code = "",
+      operation = "";
     try {
       // Try to extract URPC operation from agent response
       // Improved regex that supports more complex parameter structures
@@ -190,31 +207,34 @@ Remember:
         }
 
         // Pre-generate random ID for create operations and replace placeholders in urpcCode
-        let actualUrpcCode = urpcCode;
+        urpc_code = urpcCode;
         if (urpcCode.includes("create") && urpcCode.includes("generated-id")) {
           const randomId = this.generateRandomId();
-          actualUrpcCode = urpcCode.replace(/generated-id/g, randomId);
+          urpc_code = urpcCode.replace(/generated-id/g, randomId);
           if (this.debug) {
-            console.log("[Generated rpcCode]:", actualUrpcCode);
+            console.log("[Generated rpcCode]:", urpc_code);
           }
         }
 
-        const { result, entity, source } =
-          await this.executeURPCCode(actualUrpcCode);
+        const executeResult = await this.executeURPCCode(urpc_code);
+
+        entity = executeResult.entity;
+        source = executeResult.source;
+        const data = executeResult.result;
 
         if (this.debug) {
-          console.log("[Result]:", result);
+          console.log("[Result]:", data);
         }
 
-        const operation = this.extractOperation(urpcCode);
+        operation = this.extractOperation(urpcCode);
 
         return {
           operation,
           entity,
           source,
-          data: result,
+          urpc_code,
+          data,
           message: "",
-          urpc_code: actualUrpcCode,
           success: true,
         };
       }
@@ -232,12 +252,12 @@ Remember:
     } catch (error: any) {
       return {
         success: false,
-        operation: "unknown",
-        entity: "unknown",
-        source: "unknown",
+        operation: operation,
+        entity: entity,
+        source: source,
+        urpc_code: urpc_code,
         data: null,
-        message: `Error occurred while executing operation: ${error.message}`,
-        urpc_code: null,
+        message: `[urpc code]: ${urpc_code}, error occurred while executing operation.`,
       };
     }
   }
@@ -458,7 +478,14 @@ Remember:
     }
   }
 
-  async streamResponse(userMessage: string): Promise<ReadableStream> {
+  async streamResponse(
+    userMessage: string,
+    model?: string
+  ): Promise<ReadableStream> {
+    if (model) {
+      this.agent = this.newAgent(model);
+    }
+
     const stream = await this.agent.stream([
       {
         role: "system",

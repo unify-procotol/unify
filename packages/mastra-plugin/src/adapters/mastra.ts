@@ -29,7 +29,7 @@ export class MastraAdapter extends BaseAdapter<ChatEntity> {
       stream?: boolean;
     }
   ): Promise<ChatEntity | Response | PageRouterStreamResponse> {
-    const { input } = args;
+    const { input, model } = args;
 
     if (!input) {
       throw new URPCError(ErrorCodes.BAD_REQUEST, "input is required");
@@ -48,7 +48,7 @@ export class MastraAdapter extends BaseAdapter<ChatEntity> {
         const { stream } = await import("hono/streaming");
         return stream(honoCtx, async (stream) => {
           const readableStream: ReadableStream<any> =
-            await agentInstance.streamResponse(input);
+            await agentInstance.streamResponse(input, model);
           const reader = readableStream.getReader();
           while (true) {
             const { done, value } = await reader.read();
@@ -63,7 +63,7 @@ export class MastraAdapter extends BaseAdapter<ChatEntity> {
         const stream = new ReadableStream({
           async start(controller) {
             const readableStream: ReadableStream<any> =
-              await agentInstance.streamResponse(input);
+              await agentInstance.streamResponse(input, model);
             const reader = readableStream.getReader();
             while (true) {
               const { done, value } = await reader.read();
@@ -93,7 +93,7 @@ export class MastraAdapter extends BaseAdapter<ChatEntity> {
 
             try {
               const readableStream: ReadableStream<any> =
-                await agentInstance.streamResponse(input);
+                await agentInstance.streamResponse(input, model);
               const reader = readableStream.getReader();
               const decoder = new TextDecoder();
 
@@ -116,7 +116,7 @@ export class MastraAdapter extends BaseAdapter<ChatEntity> {
       }
     }
 
-    const output = await agentInstance.processRequest(input);
+    const output = await agentInstance.processRequest(input, model);
     return {
       input,
       output,
