@@ -2,7 +2,7 @@ import { Fields } from "@unilab/urpc-core";
 
 export class Output {
   static displayName = "Output";
-  
+
   @Fields.string({
     description: "The operation to be performed",
   })
@@ -46,6 +46,12 @@ export class ChatEntity {
     description: "The input to the mastra model",
   })
   input: string = "";
+
+  @Fields.string({
+    optional: true,
+    description: "The model to be used",
+  })
+  model?: string;
 
   @Fields.record(() => Output, {
     optional: true,

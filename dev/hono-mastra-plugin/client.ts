@@ -44,6 +44,7 @@ const testAgent = async () => {
   }).call({
     // input: "Find all users, source is mock",
     input: "Find all users",
+    model: "google/gemini-2.0-flash-001",
   });
 
   if (result instanceof Response) {

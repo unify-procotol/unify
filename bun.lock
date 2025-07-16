@@ -348,7 +348,7 @@
     },
     "packages/mastra-plugin": {
       "name": "@unilab/mastra-plugin",
-      "version": "0.0.3",
+      "version": "0.0.4",
       "dependencies": {
         "@mastra/core": "^0.10.12",
         "@openrouter/ai-sdk-provider": "^0.7.2",
@@ -361,7 +361,7 @@
     },
     "packages/ukit": {
       "name": "@unilab/ukit",
-      "version": "0.0.6",
+      "version": "0.0.7",
       "dependencies": {
         "@radix-ui/react-alert-dialog": "^1.1.1",
         "@radix-ui/react-avatar": "^1.1.0",
