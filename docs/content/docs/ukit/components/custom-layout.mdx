@@ -1,0 +1,400 @@
+---
+title: Custom Layout
+description: Create completely custom layouts using render functions with automatic URPC integration and flexible design patterns
+---
+
+# Custom Layout
+
+The custom layout allows you to create completely custom data visualizations using render functions, giving you full control over the layout, styling, and behavior while maintaining automatic URPC integration and built-in features like pagination and actions.
+
+## 🎯 Basic Custom Layout
+
+<Tabs items={['Preview', 'Code']}>
+<Tab value="Preview">
+<UniRenderCustomLayout type="basic" />
+</Tab>
+<Tab value="Code">
+```tsx
+import { UniRender } from '@unilab/ukit';
+
+// Define your custom render function
+const renderCustomCardLayout = (data: any[], options: any) => {
+  return (
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      {data.map((record, index) => (
+        <div 
+          key={record.id || index}
+          className="bg-white border border-gray-200 rounded-lg hover:shadow-lg transition-all duration-300"
+        >
+          <div className="bg-gradient-to-br from-blue-500 to-purple-600 p-4 text-white">
+            <h3 className="font-semibold text-lg mb-2">{record.name}</h3>
+            <p className="text-sm opacity-90">{record.email}</p>
+          </div>
+          <div className="p-4">
+            <p className="text-sm text-gray-600 mb-3">{record.content}</p>
+            <div className="flex justify-between items-center">
+              <span className="text-xs text-gray-500">{record.role}</span>
+              <div className="flex gap-2">
+                <button 
+                  onClick={() => options.onEdit(record, index)}
+                  className="px-3 py-1 bg-blue-500 text-white text-xs rounded"
+                >
+                  Edit
+                </button>
+                <button 
+                  onClick={() => options.onDelete(record, index)}
+                  className="px-3 py-1 bg-red-500 text-white text-xs rounded"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+<UniRender
+  entity="user"
+  source="mock"
+  layout="custom"
+  render={renderCustomCardLayout}
+  config={{
+    name: { label: 'Title' },
+    content: { label: 'Content' },
+    role: { label: 'Role' },
+    type: { label: 'Type' },
+    category: { label: 'Category' },
+    status: { label: 'Status' },
+  }}
+  pagination={{
+    enabled: true,
+    pageSize: 6,
+  }}
+  onEdit={handleEdit}
+  onDelete={handleDelete}
+/>
+```
+</Tab>
+</Tabs>
+
+## 🎨 Magazine Style Layout
+
+Create a magazine-style layout with rich visual design and content preview.
+
+<Tabs items={['Preview', 'Code']}>
+<Tab value="Preview">
+<UniRenderCustomLayout type="magazine" />
+</Tab>
+<Tab value="Code">
+```tsx
+import { UniRender } from '@unilab/ukit';
+
+<UniRender
+  entity="article"
+  source="mock"
+  layout="custom"
+  render={renderCustomCardLayout}
+  config={{
+    name: { label: 'Article Title' },
+    content: { label: 'Content' },
+    role: { label: 'Department' },
+    type: { label: 'Type' },
+    category: { label: 'Category' },
+    status: { label: 'Status' },
+  }}
+  pagination={{
+    enabled: true,
+    pageSize: 8,
+  }}
+  onEdit={handleEdit}
+  onDelete={handleDelete}
+/>
+```
+</Tab>
+</Tabs>
+
+## 📱 Social Media Style Layout
+
+Perfect for social media posts, user profiles, or any content that needs a social media feel.
+
+<Tabs items={['Preview', 'Code']}>
+<Tab value="Preview">
+<UniRenderCustomLayout type="social" />
+</Tab>
+<Tab value="Code">
+```tsx
+import { UniRender } from '@unilab/ukit';
+
+<UniRender
+  entity="post"
+  source="mock"
+  layout="custom"
+  render={renderCustomCardLayout}
+  config={{
+    name: { label: 'Post Title' },
+    content: { label: 'Content' },
+    role: { label: 'User Role' },
+    type: { label: 'Post Type' },
+    category: { label: 'Category' },
+    status: { label: 'Status' },
+  }}
+  pagination={{
+    enabled: true,
+    pageSize: 9,
+  }}
+  onEdit={handleEdit}
+  onDelete={handleDelete}
+/>
+```
+</Tab>
+</Tabs>
+
+## 📝 Blog Style Layout
+
+Ideal for blog posts, articles, or any content-heavy applications.
+
+<Tabs items={['Preview', 'Code']}>
+<Tab value="Preview">
+<UniRenderCustomLayout type="blog" />
+</Tab>
+<Tab value="Code">
+```tsx
+import { UniRender } from '@unilab/ukit';
+
+<UniRender
+  entity="blog"
+  source="mock"
+  layout="custom"
+  render={renderCustomCardLayout}
+  config={{
+    name: { label: 'Blog Title' },
+    content: { label: 'Content' },
+    role: { label: 'Author Role' },
+    type: { label: 'Post Type' },
+    category: { label: 'Category' },
+    status: { label: 'Status' },
+  }}
+  pagination={{
+    enabled: true,
+    pageSize: 4,
+  }}
+  onEdit={handleEdit}
+  onDelete={handleDelete}
+/>
+```
+</Tab>
+</Tabs>
+
+## 🔸 Minimal Layout
+
+Clean and minimal design for simple data display.
+
+<Tabs items={['Preview', 'Code']}>
+<Tab value="Preview">
+<UniRenderCustomLayout type="minimal" />
+</Tab>
+<Tab value="Code">
+```tsx
+import { UniRender } from '@unilab/ukit';
+
+<UniRender
+  entity="item"
+  source="mock"
+  layout="custom"
+  render={renderCustomCardLayout}
+  config={{
+    name: { label: 'Title' },
+    content: { label: 'Description' },
+    role: { label: 'Role' },
+    status: { label: 'Status' },
+  }}
+  pagination={{
+    enabled: true,
+    pageSize: 12,
+  }}
+  onEdit={handleEdit}
+  onDelete={handleDelete}
+/>
+```
+</Tab>
+</Tabs>
+
+## 🛠️ Custom Render Function
+
+The render function receives two parameters:
+
+### Parameters
+
+- **data**: `any[]` - Array of records to render
+- **options**: `object` - Options object containing:
+  - `onEdit`: Function to handle edit actions
+  - `onDelete`: Function to handle delete actions
+  - `deletingIndex`: Index of currently deleting item
+  - `startIndex`: Starting index for pagination
+
+### Helper Functions
+
+You can create helper functions to make your render function cleaner:
+
+```tsx
+// Color generation
+const getRandomColor = () => {
+  const colors = [
+    'bg-gradient-to-br from-blue-500 to-purple-600',
+    'bg-gradient-to-br from-green-500 to-teal-600',
+    'bg-gradient-to-br from-orange-500 to-red-600',
+    'bg-gradient-to-br from-pink-500 to-rose-600',
+  ];
+  return colors[Math.floor(Math.random() * colors.length)];
+};
+
+// Initial generation
+const getInitials = (name: string) => {
+  return name.split(' ').map(word => word[0]).join('').toUpperCase().slice(0, 2);
+};
+
+// Date formatting
+const formatDate = (dateString: string) => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-US', { 
+    month: 'short', 
+    day: 'numeric'
+  });
+};
+
+// Reading time estimation
+const getReadingTime = (content: string) => {
+  const words = content.split(' ').length;
+  const minutes = Math.ceil(words / 200);
+  return `${minutes}m read time`;
+};
+
+// Tag extraction
+const getTags = (record: any) => {
+  const tags = [];
+  if (record.type) tags.push(`#${record.type}`);
+  if (record.category) tags.push(`#${record.category}`);
+  if (record.status) tags.push(`#${record.status}`);
+  return tags.slice(0, 4);
+};
+```
+
+## 🎛️ Props Reference
+
+### UniRender Props for Custom Layout
+
+| Prop | Type | Description | Default |
+|------|------|-------------|---------|
+| `entity` | `string` | Entity name | Required |
+| `source` | `string` | Data source | Required |
+| `layout` | `'custom'` | Layout type | Required |
+| `render` | `function` | Custom render function | Required |
+| `config` | `object` | Field configuration | `{}` |
+| `pagination` | `object` | Pagination settings | `{ enabled: false }` |
+| `onEdit` | `function` | Edit handler | `undefined` |
+| `onDelete` | `function` | Delete handler | `undefined` |
+| `loading` | `boolean` | Loading state | `false` |
+| `error` | `string \| null` | Error message | `null` |
+
+### Pagination Configuration
+
+```tsx
+pagination={{
+  enabled: true,
+  pageSize: 6,
+  showPageInfo: true,
+  showFirstLast: true,
+  showPrevNext: true,
+}}
+```
+
+### Action Handlers
+
+```tsx
+const handleEdit = async (record: any, index: number) => {
+  // Handle edit logic
+  console.log('Editing record:', record);
+};
+
+const handleDelete = async (record: any, index: number) => {
+  // Handle delete logic
+  console.log('Deleting record:', record);
+};
+```
+
+## 🎯 Best Practices
+
+### 1. **Responsive Design**
+```tsx
+<div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+  {/* Cards */}
+</div>
+```
+
+### 2. **Performance Optimization**
+```tsx
+// Use React.memo for render function if it's expensive
+const renderCustomLayout = React.memo((data: any[], options: any) => {
+  // Your render logic
+});
+```
+
+### 3. **Accessibility**
+```tsx
+<button
+  onClick={() => options.onEdit(record, index)}
+  aria-label={`Edit ${record.name}`}
+  className="btn btn-primary"
+>
+  Edit
+</button>
+```
+
+### 4. **Loading States**
+```tsx
+{options.deletingIndex === index ? (
+  <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full" />
+) : (
+  'Delete'
+)}
+```
+
+### 5. **Error Handling**
+```tsx
+const renderCustomLayout = (data: any[], options: any) => {
+  if (!data || data.length === 0) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-gray-500">No data available</p>
+      </div>
+    );
+  }
+  
+  return (
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      {data.map((record, index) => (
+        // Your card component
+      ))}
+    </div>
+  );
+};
+```
+
+## 🔗 Related Components
+
+- [Table Layout](/docs/ukit/components/table-layout) - Structured data display
+- [Card Layout](/docs/ukit/components/card-layout) - Built-in card layouts
+- [Grid Layout](/docs/ukit/components/grid) - Grid-based layouts
+- [List Layout](/docs/ukit/components/list) - List-based layouts
+
+## 💡 Tips
+
+1. **Use consistent styling** across your custom layouts
+2. **Handle edge cases** like empty data or missing fields
+3. **Add hover effects** to improve user interaction
+4. **Consider mobile responsiveness** in your designs
+5. **Use semantic HTML** for better accessibility
+6. **Test with different data shapes** to ensure robustness 

@@ -12,6 +12,7 @@ import { CardLayout } from "./CardLayout";
 import { GridLayout } from "./GridLayout";
 import { ListLayout } from "./ListLayout";
 import { DashboardLayout } from "./DashboardLayout";
+import { CustomLayout } from "./CustomLayout";
 
 /**
  * Check if we're running on the client side
@@ -141,6 +142,8 @@ export const UniRender = forwardRef<UniRenderRef, UniRenderProps>(
       onDelete,
       onSave,
       className = "",
+      render,
+      pagination,
     },
     ref
   ) => {
@@ -538,6 +541,18 @@ export const UniRender = forwardRef<UniRenderRef, UniRenderProps>(
           return <ListLayout {...layoutProps} {...commonConfig} />;
         case "dashboard":
           return <DashboardLayout {...layoutProps} />;
+        case "custom":
+          return (
+            <CustomLayout
+              {...layoutProps}
+              {...commonConfig}
+              render={render}
+              enablePagination={pagination?.enabled ?? true}
+              pageSize={pagination?.pageSize ?? 10}
+              currentPage={pagination?.currentPage ?? 1}
+              onPageChange={pagination?.onPageChange}
+            />
+          );
         default:
           return (
             <TableLayout

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { repo, URPC } from "@unilab/urpc";
-import { UniRender, FieldConfig, UniRenderRef } from "@unilab/ukit";
+import { UniRender, FieldConfig, UniRenderRef, LayoutType } from "@unilab/ukit";
 import { Button } from "./ui/button";
 import { Card, CardContent } from "./ui/card";
 import { Badge } from "./ui/badge";
@@ -40,6 +40,7 @@ export function StudioHome({ isConnected, baseUrl }: StudioHomeProps) {
   );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentLayout, setCurrentLayout] = useState<'table' | 'custom'>('table');
 
 
 
@@ -258,7 +259,7 @@ export function StudioHome({ isConnected, baseUrl }: StudioHomeProps) {
         email: {
           order: 3,
           label: "Email Address",
-          render: (value) => (
+          render: (value: any) => (
             <a
               href={`mailto:${value}`}
               className="text-blue-400 hover:underline"
@@ -271,7 +272,7 @@ export function StudioHome({ isConnected, baseUrl }: StudioHomeProps) {
           order: 4,
           label: "Age",
           align: "center",
-          render: (value) => (
+          render: (value: any) => (
             <span
               className={`px-2 py-1 rounded text-xs ${value >= 18
                 ? "bg-green-600/20 text-green-400"
@@ -285,7 +286,7 @@ export function StudioHome({ isConnected, baseUrl }: StudioHomeProps) {
         createdAt: {
           order: 5,
           label: "Created",
-          render: (value) => (
+          render: (value: any) => (
             <span className="text-cyan-400">
               {new Date(value).toLocaleDateString()}
             </span>
@@ -296,6 +297,191 @@ export function StudioHome({ isConnected, baseUrl }: StudioHomeProps) {
 
     // Default configuration for other entities
     return baseConfig;
+  };
+
+  // Custom render function for card layout
+  const renderCustomCardLayout = (data: any[], options: any) => {
+    const getRandomColor = () => {
+      const colors = [
+        'bg-gradient-to-br from-blue-500 to-purple-600',
+        'bg-gradient-to-br from-green-500 to-teal-600', 
+        'bg-gradient-to-br from-orange-500 to-red-600',
+        'bg-gradient-to-br from-pink-500 to-rose-600',
+        'bg-gradient-to-br from-indigo-500 to-blue-600',
+        'bg-gradient-to-br from-yellow-500 to-orange-600',
+        'bg-gradient-to-br from-purple-500 to-pink-600',
+        'bg-gradient-to-br from-cyan-500 to-blue-600',
+      ];
+      return colors[Math.floor(Math.random() * colors.length)];
+    };
+
+    const getAuthorInitials = (name: string) => {
+      if (!name) return "??";
+      return name.split(' ').map(word => word[0]).join('').toUpperCase().slice(0, 2);
+    };
+
+    const formatDate = (dateString: string) => {
+      if (!dateString) return "Unknown";
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-US', { 
+        month: 'short', 
+        day: 'numeric'
+      });
+    };
+
+    const getReadingTime = (content: string) => {
+      if (!content) return "1m read time";
+      const words = content.split(' ').length;
+      const minutes = Math.ceil(words / 200);
+      return `${minutes}m read time`;
+    };
+
+    const getTags = (record: any) => {
+      const tags = [];
+      if (record.type) tags.push(`#${record.type}`);
+      if (record.category) tags.push(`#${record.category}`);
+      if (record.status) tags.push(`#${record.status}`);
+      if (record.role) tags.push(`#${record.role}`);
+      if (tags.length === 0) {
+        tags.push('#general');
+      }
+      return tags.slice(0, 4); // Limit to 4 tags
+    };
+
+    return (
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {data.map((record, index) => {
+          const cardColor = getRandomColor();
+          const authorName = record.name || record.title || record.username || `Item ${index + 1}`;
+          const content = record.content || record.description || record.details || "";
+          const createdDate = record.createdAt || record.updatedAt || record.date || new Date().toISOString();
+          const tags = getTags(record);
+          
+          return (
+            <Card 
+              key={record.id || index} 
+              className="group overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
+            >
+              {/* Card Header with gradient background */}
+              <div className={`${cardColor} p-4 text-white relative`}>
+                <div className="absolute top-2 right-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 w-6 p-0 text-white hover:bg-white/20"
+                    onClick={() => {/* Handle more options */}}
+                  >
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
+                    </svg>
+                  </Button>
+                </div>
+                
+                {/* Author avatar */}
+                <div className="flex items-center space-x-3 mb-3">
+                  <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+                    <span className="text-xs font-semibold">
+                      {getAuthorInitials(authorName)}
+                    </span>
+                  </div>
+                  <div>
+                    <div className="text-sm font-medium">{selectedEntity?.name || "Entity"}</div>
+                  </div>
+                </div>
+
+                                 {/* Title/Name */}
+                 <h3 className="font-semibold text-lg mb-2 overflow-hidden" style={{ 
+                   display: '-webkit-box',
+                   WebkitLineClamp: 2,
+                   WebkitBoxOrient: 'vertical' as any
+                 }}>
+                   {authorName}
+                 </h3>
+
+                {/* Meta info */}
+                <div className="flex items-center justify-between text-xs text-white/80">
+                  <span>{formatDate(createdDate)}</span>
+                  <span>•</span>
+                  <span>{getReadingTime(content)}</span>
+                </div>
+              </div>
+
+              {/* Card Content */}
+              <CardContent className="p-4">
+                {/* Tags */}
+                <div className="flex flex-wrap gap-1 mb-3">
+                  {tags.map((tag, tagIndex) => (
+                    <Badge 
+                      key={tagIndex} 
+                      variant="secondary" 
+                      className="text-xs px-2 py-0.5"
+                    >
+                      {tag}
+                    </Badge>
+                  ))}
+                </div>
+
+                                 {/* Content preview */}
+                 {content && (
+                   <p className="text-sm text-muted-foreground mb-3 overflow-hidden" style={{ 
+                     display: '-webkit-box',
+                     WebkitLineClamp: 3,
+                     WebkitBoxOrient: 'vertical' as any
+                   }}>
+                     {content}
+                   </p>
+                 )}
+
+                {/* Record details */}
+                <div className="space-y-2 text-xs">
+                  {Object.entries(record).slice(0, 3).map(([key, value]) => (
+                    <div key={key} className="flex justify-between">
+                      <span className="text-muted-foreground capitalize">{key}:</span>
+                      <span className="font-medium text-right max-w-32 truncate">
+                        {typeof value === 'object' ? JSON.stringify(value) : String(value)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Action buttons */}
+                <div className="flex items-center justify-between pt-4 border-t mt-4">
+                  <div className="flex items-center space-x-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => options.onEdit(record, index)}
+                      className="h-8 px-3 text-xs"
+                    >
+                      <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                      </svg>
+                      Edit
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => options.onDelete(record, index)}
+                      className="h-8 px-3 text-xs text-red-600 hover:text-red-700"
+                      disabled={options.deletingIndex === index}
+                    >
+                      <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                      </svg>
+                      {options.deletingIndex === index ? 'Deleting...' : 'Delete'}
+                    </Button>
+                  </div>
+
+                  <div className="text-xs text-muted-foreground">
+                    #{options.startIndex + index + 1}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
+    );
   };
 
 
@@ -578,6 +764,35 @@ export function StudioHome({ isConnected, baseUrl }: StudioHomeProps) {
               </>
             )}
           </div>
+          
+          {/* Layout Selector */}
+          <div className="flex items-center space-x-2">
+            <span className="text-xs text-muted-foreground">Layout:</span>
+            <div className="flex items-center border rounded-md">
+              <Button
+                variant={currentLayout === 'table' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setCurrentLayout('table')}
+                className="h-7 px-2 text-xs rounded-r-none"
+              >
+                <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h18M3 14h18M3 18h18M3 6h18" />
+                </svg>
+                Table
+              </Button>
+              <Button
+                variant={currentLayout === 'custom' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setCurrentLayout('custom')}
+                className="h-7 px-2 text-xs rounded-l-none"
+              >
+                <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                </svg>
+                Cards
+              </Button>
+            </div>
+          </div>
         </Card>
 
         {/* Data Content */}
@@ -590,7 +805,7 @@ export function StudioHome({ isConnected, baseUrl }: StudioHomeProps) {
                   ref={uniRenderRef}
                   entity={selectedEntity.name}
                   source={selectedSource}
-                  layout="table"
+                  layout={currentLayout as any}
                   config={getFieldConfig(selectedEntity.name)}
                   generalConfig={{
                     showActions: true,
@@ -601,6 +816,13 @@ export function StudioHome({ isConnected, baseUrl }: StudioHomeProps) {
                   }}
                   loading={currentSourceData?.loading}
                   error={currentSourceData?.error}
+                  {...(currentLayout === 'custom' ? {
+                    render: renderCustomCardLayout,
+                    pagination: {
+                      enabled: true,
+                      pageSize: 8,
+                    }
+                  } : {})}
                 />
               </div>
             ) : (

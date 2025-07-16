@@ -7,6 +7,8 @@
     "card-layout", 
     "form",
     "grid",
-    "list"
+    "list",
+    "dashboard",
+    "custom-layout"
   ]
 } 

@@ -3,7 +3,7 @@ import { ReactNode } from "react";
 /**
  * Available layout types for rendering data
  */
-export type LayoutType = 'table' | 'form' | 'card' | 'grid' | 'list' | 'dashboard';
+export type LayoutType = 'table' | 'form' | 'card' | 'grid' | 'list' | 'dashboard' | 'custom';
 
 /**
  * Configuration for individual fields
@@ -167,6 +167,31 @@ export interface UniRenderProps {
   onSave?: (record: any, index: number) => Promise<void> | void;
   /** Additional CSS class names */
   className?: string;
+  
+  // Custom layout specific props
+  /** Custom render function for custom layout */
+  render?: (data: any[], options: {
+    fields: EntityField[];
+    config: Record<string, FieldConfig>;
+    generalConfig: GeneralConfig;
+    onEdit: (record: any, index: number) => void;
+    onDelete: (record: any, index: number) => void;
+    createActionHandler: (action: any, record: any, index: number) => () => Promise<void>;
+    deletingIndex: number | null;
+    currentPage: number;
+    pageSize: number;
+    startIndex: number;
+    endIndex: number;
+    totalRecords: number;
+  }) => ReactNode;
+  
+  /** Pagination configuration for custom layout */
+  pagination?: {
+    enabled?: boolean;
+    pageSize?: number;
+    currentPage?: number;
+    onPageChange?: (page: number) => void;
+  };
 }
 
 /**

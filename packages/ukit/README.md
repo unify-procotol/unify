@@ -202,3 +202,182 @@ Want custom colors? Just override with CSS variables:
 ## 📄 License
 
 MIT 
+
+## Custom Layout
+
+UniRender now supports a custom layout type that allows you to define your own rendering logic while still benefiting from built-in pagination, filtering, and data management.
+
+### Basic Usage
+
+```jsx
+import { UniRender } from '@unilab/ukit';
+
+function CustomCardView() {
+  return (
+    <UniRender
+      entity="User"
+      source="memory"
+      layout="custom"
+      render={(data, options) => (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {data.map((record, index) => (
+            <div key={index} className="border rounded-lg p-4 hover:shadow-md">
+              <h3 className="font-semibold">{record.name}</h3>
+              <p className="text-sm text-gray-600">{record.email}</p>
+              <div className="mt-2 flex gap-2">
+                <button 
+                  onClick={() => options.onEdit(record, index)}
+                  className="text-blue-600 hover:underline"
+                >
+                  Edit
+                </button>
+                <button 
+                  onClick={() => options.onDelete(record, index)}
+                  className="text-red-600 hover:underline"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+      pagination={{
+        enabled: true,
+        pageSize: 6,
+      }}
+    />
+  );
+}
+```
+
+### Advanced Usage with Custom Actions
+
+```jsx
+import { UniRender } from '@unilab/ukit';
+
+function AdvancedCustomView() {
+  return (
+    <UniRender
+      entity="User"
+      source="memory"
+      layout="custom"
+      generalConfig={{
+        actions: {
+          custom: [
+            {
+              label: 'View Profile',
+              onClick: async (record, index, entityInstance, refresh) => {
+                // Custom action logic
+                console.log('Viewing profile:', record);
+              }
+            },
+            {
+              label: 'Send Message',
+              onClick: async (record, index, entityInstance, refresh) => {
+                // Another custom action
+                console.log('Sending message to:', record.email);
+              }
+            }
+          ]
+        }
+      }}
+      render={(data, options) => (
+        <div className="space-y-4">
+          {data.map((record, index) => (
+            <div key={index} className="border rounded-lg p-6 bg-white shadow-sm">
+              <div className="flex justify-between items-start">
+                <div className="flex-1">
+                  <h3 className="text-lg font-semibold">{record.name}</h3>
+                  <p className="text-gray-600 mt-1">{record.email}</p>
+                  <div className="mt-3 text-sm text-gray-500">
+                    Record #{options.startIndex + index + 1} of {options.totalRecords}
+                  </div>
+                </div>
+                
+                <div className="flex gap-2">
+                  {/* Built-in edit/delete actions */}
+                  <button 
+                    onClick={() => options.onEdit(record, index)}
+                    className="px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
+                  >
+                    Edit
+                  </button>
+                  <button 
+                    onClick={() => options.onDelete(record, index)}
+                    className="px-3 py-1 text-sm bg-red-100 text-red-700 rounded hover:bg-red-200"
+                    disabled={options.deletingIndex === index}
+                  >
+                    {options.deletingIndex === index ? 'Deleting...' : 'Delete'}
+                  </button>
+                  
+                  {/* Custom actions */}
+                  {options.generalConfig?.actions?.custom?.map((action, actionIndex) => (
+                    <button
+                      key={actionIndex}
+                      onClick={options.createActionHandler(action, record, index)}
+                      className="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200"
+                    >
+                      {action.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+      pagination={{
+        enabled: true,
+        pageSize: 5,
+      }}
+    />
+  );
+}
+```
+
+### Custom Layout Options
+
+The `render` function receives data and an options object with the following properties:
+
+- `fields`: Array of entity fields
+- `config`: Field configuration
+- `generalConfig`: General configuration
+- `onEdit`: Function to trigger edit modal
+- `onDelete`: Function to trigger delete action
+- `createActionHandler`: Function to create custom action handlers
+- `deletingIndex`: Index of record being deleted (for loading states)
+- `currentPage`: Current page number
+- `pageSize`: Number of records per page
+- `startIndex`: Starting index of current page
+- `endIndex`: Ending index of current page
+- `totalRecords`: Total number of records
+
+### Pagination Configuration
+
+```jsx
+<UniRender
+  layout="custom"
+  pagination={{
+    enabled: true,           // Enable/disable pagination
+    pageSize: 10,           // Records per page
+    currentPage: 1,         // Current page (for controlled pagination)
+    onPageChange: (page) => {  // Page change handler
+      console.log('Page changed to:', page);
+    }
+  }}
+  render={(data, options) => {
+    // Your custom rendering logic
+    return <div>...</div>;
+  }}
+/>
+```
+
+The custom layout automatically handles:
+- Header with search and filter controls
+- Pagination controls
+- Add record modal
+- Edit record modal
+- Delete confirmation modal
+- Loading states
+- Error handling 

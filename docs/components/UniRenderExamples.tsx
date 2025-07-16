@@ -40,6 +40,9 @@ export function UniRenderExample({ type }: ExampleProps) {
             user: {
               defaultSource: "mock",
             },
+            schema: {
+              defaultSource: "_global",
+            },
           },
           globalAdapters: [MockAdapter],
         });
