@@ -39,7 +39,7 @@ const CodeHighlighter: React.FC<CodeHighlighterProps> = ({
       <code
         ref={codeRef}
         className={cn(
-          `language-${language} block whitespace-pre`,
+          `language-${language} block whitespace-pre p-2`,
           classNames?.code
         )}
       >
