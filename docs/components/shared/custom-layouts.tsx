@@ -54,7 +54,7 @@ export const renderCustomCardLayout = (data: any[], options: any) => {
         
         return (
           <div 
-            key={record.id || index} 
+            key={record.id + Math.random() || index} 
             className="bg-white border border-gray-200 rounded-lg hover:shadow-lg transition-all duration-300 cursor-pointer"
           >
             {/* Cover Image */}

@@ -4,27 +4,39 @@ import { UniRender } from "@unilab/ukit";
 import { useURPCProvider } from "./shared/urpc-provider";
 import { LoadingState, ErrorState } from "./shared/common-ui";
 import { renderCustomCardLayout } from "./shared/custom-layouts";
+import { useEffect, useState } from "react";
 
 interface ExampleProps {
   type: 'basic' | 'table-editable' | 'card' | 'form' | 'grid' | 'list' | 'dashboard' | 'loading' | 'error' | 'empty' | 'custom-basic' | 'custom-magazine' | 'custom-social' | 'custom-blog' | 'custom-minimal';
 }
 
 export function UniRenderExample({ type }: ExampleProps) {
+  const [isClient, setIsClient] = useState(false);
   const { isInitialized, loading, error, retryInitialization } = useURPCProvider();
 
-  // Show loading state
+  // Ensure we only render on client side
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  // Don't render anything on server side
+  if (!isClient) {
+    return <LoadingState />;
+  }
+
+  // Show loading state while URPC is initializing
   if (loading) {
     return <LoadingState />;
   }
 
-  // Show error state
+  // Show error state if URPC initialization failed
   if (error) {
     return <ErrorState error={error} onRetry={retryInitialization} />;
   }
 
-  // Only render after URPC is initialized
+  // Only render UniRender after URPC is fully initialized
   if (!isInitialized) {
-    return null;
+    return <LoadingState />;
   }
 
   const handleEdit = async (updatedRecord: any, index: number) => {
@@ -37,22 +49,41 @@ export function UniRenderExample({ type }: ExampleProps) {
     console.log('Deleted record:', record);
   };
 
+  // Create a wrapper component that ensures URPC is ready
+  const SafeUniRender = (props: any) => {
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+      // Add a small delay to ensure URPC is fully ready
+      const timer = setTimeout(() => {
+        setMounted(true);
+      }, 100);
+
+      return () => clearTimeout(timer);
+    }, []);
+
+    if (!mounted) {
+      return <LoadingState />;
+    }
+
+    return <UniRender {...props} />;
+  };
+
   const examples = {
     basic: {
       entity: "user",
-      source: "mock",
+      source: "memory",
       layout: 'table' as const,
       config: {
         id: { label: 'ID', width: '60px' },
         name: { label: 'Full Name' },
         email: { label: 'Email Address' },
         role: { label: 'Role' },
-        isActive: { 
+        isActive: {
           label: 'Status',
           render: (value: boolean) => (
-            <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-              value ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-            }`}>
+            <span className={`px-2 py-1 rounded-full text-xs font-semibold ${value ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+              }`}>
               {value ? 'Active' : 'Inactive'}
             </span>
           )
@@ -68,36 +99,35 @@ export function UniRenderExample({ type }: ExampleProps) {
     },
     'table-editable': {
       entity: "user",
-      source: "mock",
+      source: "memory",
       layout: 'table' as const,
       config: {
         id: { label: 'ID', width: '60px', editable: false },
-        name: { 
-          label: 'Full Name', 
+        name: {
+          label: 'Full Name',
           editable: true,
           required: true,
           type: 'text'
         },
-        email: { 
-          label: 'Email Address', 
+        email: {
+          label: 'Email Address',
           editable: true,
           required: true,
           type: 'email'
         },
-        role: { 
+        role: {
           label: 'Role',
           editable: true,
           type: 'select',
           options: ['Admin', 'User', 'Manager']
         },
-        isActive: { 
+        isActive: {
           label: 'Status',
           editable: true,
           type: 'checkbox',
           render: (value: boolean) => (
-            <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-              value ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-            }`}>
+            <span className={`px-2 py-1 rounded-full text-xs font-semibold ${value ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+              }`}>
               {value ? 'Active' : 'Inactive'}
             </span>
           )
@@ -116,10 +146,10 @@ export function UniRenderExample({ type }: ExampleProps) {
     },
     card: {
       entity: "user",
-      source: "mock",
+      source: "memory",
       layout: 'card' as const,
       config: {
-        name: { 
+        name: {
           label: 'Name',
           render: (value: string) => (
             <span className="text-lg font-bold text-gray-900">
@@ -127,14 +157,13 @@ export function UniRenderExample({ type }: ExampleProps) {
             </span>
           )
         },
-        role: { 
+        role: {
           label: 'Role',
           render: (value: string) => (
-            <span className={`px-2 py-1 rounded text-xs font-semibold ${
-              value === 'Admin' ? 'bg-purple-100 text-purple-800' :
-              value === 'Manager' ? 'bg-blue-100 text-blue-800' :
-              'bg-green-100 text-green-800'
-            }`}>
+            <span className={`px-2 py-1 rounded text-xs font-semibold ${value === 'Admin' ? 'bg-purple-100 text-purple-800' :
+                value === 'Manager' ? 'bg-blue-100 text-blue-800' :
+                  'bg-green-100 text-green-800'
+              }`}>
               {value}
             </span>
           )
@@ -147,12 +176,11 @@ export function UniRenderExample({ type }: ExampleProps) {
             </span>
           )
         },
-        isActive: { 
+        isActive: {
           label: 'Status',
           render: (value: boolean) => (
-            <span className={`px-2 py-1 rounded text-xs font-semibold ${
-              value ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-            }`}>
+            <span className={`px-2 py-1 rounded text-xs font-semibold ${value ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+              }`}>
               {value ? 'Active' : 'Inactive'}
             </span>
           )
@@ -161,7 +189,7 @@ export function UniRenderExample({ type }: ExampleProps) {
     },
     form: {
       entity: "user",
-      source: "mock",
+      source: "memory",
       query: {
         where: { id: "1" }
       },
@@ -170,12 +198,11 @@ export function UniRenderExample({ type }: ExampleProps) {
         name: { label: 'Full Name' },
         email: { label: 'Email Address' },
         role: { label: 'Role' },
-        isActive: { 
+        isActive: {
           label: 'Active Status',
           render: (value: boolean) => (
-            <span className={`px-2 py-1 rounded text-xs font-semibold ${
-              value ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-            }`}>
+            <span className={`px-2 py-1 rounded text-xs font-semibold ${value ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+              }`}>
               {value ? 'Active' : 'Inactive'}
             </span>
           )
@@ -184,11 +211,11 @@ export function UniRenderExample({ type }: ExampleProps) {
     },
     grid: {
       entity: "user",
-      source: "mock",
+      source: "memory",
       layout: 'grid' as const,
       config: {
         name: { label: 'Name' },
-        role: { 
+        role: {
           label: 'Role',
           render: (value: string) => (
             <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">
@@ -196,18 +223,17 @@ export function UniRenderExample({ type }: ExampleProps) {
             </span>
           )
         },
-        email: { 
+        email: {
           label: 'Email',
           render: (value: string) => (
             <span className="text-sm text-gray-600">{value}</span>
           )
         },
-        isActive: { 
+        isActive: {
           label: 'Status',
           render: (value: boolean) => (
-            <span className={`px-2 py-1 rounded text-xs font-semibold ${
-              value ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-            }`}>
+            <span className={`px-2 py-1 rounded text-xs font-semibold ${value ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+              }`}>
               {value ? '✅ Active' : '❌ Inactive'}
             </span>
           )
@@ -216,18 +242,17 @@ export function UniRenderExample({ type }: ExampleProps) {
     },
     list: {
       entity: "user",
-      source: "mock",
+      source: "memory",
       layout: 'list' as const,
       config: {
         name: { label: 'Name' },
         email: { label: 'Email' },
         role: { label: 'Role' },
-        isActive: { 
+        isActive: {
           label: 'Status',
           render: (value: boolean) => (
-            <span className={`px-2 py-1 rounded text-xs font-semibold ${
-              value ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-            }`}>
+            <span className={`px-2 py-1 rounded text-xs font-semibold ${value ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+              }`}>
               {value ? 'Active' : 'Inactive'}
             </span>
           )
@@ -236,24 +261,23 @@ export function UniRenderExample({ type }: ExampleProps) {
     },
     dashboard: {
       entity: "user",
-      source: "mock",
+      source: "memory",
       layout: 'dashboard' as const,
       config: {
         name: { label: 'User' },
-        role: { 
+        role: {
           label: 'Role',
           render: (value: string) => value
         },
-        email: { 
+        email: {
           label: 'Email',
           render: (value: string) => value
         },
-        isActive: { 
+        isActive: {
           label: 'Status',
           render: (value: boolean) => (
-            <span className={`px-2 py-1 rounded text-xs font-semibold ${
-              value ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-            }`}>
+            <span className={`px-2 py-1 rounded text-xs font-semibold ${value ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+              }`}>
               {value ? 'Active' : 'Inactive'}
             </span>
           )
@@ -262,20 +286,20 @@ export function UniRenderExample({ type }: ExampleProps) {
     },
     loading: {
       entity: "user",
-      source: "mock",
+      source: "memory",
       layout: 'table' as const,
       loading: true
     },
     error: {
       entity: "user",
-      source: "mock",
+      source: "memory",
       layout: 'table' as const,
       loading: false,
       error: "Failed to load orders: Network connection timeout"
     },
     empty: {
       entity: "user",
-      source: "mock",
+      source: "memory",
       query: {
         where: { id: "nonexistent" }
       },
@@ -285,7 +309,7 @@ export function UniRenderExample({ type }: ExampleProps) {
     },
     'custom-basic': {
       entity: "post",
-      source: "mock",
+      source: "memory",
       layout: 'custom' as const,
       render: renderCustomCardLayout,
       config: {
@@ -307,7 +331,7 @@ export function UniRenderExample({ type }: ExampleProps) {
     },
     'custom-magazine': {
       entity: "post",
-      source: "mock",
+      source: "memory",
       layout: 'custom' as const,
       render: renderCustomCardLayout,
       config: {
@@ -327,7 +351,7 @@ export function UniRenderExample({ type }: ExampleProps) {
     },
     'custom-social': {
       entity: "post",
-      source: "mock",
+      source: "memory",
       layout: 'custom' as const,
       render: renderCustomCardLayout,
       config: {
@@ -347,7 +371,7 @@ export function UniRenderExample({ type }: ExampleProps) {
     },
     'custom-blog': {
       entity: "post",
-      source: "mock",
+      source: "memory",
       layout: 'custom' as const,
       render: renderCustomCardLayout,
       config: {
@@ -367,7 +391,7 @@ export function UniRenderExample({ type }: ExampleProps) {
     },
     'custom-minimal': {
       entity: "post",
-      source: "mock",
+      source: "memory",
       layout: 'custom' as const,
       render: renderCustomCardLayout,
       config: {
@@ -386,10 +410,10 @@ export function UniRenderExample({ type }: ExampleProps) {
   };
 
   const baseProps = examples[type];
-  
+
   // Dynamically create final props to avoid type errors
   const finalProps: any = { ...baseProps };
-  
+
   // For special states, keep as is
   if (type === 'loading') {
     finalProps.loading = true;
@@ -404,17 +428,18 @@ export function UniRenderExample({ type }: ExampleProps) {
     finalProps.loading = false;
     finalProps.error = null;
   }
-  
+
   // Ensure required properties exist
   finalProps.entity = finalProps.entity || "user";
+  finalProps.source = finalProps.source || "memory";
   finalProps.layout = finalProps.layout || "table";
-  
+
   // Add debug information
   if (process.env.NODE_ENV === 'development') {
     console.log('UniRender props:', finalProps);
   }
-  
-  return <UniRender {...finalProps} />;
+
+  return <SafeUniRender {...finalProps} />;
 }
 
 // Export with backward compatibility

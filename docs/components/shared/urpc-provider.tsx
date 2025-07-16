@@ -3,12 +3,25 @@
 import { repo, URPC } from "@unilab/urpc";
 import { Plugin } from "@unilab/urpc-core";
 import { Logging } from "@unilab/urpc-core/middleware";
+import { MemoryAdapter } from "@unilab/urpc-adapters";
 import { useState, useEffect } from "react";
 import { PostEntity } from "../entities/post";
 import { UserEntity } from "../entities/user";
 
 const MyPlugin: Plugin = {
   entities: [UserEntity, PostEntity],
+  adapters: [
+    {
+      entity: "user",
+      source: "memory",
+      adapter: new MemoryAdapter(),
+    },
+    {
+      entity: "post", 
+      source: "memory",
+      adapter: new MemoryAdapter(),
+    },
+  ],
 };
 
 // Global variable to track initialization status for current session
@@ -40,30 +53,53 @@ export const useURPCProvider = (): URPCProviderState => {
   const [error, setError] = useState<string | null>(null);
 
   const initializeURPC = async () => {
+    // Only initialize on client side
+    if (typeof window === 'undefined') {
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
       setError(null);
       
-      // Dynamic import MockAdapter to avoid SSR issues
-      const { MockAdapter } = await import("@unilab/urpc-adapters");
+      console.log("Starting URPC initialization...");
       
-      // Initialize URPC only on client side
+      // Initialize URPC with explicit adapter configuration
       URPC.init({
         plugins: [MyPlugin],
         middlewares: [Logging()],
         entityConfigs: {
           user: {
-            defaultSource: "mock",
+            defaultSource: "memory",
           },
           post: {
-            defaultSource: "mock",
+            defaultSource: "memory",
           },
           schema: {
             defaultSource: "_global",
           },
         },
-        globalAdapters: [MockAdapter],
+        // Don't use globalAdapters to avoid static export issues
+        // globalAdapters: [MemoryAdapter],
       });
+
+      console.log("URPC initialized, waiting for stabilization...");
+      
+      // Wait longer for URPC to fully stabilize
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      console.log("Testing URPC connection...");
+      
+      // Verify that the adapter is working by testing a simple call
+      let testResult;
+      try {
+        testResult = await repo({ entity: "user" }).findMany();
+        console.log("URPC verification successful, found records:", testResult.length);
+      } catch (testError) {
+        console.error("URPC verification failed:", testError);
+        throw new Error(`URPC verification failed: ${testError instanceof Error ? testError.message : String(testError)}`);
+      }
 
       // Check if data has been initialized in current session
       if (!getSessionInitialized()) {
@@ -199,8 +235,24 @@ export const useURPCProvider = (): URPCProviderState => {
         console.log("Mock data already initialized in this session, skipping creation");
       }
 
+      // Final verification that everything is working
+      try {
+        const testUsers = await repo({ entity: "user" }).findMany();
+        const testPosts = await repo({ entity: "post" }).findMany();
+        console.log(`URPC initialization complete. Users: ${testUsers.length}, Posts: ${testPosts.length}`);
+        
+        if (testUsers.length === 0 && testPosts.length === 0) {
+          throw new Error("No data found after initialization");
+        }
+      } catch (finalTestError) {
+        console.error("Final verification failed:", finalTestError);
+        throw new Error(`Final verification failed: ${finalTestError instanceof Error ? finalTestError.message : String(finalTestError)}`);
+      }
+
       setIsInitialized(true);
+      console.log("URPC provider initialization successful!");
     } catch (err) {
+      console.error("URPC initialization failed:", err);
       setError(err instanceof Error ? err.message : 'Failed to initialize URPC');
     } finally {
       setLoading(false);
@@ -214,7 +266,12 @@ export const useURPCProvider = (): URPCProviderState => {
 
   useEffect(() => {
     if (!isInitialized) {
-      initializeURPC();
+      // Add a small delay to ensure DOM is ready
+      const timer = setTimeout(() => {
+        initializeURPC();
+      }, 100);
+      
+      return () => clearTimeout(timer);
     }
   }, [isInitialized]);
 
