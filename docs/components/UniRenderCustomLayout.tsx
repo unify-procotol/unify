@@ -6,9 +6,10 @@ import { Plugin } from "@unilab/urpc-core";
 import { Logging } from "@unilab/urpc-core/middleware";
 import { useState, useEffect } from "react";
 import { PostEntity } from "./entities/post";
+import { UserEntity } from "./entities/user";
 
 const MyPlugin: Plugin = {
-  entities: [PostEntity],
+  entities: [UserEntity, PostEntity],
 };
 
 // Custom card layout renderer inspired by daily.dev
@@ -203,7 +204,19 @@ export const renderCustomCardLayout = (data: any[], options: any) => {
 };
 
 // Global variable to track initialization status for current session
-let isSessionInitialized = false;
+// Using a global key to share state between components  
+const GLOBAL_SESSION_KEY = '__urpc_session_initialized__';
+const getSessionInitialized = (): boolean => {
+  if (typeof window !== 'undefined') {
+    return (window as any)[GLOBAL_SESSION_KEY] || false;
+  }
+  return false;
+};
+const setSessionInitialized = (value: boolean) => {
+  if (typeof window !== 'undefined') {
+    (window as any)[GLOBAL_SESSION_KEY] = value;
+  }
+};
 
 interface UniRenderCustomLayoutProps {
   type: 'basic' | 'magazine' | 'social' | 'blog' | 'minimal';
@@ -228,6 +241,9 @@ export function UniRenderCustomLayout({ type }: UniRenderCustomLayoutProps) {
           plugins: [MyPlugin],
           middlewares: [Logging()],
           entityConfigs: {
+            user: {
+              defaultSource: "mock",
+            },
             post: {
               defaultSource: "mock",
             },
@@ -239,7 +255,7 @@ export function UniRenderCustomLayout({ type }: UniRenderCustomLayoutProps) {
         });
 
         // Check if data has been initialized in current session using global variable
-        if (!isSessionInitialized) {
+        if (!getSessionInitialized()) {
           console.log("Creating initial mock data...");
           
           // Available images for random display
@@ -340,7 +356,7 @@ export function UniRenderCustomLayout({ type }: UniRenderCustomLayoutProps) {
           }
           
           // Mark current session as initialized
-          isSessionInitialized = true;
+          setSessionInitialized(true);
           console.log("Mock data created successfully");
         } else {
           console.log("Mock data already initialized in this session, skipping creation");
