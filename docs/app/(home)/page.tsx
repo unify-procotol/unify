@@ -72,17 +72,12 @@ function CodeExample() {
 import { MastraPlugin } from "@unilab/mastra-plugin/hono";
 import { Logging } from "@unilab/urpc-core/middleware";
 import { UserEntity } from "./entities/user";
-import { UserAdapter } from "./adapters/user";
+// import { UserAdapter } from "./adapters/user";
+import { MockAdapter } from "@unilab/urpc-adapters";
 
 const MyPlugin = {
   entities: [UserEntity],
-  // adapters: [
-  //   {
-  //     entity: "UserEntity",
-  //     source: "demo",
-  //     adapter: new UserAdapter(),
-  //   },
-  // ],
+  // adapters: [{ entity: "UserEntity", source: "demo", adapter: new UserAdapter()}],
 };
 
 const app = URPC.init({
@@ -95,6 +90,12 @@ const app = URPC.init({
     })
   ],
   middlewares: [Logging()],
+  entityConfigs: {
+    user: {
+      defaultSource: "mock",
+    },
+  },
+  globalAdapters: [MockAdapter],
 });
 
 export default {
@@ -176,7 +177,7 @@ console.log(aiResult.output);
             code={serverCode}
             language="typescript"
             classNames={{
-              code: "h-[690px]",
+              code: "h-[700px]",
             }}
           />
         )}
@@ -186,7 +187,7 @@ console.log(aiResult.output);
             code={clientCode}
             language="typescript"
             classNames={{
-              code: "h-[690px]",
+              code: "h-[700px]",
             }}
           />
         )}
