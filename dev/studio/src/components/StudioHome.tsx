@@ -5,7 +5,7 @@ import { Button } from "./ui/button";
 import { Card, CardContent } from "./ui/card";
 import { Badge } from "./ui/badge";
 import { cn } from "../lib/utils";
-import { Database, MoreVertical, Edit, Trash2 } from "lucide-react";
+import { Database, MoreVertical, Edit, Trash2, AlertCircle, RefreshCw, Loader2 } from "lucide-react";
 
 // Entity schema type based on the API response
 interface Schema {
@@ -483,31 +483,119 @@ export function StudioHome({ isConnected, baseUrl }: StudioHomeProps) {
 
   if (loading) {
     return (
-      <div className="flex-1 flex items-center justify-center">
-        <Card className="p-6">
-          <div className="text-center">
-            <div className="w-8 h-8 animate-spin mx-auto mb-3 border-2 border-primary border-t-transparent rounded-full"></div>
-            <div className="text-muted-foreground">Loading entities...</div>
+      <div className="flex-1 flex overflow-hidden">
+        {/* Left Sidebar Skeleton */}
+        <div className="w-80 border-r border-border flex flex-col overflow-hidden">
+          <Card className="h-10 rounded-none border-x-0 border-t-0 flex items-center px-4">
+            <div className="flex items-center space-x-2">
+              <div className="w-4 h-4 bg-muted animate-pulse rounded"></div>
+              <div className="w-32 h-4 bg-muted animate-pulse rounded"></div>
+            </div>
+          </Card>
+          <div className="p-4 space-y-3">
+            {[...Array(4)].map((_, i) => (
+              <Card key={i} className="p-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-4 h-4 bg-muted animate-pulse rounded"></div>
+                    <div className="w-24 h-4 bg-muted animate-pulse rounded"></div>
+                  </div>
+                  <div className="w-4 h-4 bg-muted animate-pulse rounded"></div>
+                </div>
+                <div className="mt-3 ml-6 space-y-2">
+                  <div className="w-20 h-3 bg-muted/60 animate-pulse rounded"></div>
+                  <div className="ml-4 space-y-1">
+                    <div className="w-16 h-3 bg-muted/40 animate-pulse rounded"></div>
+                    <div className="w-14 h-3 bg-muted/40 animate-pulse rounded"></div>
+                  </div>
+                </div>
+              </Card>
+            ))}
           </div>
-        </Card>
+        </div>
+
+        {/* Right Panel Skeleton */}
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <Card className="h-10 rounded-none border-x-0 border-t-0 flex items-center justify-between px-4">
+            <div className="flex items-center space-x-2">
+              <div className="w-4 h-4 bg-muted animate-pulse rounded"></div>
+              <div className="w-32 h-4 bg-muted animate-pulse rounded"></div>
+            </div>
+          </Card>
+          
+          <div className="flex-1 p-6">
+            <div className="space-y-4">
+              {/* Table header skeleton */}
+              <div className="flex space-x-4 pb-2">
+                {[...Array(5)].map((_, i) => (
+                  <div key={i} className="flex-1 h-4 bg-muted animate-pulse rounded"></div>
+                ))}
+              </div>
+              
+              {/* Table rows skeleton */}
+              {[...Array(8)].map((_, i) => (
+                <div key={i} className="flex space-x-4 py-3 border-b border-muted/30">
+                  {[...Array(5)].map((_, j) => (
+                    <div key={j} className="flex-1 h-3 bg-muted/60 animate-pulse rounded"></div>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="flex-1 flex items-center justify-center">
-        <Card className="p-6 max-w-md">
-          <div className="text-center">
-            <div className="text-destructive text-lg font-medium mb-2">
-              Error
+      <div className="flex-1 flex items-center justify-center min-h-screen bg-gradient-to-br from-background to-muted/20">
+        <div className="w-full max-w-md mx-auto p-6">
+          <Card className="border-0 shadow-2xl bg-background/95 backdrop-blur-sm">
+            <div className="p-8 text-center">
+              {/* Error Icon */}
+              <div className="mx-auto w-16 h-16 bg-destructive/10 rounded-full flex items-center justify-center mb-6">
+                <AlertCircle className="w-8 h-8 text-destructive" />
+              </div>
+              
+              {/* Error Title */}
+              <h2 className="text-2xl font-bold text-foreground mb-3">
+                Connection Failed
+              </h2>
+              
+              {/* Error Message */}
+              <p className="text-muted-foreground text-sm mb-6 leading-relaxed">
+                {error}
+              </p>
+              
+              {/* Action Buttons */}
+              <div className="space-y-3">
+                <Button 
+                  onClick={loadEntities} 
+                  variant="default" 
+                  className="w-full h-11 text-base font-medium"
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <div className="flex items-center space-x-2">
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>Retrying...</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center space-x-2">
+                      <RefreshCw className="w-4 h-4" />
+                      <span>Try Again</span>
+                    </div>
+                  )}
+                </Button>
+                
+                <div className="text-xs text-muted-foreground">
+                  Make sure the server is running and accessible
+                </div>
+              </div>
             </div>
-            <p className="text-muted-foreground mb-4">{error}</p>
-            <Button onClick={loadEntities} variant="default">
-              Retry
-            </Button>
-          </div>
-        </Card>
+          </Card>
+        </div>
       </div>
     );
   }

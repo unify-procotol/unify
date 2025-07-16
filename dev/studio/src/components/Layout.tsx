@@ -4,17 +4,28 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Card } from "./ui/card";
 import { cn } from "../lib/utils";
-import { Server, Loader2, Search, Terminal } from "lucide-react";
+import { Server, Loader2, Search, Terminal, ChevronDown, Check, Trash2 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
 
 interface LayoutProps {
   children: ReactNode | ((props: { isConnected: boolean; baseUrl: string }) => ReactNode);
 }
 
 export function Layout({ children }: LayoutProps) {
-  const [baseUrl, setBaseUrl] = useState("http://localhost:3000");
+  const [baseUrl, setBaseUrl] = useState("https://hono-basic-example.uni-labs.org");
   const [isConnected, setIsConnected] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
-  const [inputUrl, setInputUrl] = useState("http://localhost:3000");
+  const [inputUrl, setInputUrl] = useState("https://hono-basic-example.uni-labs.org");
+  
+  // Predefined server options
+  const serverOptions = [
+    { label: "Hono Basic Example", value: "https://hono-basic-example.uni-labs.org" },
+  ];
 
   // Initialize connection on mount
   useEffect(() => {
@@ -32,32 +43,75 @@ export function Layout({ children }: LayoutProps) {
         setInputUrl(savedEndpoint);
         connectToServer(savedEndpoint);
       } else {
-        connectToServer(baseUrl);
+        // Use the default inputUrl instead of baseUrl
+        connectToServer(inputUrl);
       }
     }
   }, []);
 
   const connectToServer = async (url: string) => {
     setIsConnecting(true);
+    console.log("Connecting to server:", url); // Debug log
+    
+    // Reset connection state
+    setIsConnected(false);
+    
     try {
+      // Direct HTTP request to test connection instead of using URPC repo
+      // This bypasses the URPC singleton issue
+      const testUrl = `${url}/schema/list?source=_global`;
+      console.log("Testing connection with direct fetch to:", testUrl); // Debug log
+      
+      // Create abort controller for timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => {
+        controller.abort();
+        console.log("Connection timeout after 10 seconds");
+      }, 10000);
+      
+      try {
+        const response = await fetch(testUrl, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          signal: controller.signal,
+        });
+        
+        clearTimeout(timeoutId);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        console.log("Connection test successful, got data:", data); // Debug log
+      } catch (fetchError: any) {
+        clearTimeout(timeoutId);
+        if (fetchError?.name === 'AbortError') {
+          throw new Error('Connection timeout - server did not respond within 10 seconds');
+        }
+        throw fetchError;
+      }
+      
+      // Now initialize URPC for future use
+      // Create a new global URPC instance by forcing reset
+      (URPC as any).globalInstance = null;
       URPC.init({
         baseUrl: url,
         timeout: 10000,
       });
       
-      // Test connection by making a URPC request to get schemas
-      await repo<any>({
-        entity: "schema",
-        source: "_global",
-      }).findMany();
+      console.log("URPC reinitialized with baseUrl:", url); // Debug log
       
       setIsConnected(true);
       setBaseUrl(url);
       
       // Save successful endpoint to localStorage
       localStorage.setItem('urpc-studio-endpoint', url);
+      console.log("Connection successful to:", url); // Debug log
     } catch (error) {
-      console.error("Connection failed:", error);
+      console.error("Connection failed to:", url, error);
       setIsConnected(false);
     } finally {
       setIsConnecting(false);
@@ -66,8 +120,19 @@ export function Layout({ children }: LayoutProps) {
 
   const handleConnect = () => {
     if (inputUrl.trim()) {
+      console.log("Manual connect to:", inputUrl.trim()); // Debug log
       connectToServer(inputUrl.trim());
     }
+  };
+
+  const handleServerSelect = (url: string) => {
+    setInputUrl(url);
+    connectToServer(url);
+  };
+
+  const clearCache = () => {
+    localStorage.removeItem('urpc-studio-endpoint');
+    console.log("Cache cleared");
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -175,14 +240,47 @@ export function Layout({ children }: LayoutProps) {
             </div>
             
             <div className="flex items-center space-x-2">
-              <Input
-                type="text"
-                value={inputUrl}
-                onChange={(e) => setInputUrl(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder="http://localhost:3000"
-                className="w-52 h-8 font-mono text-sm border-0 bg-muted/50 focus:bg-background"
-              />
+              <div className="relative">
+                <Input
+                  type="text"
+                  value={inputUrl}
+                  onChange={(e) => setInputUrl(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  placeholder="https://hono-basic-example.uni-labs.org"
+                  className="w-52 h-8 font-mono text-sm border-0 bg-muted/50 focus:bg-background pr-8"
+                />
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-0 top-0 h-8 w-8 p-0 hover:bg-muted"
+                      title="Select from predefined servers"
+                    >
+                      <ChevronDown className="w-3 h-3" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-64">
+                    {serverOptions.map((option) => (
+                      <DropdownMenuItem
+                        key={option.value}
+                        onClick={() => handleServerSelect(option.value)}
+                        className="flex items-center justify-between"
+                      >
+                        <div className="flex flex-col">
+                          <span className="font-medium">{option.label}</span>
+                          <span className="text-xs text-muted-foreground font-mono">
+                            {option.value}
+                          </span>
+                        </div>
+                        {inputUrl === option.value && (
+                          <Check className="w-4 h-4 text-primary" />
+                        )}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
               <Button
                 onClick={detectEndpoint}
                 disabled={isConnecting}
@@ -208,6 +306,16 @@ export function Layout({ children }: LayoutProps) {
                 ) : (
                   "Connect"
                 )}
+              </Button>
+              <Button
+                onClick={clearCache}
+                disabled={isConnecting}
+                variant="outline"
+                size="sm"
+                className="px-2 border-0 bg-muted/50 hover:bg-muted"
+                title="Clear cached server settings"
+              >
+                <Trash2 className="w-3 h-3" />
               </Button>
             </div>
           </div>
