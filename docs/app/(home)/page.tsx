@@ -10,7 +10,7 @@ export default function HomePage() {
     <>
       {/* Full Screen Grid Background */}
       <div className="bg-grid bg-fullscreen"></div>
-      <section className="relative px-4 py-20 md:py-24 overflow-hidden flex items-center">
+      <section className="relative px-4 py-8 md:py-12 overflow-hidden flex items-center h-full">
         <div className="relative max-w-7xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             {/* Left Content */}
@@ -69,12 +69,33 @@ function CodeExample() {
   const [activeTab, setActiveTab] = useState<"server" | "client">("server");
 
   const serverCode = `import { URPC } from "@unilab/urpc-hono";
-import { WalletPlugin } from "@unilab/uniweb3";
+import { MastraPlugin } from "@unilab/mastra-plugin/hono";
 import { Logging } from "@unilab/urpc-core/middleware";
+import { UserEntity } from "./entities/user";
+// import { UserAdapter } from "./adapters/user";
+import { MockAdapter } from "@unilab/urpc-adapters";
+
+const MyPlugin = {
+  entities: [UserEntity],
+  // adapters: [{ entity: "UserEntity", source: "demo", adapter: new UserAdapter()}],
+};
 
 const app = URPC.init({
-  plugins: [WalletPlugin],
+  plugins: [
+    MyPlugin,
+    MastraPlugin({
+      defaultModel: "openai/gpt-4o-mini",
+      openrouterApiKey: process.env.OPENROUTER_API_KEY,
+      debug: true,
+    })
+  ],
   middlewares: [Logging()],
+  entityConfigs: {
+    user: {
+      defaultSource: "mock",
+    },
+  },
+  globalAdapters: [MockAdapter],
 });
 
 export default {
@@ -83,31 +104,34 @@ export default {
 };`;
 
   const clientCode = `import { repo, URPC } from "@unilab/urpc";
-import { WalletEntity } from "@unilab/uniweb3/entities";
+import { ChatEntity } from "@unilab/mastra-plugin/entities";
 
 URPC.init({
   baseUrl: "http://localhost:3000",
   timeout: 10000,
 });
 
-const evmBalanceRes = await repo<WalletEntity>({
-  entity: "WalletEntity",
-  source: "evm",
+// Traditional entity operations
+const user = await repo<UserEntity>({
+  entity: "user",
+  source: "mock",
 }).findOne({
   where: {
-    address: "0x...",
-    network: "ethereum",
+    id: "1",
   },
 });
 
-const solanaBalanceRes = await repo<WalletEntity>({
-  entity: "WalletEntity",
-  source: "solana",
-}).findOne({
-  where: {
-    address: "11111111111111111111111111111112",
-  },
-});`;
+// AI-powered natural language queries
+const aiResult = await repo<ChatEntity>({
+  entity: "chat",
+  source: "mastra",
+}).call({
+  input: "Find all users",
+  model: "google/gemini-2.0-flash-001",
+});
+
+console.log(aiResult.output);
+`;
 
   return (
     <div className="w-full max-w-2xl mx-auto lg:mx-0 relative">
@@ -153,7 +177,7 @@ const solanaBalanceRes = await repo<WalletEntity>({
             code={serverCode}
             language="typescript"
             classNames={{
-              code: "h-[300px]",
+              code: "h-[700px]",
             }}
           />
         )}
@@ -163,7 +187,7 @@ const solanaBalanceRes = await repo<WalletEntity>({
             code={clientCode}
             language="typescript"
             classNames={{
-              code: "h-[550px]",
+              code: "h-[700px]",
             }}
           />
         )}

@@ -7,6 +7,11 @@ Unify is a protocol focused on entity-first abstraction, aimed at resolving same
 npx @unilab/urpc-cli create my-project
 ```
 
+## 🎮 Playground
+[Try Unify Protocol online](https://playground.uni-labs.org) 
+
+[Playground Source code](https://github.com/unify-procotol/playground)
+
 ## 🌐 Why Unify?
 Kills switch-case hell in multi-protocol apps 🧹
 - Frontend works with clean abstractions
