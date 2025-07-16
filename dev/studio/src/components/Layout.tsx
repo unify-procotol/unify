@@ -4,7 +4,7 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Card } from "./ui/card";
 import { cn } from "../lib/utils";
-import { Server, Loader2, Search } from "lucide-react";
+import { Server, Loader2, Search, Terminal } from "lucide-react";
 
 interface LayoutProps {
   children: ReactNode | ((props: { isConnected: boolean; baseUrl: string }) => ReactNode);
@@ -145,14 +145,12 @@ export function Layout({ children }: LayoutProps) {
   return (
     <div className="h-screen bg-background text-foreground flex flex-col overflow-hidden">
       {/* Top Header */}
-      <Card className="h-16 rounded-none border-x-0 border-t-0 flex items-center justify-between px-6 shadow-sm">
+      <Card className="h-16 rounded-none border-x-0 border-t-0 flex items-center justify-between px-6">
         {/* Left Section - Logo and Brand */}
         <div className="flex items-center space-x-6">
           <div className="flex items-center space-x-3">
-            <div className="w-9 h-9 bg-primary rounded-xl flex items-center justify-center shadow-md">
-              <svg className="w-5 h-5 text-primary-foreground" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-              </svg>
+            <div className="w-9 h-9 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
+              <Terminal className="w-5 h-5 text-white" />
             </div>
             <div>
               <h1 className="text-xl font-bold text-foreground">
@@ -169,7 +167,7 @@ export function Layout({ children }: LayoutProps) {
         {/* Right Section - Connection Input */}
         <div className="flex items-center space-x-4">
           {/* Server Connection */}
-          <Card className="flex items-center space-x-3 p-2">
+          <div className="flex items-center space-x-3 p-2">
             <div className="flex items-center space-x-2">
               {/* @ts-ignore */}
               <Server className="w-4 h-4 text-muted-foreground" />
@@ -183,14 +181,14 @@ export function Layout({ children }: LayoutProps) {
                 onChange={(e) => setInputUrl(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="http://localhost:3000"
-                className="w-52 h-8 font-mono text-sm"
+                className="w-52 h-8 font-mono text-sm border-0 bg-muted/50 focus:bg-background"
               />
               <Button
                 onClick={detectEndpoint}
                 disabled={isConnecting}
                 variant="outline"
                 size="sm"
-                className="shadow-sm px-2"
+                className="px-2 border-0 bg-muted/50 hover:bg-muted"
                 title="Detect endpoint from URL or environment"
               >
                 <Search className="w-3 h-3" />
@@ -199,7 +197,7 @@ export function Layout({ children }: LayoutProps) {
                 onClick={handleConnect}
                 disabled={isConnecting}
                 size="sm"
-                className="shadow-sm"
+                className="border-0"
               >
                 {isConnecting ? (
                   <div className="flex items-center space-x-1">
@@ -212,26 +210,17 @@ export function Layout({ children }: LayoutProps) {
                 )}
               </Button>
             </div>
-          </Card>
+          </div>
 
-          {/* Connection Status Indicator */}
-          <Card className="flex items-center space-x-2 p-2">
+          {/* Connection Status Indicator - Simplified to just dots */}
+          <div className="flex items-center space-x-2">
             <div className={cn(
-              "w-2.5 h-2.5 rounded-full shadow-sm",
+              "w-3 h-3 rounded-full",
               isConnecting && "bg-yellow-400 animate-pulse",
               isConnected && !isConnecting && "bg-green-400",
               !isConnected && !isConnecting && "bg-red-400"
             )}></div>
-            <span className={cn(
-              "text-sm font-medium",
-              isConnecting && "text-yellow-600 dark:text-yellow-400",
-              isConnected && !isConnecting && "text-green-600 dark:text-green-400",
-              !isConnected && !isConnecting && "text-red-600 dark:text-red-400"
-            )}>
-              {isConnecting ? 'Connecting...' :
-               isConnected ? 'Connected' : 'Disconnected'}
-            </span>
-          </Card>
+          </div>
         </div>
       </Card>
 

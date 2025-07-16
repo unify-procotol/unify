@@ -29,28 +29,7 @@ export const Router: React.FC = () => {
           <Layout>
             {({ isConnected, baseUrl }) => (
               <div className="flex flex-col h-screen">
-                {/* Navigation Bar */}
-                <div className="h-12 bg-muted/50 border-b border-border flex items-center justify-between px-4">
-                  <div className="flex items-center space-x-2">
-                    <nav className="flex items-center space-x-2">
-                      <button
-                        onClick={() => navigate('/')}
-                        className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${
-                          currentPath === '/' 
-                            ? 'bg-primary text-primary-foreground shadow-sm' 
-                            : 'text-muted-foreground hover:text-foreground hover:bg-muted'
-                        }`}
-                      >
-                        Studio
-                      </button>
-                    </nav>
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    Current: <span className="text-foreground font-medium">{currentPath}</span>
-                  </div>
-                </div>
-                
-                {/* Main Content */}
+                {/* Main Content - Direct display without tabs */}
                 <div className="flex-1 overflow-hidden">
                   <StudioHome isConnected={isConnected} baseUrl={baseUrl} />
                 </div>

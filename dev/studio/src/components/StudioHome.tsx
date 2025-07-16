@@ -5,6 +5,7 @@ import { Button } from "./ui/button";
 import { Card, CardContent } from "./ui/card";
 import { Badge } from "./ui/badge";
 import { cn } from "../lib/utils";
+import { Database, MoreVertical, Edit, Trash2 } from "lucide-react";
 
 // Entity schema type based on the API response
 interface Schema {
@@ -360,7 +361,7 @@ export function StudioHome({ isConnected, baseUrl }: StudioHomeProps) {
           return (
             <Card 
               key={record.id || index} 
-              className="group overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
+              className="group overflow-hidden transition-all duration-300 hover:-translate-y-1"
             >
               {/* Card Header with gradient background */}
               <div className={`${cardColor} p-4 text-white relative`}>
@@ -371,9 +372,7 @@ export function StudioHome({ isConnected, baseUrl }: StudioHomeProps) {
                     className="h-6 w-6 p-0 text-white hover:bg-white/20"
                     onClick={() => {/* Handle more options */}}
                   >
-                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
-                    </svg>
+                    <MoreVertical className="w-4 h-4" />
                   </Button>
                 </div>
                 
@@ -453,9 +452,7 @@ export function StudioHome({ isConnected, baseUrl }: StudioHomeProps) {
                       onClick={() => options.onEdit(record, index)}
                       className="h-8 px-3 text-xs"
                     >
-                      <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                      </svg>
+                      <Edit className="w-3 h-3 mr-1" />
                       Edit
                     </Button>
                     <Button
@@ -465,9 +462,7 @@ export function StudioHome({ isConnected, baseUrl }: StudioHomeProps) {
                       className="h-8 px-3 text-xs text-red-600 hover:text-red-700"
                       disabled={options.deletingIndex === index}
                     >
-                      <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                      </svg>
+                      <Trash2 className="w-3 h-3 mr-1" />
                       {options.deletingIndex === index ? 'Deleting...' : 'Delete'}
                     </Button>
                   </div>
@@ -527,19 +522,7 @@ export function StudioHome({ isConnected, baseUrl }: StudioHomeProps) {
         <div className="flex-1 overflow-auto">
           <Card className="h-10 rounded-none border-x-0 border-t-0 flex items-center px-4">
             <div className="flex items-center space-x-2">
-              <svg
-                className="w-4 h-4 text-muted-foreground"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M4 7v10c0 2.21 1.79 4 4 4h8c2.21 0 4-1.79 4-4V7c0-2.21-1.79-4-4-4H8c-2.21 0-4 1.79-4 4z"
-                />
-              </svg>
+              <Database className="w-4 h-4 text-muted-foreground" />
               <span className="text-sm font-medium text-foreground">
                 Database Explorer
               </span>
@@ -610,13 +593,6 @@ export function StudioHome({ isConnected, baseUrl }: StudioHomeProps) {
                     {/* Entity Details and Data Sources */}
                     {!isCollapsed && (
                       <CardContent className="p-0 bg-muted/50 rounded-b-lg">
-                        {/* Schema Info */}
-                        <div className="px-3 py-2 border-b border-border">
-                          <Badge variant="outline" className="text-xs">
-                            Required: {entity.schema.required.join(", ")}
-                          </Badge>
-                        </div>
-
                         {/* Data Sources */}
                         {entity.sources && entity.sources.length > 0 && (
                           <div className="px-3 py-2">
@@ -712,29 +688,7 @@ export function StudioHome({ isConnected, baseUrl }: StudioHomeProps) {
 
       {/* Right Panel - Data View */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Entity Tabs */}
-        <Card className="h-12 rounded-none border-x-0 border-t-0 flex items-center px-4">
-          <div className="flex items-center space-x-1 overflow-x-auto">
-            {entities.map((entity) => (
-              <Button
-                key={entity.name}
-                variant={
-                  selectedEntity?.name === entity.name ? "default" : "ghost"
-                }
-                size="sm"
-                onClick={() => {
-                  setSelectedEntity(entity);
-                  if (entity.sources && entity.sources.length > 0) {
-                    setSelectedSource(entity.sources[0]);
-                  }
-                }}
-                className="whitespace-nowrap"
-              >
-                {entity.name}
-              </Button>
-            ))}
-          </div>
-        </Card>
+
 
         {/* Breadcrumb and View Controls */}
         <Card className="h-10 rounded-none border-x-0 border-t-0 flex items-center justify-between px-4">
@@ -764,35 +718,6 @@ export function StudioHome({ isConnected, baseUrl }: StudioHomeProps) {
               </>
             )}
           </div>
-          
-          {/* Layout Selector */}
-          <div className="flex items-center space-x-2">
-            <span className="text-xs text-muted-foreground">Layout:</span>
-            <div className="flex items-center border rounded-md">
-              <Button
-                variant={currentLayout === 'table' ? 'default' : 'ghost'}
-                size="sm"
-                onClick={() => setCurrentLayout('table')}
-                className="h-7 px-2 text-xs rounded-r-none"
-              >
-                <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h18M3 14h18M3 18h18M3 6h18" />
-                </svg>
-                Table
-              </Button>
-              <Button
-                variant={currentLayout === 'custom' ? 'default' : 'ghost'}
-                size="sm"
-                onClick={() => setCurrentLayout('custom')}
-                className="h-7 px-2 text-xs rounded-l-none"
-              >
-                <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                </svg>
-                Cards
-              </Button>
-            </div>
-          </div>
         </Card>
 
         {/* Data Content */}
@@ -809,9 +734,14 @@ export function StudioHome({ isConnected, baseUrl }: StudioHomeProps) {
                   config={getFieldConfig(selectedEntity.name)}
                   generalConfig={{
                     showActions: true,
+                    showTopControls: true,
                     actions: {
                       delete: true,
                       edit: true,
+                    },
+                    table: {
+                      enablePagination: true,
+                      pageSize: 10,
                     }
                   }}
                   loading={currentSourceData?.loading}
