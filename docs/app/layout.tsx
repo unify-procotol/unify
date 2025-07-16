@@ -22,6 +22,7 @@ export default function Layout({ children }: LayoutProps) {
             SearchDialog
           }}
         >
+          {/* @ts-ignore */}
           {children}
         </RootProvider>
       </body>

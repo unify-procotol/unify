@@ -10,6 +10,7 @@
     "preview": "npm run pages:build && wrangler pages dev",
     "deploy": "npm run pages:build && wrangler pages deploy",
     "cf:deploy": "npm run pages:build && wrangler pages deploy --project-name=unify-docs",
+    
     "postinstall": "fumadocs-mdx"
   },
   "dependencies": {

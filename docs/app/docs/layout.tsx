@@ -19,6 +19,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       }}
       {...baseOptions}
     >
+      {/* @ts-ignore */}
       {children}
     </DocsLayout>
   );

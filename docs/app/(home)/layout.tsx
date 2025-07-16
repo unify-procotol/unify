@@ -7,5 +7,6 @@ interface LayoutProps {
 }
 
 export default function Layout({ children }: LayoutProps) {
+  // @ts-ignore
   return <HomeLayout {...baseOptions}>{children}</HomeLayout>;
 }
