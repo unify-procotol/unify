@@ -693,19 +693,7 @@ export function StudioHome({ isConnected, baseUrl }: StudioHomeProps) {
         {/* Breadcrumb and View Controls */}
         <Card className="h-10 rounded-none border-x-0 border-t-0 flex items-center justify-between px-4">
           <div className="flex items-center space-x-1 text-sm text-muted-foreground">
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M4 7v10c0 2.21 1.79 4 4 4h8c2.21 0 4-1.79 4-4V7c0-2.21-1.79-4-4-4H8c-2.21 0-4 1.79-4 4z"
-              />
-            </svg>
+            <Database className="w-4 h-4 text-muted-foreground" />
             <span>Database</span>
             <span>/</span>
             <span className="text-foreground">
