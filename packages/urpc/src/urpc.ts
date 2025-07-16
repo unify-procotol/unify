@@ -1,5 +1,4 @@
 import type {
-  Repository,
   Plugin,
   SchemaObject,
   Middleware,
@@ -20,6 +19,7 @@ import type {
   URPCConfig,
   RepoOptions,
   JoinRepoOptions,
+  ProxyRepo,
 } from "./types";
 import { BuiltinPlugin } from "@unilab/builtin-plugin";
 import { isHttpClientConfig, isLocalConfig, isHybridConfig } from "./utils";
@@ -155,7 +155,7 @@ export class URPC {
         });
       });
       console.log(
-        `✅ Registered global adapters: ${globalAdapters
+        `✅ Registered Global Adapters: ${globalAdapters
           .map((a) => `${a.name}`)
           .join(", ")}`
       );
@@ -242,7 +242,7 @@ export class URPC {
 
   createRepositoryProxy<T extends Record<string, any>>(
     options: RepoOptions<T>
-  ): Repository<T> {
+  ): ProxyRepo<T> {
     if (this.mode === Mode.Hybrid) {
       return createHybridRepositoryProxy<T>(
         options,
@@ -277,13 +277,13 @@ export class URPC {
 
   static repo<T extends Record<string, any>>(
     options: RepoOptions<T>
-  ): Repository<T> {
+  ): ProxyRepo<T> {
     return URPC.getGlobalInstance().createRepositoryProxy<T>(options);
   }
 
   static joinRepo<F extends Record<string, any>, L extends Record<string, any>>(
     options: JoinRepoOptions<F, L>
-  ): Repository<F> {
+  ): ProxyRepo<F> {
     const baseRepo = URPC.repo<F>(options);
     return new Proxy(baseRepo, {
       get: (target, prop: string) => {
@@ -314,13 +314,13 @@ export class URPC {
 
 export function repo<T extends Record<string, any>>(
   options: RepoOptions<T>
-): Repository<T> {
+): ProxyRepo<T> {
   return URPC.repo<T>(options);
 }
 
 export function joinRepo<
   F extends Record<string, any> = Record<string, any>,
   L extends Record<string, any> = Record<string, any>,
->(options: JoinRepoOptions<F, L>): Repository<F> {
+>(options: JoinRepoOptions<F, L>): ProxyRepo<F> {
   return URPC.joinRepo<F, L>(options);
 }

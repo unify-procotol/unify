@@ -4,6 +4,7 @@ import type {
   CreationArgs,
   UpdateArgs,
   DeletionArgs,
+  CallArgs,
 } from "@unilab/urpc-core";
 import { simplifyEntityName, getRepo } from "@unilab/urpc-core";
 import type {
@@ -120,6 +121,52 @@ export async function makeHttpRequest<T>(
 
   const result = await response.json();
   return result.data;
+}
+
+export async function makeStreamRequest(
+  options: HttpRequestOptions,
+  httpConfig: HttpClientConfig
+): Promise<Response> {
+  const { method, url, params, data, headers } = options;
+
+  const baseUrl = httpConfig.baseUrl.endsWith("/")
+    ? httpConfig.baseUrl.slice(0, -1)
+    : httpConfig.baseUrl;
+  const cleanUrl = url.startsWith("/") ? url.slice(1) : url;
+  const fullUrl = new URL(`${baseUrl}/${cleanUrl}`);
+
+  if (params) {
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        if (typeof value === "object") {
+          fullUrl.searchParams.set(key, JSON.stringify(value));
+        } else {
+          fullUrl.searchParams.set(key, String(value));
+        }
+      }
+    });
+  }
+
+  const requestInit: RequestInit = {
+    method,
+    headers: {
+      ...httpConfig.headers,
+      ...headers,
+      "Content-Type": "application/json",
+    },
+  };
+
+  if (data && (method === "POST" || method === "PATCH")) {
+    requestInit.body = JSON.stringify(data);
+  }
+
+  const response = await fetch(fullUrl.toString(), requestInit);
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+
+  return response;
 }
 
 export async function loadRelations<T extends Record<string, any>>(
@@ -300,6 +347,30 @@ export async function executeLocalDelete<T extends Record<string, any>>(
     entity: entityName,
     source,
   });
+}
+
+export async function executeLocalCall<T extends Record<string, any>>(
+  args: CallArgs<T>,
+  entityName: string,
+  source: string,
+  context: any
+): Promise<T | Response> {
+  const repo = getRepo(entityName, source);
+  if (!repo) {
+    throw new Error(`Unknown data source: ${source} for entity ${entityName}`);
+  }
+
+  return await repo.call(
+    args,
+    {
+      entity: entityName,
+      source,
+      context,
+    },
+    {
+      stream: context?.stream,
+    }
+  );
 }
 
 export function shouldFallbackToHttp(

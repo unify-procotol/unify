@@ -1,0 +1,32 @@
+{
+  "name": "hono-mastra-plugin",
+  "version": "1.0.0",
+  "description": "Basic Hono example using @unilab/urpc-hono and @unilab/urpc with @unilab/mastra-plugin",
+  "main": "server.ts",
+  "scripts": {
+    "dev": "bun run server.ts",
+    "start": "bun run server.ts",
+    "client": "bun run client.ts"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.12.2",
+    "@unilab/urpc": "workspace:*",
+    "@unilab/urpc-core": "workspace:*",
+    "@unilab/urpc-hono": "workspace:*",
+    "@unilab/mastra-plugin": "workspace:*",
+    "@unilab/urpc-adapters": "workspace:*",
+    "hono": "^4.7.11"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.1.12",
+    "typescript": "^5.3.0"
+  },
+  "keywords": [
+    "hono",
+    "unilab",
+    "api",
+    "example"
+  ],
+  "author": "",
+  "license": "MIT"
+}

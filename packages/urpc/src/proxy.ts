@@ -4,10 +4,10 @@ import type {
   CreationArgs,
   UpdateArgs,
   DeletionArgs,
-  Repository,
   EntityConfigs,
+  CallArgs,
 } from "@unilab/urpc-core";
-import type { HttpClientConfig, RepoOptions } from "./types";
+import type { HttpClientConfig, ProxyRepo, RepoOptions } from "./types";
 import {
   getEntityName,
   createEntityInstance,
@@ -19,19 +19,21 @@ import {
   executeLocalCreate,
   executeLocalUpdate,
   executeLocalDelete,
+  executeLocalCall,
   shouldFallbackToHttp,
   logHttpFallbackWarning,
   loadRelations,
   loadRelationsForMany,
   makeHttpRequest,
+  makeStreamRequest,
 } from "./utils";
 
 export function createHttpRepositoryProxy<T extends Record<string, any>>(
   options: RepoOptions<T>,
   entityConfigs: EntityConfigs,
   httpConfig: HttpClientConfig
-): Repository<T> {
-  return new Proxy({} as Repository<T>, {
+): ProxyRepo<T> {
+  return new Proxy({} as ProxyRepo<T>, {
     get: (target, prop: string) => {
       const { entity, context } = options;
       const entityName = getEntityName(entity);
@@ -132,6 +134,33 @@ export function createHttpRepositoryProxy<T extends Record<string, any>>(
             return result.success;
           };
 
+        case "call":
+          return async (args: CallArgs<T>) => {
+            // For stream requests, we need to handle the response differently
+            if (context?.stream) {
+              return await makeStreamRequest(
+                {
+                  method: "POST",
+                  url: `/${entityName}/call`,
+                  params: { source, context },
+                  data: { data: args },
+                },
+                httpConfig
+              );
+            } else {
+              const result = await makeHttpRequest<T>(
+                {
+                  method: "POST",
+                  url: `/${entityName}/call`,
+                  params: { source, context },
+                  data: { data: args },
+                },
+                httpConfig
+              );
+              return result;
+            }
+          };
+
         default:
           throw new Error(`Method ${prop} is not supported`);
       }
@@ -142,8 +171,8 @@ export function createHttpRepositoryProxy<T extends Record<string, any>>(
 export function createLocalRepositoryProxy<T extends Record<string, any>>(
   options: RepoOptions<T>,
   entityConfigs: EntityConfigs
-): Repository<T> {
-  return new Proxy({} as Repository<T>, {
+): ProxyRepo<T> {
+  return new Proxy({} as ProxyRepo<T>, {
     get: (target, prop: string) => {
       const { entity, context } = options;
       const entityName = getEntityName(entity);
@@ -211,6 +240,11 @@ export function createLocalRepositoryProxy<T extends Record<string, any>>(
             return await executeLocalDelete(args, entityName, source);
           };
 
+        case "call":
+          return async (args: CallArgs<T>) => {
+            return await executeLocalCall(args, entityName, source, context);
+          };
+
         default:
           throw new Error(`Method ${prop} is not supported`);
       }
@@ -222,8 +256,8 @@ export function createHybridRepositoryProxy<T extends Record<string, any>>(
   options: RepoOptions<T>,
   entityConfigs: EntityConfigs,
   httpConfig: HttpClientConfig
-): Repository<T> {
-  return new Proxy({} as Repository<T>, {
+): ProxyRepo<T> {
+  return new Proxy({} as ProxyRepo<T>, {
     get: (target, prop: string) => {
       const { entity, context } = options;
       const entityName = getEntityName(entity);
@@ -427,6 +461,51 @@ export function createHybridRepositoryProxy<T extends Record<string, any>>(
               );
             } catch (httpError) {
               logHttpFallbackWarning(entityName, "delete", httpError);
+              throw httpError;
+            }
+          };
+
+        case "call":
+          return async (args: CallArgs<T>) => {
+            if (!shouldFallbackToHttp(entityName, source)) {
+              try {
+                return await executeLocalCall(
+                  args,
+                  entityName,
+                  source!,
+                  context
+                );
+              } catch (error) {
+                console.warn(`Local call failed for ${entityName}:`, error);
+              }
+            }
+
+            try {
+              // For stream requests, we need to handle the response differently
+              if (context?.stream) {
+                return await makeStreamRequest(
+                  {
+                    method: "POST",
+                    url: `/${entityName}/call`,
+                    params: { source, context },
+                    data: { data: args },
+                  },
+                  httpConfig
+                );
+              } else {
+                const result = await makeHttpRequest<T>(
+                  {
+                    method: "POST",
+                    url: `/${entityName}/call`,
+                    params: { source, context },
+                    data: { data: args },
+                  },
+                  httpConfig
+                );
+                return result;
+              }
+            } catch (httpError) {
+              logHttpFallbackWarning(entityName, "call", httpError);
               throw httpError;
             }
           };

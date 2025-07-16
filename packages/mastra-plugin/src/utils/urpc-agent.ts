@@ -1,50 +1,50 @@
 import { Agent } from "@mastra/core/agent";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
-import { URPC, repo } from "@unilab/urpc";
 import { convertSchemaToMarkdown } from "./entity-schema-to-markdown";
 import { convertEntitySourcesToMarkdown } from "./entity-source-to-markdown";
-
-export interface URPCAgentOptions {
-  name?: string;
-  description?: string;
-  model?: string;
-  openrouterApiKey?: string;
-  debug?: boolean;
-}
+import { MastraOptions, Output, URPC } from "./type";
 
 export class URPCAgent {
-  private instructions: string;
+  private instructions: string = "";
   private agent: Agent;
   private debug: boolean;
+  private URPC: URPC;
 
-  constructor({
-    name = "URPC Smart Data Assistant",
-    description = "An intelligent data operation assistant based on URPC, capable of understanding natural language and executing corresponding database operations",
-    model = "openai/gpt-4o-mini",
-    openrouterApiKey,
-    debug = false,
-  }: URPCAgentOptions = {}) {
-    this.debug = debug;
+  constructor(options: MastraOptions & { URPC: URPC }) {
+    this.URPC = options.URPC;
+    this.debug = options.debug || false;
     this.instructions = this.generateInstructions();
-
     this.agent = new Agent({
-      name,
-      description,
+      name: "URPC Smart Data Assistant",
+      description:
+        "An intelligent data operation assistant based on URPC, capable of understanding natural language and executing corresponding data operations",
       instructions: this.instructions,
       model: createOpenRouter({
-        apiKey: openrouterApiKey || process.env.OPENROUTER_API_KEY,
-      }).chat(model),
+        apiKey: options.openrouterApiKey || process.env.OPENROUTER_API_KEY,
+      }).chat(options.model || "openai/gpt-4o-mini"),
     });
   }
 
   private generateInstructions(): string {
-    const schemas = URPC.getEntitySchemas();
-    const entitySources = URPC.getEntitySources();
+    const schemas = this.URPC.getEntitySchemas();
+    const entitySources = this.URPC.getEntitySources();
+    const entityConfigs = this.URPC.getEntityConfigs();
     const entityMarkdown = convertSchemaToMarkdown(schemas);
-    const entitySourcesMarkdown = convertEntitySourcesToMarkdown(entitySources);
+    const entitySourcesMarkdown = convertEntitySourcesToMarkdown(
+      entitySources,
+      entityConfigs
+    );
 
     if (this.debug) {
       console.log("[Schemas]:\n", JSON.stringify(schemas, null, 2));
+      console.log(
+        "[Entity Sources]:\n",
+        JSON.stringify(entitySources, null, 2)
+      );
+      console.log(
+        "[Entity Configs]:\n",
+        JSON.stringify(entityConfigs, null, 2)
+      );
       console.log("[Entity Markdown]:\n", entityMarkdown);
       console.log("[Entity Sources Markdown]:\n", entitySourcesMarkdown);
     }
@@ -101,40 +101,53 @@ For the request "Find user with ID 1", you should respond:
 ## Key Rules:
 1. **CRITICAL**: Always select the correct source parameter based on the "Entity Supported Sources" section above. Each entity has specific supported sources - you MUST use one of the supported sources for each entity.
 2. **CRITICAL**: Always use the correct entity parameter: "user" for user operations, "post" for post/article operations
-3. Map user natural language to correct entity names: user/users → "user", post/posts/article/articles → "post"
-4. Look up the correct source for each entity from "Entity Supported Sources" section
-5. Always include the actual URPC code in your response using the exact format: repo({entity: "[correct-entity]", source: "[correct-source]"}).methodName(...)
-6. Use "generated-id" as placeholder for new record IDs in create operations
-7. For create operations, always include all required fields based on the entity schema
-8. Respond in natural language that explains what you're doing, followed by the URPC code
-9. Never return JSON format - always use descriptive text with embedded URPC code
+3. **CRITICAL**: Source Selection Rules:
+   - If user explicitly specifies a source in their request, use that source (if it's supported for the entity)
+   - If user does NOT specify a source, automatically use the source marked with "(default)" for that entity
+   - If no default is marked, use the first available source for that entity
+4. Map user natural language to correct entity names: user/users → "user", post/posts/article/articles → "post"
+5. Look up the correct source for each entity from "Entity Supported Sources" section
+6. Always include the actual URPC code in your response using the exact format: repo({entity: "[correct-entity]", source: "[correct-source]"}).methodName(...)
+7. Use "generated-id" as placeholder for new record IDs in create operations
+8. For create operations, always include all required fields based on the entity schema
+9. Respond in natural language that explains what you're doing, followed by the URPC code
+10. Never return JSON format - always use descriptive text with embedded URPC code
 
 ## Processing Flow
 1. Understand user's natural language request
 2. Map user's intent to correct entity name (user/post)
-3. Look up the correct source for that entity from "Entity Supported Sources"
+3. Determine the source to use:
+   - Check if user explicitly mentioned a source in their request
+   - If yes, use that source (if supported for the entity)
+   - If no, use the source marked with "(default)" for that entity
+   - If no default marked, use the first available source
 4. Analyze the operation type to execute
 5. Build corresponding URPC operation with correct entity and source
 6. Explain what you're doing and include the URPC code in your response
 
 ## Example Responses:
 User: "Find all users"
-Your response: "I understand you want to find all users. I will execute the following URPC operation: repo({entity: "user", source: "[correct source for UserEntity]"}).findMany()"
+Your response: "I understand you want to find all users. I will execute the following URPC operation: repo({entity: "user", source: "[default source for UserEntity]"}).findMany()"
+
+User: "Find all users from mock source"
+Your response: "I understand you want to find all users from mock source. I will execute the following URPC operation: repo({entity: "user", source: "mock"}).findMany()"
 
 User: "Create a user named jack with email jack@test.com"
-Your response: "I understand you want to create a new user named jack with email jack@test.com. I will execute the following URPC operation: repo({entity: "user", source: "[correct source for UserEntity]"}).create({data: {id: "generated-id", name: "jack", email: "jack@test.com", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=jack"}})"
+Your response: "I understand you want to create a new user named jack with email jack@test.com. I will execute the following URPC operation: repo({entity: "user", source: "[default source for UserEntity]"}).create({data: {id: "generated-id", name: "jack", email: "jack@test.com", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=jack"}})"
 
 User: "Find all posts"
-Your response: "I understand you want to find all posts. I will execute the following URPC operation: repo({entity: "post", source: "[correct source for PostEntity]"}).findMany()"
+Your response: "I understand you want to find all posts. I will execute the following URPC operation: repo({entity: "post", source: "[default source for PostEntity]"}).findMany()"
 
 Remember: 
 - Always include the actual URPC code in your natural language response, never return JSON format
 - ALWAYS use the correct source parameter based on the Entity Supported Sources section
-- Replace [correct source for EntityName] with the actual source value from the supported sources list
+- When user doesn't specify source, automatically use the source marked with "(default)" for that entity
+- When user specifies source explicitly, use that source if it's supported for the entity
+- Replace [default source for EntityName] with the actual default source value from the supported sources list
 `;
   }
 
-  async processRequest(userMessage: string): Promise<any> {
+  async processRequest(userMessage: string): Promise<Output> {
     try {
       const response = await this.agent.generate([
         {
@@ -153,6 +166,7 @@ Remember:
         success: false,
         operation: "unknown",
         entity: "unknown",
+        source: "unknown",
         data: null,
         message: `Error occurred while processing request: ${error.message}`,
         urpc_code: null,
@@ -160,7 +174,9 @@ Remember:
     }
   }
 
-  private async parseAndExecuteResponse(agentResponse: string): Promise<any> {
+  private async parseAndExecuteResponse(
+    agentResponse: string
+  ): Promise<Output> {
     try {
       // Try to extract URPC operation from agent response
       // Improved regex that supports more complex parameter structures
@@ -183,29 +199,23 @@ Remember:
           }
         }
 
-        const result = await this.executeURPCCode(actualUrpcCode);
+        const { result, entity, source } =
+          await this.executeURPCCode(actualUrpcCode);
+
         if (this.debug) {
           console.log("[Result]:", result);
         }
 
         const operation = this.extractOperation(urpcCode);
-        const entity = this.extractEntity(urpcCode);
-
-        // Generate more friendly message for create operations
-        let message = "Operation executed successfully";
-        if (operation === "create") {
-          const entityName = entity === "user" ? "User" : "Article";
-          const name = result?.name || result?.title || "New record";
-          message = `${entityName} ${name} created successfully`;
-        }
 
         return {
-          success: true,
           operation,
           entity,
+          source,
           data: result,
-          message,
+          message: "",
           urpc_code: actualUrpcCode,
+          success: true,
         };
       }
 
@@ -214,6 +224,7 @@ Remember:
         success: true,
         operation: "conversation",
         entity: "none",
+        source: "none",
         data: null,
         message: agentResponse,
         urpc_code: null,
@@ -223,6 +234,7 @@ Remember:
         success: false,
         operation: "unknown",
         entity: "unknown",
+        source: "unknown",
         data: null,
         message: `Error occurred while executing operation: ${error.message}`,
         urpc_code: null,
@@ -230,36 +242,70 @@ Remember:
     }
   }
 
-  private async executeURPCCode(urpcCode: string): Promise<any> {
+  private async executeURPCCode(urpcCode: string): Promise<{
+    entity: string;
+    source: string;
+    result: any;
+  }> {
     // Here we need to safely execute URPC code
     // For simplification, we parse operation types and parameters
     try {
+      const entity = this.extractEntity(urpcCode);
+      const source = this.extractSource(urpcCode);
+      const options = this.extractOptions(urpcCode);
+
       if (urpcCode.includes("findMany")) {
-        const entity = this.extractEntity(urpcCode);
-        const source = this.extractSource(urpcCode);
-        const options = this.extractOptions(urpcCode);
-        return await repo({ entity, source }).findMany(options);
+        const result = await this.URPC.repo({ entity, source }).findMany(
+          options
+        );
+        return {
+          entity,
+          source,
+          result,
+        };
       } else if (urpcCode.includes("findOne")) {
-        const entity = this.extractEntity(urpcCode);
-        const source = this.extractSource(urpcCode);
-        const options = this.extractOptions(urpcCode);
-        return await repo({ entity, source }).findOne(options);
+        const result = await this.URPC.repo({ entity, source }).findOne(
+          options
+        );
+        return {
+          entity,
+          source,
+          result,
+        };
       } else if (urpcCode.includes("create")) {
-        const entity = this.extractEntity(urpcCode);
-        const source = this.extractSource(urpcCode);
-        const options = this.extractOptions(urpcCode);
-        return await repo({ entity, source }).create(options);
+        const result = await this.URPC.repo({ entity, source }).create(options);
+        return {
+          entity,
+          source,
+          result,
+        };
       } else if (urpcCode.includes("update")) {
-        const entity = this.extractEntity(urpcCode);
-        const source = this.extractSource(urpcCode);
-        const options = this.extractOptions(urpcCode);
-        return await repo({ entity, source }).update(options);
+        const result = await this.URPC.repo({ entity, source }).update(options);
+        return {
+          entity,
+          source,
+          result,
+        };
       } else if (urpcCode.includes("delete")) {
-        const entity = this.extractEntity(urpcCode);
-        const source = this.extractSource(urpcCode);
-        const options = this.extractOptions(urpcCode);
-        return await repo({ entity, source }).delete(options);
+        const result = await this.URPC.repo({ entity, source }).delete(options);
+        return {
+          entity,
+          source,
+          result,
+        };
+      } else if (urpcCode.includes("call")) {
+        const result = await this.URPC.repo({ entity, source }).call(options);
+        return {
+          entity,
+          source,
+          result,
+        };
       }
+      return {
+        entity: "unknown",
+        source: "unknown",
+        result: null,
+      };
     } catch (error: any) {
       throw new Error(`URPC operation execution failed: ${error.message}`);
     }
@@ -271,6 +317,7 @@ Remember:
     if (urpcCode.includes("create")) return "create";
     if (urpcCode.includes("update")) return "update";
     if (urpcCode.includes("delete")) return "delete";
+    if (urpcCode.includes("call")) return "call";
     return "unknown";
   }
 

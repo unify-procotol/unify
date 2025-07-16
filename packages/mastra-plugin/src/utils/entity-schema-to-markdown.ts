@@ -6,6 +6,9 @@ export function convertSchemaToMarkdown(
   let markdown = "";
 
   for (const [entityName, entitySchema] of Object.entries(schemas)) {
+    if (entityName === "ChatEntity") {
+      continue;
+    }
     markdown += `### ${entityName}:\n`;
 
     for (const [propertyName, propertySchema] of Object.entries(

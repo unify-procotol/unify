@@ -3,6 +3,12 @@ import type {
   Plugin,
   EntityConfigs,
   DataSourceAdapter,
+  FindManyArgs,
+  FindOneArgs,
+  CreationArgs,
+  UpdateArgs,
+  DeletionArgs,
+  CallArgs,
 } from "@unilab/urpc-core";
 
 export interface RepoOptions<T extends Record<string, any>> {
@@ -10,6 +16,7 @@ export interface RepoOptions<T extends Record<string, any>> {
   source?: string;
   context?: {
     lang?: string;
+    stream?: boolean;
   };
 }
 
@@ -25,6 +32,15 @@ export type JoinRepoOptions<
   F extends Record<string, any> = Record<string, any>,
   L extends Record<string, any> = Record<string, any>,
 > = RepoOptions<F> & RelationMapping<F, L>;
+
+export interface ProxyRepo<T extends Record<string, any>> {
+  findMany(args?: FindManyArgs<T>): Promise<T[]>;
+  findOne(args: FindOneArgs<T>): Promise<T | null>;
+  create(args: CreationArgs<T>): Promise<T>;
+  update(args: UpdateArgs<T>): Promise<T>;
+  delete(args: DeletionArgs<T>): Promise<boolean>;
+  call(args: CallArgs<T>): Promise<T | Response>;
+}
 
 export interface LocalConfig {
   plugins: Plugin[];
