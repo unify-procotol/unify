@@ -1,197 +1,38 @@
 "use client";
 
 import { UniRender } from "@unilab/ukit";
-import { repo, URPC } from "@unilab/urpc";
-import { Plugin } from "@unilab/urpc-core";
-import { Logging } from "@unilab/urpc-core/middleware";
-import { useState, useEffect } from "react";
-import { UserEntity } from "./entities/user";
-import { PostEntity } from "./entities/post";
-
-const MyPlugin: Plugin = {
-  entities: [UserEntity, PostEntity],
-};
-
-// Global variable to track initialization status for current session
-// Using a global key to share state between components  
-const GLOBAL_SESSION_KEY = '__urpc_session_initialized__';
-const getSessionInitialized = (): boolean => {
-  if (typeof window !== 'undefined') {
-    return (window as any)[GLOBAL_SESSION_KEY] || false;
-  }
-  return false;
-};
-const setSessionInitialized = (value: boolean) => {
-  if (typeof window !== 'undefined') {
-    (window as any)[GLOBAL_SESSION_KEY] = value;
-  }
-};
+import { useURPCProvider } from "./shared/urpc-provider";
+import { LoadingState, ErrorState } from "./shared/common-ui";
+import { renderCustomCardLayout } from "./shared/custom-layouts";
 
 interface ExampleProps {
-  type: 'basic' | 'table-editable' | 'card' | 'form' | 'grid' | 'list' | 'dashboard' | 'loading' | 'error' | 'empty';
+  type: 'basic' | 'table-editable' | 'card' | 'form' | 'grid' | 'list' | 'dashboard' | 'loading' | 'error' | 'empty' | 'custom-basic' | 'custom-magazine' | 'custom-social' | 'custom-blog' | 'custom-minimal';
 }
 
 export function UniRenderExample({ type }: ExampleProps) {
-  const [isInitialized, setIsInitialized] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { isInitialized, loading, error, retryInitialization } = useURPCProvider();
 
-  useEffect(() => {
-    const initializeURPC = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        
-        // Dynamic import MockAdapter to avoid SSR issues
-        const { MockAdapter } = await import("@unilab/urpc-adapters");
-        
-        // Initialize URPC only on client side
-        URPC.init({
-          plugins: [MyPlugin],
-          middlewares: [Logging()],
-          entityConfigs: {
-            user: {
-              defaultSource: "mock",
-            },
-            post: {
-              defaultSource: "mock",
-            },
-            schema: {
-              defaultSource: "_global",
-            },
-          },
-          globalAdapters: [MockAdapter],
-        });
-
-        // Check if data has been initialized in current session using global variable
-        if (!getSessionInitialized()) {
-          console.log("Creating initial mock data...");
-          
-          // Create some mock data
-          await repo({
-            entity: "user",
-          }).create({
-            data: {
-              id: "1",
-              name: "John Doe",
-              email: "john.doe@example.com",
-              role: "Admin",
-              isActive: true,
-              avatar: "https://example.com/avatar1.png",
-            },
-          });
-
-          await repo({
-            entity: "user",
-          }).create({
-            data: {
-              id: "2",
-              name: "Jane Smith",
-              email: "jane.smith@example.com",
-              role: "User",
-              isActive: true,
-              avatar: "https://example.com/avatar2.png",
-            },
-          });
-
-          await repo({
-            entity: "user",
-          }).create({
-            data: {
-              id: "3",
-              name: "Bob Johnson",
-              email: "bob.johnson@example.com",
-              role: "Manager",
-              isActive: false,
-              avatar: "https://example.com/avatar3.png",
-            },
-          });
-          
-          // Mark current session as initialized
-          setSessionInitialized(true);
-          console.log("Mock data created successfully");
-        } else {
-          console.log("Mock data already initialized in this session, skipping creation");
-        }
-
-        setIsInitialized(true);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to initialize URPC');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (!isInitialized) {
-      initializeURPC();
-    }
-  }, [isInitialized]);
-
-  // Show corresponding states if still initializing or encountering errors
+  // Show loading state
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <div className="animate-spin w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full mx-auto mb-4"></div>
-          <div className="text-gray-600 font-medium">Initializing URPC...</div>
-          <div className="text-gray-400 text-sm mt-1">
-            Setting up data adapters and mock data
-          </div>
-        </div>
-      </div>
-    );
+    return <LoadingState />;
   }
 
+  // Show error state
   if (error) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center max-w-md">
-          <div className="w-16 h-16 mx-auto mb-4 text-red-400">
-            <svg
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              className="w-full h-full"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"
-              />
-            </svg>
-          </div>
-          <div className="text-red-600 text-lg font-semibold mb-2">
-            Initialization Failed
-          </div>
-          <p className="text-gray-600 mb-4">{error}</p>
-          <button
-            onClick={() => {
-              setError(null);
-              setIsInitialized(false);
-            }}
-            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm"
-          >
-            Retry
-          </button>
-        </div>
-      </div>
-    );
+    return <ErrorState error={error} onRetry={retryInitialization} />;
   }
 
-  // Only render UniRender component after URPC is fully initialized
+  // Only render after URPC is initialized
   if (!isInitialized) {
     return null;
   }
 
   const handleEdit = async (updatedRecord: any, index: number) => {
-    // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 500));
     console.log('Updated record:', updatedRecord);
   };
 
   const handleDelete = async (record: any, index: number) => {
-    // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 500));
     console.log('Deleted record:', record);
   };
@@ -441,6 +282,106 @@ export function UniRenderExample({ type }: ExampleProps) {
       layout: 'table' as const,
       loading: false,
       error: null
+    },
+    'custom-basic': {
+      entity: "post",
+      source: "mock",
+      layout: 'custom' as const,
+      render: renderCustomCardLayout,
+      config: {
+        name: { label: 'Title' },
+        content: { label: 'Content' },
+        role: { label: 'Role' },
+        type: { label: 'Type' },
+        category: { label: 'Category' },
+        status: { label: 'Status' },
+        isActive: { label: 'Active' },
+        createdAt: { label: 'Created' }
+      },
+      pagination: {
+        enabled: true,
+        pageSize: 6,
+      },
+      onEdit: handleEdit,
+      onDelete: handleDelete
+    },
+    'custom-magazine': {
+      entity: "post",
+      source: "mock",
+      layout: 'custom' as const,
+      render: renderCustomCardLayout,
+      config: {
+        name: { label: 'Article Title' },
+        content: { label: 'Content' },
+        role: { label: 'Department' },
+        type: { label: 'Type' },
+        category: { label: 'Category' },
+        status: { label: 'Status' },
+      },
+      pagination: {
+        enabled: true,
+        pageSize: 8,
+      },
+      onEdit: handleEdit,
+      onDelete: handleDelete
+    },
+    'custom-social': {
+      entity: "post",
+      source: "mock",
+      layout: 'custom' as const,
+      render: renderCustomCardLayout,
+      config: {
+        name: { label: 'Post Title' },
+        content: { label: 'Content' },
+        role: { label: 'User Role' },
+        type: { label: 'Post Type' },
+        category: { label: 'Category' },
+        status: { label: 'Status' },
+      },
+      pagination: {
+        enabled: true,
+        pageSize: 9,
+      },
+      onEdit: handleEdit,
+      onDelete: handleDelete
+    },
+    'custom-blog': {
+      entity: "post",
+      source: "mock",
+      layout: 'custom' as const,
+      render: renderCustomCardLayout,
+      config: {
+        name: { label: 'Blog Title' },
+        content: { label: 'Content' },
+        role: { label: 'Author Role' },
+        type: { label: 'Post Type' },
+        category: { label: 'Category' },
+        status: { label: 'Status' },
+      },
+      pagination: {
+        enabled: true,
+        pageSize: 4,
+      },
+      onEdit: handleEdit,
+      onDelete: handleDelete
+    },
+    'custom-minimal': {
+      entity: "post",
+      source: "mock",
+      layout: 'custom' as const,
+      render: renderCustomCardLayout,
+      config: {
+        name: { label: 'Title' },
+        content: { label: 'Description' },
+        role: { label: 'Role' },
+        status: { label: 'Status' },
+      },
+      pagination: {
+        enabled: true,
+        pageSize: 12,
+      },
+      onEdit: handleEdit,
+      onDelete: handleDelete
     }
   };
 
@@ -474,4 +415,7 @@ export function UniRenderExample({ type }: ExampleProps) {
   }
   
   return <UniRender {...finalProps} />;
-} 
+}
+
+// Export with backward compatibility
+export { UniRenderExample as UniRenderCustomLayout }; 

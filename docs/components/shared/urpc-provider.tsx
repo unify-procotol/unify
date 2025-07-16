@@ -1,0 +1,227 @@
+"use client";
+
+import { repo, URPC } from "@unilab/urpc";
+import { Plugin } from "@unilab/urpc-core";
+import { Logging } from "@unilab/urpc-core/middleware";
+import { useState, useEffect } from "react";
+import { PostEntity } from "../entities/post";
+import { UserEntity } from "../entities/user";
+
+const MyPlugin: Plugin = {
+  entities: [UserEntity, PostEntity],
+};
+
+// Global variable to track initialization status for current session
+const GLOBAL_SESSION_KEY = '__urpc_session_initialized__';
+
+export const getSessionInitialized = (): boolean => {
+  if (typeof window !== 'undefined') {
+    return (window as any)[GLOBAL_SESSION_KEY] || false;
+  }
+  return false;
+};
+
+export const setSessionInitialized = (value: boolean) => {
+  if (typeof window !== 'undefined') {
+    (window as any)[GLOBAL_SESSION_KEY] = value;
+  }
+};
+
+export interface URPCProviderState {
+  isInitialized: boolean;
+  loading: boolean;
+  error: string | null;
+  retryInitialization: () => void;
+}
+
+export const useURPCProvider = (): URPCProviderState => {
+  const [isInitialized, setIsInitialized] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const initializeURPC = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // Dynamic import MockAdapter to avoid SSR issues
+      const { MockAdapter } = await import("@unilab/urpc-adapters");
+      
+      // Initialize URPC only on client side
+      URPC.init({
+        plugins: [MyPlugin],
+        middlewares: [Logging()],
+        entityConfigs: {
+          user: {
+            defaultSource: "mock",
+          },
+          post: {
+            defaultSource: "mock",
+          },
+          schema: {
+            defaultSource: "_global",
+          },
+        },
+        globalAdapters: [MockAdapter],
+      });
+
+      // Check if data has been initialized in current session
+      if (!getSessionInitialized()) {
+        console.log("Creating initial mock data...");
+        
+        // Create user mock data
+        const users = [
+          {
+            id: "1",
+            name: "John Doe",
+            email: "john.doe@example.com",
+            role: "Admin",
+            isActive: true,
+            avatar: "https://example.com/avatar1.png",
+          },
+          {
+            id: "2",
+            name: "Jane Smith",
+            email: "jane.smith@example.com",
+            role: "User",
+            isActive: true,
+            avatar: "https://example.com/avatar2.png",
+          },
+          {
+            id: "3",
+            name: "Bob Johnson",
+            email: "bob.johnson@example.com",
+            role: "Manager",
+            isActive: false,
+            avatar: "https://example.com/avatar3.png",
+          },
+        ];
+
+        for (const user of users) {
+          await repo({ entity: "user" }).create({ data: user });
+        }
+
+        // Create post mock data
+        const images = [
+          "https://media.daily.dev/image/upload/s--AC8ihwmO--/f_auto/v1746082658/posts/xjMewZTM2",
+          "https://i0.wp.com/devjournal.info/wp-content/uploads/2025/05/minio-s3-image.png?fit=600%2C452&ssl=1",
+          "https://flo-bit.dev/ui-kit/opengraph.png"
+        ];
+
+        const posts = [
+          {
+            id: "1",
+            name: "React Performance Optimization",
+            email: "john.doe@example.com",
+            role: "Frontend",
+            type: "article",
+            category: "development",
+            status: "published",
+            isActive: true,
+            content: "Learn advanced techniques for optimizing React applications performance including memoization, virtualization, and code splitting strategies.",
+            createdAt: new Date().toISOString(),
+            imageUrl: images[Math.floor(Math.random() * images.length)],
+          },
+          {
+            id: "2",
+            name: "Understanding TypeScript Generics",
+            email: "jane.smith@example.com",
+            role: "Backend",
+            type: "tutorial",
+            category: "typescript",
+            status: "draft",
+            isActive: true,
+            content: "A comprehensive guide to TypeScript generics, covering basic concepts to advanced patterns and real-world applications.",
+            createdAt: new Date(Date.now() - 86400000).toISOString(),
+            imageUrl: images[Math.floor(Math.random() * images.length)],
+          },
+          {
+            id: "3",
+            name: "Building Scalable APIs",
+            email: "bob.johnson@example.com",
+            role: "DevOps",
+            type: "guide",
+            category: "backend",
+            status: "published",
+            isActive: false,
+            content: "Best practices for designing and implementing scalable REST APIs with proper authentication, caching, and monitoring.",
+            createdAt: new Date(Date.now() - 172800000).toISOString(),
+            imageUrl: images[Math.floor(Math.random() * images.length)],
+          },
+          {
+            id: "4",
+            name: "CSS Grid Layout Mastery",
+            email: "alice.davis@example.com",
+            role: "Designer",
+            type: "workshop",
+            category: "design",
+            status: "published",
+            isActive: true,
+            content: "Master CSS Grid layout with practical examples and advanced techniques for creating responsive layouts.",
+            createdAt: new Date(Date.now() - 259200000).toISOString(),
+            imageUrl: images[Math.floor(Math.random() * images.length)],
+          },
+          {
+            id: "5",
+            name: "Database Optimization Strategies",
+            email: "charlie.brown@example.com",
+            role: "Database",
+            type: "article",
+            category: "database",
+            status: "published",
+            isActive: true,
+            content: "Proven strategies for optimizing database performance including indexing, query optimization, and schema design.",
+            createdAt: new Date(Date.now() - 345600000).toISOString(),
+            imageUrl: images[Math.floor(Math.random() * images.length)],
+          },
+          {
+            id: "6",
+            name: "Modern JavaScript Features",
+            email: "diana.wilson@example.com",
+            role: "Frontend",
+            type: "reference",
+            category: "javascript",
+            status: "published",
+            isActive: true,
+            content: "Explore the latest JavaScript features including async/await, destructuring, modules, and more.",
+            createdAt: new Date(Date.now() - 432000000).toISOString(),
+            imageUrl: images[Math.floor(Math.random() * images.length)],
+          }
+        ];
+
+        for (const post of posts) {
+          await repo({ entity: "post" }).create({ data: post });
+        }
+        
+        setSessionInitialized(true);
+        console.log("Mock data created successfully");
+      } else {
+        console.log("Mock data already initialized in this session, skipping creation");
+      }
+
+      setIsInitialized(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to initialize URPC');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const retryInitialization = () => {
+    setError(null);
+    setIsInitialized(false);
+  };
+
+  useEffect(() => {
+    if (!isInitialized) {
+      initializeURPC();
+    }
+  }, [isInitialized]);
+
+  return {
+    isInitialized,
+    loading,
+    error,
+    retryInitialization,
+  };
+}; 
