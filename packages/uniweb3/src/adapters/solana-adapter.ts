@@ -5,7 +5,7 @@ import { SolanaHandler } from "../handlers/solana";
 const handler = new SolanaHandler();
 
 export class SolanaAdapter extends BaseAdapter<WalletEntity> {
-  static readonly adapterName = "SolanaAdapter";
+  static displayName = "SolanaAdapter";
 
   async findOne(args: FindOneArgs<WalletEntity>): Promise<WalletEntity | null> {
     const { address } = args.where;

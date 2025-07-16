@@ -10,7 +10,7 @@ const evmHandlers: Record<EVMNetwork, EVMHandler> = {
 };
 
 export class EVMAdapter extends BaseAdapter<WalletEntity> {
-  static readonly adapterName = "EVMAdapter";
+  static displayName = "EVMAdapter";
 
   async findOne(args: FindOneArgs<WalletEntity>): Promise<WalletEntity | null> {
     const { address, network } = args.where;

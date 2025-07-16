@@ -3,14 +3,14 @@ import { SchemaEntity } from "../entities/schema";
 import { URPC } from "../type";
 
 export class SchemaAdapter extends BaseAdapter<SchemaEntity> {
+  static displayName = "SchemaAdapter";
+
   private urpc: URPC;
 
   constructor(urpc: URPC) {
     super();
     this.urpc = urpc;
   }
-
-  static readonly adapterName = "SchemaAdapter";
 
   private getSourcesForEntity(entity: string): string[] {
     const entitySources = this.urpc.getEntitySources();

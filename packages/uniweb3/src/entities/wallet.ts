@@ -1,6 +1,8 @@
 import { Fields } from "@unilab/urpc-core";
 
 export class TokenEntity {
+  static displayName = "TokenEntity";
+
   @Fields.string({
     description: "The symbol of the token",
   })
@@ -13,6 +15,8 @@ export class TokenEntity {
 }
 
 export class WalletEntity {
+  static displayName = "WalletEntity";
+  
   @Fields.string({
     description: "The address of the wallet",
   })

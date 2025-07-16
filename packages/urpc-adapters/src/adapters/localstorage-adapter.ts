@@ -17,6 +17,7 @@ export interface LocalStorageAdapterOptions {
 export class LocalStorageAdapter<
   T extends Record<string, any>,
 > extends BaseAdapter<T> {
+  static displayName = "LocalStorageAdapter";
   static get name() {
     return "localstorage";
   }

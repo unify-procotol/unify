@@ -204,7 +204,7 @@ function getAllFieldMetadata(target: any): Record<string, FieldMetadata> {
 function getEntityTypeName(targetFunction: () => any): string {
   try {
     const targetClass = targetFunction();
-    return targetClass.name || "UnknownEntity";
+    return extractEntityClassName(targetClass);
   } catch (error) {
     // If target function fails (e.g., circular dependency), try to extract from function string
     const funcStr = targetFunction.toString();
@@ -270,9 +270,17 @@ export function generateSchemas(
   const schemas: Record<string, SchemaObject> = {};
 
   for (const entityClass of entityClasses) {
-    const className = entityClass.name;
-    schemas[className] = generateSchema(entityClass);
+    const name = extractEntityClassName(entityClass);
+    schemas[name] = generateSchema(entityClass);
   }
 
   return schemas;
+}
+
+export function extractEntityClassName(entityClass: any): string {
+  return entityClass.displayName || entityClass.name;
+}
+
+export function extractAdapterName(adapterClass: any): string {
+  return adapterClass.displayName || adapterClass.name;
 }

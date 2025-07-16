@@ -11,6 +11,7 @@ import { matchesWhere, processFindManyArgs } from "../utils";
 export class IndexedDBAdapter<
   T extends Record<string, any>,
 > extends BaseAdapter<T> {
+  static displayName = "IndexedDBAdapter";
   static get name() {
     return "indexeddb";
   }

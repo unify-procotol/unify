@@ -11,6 +11,8 @@ import {
   useGlobalMiddleware,
   getGlobalMiddlewareManager,
   simplifyEntityName,
+  extractAdapterName,
+  extractEntityClassName,
 } from "@unilab/urpc-core";
 import type {
   LocalConfig,
@@ -128,9 +130,7 @@ export class URPC {
       console.log(
         `✅ Registered Plugin Adapters: ${adapters
           .map((a) => {
-            const adapterName =
-              (a.adapter.constructor as any).adapterName ||
-              a.adapter.constructor.name;
+            const adapterName = extractAdapterName(a.adapter);
             return `${adapterName}`;
           })
           .join(", ")}`
@@ -150,13 +150,13 @@ export class URPC {
       globalAdapters.forEach((Adapter) => {
         const source = Adapter.name;
         entities.forEach((entity) => {
-          const entityName = entity.name;
+          const entityName = extractEntityClassName(entity);
           registerAdapter(entityName, source, new Adapter());
         });
       });
       console.log(
         `✅ Registered Global Adapters: ${globalAdapters
-          .map((a) => `${a.name}`)
+          .map((a) => `${extractAdapterName(a)}`)
           .join(", ")}`
       );
     }
@@ -195,8 +195,10 @@ export class URPC {
     if (globalAdapters && entities) {
       globalAdapters.forEach((adapter) => {
         entities.forEach((entity) => {
-          const entityName = entity.name;
-          const source = adapter.name;
+          const entityName = extractEntityClassName(entity);
+          const source = extractAdapterName(adapter)
+            .toLowerCase()
+            .replace("adapter", "");
           if (!entitySources[entityName]) {
             entitySources[entityName] = [];
           }

@@ -7,6 +7,8 @@ import {
   getGlobalMiddlewareManager,
   simplifyEntityName,
   DataSourceAdapter,
+  extractEntityClassName,
+  extractAdapterName,
 } from "@unilab/urpc-core";
 import {
   generateSchemas,
@@ -98,9 +100,11 @@ export class URPC {
     if (globalAdapters.length > 0) {
       const entities = plugins.flatMap((p) => p.entities || []);
       globalAdapters.forEach((Adapter) => {
-        const source = Adapter.name;
+        const source = extractAdapterName(Adapter)
+          .toLowerCase()
+          .replace("adapter", "");
         entities.forEach((entity) => {
-          const entityName = entity.name;
+          const entityName = extractEntityClassName(entity);
           registerAdapter(entityName, source, new Adapter());
         });
       });
@@ -168,8 +172,10 @@ export class URPC {
     if (globalAdapters && entities) {
       globalAdapters.forEach((adapter) => {
         entities.forEach((entity) => {
-          const entityName = entity.name;
-          const source = adapter.name;
+          const entityName = extractEntityClassName(entity);
+          const source = extractAdapterName(adapter)
+            .toLowerCase()
+            .replace("adapter", "");
           if (!entitySources[entityName]) {
             entitySources[entityName] = [];
           }

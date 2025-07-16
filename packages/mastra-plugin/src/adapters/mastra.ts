@@ -10,9 +10,7 @@ import { MastraOptions, URPC } from "../utils/type";
 import { URPCAgent } from "../utils/urpc-agent";
 
 export class MastraAdapter extends BaseAdapter<ChatEntity> {
-  get name() {
-    return "mastra";
-  }
+  static displayName = "MastraAdapter";
 
   private options: MastraOptions & { URPC: URPC };
   private agentInstance: URPCAgent | null = null;
