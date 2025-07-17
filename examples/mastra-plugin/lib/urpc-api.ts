@@ -5,6 +5,7 @@ import { Plugin } from "@unilab/urpc-core";
 import { UserEntity } from "@/entities/user";
 import { PostEntity } from "@/entities/post";
 import { MockAdapter } from "@unilab/urpc-adapters";
+import { WalletPlugin } from "@unilab/uniweb3";
 
 let api: URPCAPI;
 export function getAPI() {
@@ -15,15 +16,19 @@ export function getAPI() {
 
     api = URPC.init({
       plugins: [
+        WalletPlugin,
         DataPlugin,
         MastraPlugin({
-          model: "openai/gpt-4o-mini",
+          defaultModel: "google/gemini-2.0-flash-001",
           openrouterApiKey: process.env.OPENROUTER_API_KEY,
           debug: true,
         }),
       ],
       // middlewares: [Logging()],
       entityConfigs: {
+        wallet: {
+          defaultSource: "evm",
+        },
         user: {
           defaultSource: "mock",
         },
@@ -32,31 +37,6 @@ export function getAPI() {
         },
       },
       globalAdapters: [MockAdapter],
-    });
-
-    // Initialize data
-    URPC.repo({
-      entity: "user",
-      source: "mock",
-    }).create({
-      data: {
-        id: "1",
-        name: "John",
-        email: "john@example.com",
-        avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=John",
-      },
-    });
-    URPC.repo({
-      entity: "post",
-      source: "mock",
-    }).create({
-      data: {
-        id: "1",
-        title: "Welcome to URPC Agent",
-        content:
-          "This is the first sample article, demonstrating the basic functionality of URPC Agent.",
-        userId: "1",
-      },
     });
   }
   return api;

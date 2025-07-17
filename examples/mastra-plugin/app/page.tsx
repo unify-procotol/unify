@@ -1,10 +1,18 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { Send, User, Bot, Database, MessageSquare, Zap } from "lucide-react";
-import { initUrpcClient } from "@/lib/urpc-client";
+import {
+  Send,
+  User,
+  Bot,
+  Database,
+  MessageSquare,
+  Zap,
+  ChevronDown,
+} from "lucide-react";
 import { repo } from "@unilab/urpc";
 import { ChatEntity } from "@unilab/mastra-plugin/entities";
+import { initUrpcClient } from "@/lib/urpc-client";
 
 interface Message {
   id: string;
@@ -19,7 +27,7 @@ interface UserData {
   id: string;
   name: string;
   email: string;
-  avatar?: string;
+  avatar: string;
 }
 
 interface PostData {
@@ -27,30 +35,45 @@ interface PostData {
   title: string;
   content: string;
   userId: string;
-  user?: UserData;
 }
 
 initUrpcClient();
 
-export default function Home() {
+export default function UrpcAgent() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [userData, setUserData] = useState<UserData[]>([]);
   const [postData, setPostData] = useState<PostData[]>([]);
+  const [selectedModel, setSelectedModel] = useState(
+    "google/gemini-2.0-flash-001"
+  );
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  // Available models
+  const availableModels = [
+    { value: "google/gemini-2.0-flash-001", label: "Gemini 2.0 Flash" },
+    { value: "moonshotai/kimi-k2", label: "MoonshotAI: Kimi K2" },
+    {
+      value: "deepseek/deepseek-chat-v3-0324",
+      label: "DeepSeek: DeepSeek V3 0324",
+    },
+    { value: "openai/gpt-4o", label: "GPT-4o" },
+    { value: "openai/gpt-4o-mini", label: "GPT-4o Mini" },
+  ];
+
   // Quick operation commands
-  const quickCommands = ["Find all users", "Find all posts by users with ID 1"];
+  const quickCommands = ["Find all users", "Find all posts"];
 
   const testCases = [
+    "Create a new user named John with email john@example.com, and avatar https://api.dicebear.com/7.x/avataaars/svg?seed=John, id is '1'",
     "Find all users",
     "Find user with ID 1",
-    "Create a new user named Jack with email jack@example.com",
     "Find all posts by users with userId 1",
-    'Create an article with title "Test Article", content "This is a test article", author is user 1',
+    'Create an article with title "Test Article", content "This is a test article", author userId is "1"',
     'Update user 1\'s name to "John Doe"',
-    "Delete article with ID 1",
+    "Query the balance of ethereum network wallet address 0x8E76cAEbaca6c0e390F825fa44Dfd1fCb74B9C36",
+    "Query the balance of solana wallet address 11111111111111111111111111111112",
   ];
 
   const scrollToBottom = () => {
@@ -60,6 +83,13 @@ export default function Home() {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
+    }
+  };
 
   const handleSendMessage = async (messageText?: string) => {
     const textToSend = messageText || inputMessage;
@@ -80,11 +110,12 @@ export default function Home() {
       const result = await repo<ChatEntity>({
         entity: "chat",
         source: "mastra",
-        // context: {
-        //   stream: true,
-        // },
       }).call({
         input: textToSend,
+        model:
+          selectedModel === "google/gemini-2.0-flash-001"
+            ? undefined
+            : selectedModel,
       });
 
       if (result instanceof Response) {
@@ -179,8 +210,7 @@ export default function Home() {
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content:
-          "Sorry, an error occurred while processing your request. Please try again later.",
+        content: "Sorry, an error occurred. Please try again later.",
         timestamp: new Date(),
       };
       setMessages((prev) => [...prev, errorMessage]);
@@ -189,237 +219,257 @@ export default function Home() {
     }
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage();
-    }
-  };
-
   return (
-    <div className="min-h-screen bg-black">
-      {/* Header */}
-      <div className="bg-gray-900 shadow-lg border-b border-gray-800">
-        <div className="max-w-7xl mx-auto p-4">
-          <div className="text-center">
-            <h1 className="text-xl font-bold text-white">
-              URPC Intelligent Agent Demo
-            </h1>
+    <div className="max-w-7xl mx-auto px-4 py-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left chat area */}
+        <div className="lg:col-span-2">
+          <div className="bg-card rounded-lg shadow-lg border border-border">
+            {/* Chat header */}
+            <div className="border-b border-border p-4">
+              <div className="flex items-center space-x-3">
+                <div className="p-2 bg-muted rounded-full">
+                  <MessageSquare className="h-5 w-5 text-muted-foreground" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-foreground">Smart Chat</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Interact with URPC Agent through natural language to perform
+                    data CRUD operations
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Chat messages area */}
+            <div className="h-[calc(100vh-300px)] overflow-y-auto p-4 space-y-4">
+              {messages.length === 0 && (
+                <div className="text-center py-8">
+                  <Bot className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <p className="text-muted-foreground mb-4">
+                    Start chatting with URPC Agent!
+                  </p>
+
+                  {/* Quick action buttons */}
+                  <div className="space-y-2">
+                    <p className="text-sm text-muted-foreground mb-2">
+                      💡 Try these commands:
+                    </p>
+                    <div className="flex flex-wrap gap-2 justify-center">
+                      {quickCommands.map((command, index) => (
+                        <button
+                          key={index}
+                          onClick={() => handleSendMessage(command)}
+                          className="px-3 py-1 bg-muted text-muted-foreground text-sm rounded-full hover:bg-accent hover:text-accent-foreground transition-colors border border-border"
+                        >
+                          {command}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {messages.map((message) => (
+                <div
+                  key={message.id}
+                  className={`flex ${
+                    message.role === "user" ? "justify-end" : "justify-start"
+                  }`}
+                >
+                  <div
+                    className={`max-w-md p-3 rounded-lg ${
+                      message.role === "user"
+                        ? "bg-secondary text-secondary-foreground"
+                        : "bg-muted text-muted-foreground"
+                    }`}
+                  >
+                    <div className="flex items-center space-x-2 mb-1">
+                      {message.role === "user" ? (
+                        <User className="h-4 w-4" />
+                      ) : (
+                        <Bot className="h-4 w-4" />
+                      )}
+                      <span className="text-xs font-medium ">
+                        {message.role === "user" ? "You" : "URPC Assistant"}
+                      </span>
+                    </div>
+                    <div className="text-sm">{message.content}</div>
+                    {message.urpcCode && (
+                      <>
+                        {/* Display URPC code */}
+                        <div className="mt-2 p-2 bg-gradient-background rounded text-foreground text-xs font-mono border border-border">
+                          <div className="text-muted-foreground mb-1">
+                            URPC Code:
+                          </div>
+                          {message.urpcCode}
+                        </div>
+                        {/* Display data */}
+                        <div className="mt-2 p-2 bg-gradient-background rounded text-foreground text-xs font-mono border border-border">
+                          <div className="text-muted-foreground mb-1">
+                            Data:
+                          </div>
+                          {JSON.stringify(message.data, null, 2)}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+              ))}
+
+              {isLoading && (
+                <div className="flex justify-start">
+                  <div className="max-w-md p-3 rounded-lg bg-muted text-muted-foreground">
+                    <div className="flex items-center space-x-2">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-muted-foreground"></div>
+                      <span className="text-sm">Processing...</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+              <div ref={messagesEndRef} />
+            </div>
+
+            {/* Input area */}
+            <div className="border-t border-border p-4">
+              <div className="flex space-x-2">
+                {/* Model selection dropdown */}
+                <div className="relative">
+                  <select
+                    value={selectedModel}
+                    onChange={(e) => setSelectedModel(e.target.value)}
+                    className="appearance-none bg-gradient-background border border-input rounded-lg px-3 py-2 pr-8 text-foreground focus:outline-none focus:ring-2 focus:ring-ring min-w-[140px] h-10"
+                    disabled={isLoading}
+                  >
+                    {availableModels.map((model) => (
+                      <option key={model.value} value={model.value}>
+                        {model.label}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                </div>
+
+                <input
+                  type="text"
+                  value={inputMessage}
+                  onChange={(e) => setInputMessage(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  placeholder="Enter your command..."
+                  className="flex-1 px-3 py-2 bg-gradient-background border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring text-foreground placeholder:text-muted-foreground h-10"
+                  disabled={isLoading}
+                />
+                <button
+                  onClick={() => handleSendMessage()}
+                  disabled={isLoading || !inputMessage.trim()}
+                  className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed h-10 flex items-center justify-center"
+                >
+                  <Send className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Main content area */}
-      <div className="max-w-7xl mx-auto px-4 py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left chat area */}
-          <div className="lg:col-span-2">
-            <div className="bg-gray-900 rounded-lg shadow-lg border border-gray-800">
-              {/* Chat header */}
-              <div className="border-b border-gray-800 p-4">
-                <div className="flex items-center space-x-3">
-                  <div className="p-2 bg-gray-800 rounded-full">
-                    <MessageSquare className="h-5 w-5 text-gray-400" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-white">Smart Chat</h3>
-                    <p className="text-sm text-gray-300">
-                      Interact with URPC Agent through natural language to
-                      realize CRUD operations on data.
-                    </p>
-                  </div>
+        {/* Right data display area */}
+        <div className="space-y-4">
+          {/* User data display */}
+          <div className="bg-card rounded-lg shadow-lg border border-border">
+            <div className="border-b border-border p-4">
+              <div className="flex items-center space-x-2">
+                <User className="h-5 w-5 text-muted-foreground" />
+                <h3 className="font-semibold text-foreground">User Data</h3>
+              </div>
+            </div>
+            <div className="p-4 max-h-64 overflow-y-auto">
+              {userData.length > 0 ? (
+                <div className="space-y-2">
+                  {userData.map((user) => (
+                    <div key={user.id} className="bg-muted rounded p-3">
+                      <div className="text-xs text-foreground">
+                        <div>
+                          <strong>ID:</strong> {user.id}
+                        </div>
+                        <div>
+                          <strong>Name:</strong> {user.name}
+                        </div>
+                        <div>
+                          <strong>Email:</strong> {user.email}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              </div>
-
-              {/* Chat messages area */}
-              <div className="h-[calc(100vh-300px)] overflow-y-auto p-4 space-y-4">
-                {messages.length === 0 && (
-                  <div className="text-center py-8">
-                    <Bot className="h-12 w-12 text-gray-500 mx-auto mb-4" />
-                    <p className="text-gray-400 mb-4">
-                      Start chatting with URPC Agent!
-                    </p>
-
-                    {/* Quick action buttons */}
-                    <div className="space-y-2">
-                      <p className="text-sm text-gray-500 mb-2">
-                        💡 Try these commands:
-                      </p>
-                      <div className="flex flex-wrap gap-2 justify-center">
-                        {quickCommands.map((command, index) => (
-                          <button
-                            key={index}
-                            onClick={() => handleSendMessage(command)}
-                            className="px-3 py-1 bg-gray-800 text-gray-300 text-sm rounded-full hover:bg-gray-700 transition-colors border border-gray-600"
-                          >
-                            {command}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {messages.map((message) => (
-                  <div
-                    key={message.id}
-                    className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
-                  >
-                    <div
-                      className={`max-w-md p-3 rounded-lg ${
-                        message.role === "user"
-                          ? "bg-gray-700 text-white"
-                          : "bg-gray-800 text-white"
-                      }`}
-                    >
-                      <div className="flex items-center space-x-2 mb-1">
-                        {message.role === "user" ? (
-                          <User className="h-4 w-4" />
-                        ) : (
-                          <Bot className="h-4 w-4" />
-                        )}
-                        <span className="text-xs font-medium">
-                          {message.role === "user" ? "You" : "URPC Assistant"}
-                        </span>
-                      </div>
-                      <div className="text-sm">{message.content}</div>
-                      {message.urpcCode && (
-                        <>
-                          {/* Display URPC code */}
-                          <div className="mt-2 p-2 bg-black rounded text-gray-300 text-xs font-mono border border-gray-600">
-                            <div className="text-gray-400 mb-1">URPC Code:</div>
-                            {message.urpcCode}
-                          </div>
-                          {/* Display data */}
-                          <div className="mt-2 p-2 bg-black rounded text-gray-300 text-xs font-mono border border-gray-600">
-                            <div className="text-gray-400 mb-1">Data:</div>
-                            {JSON.stringify(message.data, null, 2)}
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                ))}
-
-                {isLoading && (
-                  <div className="flex justify-start">
-                    <div className="max-w-md p-3 rounded-lg bg-gray-800 text-white">
-                      <div className="flex items-center space-x-2">
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-400"></div>
-                        <span className="text-sm">Processing...</span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-                <div ref={messagesEndRef} />
-              </div>
-
-              {/* Input area */}
-              <div className="border-t border-gray-800 p-4">
-                <div className="flex space-x-2">
-                  <input
-                    type="text"
-                    value={inputMessage}
-                    onChange={(e) => setInputMessage(e.target.value)}
-                    onKeyPress={handleKeyPress}
-                    placeholder="Enter your command..."
-                    className="flex-1 px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 text-white placeholder-gray-400"
-                    disabled={isLoading}
-                  />
-                  <button
-                    onClick={() => handleSendMessage()}
-                    disabled={isLoading || !inputMessage.trim()}
-                    className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <Send className="h-4 w-4" />
-                  </button>
+              ) : (
+                <div className="text-center text-muted-foreground py-4">
+                  No user data available
                 </div>
-              </div>
+              )}
             </div>
           </div>
 
-          {/* Right data display area */}
-          <div className="space-y-6 h-[calc(100vh-110px)] overflow-y-auto">
-            {/* User data */}
-            <div className="bg-gray-900 rounded-lg shadow-lg border border-gray-800">
-              <div className="border-b border-gray-800 p-4">
-                <div className="flex items-center space-x-2">
-                  <User className="h-5 w-5 text-gray-400" />
-                  <h3 className="font-semibold text-white">User Data</h3>
-                </div>
-              </div>
-              <div className="p-4 space-y-3">
-                {userData.map((user) => (
-                  <div
-                    key={user.id}
-                    className="flex items-center space-x-3 p-2 bg-gray-800 rounded border border-gray-700"
-                  >
-                    <div className="w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center">
-                      <User className="h-4 w-4 text-gray-400" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="font-medium text-white">{user.name}</div>
-                      <div className="text-sm text-gray-300">{user.email}</div>
-                      <div className="text-xs text-gray-500">ID: {user.id}</div>
-                    </div>
-                  </div>
-                ))}
+          {/* Post data display */}
+          <div className="bg-card rounded-lg shadow-lg border border-border">
+            <div className="border-b border-border p-4">
+              <div className="flex items-center space-x-2">
+                <Database className="h-5 w-5 text-muted-foreground" />
+                <h3 className="font-semibold text-foreground">Post Data</h3>
               </div>
             </div>
-
-            {/* Post data */}
-            <div className="bg-gray-900 rounded-lg shadow-lg border border-gray-800">
-              <div className="border-b border-gray-800 p-4">
-                <div className="flex items-center space-x-2">
-                  <Database className="h-5 w-5 text-gray-400" />
-                  <h3 className="font-semibold text-white">Post Data</h3>
+            <div className="p-4 max-h-64 overflow-y-auto">
+              {postData.length > 0 ? (
+                <div className="space-y-2">
+                  {postData.map((post) => (
+                    <div key={post.id} className="bg-muted rounded p-3">
+                      <div className="text-xs text-foreground">
+                        <div>
+                          <strong>ID:</strong> {post.id}
+                        </div>
+                        <div>
+                          <strong>Title:</strong> {post.title}
+                        </div>
+                        <div>
+                          <strong>Content:</strong> {post.content}
+                        </div>
+                        <div>
+                          <strong>Author ID:</strong> {post.userId}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              </div>
-              <div className="p-4 space-y-3">
-                {postData.map((post) => (
-                  <div
-                    key={post.id}
-                    className="p-3 bg-gray-800 rounded border border-gray-700"
-                  >
-                    <div className="font-medium text-white mb-1">
-                      {post.title}
-                    </div>
-                    <div className="text-sm text-gray-300 mb-2">
-                      {post.content}
-                    </div>
-                    <div className="flex items-center space-x-4 text-xs text-gray-500">
-                      <span>Author ID: {post.userId}</span>
-                      <span>ID: {post.id}</span>
-                    </div>
-                  </div>
-                ))}
+              ) : (
+                <div className="text-center text-muted-foreground py-4">
+                  No post data available
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Quick commands */}
+          <div className="bg-card rounded-lg shadow-lg border border-border">
+            <div className="border-b border-border p-2">
+              <div className="flex items-center space-x-2">
+                <Zap className="h-3 w-3 text-muted-foreground" />
+                <h3 className="text-sm font-medium text-foreground">
+                  Try these commands
+                </h3>
               </div>
             </div>
-
-            <div className="bg-gray-900 rounded-lg shadow-lg border border-gray-800">
-              <div className="border-b border-gray-800 p-2">
-                <div className="flex items-center space-x-2">
-                  <Zap className="h-3 w-3 text-gray-400" />
-                  <h3 className="text-sm font-medium text-white">
-                    Try these commands
-                  </h3>
-                </div>
-              </div>
-              <div className="p-2 grid grid-cols-1 gap-1">
-                {testCases.map((testCase, index) => (
-                  <button
-                    key={index}
-                    onClick={() => handleSendMessage(testCase)}
-                    className="w-full text-left p-1.5 bg-gray-800 hover:bg-gray-700 rounded text-xs transition-colors duration-200 border border-gray-700 hover:border-gray-500"
-                    disabled={isLoading}
-                    title={testCase}
-                  >
-                    <div className="text-xs font-medium text-gray-300 truncate">
-                      {testCase}
-                    </div>
-                  </button>
-                ))}
-              </div>
+            <div className="p-2 grid grid-cols-1 gap-1">
+              {testCases.map((testCase, index) => (
+                <button
+                  key={index}
+                  onClick={() => handleSendMessage(testCase)}
+                  className="w-full text-left p-1.5 bg-muted hover:bg-accent rounded text-xs transition-colors duration-200 border border-border hover:border-accent cursor-pointer"
+                  disabled={isLoading}
+                  title={testCase}
+                >
+                  <div className="text-xs font-medium text-foreground truncate">
+                    {testCase}
+                  </div>
+                </button>
+              ))}
             </div>
           </div>
         </div>

@@ -2,6 +2,8 @@ import { Fields } from "@unilab/urpc-core";
 import type { UserEntity } from "./user";
 
 export class PostEntity {
+  static readonly displayName = "PostEntity";
+  
   @Fields.string({
     description: "Post ID",
   })
