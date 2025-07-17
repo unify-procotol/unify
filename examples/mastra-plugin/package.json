@@ -16,7 +16,7 @@
     "@tailwindcss/postcss": "^4.1.11",
     "@unilab/mastra-client-plugin": "^0.0.1",
     "@unilab/mastra-plugin": "^0.0.6",
-    "@unilab/ukit": "^0.0.7",
+    "@unilab/ukit": "^0.0.8",
     "@unilab/urpc": "^0.0.12",
     "@unilab/urpc-adapters": "^0.0.8",
     "@unilab/urpc-core": "^0.0.7",
