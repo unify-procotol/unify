@@ -68,45 +68,19 @@ export default function HomePage() {
 function CodeExample() {
   const [activeTab, setActiveTab] = useState<"server" | "client">("server");
 
-  const serverCode = `import { URPC } from "@unilab/urpc-hono";
-import { MastraPlugin } from "@unilab/mastra-plugin/hono";
-import { Logging } from "@unilab/urpc-core/middleware";
-import { UserEntity } from "./entities/user";
-// import { UserAdapter } from "./adapters/user";
-import { MockAdapter } from "@unilab/urpc-adapters";
-
-const MyPlugin = {
-  entities: [UserEntity],
-  // adapters: [{ entity: "UserEntity", source: "demo", adapter: new UserAdapter()}],
-};
-
-const app = URPC.init({
+  const serverCode = `URPC.init({
   plugins: [
+    WalletPlugin,
     MyPlugin,
     MastraPlugin({
-      defaultModel: "openai/gpt-4o-mini",
       openrouterApiKey: process.env.OPENROUTER_API_KEY,
-      debug: true,
     })
   ],
-  middlewares: [Logging()],
-  entityConfigs: {
-    user: {
-      defaultSource: "mock",
-    },
-  },
   globalAdapters: [MockAdapter],
 });
+`;
 
-export default {
-  port: 3000,
-  fetch: app.fetch,
-};`;
-
-  const clientCode = `import { repo, URPC } from "@unilab/urpc";
-import { ChatEntity } from "@unilab/mastra-plugin/entities";
-
-URPC.init({
+  const clientCode = `URPC.init({
   baseUrl: "http://localhost:3000",
   timeout: 10000,
 });
@@ -129,8 +103,6 @@ const aiResult = await repo<ChatEntity>({
   input: "Find all users",
   model: "google/gemini-2.0-flash-001",
 });
-
-console.log(aiResult.output);
 `;
 
   return (
@@ -177,7 +149,7 @@ console.log(aiResult.output);
             code={serverCode}
             language="typescript"
             classNames={{
-              code: "h-[700px]",
+              code: "h-[240px]",
             }}
           />
         )}
@@ -187,7 +159,7 @@ console.log(aiResult.output);
             code={clientCode}
             language="typescript"
             classNames={{
-              code: "h-[700px]",
+              code: "h-[500px]",
             }}
           />
         )}
