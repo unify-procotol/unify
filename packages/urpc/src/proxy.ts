@@ -288,6 +288,7 @@ export function createHybridRepositoryProxy<T extends Record<string, any>>(
                 }
               } catch (error) {
                 console.warn(`Local findMany failed for ${entityName}:`, error);
+                return [];
               }
             }
 
@@ -341,6 +342,7 @@ export function createHybridRepositoryProxy<T extends Record<string, any>>(
                 }
               } catch (error) {
                 console.warn(`Local findOne failed for ${entityName}:`, error);
+                return null;
               }
             }
 
@@ -384,6 +386,7 @@ export function createHybridRepositoryProxy<T extends Record<string, any>>(
                 return createEntityInstance(entity, localResult);
               } catch (error) {
                 console.warn(`Local create failed for ${entityName}:`, error);
+                throw error;
               }
             }
 
@@ -400,7 +403,7 @@ export function createHybridRepositoryProxy<T extends Record<string, any>>(
               return createEntityInstance(entity, httpResult);
             } catch (httpError) {
               logHttpFallbackWarning(entityName, "create", httpError);
-              throw httpError;
+              return httpError;
             }
           };
 
@@ -416,6 +419,7 @@ export function createHybridRepositoryProxy<T extends Record<string, any>>(
                 return createEntityInstance(entity, localResult);
               } catch (error) {
                 console.warn(`Local update failed for ${entityName}:`, error);
+                throw error;
               }
             }
 
@@ -446,6 +450,7 @@ export function createHybridRepositoryProxy<T extends Record<string, any>>(
                 return await executeLocalDelete(args, entityName, source!);
               } catch (error) {
                 console.warn(`Local delete failed for ${entityName}:`, error);
+                return false;
               }
             }
 
@@ -461,7 +466,7 @@ export function createHybridRepositoryProxy<T extends Record<string, any>>(
               );
             } catch (httpError) {
               logHttpFallbackWarning(entityName, "delete", httpError);
-              throw httpError;
+              return false;
             }
           };
 
@@ -477,6 +482,7 @@ export function createHybridRepositoryProxy<T extends Record<string, any>>(
                 );
               } catch (error) {
                 console.warn(`Local call failed for ${entityName}:`, error);
+                throw error;
               }
             }
 

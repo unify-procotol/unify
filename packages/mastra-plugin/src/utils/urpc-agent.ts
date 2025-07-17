@@ -3,37 +3,63 @@ import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { convertSchemaToMarkdown } from "./entity-schema-to-markdown";
 import { convertEntitySourcesToMarkdown } from "./entity-source-to-markdown";
 import { MastraOptions, Output, URPC } from "./type";
+import { EntityConfigs, SchemaObject } from "@unilab/urpc-core";
 
 export class URPCAgent {
   private openrouterApiKey: string;
+  private model: string;
   private instructions: string = "";
-  private agent: Agent;
   private debug: boolean;
   private URPC: URPC;
+  private isProxyConfigured: boolean = false;
 
   constructor(options: MastraOptions & { URPC: URPC }) {
     this.URPC = options.URPC;
     this.debug = options.debug || false;
     this.openrouterApiKey =
       options.openrouterApiKey || process.env.OPENROUTER_API_KEY || "";
+    this.model = options.defaultModel || "google/gemini-2.0-flash-001";
     this.instructions = this.generateInstructions();
-    this.agent = this.newAgent(
-      options.defaultModel || "google/gemini-2.0-flash-001"
-    );
   }
 
-  private generateInstructions(): string {
-    const schemas = this.URPC.getEntitySchemas();
-    const entitySources = this.URPC.getEntitySources();
-    const entityConfigs = this.URPC.getEntityConfigs();
-    const entityMarkdown = convertSchemaToMarkdown(schemas);
+  private generateInstructions(options?: {
+    entitySchemasOfClient: Record<string, SchemaObject>;
+    entitySourcesOfClient: Record<string, string[]>;
+    entityConfigsOfClient: EntityConfigs;
+  }): string {
+    const entitySchemasOfServer = this.URPC.getEntitySchemas();
+    const entitySourcesOfServer = this.URPC.getEntitySources();
+    const entityConfigsOfServer = this.URPC.getEntityConfigs();
+
+    const {
+      entitySchemasOfClient,
+      entitySourcesOfClient,
+      entityConfigsOfClient,
+    } = options || {};
+
+    const entitySchemas = {
+      ...entitySchemasOfServer,
+      ...entitySchemasOfClient,
+    };
+
+    const entitySources = {
+      ...entitySourcesOfServer,
+      ...entitySourcesOfClient,
+    };
+
+    const entityConfigs = {
+      ...entityConfigsOfServer,
+      ...entityConfigsOfClient,
+    };
+
+    const entityMarkdown = convertSchemaToMarkdown(entitySchemas);
     const entitySourcesMarkdown = convertEntitySourcesToMarkdown(
       entitySources,
       entityConfigs
     );
 
     if (this.debug) {
-      console.log("[Schemas]:\n", JSON.stringify(schemas, null, 2));
+      console.log("[Schemas]:\n", JSON.stringify(entitySchemas, null, 2));
       console.log(
         "[Entity Sources]:\n",
         JSON.stringify(entitySources, null, 2)
@@ -144,7 +170,7 @@ Remember:
 `;
   }
 
-  private newAgent(model: string) {
+  private newAgent() {
     return new Agent({
       name: "URPC Smart Data Assistant",
       description:
@@ -152,28 +178,67 @@ Remember:
       instructions: this.instructions,
       model: createOpenRouter({
         apiKey: this.openrouterApiKey,
-      }).chat(model),
+      }).chat(this.model),
     });
   }
 
-  async processRequest(userMessage: string, model?: string): Promise<Output> {
+  setProxyConfig({
+    entitySchemas,
+    entitySources,
+    entityConfigs,
+  }: {
+    entitySchemas: Record<string, SchemaObject>;
+    entitySources: Record<string, string[]>;
+    entityConfigs: EntityConfigs;
+  }) {
+    if (this.isProxyConfigured) {
+      return;
+    }
+    this.instructions = this.generateInstructions({
+      entitySchemasOfClient: entitySchemas,
+      entitySourcesOfClient: entitySources,
+      entityConfigsOfClient: entityConfigs,
+    });
+    this.isProxyConfigured = true;
+  }
+
+  async processRequest({
+    input,
+    model,
+    proxy,
+  }: {
+    input: string;
+    model?: string;
+    proxy?: boolean;
+  }): Promise<Output> {
     try {
       if (model) {
-        this.agent = this.newAgent(model);
+        this.model = model;
       }
 
-      const response = await this.agent.generate([
+      const agent = this.newAgent();
+
+      const response = await agent.generate([
         {
           role: "system",
           content: this.instructions,
         },
         {
           role: "user",
-          content: userMessage,
+          content: input,
         },
       ]);
 
-      return this.parseAndExecuteResponse(response.text);
+      if (proxy) {
+        return this.parseAIResponse(response.text);
+      } else {
+        const output = this.parseAIResponse(response.text);
+        const urpcCode = output.urpc_code;
+        if (!urpcCode) {
+          return output;
+        }
+        return this.executeURPCCode(urpcCode);
+      }
     } catch (error: any) {
       return {
         success: false,
@@ -187,13 +252,7 @@ Remember:
     }
   }
 
-  private async parseAndExecuteResponse(
-    agentResponse: string
-  ): Promise<Output> {
-    let entity = "",
-      source = "",
-      urpc_code = "",
-      operation = "";
+  private parseAIResponse(agentResponse: string): Output {
     try {
       // Try to extract URPC operation from agent response
       // Improved regex that supports more complex parameter structures
@@ -207,7 +266,7 @@ Remember:
         }
 
         // Pre-generate random ID for create operations and replace placeholders in urpcCode
-        urpc_code = urpcCode;
+        let urpc_code = urpcCode;
         if (urpcCode.includes("create") && urpcCode.includes("generated-id")) {
           const randomId = this.generateRandomId();
           urpc_code = urpcCode.replace(/generated-id/g, randomId);
@@ -216,24 +275,12 @@ Remember:
           }
         }
 
-        const executeResult = await this.executeURPCCode(urpc_code);
-
-        entity = executeResult.entity;
-        source = executeResult.source;
-        const data = executeResult.result;
-
-        if (this.debug) {
-          console.log("[Result]:", data);
-        }
-
-        operation = this.extractOperation(urpcCode);
-
         return {
-          operation,
-          entity,
-          source,
+          operation: "",
+          entity: "",
+          source: "",
           urpc_code,
-          data,
+          data: null,
           message: "",
           success: true,
         };
@@ -252,82 +299,108 @@ Remember:
     } catch (error: any) {
       return {
         success: false,
-        operation: operation,
-        entity: entity,
-        source: source,
-        urpc_code: urpc_code,
+        operation: "",
+        entity: "",
+        source: "",
+        urpc_code: null,
         data: null,
-        message: `Error occurred while executing operation.`,
+        message: `Error occurred while parsing AI response.`,
       };
     }
   }
 
-  private async executeURPCCode(urpcCode: string): Promise<{
-    entity: string;
-    source: string;
-    result: any;
-  }> {
-    // Here we need to safely execute URPC code
-    // For simplification, we parse operation types and parameters
+  private async executeURPCCode(urpcCode: string): Promise<Output> {
+    const operation = this.extractOperation(urpcCode);
+    const entity = this.extractEntity(urpcCode);
+    const source = this.extractSource(urpcCode);
+    const options = this.extractOptions(urpcCode);
     try {
-      const entity = this.extractEntity(urpcCode);
-      const source = this.extractSource(urpcCode);
-      const options = this.extractOptions(urpcCode);
-
       if (urpcCode.includes("findMany")) {
-        const result = await this.URPC.repo({ entity, source }).findMany(
-          options
-        );
+        const data = await this.URPC.repo({ entity, source }).findMany(options);
         return {
+          operation,
           entity,
           source,
-          result,
+          data,
+          urpc_code: urpcCode,
+          message: "",
+          success: true,
         };
       } else if (urpcCode.includes("findOne")) {
-        const result = await this.URPC.repo({ entity, source }).findOne(
-          options
-        );
+        const data = await this.URPC.repo({ entity, source }).findOne(options);
         return {
+          operation,
           entity,
           source,
-          result,
+          data,
+          urpc_code: urpcCode,
+          message: "",
+          success: true,
         };
       } else if (urpcCode.includes("create")) {
-        const result = await this.URPC.repo({ entity, source }).create(options);
+        const data = await this.URPC.repo({ entity, source }).create(options);
         return {
+          operation,
           entity,
           source,
-          result,
+          data,
+          urpc_code: urpcCode,
+          message: "",
+          success: true,
         };
       } else if (urpcCode.includes("update")) {
-        const result = await this.URPC.repo({ entity, source }).update(options);
+        const data = await this.URPC.repo({ entity, source }).update(options);
         return {
+          operation,
           entity,
           source,
-          result,
+          data,
+          urpc_code: urpcCode,
+          message: "",
+          success: true,
         };
       } else if (urpcCode.includes("delete")) {
-        const result = await this.URPC.repo({ entity, source }).delete(options);
+        const data = await this.URPC.repo({ entity, source }).delete(options);
         return {
+          operation,
           entity,
           source,
-          result,
+          data,
+          urpc_code: urpcCode,
+          message: "",
+          success: true,
         };
       } else if (urpcCode.includes("call")) {
-        const result = await this.URPC.repo({ entity, source }).call(options);
+        const data = await this.URPC.repo({ entity, source }).call(options);
         return {
+          operation,
           entity,
           source,
-          result,
+          data,
+          urpc_code: urpcCode,
+          message: "",
+          success: true,
         };
       }
       return {
-        entity: "unknown",
-        source: "unknown",
-        result: null,
+        operation,
+        entity,
+        source,
+        data: null,
+        urpc_code: urpcCode,
+        message: `Unsupported operations: ${operation}`,
+        success: false,
       };
     } catch (error: any) {
-      throw new Error(`URPC operation execution failed: ${error.message}`);
+      return {
+        operation,
+        entity,
+        source,
+        data: null,
+        urpc_code: urpcCode,
+        message: `Error occurred while executing operation.`,
+        success: false,
+      };
     }
   }
 
@@ -478,22 +551,29 @@ Remember:
     }
   }
 
-  async streamResponse(
-    userMessage: string,
-    model?: string
-  ): Promise<ReadableStream> {
+  async streamResponse({
+    input,
+    model,
+    proxy,
+  }: {
+    input: string;
+    model?: string;
+    proxy?: boolean;
+  }): Promise<ReadableStream> {
     if (model) {
-      this.agent = this.newAgent(model);
+      this.model = model;
     }
 
-    const stream = await this.agent.stream([
+    const agent = this.newAgent();
+
+    const stream = await agent.stream([
       {
         role: "system",
         content: this.instructions,
       },
       {
         role: "user",
-        content: userMessage,
+        content: input,
       },
     ]);
 

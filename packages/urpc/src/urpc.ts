@@ -299,6 +299,10 @@ export class URPC {
   static getEntitySources(): Record<string, string[]> {
     return URPC.getGlobalInstance().entitySources;
   }
+
+  static getEntityConfigs(): EntityConfigs {
+    return URPC.getGlobalInstance().entityConfigs;
+  }
 }
 
 export function repo<T extends Record<string, any>>(
