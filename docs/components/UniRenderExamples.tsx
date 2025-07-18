@@ -1,79 +1,271 @@
 "use client";
 
 import { UniRender } from "@unilab/ukit";
-import { useURPCProvider } from "./shared/urpc-provider";
+import { repo, URPC } from "@unilab/urpc";
+import { Plugin } from "@unilab/urpc-core";
+import { Logging } from "@unilab/urpc-core/middleware";
+import { IndexedDBAdapter, MemoryAdapter } from "@unilab/urpc-adapters";
+import { PostEntity } from "./entities/post";
+import { UserEntity } from "./entities/user";
 import { LoadingState, ErrorState } from "./shared/common-ui";
 import { renderCustomCardLayout } from "./shared/custom-layouts";
 import { renderMagazineLayout } from "./shared/custom-magazine-layout";
 import { renderSocialLayout } from "./shared/custom-social-layout";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
+
+let initialized = false;
+let initPromise: Promise<boolean> | null = null;
+
+export async function initUrpcClient() {
+  if (initPromise) {
+    return initPromise;
+  }
+
+  if (!initialized && typeof window !== 'undefined') {
+    initPromise = (async () => {
+      try {
+        const MyPlugin: Plugin = {
+          entities: [UserEntity, PostEntity]
+        };
+        
+        URPC.init({
+          plugins: [MyPlugin],
+          entityConfigs: {
+            user: {
+              defaultSource: "memory",
+            },
+            post: {
+              defaultSource: "memory", 
+            },
+            schema: {
+              defaultSource: "_global",
+            },
+          },
+          globalAdapters: [MemoryAdapter],
+        });
+
+        // Create mock data
+        await createMockData();
+        
+        initialized = true;
+        return true;
+      } catch (error) {
+        console.error("Failed to initialize URPC:", error);
+        initPromise = null;
+        return false;
+      }
+    })();
+    
+    return initPromise;
+  }
+  
+  return initialized;
+}
+
+async function createMockData() {
+  try {
+    // Create user mock data
+    const users = [
+      {
+        id: "1",
+        name: "John Doe",
+        email: "john.doe@example.com",
+        role: "Admin",
+        isActive: true,
+        avatar: "https://example.com/avatar1.png",
+      },
+      {
+        id: "2",
+        name: "Jane Smith",
+        email: "jane.smith@example.com",
+        role: "User",
+        isActive: true,
+        avatar: "https://example.com/avatar2.png",
+      },
+      {
+        id: "3",
+        name: "Bob Johnson",
+        email: "bob.johnson@example.com",
+        role: "Manager",
+        isActive: false,
+        avatar: "https://example.com/avatar3.png",
+      },
+    ];
+
+    for (const user of users) {
+      await repo({ entity: "user" }).create({ data: user });
+    }
+
+    // Create post mock data
+    const images = [
+      "https://media.daily.dev/image/upload/s--AC8ihwmO--/f_auto/v1746082658/posts/xjMewZTM2",
+      "https://i0.wp.com/devjournal.info/wp-content/uploads/2025/05/minio-s3-image.png?fit=600%2C452&ssl=1",
+      "https://flo-bit.dev/ui-kit/opengraph.png"
+    ];
+
+    const posts = [
+      {
+        id: "1",
+        name: "React Performance Optimization",
+        email: "john.doe@example.com",
+        role: "Frontend",
+        type: "article",
+        category: "development",
+        status: "published",
+        isActive: true,
+        content: "Learn advanced techniques for optimizing React applications performance including memoization, virtualization, and code splitting strategies.",
+        createdAt: new Date().toISOString(),
+        imageUrl: images[Math.floor(Math.random() * images.length)],
+      },
+      {
+        id: "2", 
+        name: "Understanding TypeScript Generics",
+        email: "jane.smith@example.com",
+        role: "Backend",
+        type: "tutorial",
+        category: "typescript",
+        status: "draft",
+        isActive: true,
+        content: "A comprehensive guide to TypeScript generics, covering basic concepts to advanced patterns and real-world applications.",
+        createdAt: new Date(Date.now() - 86400000).toISOString(),
+        imageUrl: images[Math.floor(Math.random() * images.length)],
+      },
+      {
+        id: "3",
+        name: "Building Scalable APIs",
+        email: "bob.johnson@example.com", 
+        role: "DevOps",
+        type: "guide",
+        category: "backend",
+        status: "published",
+        isActive: false,
+        content: "Best practices for designing and implementing scalable REST APIs with proper authentication, caching, and monitoring.",
+        createdAt: new Date(Date.now() - 172800000).toISOString(),
+        imageUrl: images[Math.floor(Math.random() * images.length)],
+      },
+      {
+        id: "4",
+        name: "CSS Grid Layout Mastery",
+        email: "alice.davis@example.com",
+        role: "Designer", 
+        type: "workshop",
+        category: "design",
+        status: "published",
+        isActive: true,
+        content: "Master CSS Grid layout with practical examples and advanced techniques for creating responsive layouts.",
+        createdAt: new Date(Date.now() - 259200000).toISOString(),
+        imageUrl: images[Math.floor(Math.random() * images.length)],
+      },
+      {
+        id: "5",
+        name: "Database Optimization Strategies",
+        email: "charlie.brown@example.com",
+        role: "Database",
+        type: "article", 
+        category: "database",
+        status: "published",
+        isActive: true,
+        content: "Proven strategies for optimizing database performance including indexing, query optimization, and schema design.",
+        createdAt: new Date(Date.now() - 345600000).toISOString(),
+        imageUrl: images[Math.floor(Math.random() * images.length)],
+      },
+      {
+        id: "6",
+        name: "Modern JavaScript Features",
+        email: "diana.wilson@example.com",
+        role: "Frontend",
+        type: "reference",
+        category: "javascript", 
+        status: "published",
+        isActive: true,
+        content: "Explore the latest JavaScript features including async/await, destructuring, modules, and more.",
+        createdAt: new Date(Date.now() - 432000000).toISOString(),
+        imageUrl: images[Math.floor(Math.random() * images.length)],
+      }
+    ];
+
+    for (const post of posts) {
+      await repo({ entity: "post" }).create({ data: post });
+    }
+
+    console.log("Mock data created successfully");
+  } catch (err) {
+    console.error("Failed to create mock data:", err);
+  }
+}
+
 
 interface ExampleProps {
   type: 'basic' | 'table-editable' | 'card' | 'form' | 'grid' | 'list' | 'dashboard' | 'loading' | 'error' | 'empty' | 'custom-basic' | 'custom-magazine' | 'custom-social' | 'custom-blog' | 'custom-minimal';
 }
 
 export function UniRenderExample({ type }: ExampleProps) {
-  const [isClient, setIsClient] = useState(false);
-  const { isInitialized, loading, error, retryInitialization } = useURPCProvider();
+  const uniRenderRef = useRef<any>(null);
+  const [isInitialized, setIsInitialized] = useState(false);
+  const [initError, setInitError] = useState<string | null>(null);
 
-  // Ensure we only render on client side
   useEffect(() => {
-    setIsClient(true);
+    const init = async () => {
+      try {
+        const success = await initUrpcClient();
+        if (success) {
+          setIsInitialized(true);
+          
+          // Call refresh after initialization is complete and component is mounted
+          setTimeout(() => {
+            if (uniRenderRef.current?.refresh) {
+              uniRenderRef.current.refresh();
+            }
+          }, 100);
+        } else {
+          setInitError("Failed to initialize URPC client");
+        }
+      } catch (error) {
+        console.error("Initialization error:", error);
+        setInitError(error instanceof Error ? error.message : "Unknown initialization error");
+      }
+    };
+    
+    init();
   }, []);
 
-  // Don't render anything on server side
-  if (!isClient) {
-    return <LoadingState />;
+  if (initError) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <div className="text-red-500 text-lg font-semibold mb-2">Initialization Error</div>
+          <p className="text-gray-600">{initError}</p>
+        </div>
+      </div>
+    );
   }
 
-  // Show loading state while URPC is initializing
-  if (loading) {
-    return <LoadingState />;
-  }
-
-  // Show error state if URPC initialization failed
-  if (error) {
-    return <ErrorState error={error} onRetry={retryInitialization} />;
-  }
-
-  // Only render UniRender after URPC is fully initialized
   if (!isInitialized) {
-    return <LoadingState />;
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <div className="animate-spin w-8 h-8 border-2 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
+          <div className="text-foreground font-medium">Initializing...</div>
+          <div className="text-muted-foreground text-sm mt-1">
+            Please wait, loading URPC client
+          </div>
+        </div>
+      </div>
+    );
   }
 
   const handleEdit = async (updatedRecord: any, index: number) => {
-    await new Promise(resolve => setTimeout(resolve, 500));
     console.log('Updated record:', updatedRecord);
   };
 
   const handleDelete = async (record: any, index: number) => {
-    await new Promise(resolve => setTimeout(resolve, 500));
     console.log('Deleted record:', record);
-  };
-
-  // Create a wrapper component that ensures URPC is ready
-  const SafeUniRender = (props: any) => {
-    const [mounted, setMounted] = useState(false);
-
-    useEffect(() => {
-      // Add a small delay to ensure URPC is fully ready
-      const timer = setTimeout(() => {
-        setMounted(true);
-      }, 100);
-
-      return () => clearTimeout(timer);
-    }, []);
-
-    if (!mounted) {
-      return <LoadingState />;
-    }
-
-    return <UniRender {...props} />;
   };
 
   const examples = {
     basic: {
-      entity: "user",
+      entity: UserEntity,
+      source: "memory",
       layout: 'table' as const,
       config: {
         id: { label: 'ID', width: '60px' },
@@ -99,7 +291,7 @@ export function UniRenderExample({ type }: ExampleProps) {
       }
     },
     'table-editable': {
-      entity: "user",
+      entity: UserEntity,
       layout: 'table' as const,
       config: {
         id: { label: 'ID', width: '60px', editable: false },
@@ -145,7 +337,7 @@ export function UniRenderExample({ type }: ExampleProps) {
       onDelete: handleDelete
     },
     card: {
-      entity: "user",
+      entity: UserEntity,
       layout: 'card' as const,
       config: {
         name: {
@@ -160,8 +352,8 @@ export function UniRenderExample({ type }: ExampleProps) {
           label: 'Role',
           render: (value: string) => (
             <span className={`px-2 py-1 rounded text-xs font-semibold ${value === 'Admin' ? 'bg-purple-100 text-purple-800' :
-                value === 'Manager' ? 'bg-blue-100 text-blue-800' :
-                  'bg-green-100 text-green-800'
+              value === 'Manager' ? 'bg-blue-100 text-blue-800' :
+                'bg-green-100 text-green-800'
               }`}>
               {value}
             </span>
@@ -187,8 +379,7 @@ export function UniRenderExample({ type }: ExampleProps) {
       }
     },
     form: {
-      entity: "user",
-      
+      entity: UserEntity,
       query: {
         where: { id: "1" }
       },
@@ -209,8 +400,7 @@ export function UniRenderExample({ type }: ExampleProps) {
       }
     },
     grid: {
-      entity: "user",
-      
+      entity: UserEntity,
       layout: 'grid' as const,
       config: {
         name: { label: 'Name' },
@@ -240,8 +430,7 @@ export function UniRenderExample({ type }: ExampleProps) {
       }
     },
     list: {
-      entity: "user",
-      
+      entity: UserEntity,
       layout: 'list' as const,
       config: {
         name: { label: 'Name' },
@@ -259,8 +448,7 @@ export function UniRenderExample({ type }: ExampleProps) {
       }
     },
     dashboard: {
-      entity: "user",
-      
+      entity: UserEntity,
       layout: 'dashboard' as const,
       config: {
         name: { label: 'User' },
@@ -284,21 +472,18 @@ export function UniRenderExample({ type }: ExampleProps) {
       }
     },
     loading: {
-      entity: "user",
-      
+      entity: UserEntity,
       layout: 'table' as const,
       loading: true
     },
     error: {
-      entity: "user",
-      
+      entity: UserEntity,
       layout: 'table' as const,
       loading: false,
       error: "Failed to load orders: Network connection timeout"
     },
     empty: {
-      entity: "user",
-      
+      entity: UserEntity,
       query: {
         where: { id: "nonexistent" }
       },
@@ -307,8 +492,7 @@ export function UniRenderExample({ type }: ExampleProps) {
       error: null
     },
     'custom-basic': {
-      entity: "post",
-      
+      entity: PostEntity,
       layout: 'custom' as const,
       render: renderCustomCardLayout,
       config: {
@@ -329,8 +513,7 @@ export function UniRenderExample({ type }: ExampleProps) {
       onDelete: handleDelete
     },
     'custom-magazine': {
-      entity: "post",
-      
+      entity: PostEntity,
       layout: 'custom' as const,
       render: renderMagazineLayout,
       config: {
@@ -349,8 +532,7 @@ export function UniRenderExample({ type }: ExampleProps) {
       onDelete: handleDelete
     },
     'custom-social': {
-      entity: "post",
-      
+      entity: PostEntity,
       layout: 'custom' as const,
       render: renderSocialLayout,
       config: {
@@ -369,8 +551,7 @@ export function UniRenderExample({ type }: ExampleProps) {
       onDelete: handleDelete
     },
     'custom-blog': {
-      entity: "post",
-      
+      entity: PostEntity,
       layout: 'custom' as const,
       render: renderCustomCardLayout,
       config: {
@@ -389,8 +570,7 @@ export function UniRenderExample({ type }: ExampleProps) {
       onDelete: handleDelete
     },
     'custom-minimal': {
-      entity: "post",
-      
+      entity: PostEntity,
       layout: 'custom' as const,
       render: renderCustomCardLayout,
       config: {
@@ -423,23 +603,27 @@ export function UniRenderExample({ type }: ExampleProps) {
     finalProps.loading = false;
     finalProps.error = null;
   } else {
-    // For normal examples, URPC is fully initialized, no loading state needed
+    // For normal examples, no loading state needed
     finalProps.loading = false;
     finalProps.error = null;
   }
 
   // Ensure required properties exist
-  finalProps.entity = finalProps.entity || "user";
-  finalProps.source = finalProps.source || "memory";
-  finalProps.layout = finalProps.layout || "table";
+  finalProps.entity = finalProps.entity;
+  finalProps.source = finalProps.source;
+  finalProps.layout = finalProps.layout ;
 
   // Add debug information
   if (process.env.NODE_ENV === 'development') {
     console.log('UniRender props:', finalProps);
   }
 
-  return <SafeUniRender {...finalProps} />;
-}
+  console.log('About to render UniRender component!!!!!!!!!!!!', {
+    isInitialized,
+    initError,
+    type,
+    finalProps
+  });
 
-// Export with backward compatibility
-export { UniRenderExample as UniRenderCustomLayout }; 
+  return <UniRender ref={uniRenderRef} {...finalProps} />;
+}

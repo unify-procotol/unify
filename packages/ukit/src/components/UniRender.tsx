@@ -4,7 +4,7 @@ import React, {
   forwardRef,
   useImperativeHandle,
 } from "react";
-import { repo } from "@unilab/urpc";
+import { repo, URPC } from "@unilab/urpc";
 import { UniRenderProps, Entity } from "../types";
 import { TableLayout } from "./TableLayout";
 import { FormLayout } from "./FormLayout";
@@ -19,6 +19,19 @@ import { extractEntityClassName } from "@unilab/urpc-core";
  * Check if we're running on the client side
  */
 const isClientSide = () => typeof window !== "undefined";
+
+/**
+ * Check if URPC is initialized
+ */
+const isUrpcInitialized = (): boolean => {
+  try {
+    // Try to access the global instance to check if URPC is initialized
+    (URPC as any).getGlobalInstance();
+    return true;
+  } catch (error) {
+    return false;
+  }
+};
 
 /**
  * Generate a default entity schema when global schema is not available
@@ -148,11 +161,27 @@ export const UniRender = forwardRef<UniRenderRef, UniRenderProps>(
     },
     ref
   ) => {
+    console.log("=== UniRender Component Started ===", {
+      entityInput,
+      source,
+      query,
+      layout,
+      config,
+      generalConfig,
+      onAdd,
+      onEdit,
+      onDelete,
+      onSave,
+      className,
+      render,
+      pagination
+    });
     const [data, setData] = useState<any[]>([]);
     const [entitySchema, setEntitySchema] = useState<Entity | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [isClient, setIsClient] = useState(false);
+    const [urpcReady, setUrpcReady] = useState(false);
 
     const isEntityClass = typeof entityInput != "string";
     const entityName = isEntityClass
@@ -165,11 +194,45 @@ export const UniRender = forwardRef<UniRenderRef, UniRenderProps>(
       setIsClient(true);
     }, []);
 
+    // Check URPC initialization status
+    useEffect(() => {
+      if (!isClient) return;
+
+      const checkUrpcStatus = () => {
+        if (isUrpcInitialized()) {
+          setUrpcReady(true);
+          return true;
+        }
+        return false;
+      };
+
+      // Check immediately
+      if (checkUrpcStatus()) {
+        return;
+      }
+
+      // If not ready, poll every 100ms
+      const interval = setInterval(() => {
+        if (checkUrpcStatus()) {
+          clearInterval(interval);
+        }
+      }, 100);
+
+      // Cleanup
+      return () => clearInterval(interval);
+    }, [isClient]);
+
     // Fetch entity schema from global schema with fallback to default generation
     const fetchEntitySchema = async (sampleData?: any[]) => {
       // Only fetch schema on client side to avoid SSR issues
       if (!isClientSide()) {
         // For SSR, wait for data to be available before generating schema
+        return;
+      }
+
+      // Check if URPC is initialized before calling repo()
+      if (!isUrpcInitialized()) {
+        console.warn("URPC not initialized, skipping schema fetch");
         return;
       }
 
@@ -262,10 +325,16 @@ export const UniRender = forwardRef<UniRenderRef, UniRenderProps>(
         return;
       }
 
+      // Check if URPC is initialized before calling repo()
+      if (!isUrpcInitialized()) {
+        console.warn("URPC not initialized, skipping data fetch");
+        return;
+      }
+      console.log("fetchData!!!!!!!!!!!!!", entityClass, entityName, source);
       try {
         setLoading(true);
         setError(null);
-
+        console.log("fetchData!!!!!!!!!!!!!", entityClass, entityName, source);
         const repoInstance = repo({
           entity: entityClass || entityName,
           source: source,
@@ -294,6 +363,7 @@ export const UniRender = forwardRef<UniRenderRef, UniRenderProps>(
           // For other layouts, use findMany
           result = await repoInstance.findMany(query as any);
           const resultData = result || [];
+          console.log("resultData!!!!!!!!!!!!!", resultData);
           setData(resultData);
 
           // Generate schema based on actual data if no schema exists or schema is empty
@@ -335,17 +405,21 @@ export const UniRender = forwardRef<UniRenderRef, UniRenderProps>(
       [entityName, source, data]
     );
 
-    // Initial setup - fetch schema and data separately
+    // Initial setup - fetch schema when URPC is ready
     useEffect(() => {
-      fetchEntitySchema();
-    }, [entityName]);
+      if (urpcReady) {
+        fetchEntitySchema();
+      }
+    }, [entityName, urpcReady]);
 
     useEffect(() => {
-      // Only fetch data when we're on client side
-      if (isClient) {
+      console.log("useEffect!!!!!!!!!!!!!", isClient, urpcReady);
+      // Only fetch data when we're on client side and URPC is ready
+      if (isClient && urpcReady) {
+        console.log("useEffect!!!!!!!!!!!!!", isClient, urpcReady);
         fetchData();
       }
-    }, [entityName, source, JSON.stringify(query), isClient]);
+    }, [entityName, source, JSON.stringify(query), isClient, urpcReady]);
 
     // Use external loading/error states if provided
     const isLoading = externalLoading !== undefined ? externalLoading : loading;
@@ -405,9 +479,13 @@ export const UniRender = forwardRef<UniRenderRef, UniRenderProps>(
     );
 
     /**
-     * Handle add record functionality
-     */
+ * Handle add record functionality
+ */
     const handleAddRecord = async (newRecord: any) => {
+      if (!isUrpcInitialized()) {
+        throw new Error("URPC not initialized");
+      }
+
       try {
         await repo({
           entity: entityClass || entityName,
@@ -423,12 +501,16 @@ export const UniRender = forwardRef<UniRenderRef, UniRenderProps>(
     };
 
     /**
-     * Handle edit record functionality
-     */
+ * Handle edit record functionality
+ */
     const handleEditRecord = async (updatedRecord: any, index: number) => {
       if (onEdit) {
         await onEdit(updatedRecord, index);
       } else {
+        if (!isUrpcInitialized()) {
+          throw new Error("URPC not initialized");
+        }
+
         try {
           await repo({
             entity: entityClass || entityName,
@@ -446,9 +528,13 @@ export const UniRender = forwardRef<UniRenderRef, UniRenderProps>(
     };
 
     /**
-     * Handle delete record functionality
-     */
+ * Handle delete record functionality
+ */
     const handleDeleteRecord = async (record: any, index: number) => {
+      if (!isUrpcInitialized()) {
+        throw new Error("URPC not initialized");
+      }
+
       try {
         await repo({
           entity: entityName,
@@ -471,6 +557,10 @@ export const UniRender = forwardRef<UniRenderRef, UniRenderProps>(
 
       const getEntityInstance = async (record: any) => {
         if (!entityClass) {
+          return null;
+        }
+
+        if (!isUrpcInitialized()) {
           return null;
         }
 
@@ -569,6 +659,11 @@ export const UniRender = forwardRef<UniRenderRef, UniRenderProps>(
     // Handle different states
     // For SSR, show loading state until client-side hydration
     if (!isClient) {
+      return renderLoadingState();
+    }
+
+    // Show loading state while waiting for URPC initialization
+    if (!urpcReady) {
       return renderLoadingState();
     }
 

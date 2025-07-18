@@ -7,7 +7,7 @@ import { Accordion, Accordions } from "fumadocs-ui/components/accordion";
 import { Step, Steps } from "fumadocs-ui/components/steps";
 import * as icons from "lucide-react";
 import { DemoCard, DemoGrid } from "@/app/(home)/components/demo-card";
-import { UniRenderExample, UniRenderCustomLayout } from "@/components/UniRenderExamples";
+import { UniRenderExample } from "@/components/UniRenderExamples";
 
 export function getMDXComponents(components?: MDXComponents): MDXComponents {
   return {
@@ -24,6 +24,5 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     DemoGrid,
     ...components,
     UniRenderExample,
-    UniRenderCustomLayout,
   } as any;
 }
