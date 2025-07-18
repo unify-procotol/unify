@@ -5,8 +5,7 @@
   "workspaces": [
     "packages/*",
     "!packages/urpc-cli",
-    "dev/*",
-    "docs"
+    "dev/*"
   ],
   "scripts": {
     "build:urpc-core": "cd packages/urpc-core && bun run build",

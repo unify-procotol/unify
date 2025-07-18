@@ -1,6 +1,8 @@
 import { Fields } from "@unilab/urpc-core";
 
 export class UserEntity {
+  static readonly displayName = "UserEntity";
+
   @Fields.string()
   id = "";
 
