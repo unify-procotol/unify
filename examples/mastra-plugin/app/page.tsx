@@ -52,14 +52,20 @@ export default function UrpcAgent() {
 
   // Available models
   const availableModels = [
-    { value: "google/gemini-2.0-flash-001", label: "Gemini 2.0 Flash" },
-    { value: "moonshotai/kimi-k2", label: "MoonshotAI: Kimi K2" },
+    { value: "google/gemini-2.0-flash-001", label: "Google: Gemini 2.0 Flash" },
+    {
+      value: "google/gemini-2.5-flash-lite-preview-06-17",
+      label: "Google: Gemini 2.5 Flash Lite Preview 06-17",
+    },
+    {
+      value: "qwen/qwen3-32b",
+      label: "Qwen: Qwen3 32B",
+    },
     {
       value: "deepseek/deepseek-chat-v3-0324",
       label: "DeepSeek: DeepSeek V3 0324",
     },
-    { value: "openai/gpt-4o", label: "GPT-4o" },
-    { value: "openai/gpt-4o-mini", label: "GPT-4o Mini" },
+    { value: "moonshotai/kimi-k2", label: "MoonshotAI: Kimi K2" },
   ];
 
   // Quick operation commands

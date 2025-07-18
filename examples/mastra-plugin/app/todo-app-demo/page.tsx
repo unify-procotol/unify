@@ -10,8 +10,8 @@ export default function ReactTodo() {
   const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
-    const isInitialized = initUrpcClient();
-    setIsInitialized(isInitialized);
+    initUrpcClient();
+    setIsInitialized(true);
   }, []);
 
   if (!isInitialized) {
