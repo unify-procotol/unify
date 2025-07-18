@@ -4,6 +4,8 @@ import { UniRender } from "@unilab/ukit";
 import { useURPCProvider } from "./shared/urpc-provider";
 import { LoadingState, ErrorState } from "./shared/common-ui";
 import { renderCustomCardLayout } from "./shared/custom-layouts";
+import { renderMagazineLayout } from "./shared/custom-magazine-layout";
+import { renderSocialLayout } from "./shared/custom-social-layout";
 import { useEffect, useState } from "react";
 
 interface ExampleProps {
@@ -330,7 +332,7 @@ export function UniRenderExample({ type }: ExampleProps) {
       entity: "post",
       
       layout: 'custom' as const,
-      render: renderCustomCardLayout,
+      render: renderMagazineLayout,
       config: {
         name: { label: 'Article Title' },
         content: { label: 'Content' },
@@ -350,7 +352,7 @@ export function UniRenderExample({ type }: ExampleProps) {
       entity: "post",
       
       layout: 'custom' as const,
-      render: renderCustomCardLayout,
+      render: renderSocialLayout,
       config: {
         name: { label: 'Post Title' },
         content: { label: 'Content' },
@@ -361,7 +363,7 @@ export function UniRenderExample({ type }: ExampleProps) {
       },
       pagination: {
         enabled: true,
-        pageSize: 9,
+        pageSize: 3,
       },
       onEdit: handleEdit,
       onDelete: handleDelete

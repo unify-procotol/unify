@@ -1,4 +1,4 @@
-import { EntityConfigs, Fields, SchemaObject } from "@unilab/urpc-core";
+import { Fields } from "@unilab/urpc-core";
 
 export class Output {
   static displayName = "Output";
@@ -58,14 +58,4 @@ export class ChatEntity {
     description: "The output from the mastra model",
   })
   output?: Output;
-
-  entitySchemas?: Record<string, SchemaObject> = {};
-  entitySources?: Record<string, string[]> = {};
-  entityConfigs?: EntityConfigs = {};
-
-  @Fields.boolean({
-    optional: true,
-    description: "Whether the operation is a proxy operation",
-  })
-  proxy?: boolean = false;
 }

@@ -3,6 +3,7 @@ import { Plugin } from "@unilab/urpc-core";
 import { TodoEntity } from "@/entities/todo";
 import { Logging } from "@unilab/urpc-core/middleware";
 import { IndexedDBAdapter } from "@unilab/urpc-adapters";
+import { MastraClientPlugin } from "@unilab/mastra-client-plugin";
 
 let initialized = false;
 export function initUrpcClient() {
@@ -13,7 +14,7 @@ export function initUrpcClient() {
     };
     URPC.init({
       // local urpc server
-      plugins: [TodoPlugin],
+      plugins: [TodoPlugin, MastraClientPlugin()],
       middlewares: [Logging()],
       entityConfigs: {
         todo: {

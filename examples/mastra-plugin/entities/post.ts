@@ -2,7 +2,7 @@ import { Fields } from "@unilab/urpc-core";
 import type { UserEntity } from "./user";
 
 export class PostEntity {
-  static readonly displayName = "PostEntity";
+  static displayName = "PostEntity";
   
   @Fields.string({
     description: "Post ID",

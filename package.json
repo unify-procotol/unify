@@ -6,8 +6,7 @@
     "packages/*",
     "!packages/urpc-cli",
     "dev/*",
-    "docs",
-    "examples/*"
+    "docs"
   ],
   "scripts": {
     "build:urpc-core": "cd packages/urpc-core && bun run build",
