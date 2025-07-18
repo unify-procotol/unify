@@ -72,7 +72,6 @@ export function UniRenderExample({ type }: ExampleProps) {
   const examples = {
     basic: {
       entity: "user",
-      source: "memory",
       layout: 'table' as const,
       config: {
         id: { label: 'ID', width: '60px' },
@@ -99,7 +98,6 @@ export function UniRenderExample({ type }: ExampleProps) {
     },
     'table-editable': {
       entity: "user",
-      source: "memory",
       layout: 'table' as const,
       config: {
         id: { label: 'ID', width: '60px', editable: false },
@@ -146,7 +144,6 @@ export function UniRenderExample({ type }: ExampleProps) {
     },
     card: {
       entity: "user",
-      source: "memory",
       layout: 'card' as const,
       config: {
         name: {
@@ -189,7 +186,7 @@ export function UniRenderExample({ type }: ExampleProps) {
     },
     form: {
       entity: "user",
-      source: "memory",
+      
       query: {
         where: { id: "1" }
       },
@@ -211,7 +208,7 @@ export function UniRenderExample({ type }: ExampleProps) {
     },
     grid: {
       entity: "user",
-      source: "memory",
+      
       layout: 'grid' as const,
       config: {
         name: { label: 'Name' },
@@ -242,7 +239,7 @@ export function UniRenderExample({ type }: ExampleProps) {
     },
     list: {
       entity: "user",
-      source: "memory",
+      
       layout: 'list' as const,
       config: {
         name: { label: 'Name' },
@@ -261,7 +258,7 @@ export function UniRenderExample({ type }: ExampleProps) {
     },
     dashboard: {
       entity: "user",
-      source: "memory",
+      
       layout: 'dashboard' as const,
       config: {
         name: { label: 'User' },
@@ -286,20 +283,20 @@ export function UniRenderExample({ type }: ExampleProps) {
     },
     loading: {
       entity: "user",
-      source: "memory",
+      
       layout: 'table' as const,
       loading: true
     },
     error: {
       entity: "user",
-      source: "memory",
+      
       layout: 'table' as const,
       loading: false,
       error: "Failed to load orders: Network connection timeout"
     },
     empty: {
       entity: "user",
-      source: "memory",
+      
       query: {
         where: { id: "nonexistent" }
       },
@@ -309,7 +306,7 @@ export function UniRenderExample({ type }: ExampleProps) {
     },
     'custom-basic': {
       entity: "post",
-      source: "memory",
+      
       layout: 'custom' as const,
       render: renderCustomCardLayout,
       config: {
@@ -331,7 +328,7 @@ export function UniRenderExample({ type }: ExampleProps) {
     },
     'custom-magazine': {
       entity: "post",
-      source: "memory",
+      
       layout: 'custom' as const,
       render: renderCustomCardLayout,
       config: {
@@ -351,7 +348,7 @@ export function UniRenderExample({ type }: ExampleProps) {
     },
     'custom-social': {
       entity: "post",
-      source: "memory",
+      
       layout: 'custom' as const,
       render: renderCustomCardLayout,
       config: {
@@ -371,7 +368,7 @@ export function UniRenderExample({ type }: ExampleProps) {
     },
     'custom-blog': {
       entity: "post",
-      source: "memory",
+      
       layout: 'custom' as const,
       render: renderCustomCardLayout,
       config: {
@@ -391,7 +388,7 @@ export function UniRenderExample({ type }: ExampleProps) {
     },
     'custom-minimal': {
       entity: "post",
-      source: "memory",
+      
       layout: 'custom' as const,
       render: renderCustomCardLayout,
       config: {

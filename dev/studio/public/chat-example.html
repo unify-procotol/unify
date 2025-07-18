@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URPC Chat Widget 集成示例</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            color: #2d3748;
+            margin-bottom: 8px;
+        }
+        
+        .subtitle {
+            color: #718096;
+            margin-bottom: 32px;
+            font-size: 18px;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 24px;
+            margin: 32px 0;
+        }
+        
+        .feature-card {
+            background: #f7fafc;
+            padding: 24px;
+            border-radius: 12px;
+            border-left: 4px solid #3182ce;
+        }
+        
+        .feature-card h3 {
+            margin: 0 0 12px 0;
+            color: #2d3748;
+        }
+        
+        .feature-card p {
+            margin: 0;
+            color: #4a5568;
+            line-height: 1.5;
+        }
+        
+        .code-block {
+            background: #1a202c;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+            margin: 20px 0;
+        }
+        
+        .api-section {
+            background: #edf2f7;
+            padding: 24px;
+            border-radius: 12px;
+            margin: 32px 0;
+        }
+        
+        .demo-controls {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin: 24px 0;
+        }
+        
+        .btn {
+            background: #3182ce;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+        
+        .btn:hover {
+            background: #2c5282;
+        }
+        
+        .btn-secondary {
+            background: #718096;
+        }
+        
+        .btn-secondary:hover {
+            background: #4a5568;
+        }
+        
+        .status {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            display: inline-block;
+            margin-left: 12px;
+        }
+        
+        .status.online {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+        
+        .notice {
+            background: #fef5e7;
+            border: 1px solid #f6e05e;
+            color: #744210;
+            padding: 16px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 URPC Chat Widget</h1>
+        <p class="subtitle">
+            AI 助手聊天组件集成示例 - 轻松为你的网站添加智能聊天功能
+            <span class="status online">✨ 已集成</span>
+        </p>
+        
+        <div class="notice">
+            <strong>💡 提示：</strong> 查看页面右下角的聊天按钮！点击即可开始与AI助手对话。
+        </div>
+
+        <div class="feature-grid">
+            <div class="feature-card">
+                <h3>🎯 一键集成</h3>
+                <p>只需一行代码即可为任何网站添加AI聊天功能，支持自定义服务器地址。</p>
+            </div>
+            
+            <div class="feature-card">
+                <h3>📱 响应式设计</h3>
+                <p>完美适配桌面和移动设备，提供一致的用户体验。</p>
+            </div>
+            
+            <div class="feature-card">
+                <h3>🔧 API 控制</h3>
+                <p>提供JavaScript API，支持程序化控制聊天窗口的打开、关闭等操作。</p>
+            </div>
+            
+            <div class="feature-card">
+                <h3>⚡ 高性能</h3>
+                <p>基于现代前端技术栈，轻量级设计，不影响页面加载速度。</p>
+            </div>
+        </div>
+
+        <h2>🔧 使用方法</h2>
+        
+        <h3>基础集成</h3>
+        <p>在你的HTML页面中添加以下代码：</p>
+        <div class="code-block">
+&lt;!-- 基础用法 --&gt;
+&lt;script src="https://studio.uni-labs.org/embed-chat.js"&gt;&lt;/script&gt;
+
+&lt;!-- 或者使用自定义服务器 --&gt;
+&lt;script src="https://studio.uni-labs.org/embed-chat.js" 
+        data-src="https://your-studio-domain.com"&gt;&lt;/script&gt;
+        </div>
+
+        <h3>高级配置</h3>
+        <div class="code-block">
+&lt;!-- 加载后自定义配置 --&gt;
+&lt;script&gt;
+  // 设置自定义服务器地址
+  URPCChat.setStudioUrl('https://your-custom-server.com');
+  
+  // 程序化打开聊天窗口
+  URPCChat.open();
+  
+  // 检查聊天状态
+  if (URPCChat.isOpen()) {
+    console.log('聊天窗口已打开');
+  }
+&lt;/script&gt;
+        </div>
+
+        <div class="api-section">
+            <h3>🎮 API 方法</h3>
+            <p>加载脚本后，可以使用 <code>window.URPCChat</code> 对象控制聊天功能：</p>
+            <ul>
+                <li><code>URPCChat.open()</code> - 打开聊天窗口</li>
+                <li><code>URPCChat.close()</code> - 关闭聊天窗口</li>
+                <li><code>URPCChat.toggle()</code> - 切换聊天窗口状态</li>
+                <li><code>URPCChat.isOpen()</code> - 检查聊天窗口是否打开</li>
+                <li><code>URPCChat.setStudioUrl(url)</code> - 设置自定义服务器地址</li>
+            </ul>
+        </div>
+
+        <h3>🎮 实时演示</h3>
+        <p>使用下面的按钮测试聊天功能：</p>
+        <div class="demo-controls">
+            <button class="btn" onclick="URPCChat.open()">打开聊天</button>
+            <button class="btn" onclick="URPCChat.close()">关闭聊天</button>
+            <button class="btn" onclick="URPCChat.toggle()">切换状态</button>
+            <button class="btn btn-secondary" onclick="alert('聊天状态: ' + (URPCChat.isOpen() ? '已打开' : '已关闭'))">
+                检查状态
+            </button>
+        </div>
+
+        <h2>🌟 特性亮点</h2>
+        <ul>
+            <li><strong>AI 智能对话：</strong> 基于先进的AI模型，支持自然语言交互</li>
+            <li><strong>数据查询：</strong> 可以查询和分析系统中的用户、帖子等数据</li>
+            <li><strong>实时流式响应：</strong> 支持流式输出，提供更好的交互体验</li>
+            <li><strong>无依赖：</strong> 纯JavaScript实现，无需任何第三方依赖</li>
+            <li><strong>隐私保护：</strong> 支持自部署，数据完全可控</li>
+            <li><strong>多语言支持：</strong> 支持中文和英文界面</li>
+        </ul>
+
+        <div class="notice">
+            <strong>🔗 更多信息：</strong> 
+            访问 <a href="https://studio.uni-labs.org" target="_blank">URPC Studio</a> 
+            了解更多功能和配置选项。
+        </div>
+    </div>
+
+    <!-- 集成聊天组件 -->
+    <script src="./embed-chat.js" data-src="http://localhost:5173"></script>
+    
+    <script>
+        // 页面加载完成后的初始化逻辑
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('页面加载完成，聊天组件已就绪');
+            
+            // 可以在这里添加更多自定义逻辑
+            setTimeout(() => {
+                console.log('聊天组件状态:', URPCChat.isOpen() ? '已打开' : '已关闭');
+            }, 1000);
+        });
+        
+        // 监听键盘快捷键
+        document.addEventListener('keydown', function(e) {
+            // Ctrl/Cmd + K 打开聊天
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                e.preventDefault();
+                URPCChat.toggle();
+            }
+        });
+    </script>
+</body>
+</html> 

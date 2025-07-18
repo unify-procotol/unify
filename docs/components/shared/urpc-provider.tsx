@@ -3,7 +3,7 @@
 import { repo, URPC } from "@unilab/urpc";
 import { Plugin } from "@unilab/urpc-core";
 import { Logging } from "@unilab/urpc-core/middleware";
-import { MemoryAdapter } from "@unilab/urpc-adapters";
+import { MockAdapter } from "@unilab/urpc-adapters";
 import { useState, useEffect } from "react";
 import { PostEntity } from "../entities/post";
 import { UserEntity } from "../entities/user";
@@ -13,13 +13,13 @@ const MyPlugin: Plugin = {
   adapters: [
     {
       entity: "user",
-      source: "memory",
-      adapter: new MemoryAdapter(),
+      source: "mock",
+      adapter: new MockAdapter(),
     },
     {
       entity: "post", 
-      source: "memory",
-      adapter: new MemoryAdapter(),
+      source: "mock",
+      adapter: new MockAdapter(),
     },
   ],
 };
@@ -71,10 +71,10 @@ export const useURPCProvider = (): URPCProviderState => {
         middlewares: [Logging()],
         entityConfigs: {
           user: {
-            defaultSource: "memory",
+            defaultSource: "mock",
           },
           post: {
-            defaultSource: "memory",
+            defaultSource: "mock",
           },
           schema: {
             defaultSource: "_global",

@@ -4,6 +4,8 @@ import { Plugin } from "@unilab/urpc-core";
 import { UserAdapter } from "./adapters/user";
 import { MastraPlugin } from "@unilab/mastra-plugin/hono";
 import { MockAdapter } from "@unilab/urpc-adapters";
+import { Hono } from "hono";
+import { cors } from "hono/cors";
 
 const MyPlugin: Plugin = {
   entities: [UserEntity],
@@ -15,8 +17,11 @@ const MyPlugin: Plugin = {
     },
   ],
 };
-
-const app = URPC.init({
+const app = new Hono()
+app.use(cors())
+console.log(process.env.OPENROUTER_API_KEY)
+URPC.init({
+  app,
   plugins: [
     MyPlugin,
     MastraPlugin({

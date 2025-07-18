@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Layout, StudioHome } from "./components";
+import { Chat } from "./components/Chat";
 
 // Simple router implementation
 export const Router: React.FC = () => {
@@ -23,6 +24,25 @@ export const Router: React.FC = () => {
   // Route components
   const renderRoute = () => {
     switch (currentPath) {
+      case '/chat':
+        return (
+          <Layout>
+            {() => (
+              <div className="flex flex-col h-screen p-4">
+                <Chat />
+              </div>
+            )}
+          </Layout>
+        );
+      
+      case '/embed-chat':
+        // Embedded chat without full layout - for iframe usage
+        return (
+          <div className="h-screen bg-background">
+            <Chat isEmbedded={true} />
+          </div>
+        );
+      
       case '/':
       default:
         return (

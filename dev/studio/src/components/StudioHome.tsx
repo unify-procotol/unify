@@ -5,7 +5,8 @@ import { Button } from "./ui/button";
 import { Card, CardContent } from "./ui/card";
 import { Badge } from "./ui/badge";
 import { cn } from "../lib/utils";
-import { Database, MoreVertical, Edit, Trash2, AlertCircle, RefreshCw, Loader2 } from "lucide-react";
+import { Database, MoreVertical, Edit, Trash2, AlertCircle, RefreshCw, Loader2, MessageCircle, X } from "lucide-react";
+import { Chat } from "./Chat";
 
 // Entity schema type based on the API response
 interface Schema {
@@ -43,7 +44,8 @@ export function StudioHome({ isConnected, baseUrl }: StudioHomeProps) {
   const [error, setError] = useState<string | null>(null);
   const [currentLayout, setCurrentLayout] = useState<'table' | 'custom'>('table');
 
-
+  // Chat state
+  const [showChat, setShowChat] = useState(false);
 
   // Add Record modal state
   const [showAddModal, setShowAddModal] = useState(false);
@@ -603,7 +605,7 @@ export function StudioHome({ isConnected, baseUrl }: StudioHomeProps) {
   const currentSourceData = getCurrentSourceData();
 
   return (
-    <div className="flex-1 flex overflow-hidden">
+    <div className="flex-1 flex overflow-hidden relative">
       {/* Left Sidebar */}
       <div className="w-80 border-r border-border flex flex-col overflow-hidden">
         {/* Entities and Data Sources Tree */}
@@ -776,8 +778,6 @@ export function StudioHome({ isConnected, baseUrl }: StudioHomeProps) {
 
       {/* Right Panel - Data View */}
       <div className="flex-1 flex flex-col overflow-hidden">
-
-
         {/* Breadcrumb and View Controls */}
         <Card className="h-10 rounded-none border-x-0 border-t-0 flex items-center justify-between px-4">
           <div className="flex items-center space-x-1 text-sm text-muted-foreground">
@@ -895,6 +895,33 @@ export function StudioHome({ isConnected, baseUrl }: StudioHomeProps) {
           </div>
         )}
 
+      {/* Floating Chat Button */}
+      <Button
+        onClick={() => setShowChat(true)}
+        className="fixed bottom-6 right-6 w-14 h-14 rounded-full p-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 z-40"
+        style={{
+          background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
+        }}
+        title="Open AI Assistant Chat"
+      >
+        <MessageCircle className="w-6 h-6 text-white" />
+      </Button>
+
+      {/* Chat Window */}
+      {showChat && (
+        <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-end justify-end p-6 z-50">
+          <div 
+            className="absolute inset-0" 
+            onClick={() => setShowChat(false)}
+          />
+          <div className="relative w-96 h-[600px] max-h-[calc(100vh-3rem)]">
+            <Chat 
+              isEmbedded={true} 
+              onClose={() => setShowChat(false)}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

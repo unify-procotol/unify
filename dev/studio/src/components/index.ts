@@ -1,6 +1,7 @@
 // Studio Components Export
 export { Layout } from './Layout';
 export { StudioHome } from './StudioHome';
+export { Chat } from './Chat';
 export { UniRender } from '@unilab/ukit';
 
 // Types
