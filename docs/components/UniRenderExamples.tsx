@@ -11,6 +11,8 @@ import { LoadingState, ErrorState } from "./shared/common-ui";
 import { renderCustomCardLayout } from "./shared/custom-layouts";
 import { renderMagazineLayout } from "./shared/custom-magazine-layout";
 import { renderSocialLayout } from "./shared/custom-social-layout";
+import { renderBlogLayout } from "./shared/custom-blog-layout";
+import { renderMinimalLayout } from "./shared/custom-minimal-layout";
 import { useEffect, useState, useRef } from "react";
 
 let initialized = false;
@@ -553,7 +555,7 @@ export function UniRenderExample({ type }: ExampleProps) {
     'custom-blog': {
       entity: PostEntity,
       layout: 'custom' as const,
-      render: renderCustomCardLayout,
+      render: renderBlogLayout,
       config: {
         name: { label: 'Blog Title' },
         content: { label: 'Content' },
@@ -572,7 +574,7 @@ export function UniRenderExample({ type }: ExampleProps) {
     'custom-minimal': {
       entity: PostEntity,
       layout: 'custom' as const,
-      render: renderCustomCardLayout,
+      render: renderMinimalLayout,
       config: {
         name: { label: 'Title' },
         content: { label: 'Description' },
@@ -581,7 +583,7 @@ export function UniRenderExample({ type }: ExampleProps) {
       },
       pagination: {
         enabled: true,
-        pageSize: 12,
+        pageSize: 8,
       },
       onEdit: handleEdit,
       onDelete: handleDelete
@@ -627,3 +629,6 @@ export function UniRenderExample({ type }: ExampleProps) {
 
   return <UniRender ref={uniRenderRef} {...finalProps} />;
 }
+
+// Export with backward compatibility
+export { UniRenderExample as UniRenderCustomLayout };

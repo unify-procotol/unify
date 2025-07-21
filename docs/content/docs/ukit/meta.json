@@ -5,6 +5,7 @@
   "pages": [
     "index",
     "getting-started",
+    "custom-layout",
     "components"
   ],
   "root": true

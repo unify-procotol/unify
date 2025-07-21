@@ -11,15 +11,54 @@ The custom layout allows you to create completely custom data visualizations usi
 
 <Tabs items={['Preview', 'Code']}>
 <Tab value="Preview">
-<UniRenderCustomLayout type="custom-basic" />
+<UniRenderExample type="custom-basic" />
 </Tab>
 <Tab value="Code">
 ```tsx
 import { UniRender } from '@unilab/ukit';
 
+// Define your custom render function
+const renderCustomCardLayout = (data: any[], options: any) => {
+  return (
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      {data.map((record, index) => (
+        <div 
+          key={record.id || index}
+          className="bg-white border border-gray-200 rounded-lg hover:shadow-lg transition-all duration-300"
+        >
+          <div className="bg-gradient-to-br from-blue-500 to-purple-600 p-4 text-white">
+            <h3 className="font-semibold text-lg mb-2">{record.name}</h3>
+            <p className="text-sm opacity-90">{record.email}</p>
+          </div>
+          <div className="p-4">
+            <p className="text-sm text-gray-600 mb-3">{record.content}</p>
+            <div className="flex justify-between items-center">
+              <span className="text-xs text-gray-500">{record.role}</span>
+              <div className="flex gap-2">
+                <button 
+                  onClick={() => options.onEdit(record, index)}
+                  className="px-3 py-1 bg-blue-500 text-white text-xs rounded"
+                >
+                  Edit
+                </button>
+                <button 
+                  onClick={() => options.onDelete(record, index)}
+                  className="px-3 py-1 bg-red-500 text-white text-xs rounded"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
+
 <UniRender
-  entity="post"
-  source="memory"
+  entity="user"
+  source="mock"
   layout="custom"
   render={renderCustomCardLayout}
   config={{
@@ -43,11 +82,11 @@ import { UniRender } from '@unilab/ukit';
 
 ## 🎨 Magazine Style Layout
 
-Create a clean blog-style layout perfect for articles and content display.
+Create a magazine-style layout with rich visual design and content preview.
 
 <Tabs items={['Preview', 'Code']}>
 <Tab value="Preview">
-<UniRenderCustomLayout type="custom-magazine" />
+<UniRenderExample type="custom-magazine" />
 </Tab>
 <Tab value="Code">
 ```tsx
@@ -85,33 +124,33 @@ const renderMagazineLayout = (data: any[], options: any) => {
                 )}
               </div>
 
-              {/* Content */}
-              <div className="flex-1 p-5">
-                {/* Category */}
-                <div className="flex items-center mb-1">
-                  <span className="text-xs font-medium text-blue-600 bg-blue-50 px-2 py-1 rounded">
-                    {category}
-                  </span>
-                </div>
+                             {/* Content */}
+               <div className="flex-1 p-5">
+                 {/* Category */}
+                 <div className="flex items-center mb-1">
+                   <span className="text-xs font-medium text-blue-600 bg-blue-50 px-2 py-1 rounded">
+                     {category}
+                   </span>
+                 </div>
 
-                {/* Title */}
-                <h2 className="text-lg font-semibold text-gray-900 mb-3 mt-1 leading-tight hover:text-blue-600 cursor-pointer">
-                  {title}
-                </h2>
+                 {/* Title */}
+                 <h2 className="text-lg font-semibold text-gray-900 mb-3 mt-1 leading-tight hover:text-blue-600 cursor-pointer">
+                   {title}
+                 </h2>
 
-                {/* Content Preview */}
-                {content && (
-                  <p className="text-gray-600 mb-3 leading-relaxed line-clamp-2">
-                    {content.length > 150 ? content.substring(0, 150) + "..." : content}
-                  </p>
-                )}
+                 {/* Content Preview */}
+                 {content && (
+                   <p className="text-gray-600 mb-3 leading-relaxed line-clamp-2">
+                     {content.length > 150 ? content.substring(0, 150) + "..." : content}
+                   </p>
+                 )}
 
-                {/* Meta Information */}
-                <div className="flex items-center justify-between text-sm text-gray-500">
+                 {/* Meta Information */}
+                 <div className="flex items-center justify-between text-sm text-gray-500">
                   <div className="flex items-center space-x-4">
                     <span>By {author}</span>
                     <span>•</span>
-                    <span>Jan 15, 2024</span>
+                    <span>{new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
                     <span>•</span>
                     <span>5 min read</span>
                   </div>
@@ -168,7 +207,7 @@ Perfect for social media posts, user profiles, or any content that needs a socia
 
 <Tabs items={['Preview', 'Code']}>
 <Tab value="Preview">
-<UniRenderCustomLayout type="custom-social" />
+<UniRenderExample type="custom-social" />
 </Tab>
 <Tab value="Code">
 ```tsx
@@ -275,129 +314,21 @@ const renderSocialLayout = (data: any[], options: any) => {
 
 ## 📝 Blog Style Layout
 
-Perfect for blog posts, articles, or any content-heavy applications. Features a clean, readable design similar to Medium or Dev.to.
+Ideal for blog posts, articles, or any content-heavy applications.
 
 <Tabs items={['Preview', 'Code']}>
 <Tab value="Preview">
-<UniRenderCustomLayout type="custom-blog" />
+<UniRenderExample type="custom-blog" />
 </Tab>
 <Tab value="Code">
 ```tsx
 import { UniRender } from '@unilab/ukit';
 
-// Modern blog layout renderer
-const renderBlogLayout = (data: any[], options: any) => {
-   return (
-           <div className="max-w-4xl mx-auto px-6 py-8">
-       <div className="space-y-6">
-         {data.map((record, index) => {
-           const title = record.name || record.title || `Article ${index + 1}`;
-           const content = record.content || record.description || "";
-           const category = record.category || record.type || 'General';
-           const author = record.email || record.author || 'Author';
-           const role = record.role || 'Writer';
-           
-           return (
-             <article 
-               key={record.id || index} 
-               className="group bg-white border border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition-all duration-200 rounded-lg p-6 shadow-sm hover:shadow-md"
-             >
-              <div className="flex flex-col lg:flex-row lg:items-start lg:space-x-8">
-                {/* Content Section */}
-                <div className="flex-1">
-                  {/* Category & Reading Time */}
-                  <div className="flex items-center space-x-3 mb-3">
-                    <span className="text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors cursor-pointer">
-                      {category}
-                    </span>
-                    <span className="text-gray-300">•</span>
-                    <span className="text-sm text-gray-500">5 min read</span>
-                  </div>
-
-                  {/* Title */}
-                  <h2 className="text-2xl font-bold text-gray-900 mb-3 leading-tight group-hover:text-blue-600 transition-colors duration-200 cursor-pointer">
-                    {title}
-                  </h2>
-
-                  {/* Content Preview */}
-                  {content && (
-                    <p className="text-gray-600 mb-4 leading-relaxed text-base">
-                      {content.length > 200 ? content.substring(0, 200) + "..." : content}
-                    </p>
-                  )}
-
-                  {/* Author & Date */}
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center">
-                        <span className="text-xs font-semibold text-white">
-                          {author.split(' ').map(word => word[0]).join('').toUpperCase().slice(0, 2)}
-                        </span>
-                      </div>
-                      <div>
-                        <div className="text-sm font-medium text-gray-900">{author}</div>
-                        <div className="text-xs text-gray-500">{role}</div>
-                      </div>
-                    </div>
-                    
-                    <div className="text-right">
-                      <div className="text-sm text-gray-500">January 15, 2024</div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Image Section */}
-                <div className="lg:w-48 lg:h-32 w-full h-48 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0 mt-4 lg:mt-0">
-                  {record.imageUrl ? (
-                    <img 
-                      src={record.imageUrl} 
-                      alt={title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <div className="text-center">
-                        <svg className="w-8 h-8 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                        </svg>
-                        <div className="text-xs text-gray-500">No image</div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Actions */}
-              <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-100">
-                <div className="flex items-center space-x-6">
-                  <button className="flex items-center space-x-2 text-gray-500 hover:text-blue-600 transition-colors text-sm">
-                    <span>24</span>
-                  </button>
-                  <button className="flex items-center space-x-2 text-gray-500 hover:text-green-600 transition-colors text-sm">
-                    <span>8</span>
-                  </button>
-                  <button className="flex items-center space-x-2 text-gray-500 hover:text-purple-600 transition-colors text-sm">
-                    <span>Save</span>
-                  </button>
-                </div>
-                
-                <button className="text-blue-600 hover:text-blue-800 font-medium text-sm transition-colors">
-                  Read more →
-                </button>
-              </div>
-            </article>
-          );
-        })}
-      </div>
-    </div>
-  );
-};
-
 <UniRender
-  entity="post"
-  source="memory"
+  entity="blog"
+  source="mock"
   layout="custom"
-  render={renderBlogLayout}
+  render={renderCustomCardLayout}
   config={{
     name: { label: 'Blog Title' },
     content: { label: 'Content' },
@@ -419,57 +350,21 @@ const renderBlogLayout = (data: any[], options: any) => {
 
 ## 🔸 Minimal Layout
 
-Clean and minimal design for simple data display. Perfect for content lists, news feeds, or any scenario where you need clean, distraction-free presentation.
+Clean and minimal design for simple data display.
 
 <Tabs items={['Preview', 'Code']}>
 <Tab value="Preview">
-<UniRenderCustomLayout type="custom-minimal" />
+<UniRenderExample type="custom-minimal" />
 </Tab>
 <Tab value="Code">
 ```tsx
 import { UniRender } from '@unilab/ukit';
 
-// Minimal layout renderer
-const renderMinimalLayout = (data: any[], options: any) => {
-  return (
-    <div className="max-w-3xl mx-auto px-6 py-6">
-      <div className="space-y-6">
-        {data.map((record, index) => {
-          const title = record.name || record.title || `Item ${index + 1}`;
-          const content = record.content || record.description || "";
-          const author = record.email || record.author || 'Author';
-          
-          return (
-            <div 
-              key={record.id || index} 
-              className="pb-6 border-b border-gray-200 last:border-b-0"
-            >
-              <h2 className="text-lg font-semibold text-gray-900 mb-2 hover:text-blue-600 cursor-pointer line-clamp-2">
-                {title}
-              </h2>
-              
-              {content && (
-                <p className="text-gray-600 mb-3 leading-relaxed line-clamp-3">
-                  {content}
-                </p>
-              )}
-              
-              <div className="text-sm text-gray-500">
-                {author}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-};
-
 <UniRender
-  entity="post"
-  source="memory"
+  entity="item"
+  source="mock"
   layout="custom"
-  render={renderMinimalLayout}
+  render={renderCustomCardLayout}
   config={{
     name: { label: 'Title' },
     content: { label: 'Description' },
@@ -478,7 +373,7 @@ const renderMinimalLayout = (data: any[], options: any) => {
   }}
   pagination={{
     enabled: true,
-    pageSize: 8,
+    pageSize: 12,
   }}
   onEdit={handleEdit}
   onDelete={handleDelete}
@@ -487,7 +382,67 @@ const renderMinimalLayout = (data: any[], options: any) => {
 </Tab>
 </Tabs>
 
-## 🛠️ Props Reference
+## 🛠️ Custom Render Function
+
+The render function receives two parameters:
+
+### Parameters
+
+- **data**: `any[]` - Array of records to render
+- **options**: `object` - Options object containing:
+  - `onEdit`: Function to handle edit actions
+  - `onDelete`: Function to handle delete actions
+  - `deletingIndex`: Index of currently deleting item
+  - `startIndex`: Starting index for pagination
+
+### Helper Functions
+
+You can create helper functions to make your render function cleaner:
+
+```tsx
+// Color generation
+const getRandomColor = () => {
+  const colors = [
+    'bg-gradient-to-br from-blue-500 to-purple-600',
+    'bg-gradient-to-br from-green-500 to-teal-600',
+    'bg-gradient-to-br from-orange-500 to-red-600',
+    'bg-gradient-to-br from-pink-500 to-rose-600',
+  ];
+  return colors[Math.floor(Math.random() * colors.length)];
+};
+
+// Initial generation
+const getInitials = (name: string) => {
+  return name.split(' ').map(word => word[0]).join('').toUpperCase().slice(0, 2);
+};
+
+// Date formatting
+const formatDate = (dateString: string) => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-US', { 
+    month: 'short', 
+    day: 'numeric'
+  });
+};
+
+// Reading time estimation
+const getReadingTime = (content: string) => {
+  const words = content.split(' ').length;
+  const minutes = Math.ceil(words / 200);
+  return `${minutes}m read time`;
+};
+
+// Tag extraction
+const getTags = (record: any) => {
+  const tags = [];
+  if (record.type) tags.push(`#${record.type}`);
+  if (record.category) tags.push(`#${record.category}`);
+  if (record.status) tags.push(`#${record.status}`);
+  return tags.slice(0, 4);
+};
+```
+
+## 🎛️ Props Reference
 
 ### UniRender Props for Custom Layout
 
@@ -503,6 +458,32 @@ const renderMinimalLayout = (data: any[], options: any) => {
 | `onDelete` | `function` | Delete handler | `undefined` |
 | `loading` | `boolean` | Loading state | `false` |
 | `error` | `string \| null` | Error message | `null` |
+
+### Pagination Configuration
+
+```tsx
+pagination={{
+  enabled: true,
+  pageSize: 6,
+  showPageInfo: true,
+  showFirstLast: true,
+  showPrevNext: true,
+}}
+```
+
+### Action Handlers
+
+```tsx
+const handleEdit = async (record: any, index: number) => {
+  // Handle edit logic
+  console.log('Editing record:', record);
+};
+
+const handleDelete = async (record: any, index: number) => {
+  // Handle delete logic
+  console.log('Deleting record:', record);
+};
+```
 
 ## 🎯 Best Practices
 
