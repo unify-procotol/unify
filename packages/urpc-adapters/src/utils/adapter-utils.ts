@@ -3,7 +3,6 @@ import type {
   FindOneArgs,
   CreationArgs,
   UpdateArgs,
-  DeletionArgs,
   WhereCondition,
   WhereConditionWithOperators,
   UpsertArgs,
@@ -19,6 +18,10 @@ export function matchesWhere<T extends Record<string, any>>(
   item: T,
   where: WhereConditionWithOperators<T> | WhereCondition<T>
 ): boolean {
+  if (where && Object.keys(where).length === 0) {
+    return false;
+  }
+
   return Object.entries(where).every(([key, value]) => {
     if (typeof value === "object" && value !== null) {
       // Handle query operators
@@ -30,6 +33,53 @@ export function matchesWhere<T extends Record<string, any>>(
       if ("$lte" in value) return item[key] <= value.$lte;
       if ("$in" in value) return value.$in.includes(item[key]);
       if ("$nin" in value) return !value.$nin.includes(item[key]);
+
+      // Handle string query operators first
+      const itemValue = item[key];
+      if (typeof itemValue === "string") {
+        const mode = value.mode || "sensitive";
+        const caseSensitive = mode === "sensitive";
+
+        // Apply case sensitivity for string comparisons
+        const normalizeString = (str: string) =>
+          caseSensitive ? str : str.toLowerCase();
+
+        const normalizedItemValue = normalizeString(itemValue);
+
+        if ("contains" in value) {
+          const searchValue = normalizeString(value.contains);
+          return normalizedItemValue.includes(searchValue);
+        }
+
+        if ("startsWith" in value) {
+          const searchValue = normalizeString(value.startsWith);
+          return normalizedItemValue.startsWith(searchValue);
+        }
+
+        if ("endsWith" in value) {
+          const searchValue = normalizeString(value.endsWith);
+          return normalizedItemValue.endsWith(searchValue);
+        }
+
+        if ("not" in value) {
+          if (value.not === null) {
+            // itemValue is a string, so it's not null
+            return true;
+          }
+          if (typeof value.not === "string") {
+            const searchValue = normalizeString(value.not);
+            return normalizedItemValue !== searchValue;
+          }
+        }
+      }
+
+      // Handle not operator for non-string fields
+      if ("not" in value) {
+        if (value.not === null) {
+          return item[key] !== null && item[key] !== undefined;
+        }
+        return item[key] !== value.not;
+      }
     }
     return item[key] === value;
   });
@@ -135,4 +185,4 @@ export async function performUpsert<T extends Record<string, any>>(
   } else {
     return create({ data: args.create });
   }
-} 
+}

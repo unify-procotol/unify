@@ -282,6 +282,41 @@ export class URPC {
       }
     });
 
+    this.app.post("/:entity/create_many", async (c) => {
+      try {
+        const entity = c.req.param("entity");
+        const source =
+          c.req.query("source") || this.entityConfigs[entity]?.defaultSource;
+
+        const sourceError = validateSource(source, c);
+        if (sourceError) return sourceError;
+
+        const body = await c.req.json();
+        if (!body.data || !Array.isArray(body.data)) {
+          return c.json({ error: "data field is required and must be an array" }, 400);
+        }
+
+        const repo = getRepo(entity, source!);
+        if (!repo) {
+          return c.json({ error: "Repository not found" }, 404);
+        }
+
+        const result = await repo.createMany(
+          {
+            data: body.data,
+          },
+          {
+            entity,
+            source,
+          }
+        );
+
+        return c.json({ data: result }, 201);
+      } catch (error) {
+        return handleError(error, c);
+      }
+    });
+
     this.app.patch("/:entity/update", async (c) => {
       try {
         const entity = c.req.param("entity");
@@ -313,6 +348,79 @@ export class URPC {
         );
 
         return c.json({ data: result });
+      } catch (error) {
+        return handleError(error, c);
+      }
+    });
+
+    this.app.patch("/:entity/update_many", async (c) => {
+      try {
+        const entity = c.req.param("entity");
+        const source =
+          c.req.query("source") || this.entityConfigs[entity]?.defaultSource;
+
+        const sourceError = validateSource(source, c);
+        if (sourceError) return sourceError;
+
+        const body = await c.req.json();
+        if (!body.where || !body.data) {
+          return c.json({ error: "where and data fields are required" }, 400);
+        }
+
+        const repo = getRepo(entity, source!);
+        if (!repo) {
+          return c.json({ error: "Repository not found" }, 404);
+        }
+
+        const result = await repo.updateMany(
+          {
+            where: body.where,
+            data: body.data,
+          },
+          {
+            entity,
+            source,
+          }
+        );
+
+        return c.json({ data: result });
+      } catch (error) {
+        return handleError(error, c);
+      }
+    });
+
+    this.app.post("/:entity/upsert", async (c) => {
+      try {
+        const entity = c.req.param("entity");
+        const source =
+          c.req.query("source") || this.entityConfigs[entity]?.defaultSource;
+
+        const sourceError = validateSource(source, c);
+        if (sourceError) return sourceError;
+
+        const body = await c.req.json();
+        if (!body.where || !body.update || !body.create) {
+          return c.json({ error: "where, update, and create fields are required" }, 400);
+        }
+
+        const repo = getRepo(entity, source!);
+        if (!repo) {
+          return c.json({ error: "Repository not found" }, 404);
+        }
+
+        const result = await repo.upsert(
+          {
+            where: body.where,
+            update: body.update,
+            create: body.create,
+          },
+          {
+            entity,
+            source,
+          }
+        );
+
+        return c.json({ data: result }, 201);
       } catch (error) {
         return handleError(error, c);
       }

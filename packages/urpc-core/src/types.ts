@@ -7,6 +7,11 @@ export type QueryOperators<T> = {
   $ne?: T;
   $in?: T[];
   $nin?: T[];
+  contains?: string;
+  startsWith?: string;
+  endsWith?: string;
+  mode?: "sensitive" | "insensitive";
+  not?: string | null;
 };
 
 export type WhereCondition<T> = {
@@ -48,8 +53,17 @@ export interface CreationArgs<T extends Record<string, any>> {
   data: Partial<T>;
 }
 
+export interface CreateManyArgs<T extends Record<string, any>> {
+  data: Partial<T>[];
+}
+
 export interface UpdateArgs<T extends Record<string, any>> {
   where: WhereCondition<T>;
+  data: Partial<T>;
+}
+
+export interface UpdateManyArgs<T extends Record<string, any>> {
+  where: WhereConditionWithOperators<T>;
   data: Partial<T>;
 }
 
@@ -81,7 +95,10 @@ export interface DataSourceAdapter<T extends Record<string, any>> {
   findMany(args?: FindManyArgs<T>): Promise<T[]>;
   findOne(args: FindOneArgs<T>): Promise<T | null>;
   create(args: CreationArgs<T>): Promise<T>;
+  createMany(args: CreateManyArgs<T>): Promise<T[]>;
   update(args: UpdateArgs<T>): Promise<T>;
+  updateMany(args: UpdateManyArgs<T>): Promise<T[]>;
+  upsert(args: UpsertArgs<T>): Promise<T>;
   delete(args: DeletionArgs<T>): Promise<boolean>;
   call(
     args: CallArgs<T>,
@@ -98,7 +115,16 @@ export interface MiddlewareMetadata {
 }
 
 export type MiddlewareContext<T extends Record<string, any>> = {
-  operation: "findMany" | "findOne" | "create" | "update" | "delete" | "call";
+  operation:
+    | "findMany"
+    | "findOne"
+    | "create"
+    | "createMany"
+    | "update"
+    | "updateMany"
+    | "upsert"
+    | "delete"
+    | "call";
   args: any;
   result?: any;
   metadata?: MiddlewareMetadata;

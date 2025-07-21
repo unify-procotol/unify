@@ -232,8 +232,14 @@ export class URPC {
           return await URPC.handleFindOne(request, repo, entity, source!);
         case "POST:create":
           return await URPC.handleCreate(request, repo, entity, source!);
+        case "POST:create_many":
+          return await URPC.handleCreateMany(request, repo, entity, source!);
         case "PATCH:update":
           return await URPC.handleUpdate(request, repo, entity, source!);
+        case "PATCH:update_many":
+          return await URPC.handleUpdateMany(request, repo, entity, source!);
+        case "POST:upsert":
+          return await URPC.handleUpsert(request, repo, entity, source!);
         case "DELETE:delete":
           return await URPC.handleDelete(request, repo, entity, source!);
         case "POST:call":
@@ -332,6 +338,37 @@ export class URPC {
     }
   }
 
+  private static async handleCreateMany(
+    request: NextRequest,
+    repo: Repository<any>,
+    entity: string,
+    source: string
+  ): Promise<NextResponse> {
+    try {
+      const body = (await request.json()) as { data?: any[] };
+      if (!body.data || !Array.isArray(body.data)) {
+        return NextResponse.json(
+          { error: "data field is required and must be an array" },
+          { status: 400 }
+        );
+      }
+
+      const result = await repo.createMany(
+        {
+          data: body.data,
+        },
+        {
+          entity,
+          source,
+        }
+      );
+
+      return NextResponse.json({ data: result }, { status: 201 });
+    } catch (error) {
+      return handleError(error);
+    }
+  }
+
   private static async handleUpdate(
     request: NextRequest,
     repo: Repository<any>,
@@ -359,6 +396,71 @@ export class URPC {
       );
 
       return NextResponse.json({ data: result });
+    } catch (error) {
+      return handleError(error);
+    }
+  }
+
+  private static async handleUpdateMany(
+    request: NextRequest,
+    repo: Repository<any>,
+    entity: string,
+    source: string
+  ): Promise<NextResponse> {
+    try {
+      const body = (await request.json()) as { where?: any; data?: any };
+      if (!body.where || !body.data) {
+        return NextResponse.json(
+          { error: "where and data fields are required" },
+          { status: 400 }
+        );
+      }
+
+      const result = await repo.updateMany(
+        {
+          where: body.where,
+          data: body.data,
+        },
+        {
+          entity,
+          source,
+        }
+      );
+
+      return NextResponse.json({ data: result });
+    } catch (error) {
+      return handleError(error);
+    }
+  }
+
+  private static async handleUpsert(
+    request: NextRequest,
+    repo: Repository<any>,
+    entity: string,
+    source: string
+  ): Promise<NextResponse> {
+    try {
+      const body = (await request.json()) as { where?: any; update?: any; create?: any };
+      if (!body.where || !body.update || !body.create) {
+        return NextResponse.json(
+          { error: "where, update, and create fields are required" },
+          { status: 400 }
+        );
+      }
+
+      const result = await repo.upsert(
+        {
+          where: body.where,
+          update: body.update,
+          create: body.create,
+        },
+        {
+          entity,
+          source,
+        }
+      );
+
+      return NextResponse.json({ data: result }, { status: 201 });
     } catch (error) {
       return handleError(error);
     }

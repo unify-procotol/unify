@@ -3,10 +3,13 @@ import {
   FindManyArgs,
   FindOneArgs,
   CreationArgs,
+  CreateManyArgs,
   UpdateArgs,
+  UpdateManyArgs,
   DeletionArgs,
+  UpsertArgs,
 } from "@unilab/urpc-core";
-import { matchesWhere, processFindManyArgs } from "../utils";
+import { matchesWhere, processFindManyArgs, performUpsert } from "../utils";
 
 export class IndexedDBAdapter<
   T extends Record<string, any>,
@@ -149,6 +152,47 @@ export class IndexedDBAdapter<
     });
   }
 
+  async createMany(args: CreateManyArgs<T>): Promise<T[]> {
+    const store = await this.getStore("readwrite");
+    const newItems = args.data.map(
+      (data) =>
+        ({
+          ...data,
+        }) as unknown as T
+    );
+
+    return new Promise((resolve, reject) => {
+      const results: T[] = [];
+      let completed = 0;
+
+      if (newItems.length === 0) {
+        resolve([]);
+        return;
+      }
+
+      newItems.forEach((item, index) => {
+        const request = store.add(item);
+
+        request.onsuccess = () => {
+          results[index] = item;
+          completed++;
+
+          if (completed === newItems.length) {
+            resolve(results);
+          }
+        };
+
+        request.onerror = () => {
+          reject(
+            new Error(
+              `Failed to create item ${index}: ${request.error?.message}`
+            )
+          );
+        };
+      });
+    });
+  }
+
   async update(args: UpdateArgs<T>): Promise<T> {
     const existing = await this.findOne({ where: args.where });
     if (!existing) {
@@ -172,6 +216,61 @@ export class IndexedDBAdapter<
         reject(new Error(`Failed to update item: ${request.error?.message}`));
       };
     });
+  }
+
+  async updateMany(args: UpdateManyArgs<T>): Promise<T[]> {
+    const allItems = await this.getAllItems();
+    const itemsToUpdate = allItems.filter((item) =>
+      matchesWhere(item, args.where)
+    );
+
+    if (itemsToUpdate.length === 0) {
+      return [];
+    }
+
+    const store = await this.getStore("readwrite");
+    const updatedItems = itemsToUpdate.map(
+      (item) =>
+        ({
+          ...item,
+          ...args.data,
+        }) as T
+    );
+
+    return new Promise((resolve, reject) => {
+      const results: T[] = [];
+      let completed = 0;
+
+      updatedItems.forEach((item, index) => {
+        const request = store.put(item);
+
+        request.onsuccess = () => {
+          results[index] = item;
+          completed++;
+
+          if (completed === updatedItems.length) {
+            resolve(results);
+          }
+        };
+
+        request.onerror = () => {
+          reject(
+            new Error(
+              `Failed to update item ${index}: ${request.error?.message}`
+            )
+          );
+        };
+      });
+    });
+  }
+
+  async upsert(args: UpsertArgs<T>): Promise<T> {
+    return performUpsert(
+      args,
+      this.findOne.bind(this),
+      this.update.bind(this),
+      this.create.bind(this)
+    );
   }
 
   async delete(args: DeletionArgs<T>): Promise<boolean> {

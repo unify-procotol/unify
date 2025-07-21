@@ -1,6 +1,7 @@
 import {
   CallArgs,
   CreationArgs,
+  CreateManyArgs,
   DataSourceAdapter,
   DeletionArgs,
   FindManyArgs,
@@ -8,6 +9,8 @@ import {
   PageRouterStreamResponse,
   ReqCtx,
   UpdateArgs,
+  UpdateManyArgs,
+  UpsertArgs,
 } from "./types";
 import { URPCError, ErrorCodes } from "./error";
 
@@ -23,7 +26,16 @@ export class BaseAdapter<T extends Record<string, any>>
   async create(args: CreationArgs<T>): Promise<T> {
     throw new URPCError(ErrorCodes.NOT_FOUND, "Method not implemented.");
   }
+  async createMany(args: CreateManyArgs<T>): Promise<T[]> {
+    throw new URPCError(ErrorCodes.NOT_FOUND, "Method not implemented.");
+  }
   async update(args: UpdateArgs<T>): Promise<T> {
+    throw new URPCError(ErrorCodes.NOT_FOUND, "Method not implemented.");
+  }
+  async updateMany(args: UpdateManyArgs<T>): Promise<T[]> {
+    throw new URPCError(ErrorCodes.NOT_FOUND, "Method not implemented.");
+  }
+  async upsert(args: UpsertArgs<T>): Promise<T> {
     throw new URPCError(ErrorCodes.NOT_FOUND, "Method not implemented.");
   }
   async delete(args: DeletionArgs<T>): Promise<boolean> {
