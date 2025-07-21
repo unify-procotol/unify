@@ -3,7 +3,9 @@ import {
   FindManyArgs,
   FindOneArgs,
   CreationArgs,
+  CreateManyArgs,
   UpdateArgs,
+  UpdateManyArgs,
   DeletionArgs,
   UpsertArgs,
 } from "@unilab/urpc-core";
@@ -96,6 +98,17 @@ export class LocalStorageAdapter<
     return newItem;
   }
 
+  async createMany(args: CreateManyArgs<T>): Promise<T[]> {
+    const items = this.getItems();
+    const newItems = args.data.map(data => ({
+      ...data,
+    } as unknown as T));
+
+    items.push(...newItems);
+    this.setItems(items);
+    return newItems;
+  }
+
   async update(args: UpdateArgs<T>): Promise<T> {
     const items = this.getItems();
     const index = items.findIndex((item) => matchesWhere(item, args.where));
@@ -112,6 +125,29 @@ export class LocalStorageAdapter<
     items[index] = updatedItem;
     this.setItems(items);
     return updatedItem;
+  }
+
+  async updateMany(args: UpdateManyArgs<T>): Promise<T[]> {
+    const items = this.getItems();
+    const updatedItems: T[] = [];
+    
+    for (let i = 0; i < items.length; i++) {
+      if (matchesWhere(items[i], args.where)) {
+        const updatedItem = {
+          ...items[i],
+          ...args.data,
+        } as T;
+        
+        items[i] = updatedItem;
+        updatedItems.push(updatedItem);
+      }
+    }
+    
+    if (updatedItems.length > 0) {
+      this.setItems(items);
+    }
+    
+    return updatedItems;
   }
 
   async delete(args: DeletionArgs<T>): Promise<boolean> {

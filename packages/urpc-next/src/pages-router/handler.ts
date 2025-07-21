@@ -215,8 +215,14 @@ export class URPC {
           return await this.handleFindOne(req, res, repo, entity, source!);
         case "POST:create":
           return await this.handleCreate(req, res, repo, entity, source!);
+        case "POST:create_many":
+          return await this.handleCreateMany(req, res, repo, entity, source!);
         case "PATCH:update":
           return await this.handleUpdate(req, res, repo, entity, source!);
+        case "PATCH:update_many":
+          return await this.handleUpdateMany(req, res, repo, entity, source!);
+        case "POST:upsert":
+          return await this.handleUpsert(req, res, repo, entity, source!);
         case "DELETE:delete":
           return await this.handleDelete(req, res, repo, entity, source!);
         case "POST:call":
@@ -315,6 +321,37 @@ export class URPC {
     }
   }
 
+  private static async handleCreateMany(
+    req: NextApiRequest,
+    res: NextApiResponse,
+    repo: Repository<any>,
+    entity: string,
+    source: string
+  ): Promise<void> {
+    try {
+      const body = req.body as { data?: any[] };
+      if (!body || !body.data || !Array.isArray(body.data)) {
+        return res.status(400).json({
+          error: "data field is required and must be an array",
+        });
+      }
+
+      const result = await repo.createMany(
+        {
+          data: body.data,
+        },
+        {
+          entity,
+          source,
+        }
+      );
+
+      return res.status(201).json({ data: result });
+    } catch (error) {
+      return handleError(error, res);
+    }
+  }
+
   private static async handleUpdate(
     req: NextApiRequest,
     res: NextApiResponse,
@@ -342,6 +379,71 @@ export class URPC {
       );
 
       return res.status(200).json({ data: result });
+    } catch (error) {
+      return handleError(error, res);
+    }
+  }
+
+  private static async handleUpdateMany(
+    req: NextApiRequest,
+    res: NextApiResponse,
+    repo: Repository<any>,
+    entity: string,
+    source: string
+  ): Promise<void> {
+    try {
+      const body = req.body as { where?: any; data?: any };
+      if (!body || !body.where || !body.data) {
+        return res.status(400).json({
+          error: "where and data fields are required",
+        });
+      }
+
+      const result = await repo.updateMany(
+        {
+          where: body.where,
+          data: body.data,
+        },
+        {
+          entity,
+          source,
+        }
+      );
+
+      return res.status(200).json({ data: result });
+    } catch (error) {
+      return handleError(error, res);
+    }
+  }
+
+  private static async handleUpsert(
+    req: NextApiRequest,
+    res: NextApiResponse,
+    repo: Repository<any>,
+    entity: string,
+    source: string
+  ): Promise<void> {
+    try {
+      const body = req.body as { where?: any; update?: any; create?: any };
+      if (!body || !body.where || !body.update || !body.create) {
+        return res.status(400).json({
+          error: "where, update, and create fields are required",
+        });
+      }
+
+      const result = await repo.upsert(
+        {
+          where: body.where,
+          update: body.update,
+          create: body.create,
+        },
+        {
+          entity,
+          source,
+        }
+      );
+
+      return res.status(201).json({ data: result });
     } catch (error) {
       return handleError(error, res);
     }

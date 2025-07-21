@@ -2,7 +2,10 @@ import type {
   FindManyArgs,
   FindOneArgs,
   CreationArgs,
+  CreateManyArgs,
   UpdateArgs,
+  UpdateManyArgs,
+  UpsertArgs,
   DeletionArgs,
   EntityConfigs,
   CallArgs,
@@ -17,7 +20,10 @@ import {
   executeLocalFindMany,
   executeLocalFindOne,
   executeLocalCreate,
+  executeLocalCreateMany,
   executeLocalUpdate,
+  executeLocalUpdateMany,
+  executeLocalUpsert,
   executeLocalDelete,
   executeLocalCall,
   shouldFallbackToHttp,
@@ -100,6 +106,20 @@ export function createHttpRepositoryProxy<T extends Record<string, any>>(
             return createEntityInstance(entity, result);
           };
 
+        case "createMany":
+          return async (args: CreateManyArgs<T>) => {
+            const result = await makeHttpRequest<T[]>(
+              {
+                method: "POST",
+                url: `/${entityName}/create_many`,
+                params: { source, context },
+                data: { data: args.data },
+              },
+              httpConfig
+            );
+            return createEntityInstances(entity, result);
+          };
+
         case "update":
           return async (args: UpdateArgs<T>) => {
             const result = await makeHttpRequest<T>(
@@ -110,6 +130,41 @@ export function createHttpRepositoryProxy<T extends Record<string, any>>(
                 data: {
                   where: args.where,
                   data: args.data,
+                },
+              },
+              httpConfig
+            );
+            return createEntityInstance(entity, result);
+          };
+
+        case "updateMany":
+          return async (args: UpdateManyArgs<T>) => {
+            const result = await makeHttpRequest<T[]>(
+              {
+                method: "PATCH",
+                url: `/${entityName}/update_many`,
+                params: { source, context },
+                data: {
+                  where: args.where,
+                  data: args.data,
+                },
+              },
+              httpConfig
+            );
+            return createEntityInstances(entity, result);
+          };
+
+        case "upsert":
+          return async (args: UpsertArgs<T>) => {
+            const result = await makeHttpRequest<T>(
+              {
+                method: "POST",
+                url: `/${entityName}/upsert`,
+                params: { source, context },
+                data: {
+                  where: args.where,
+                  update: args.update,
+                  create: args.create,
                 },
               },
               httpConfig
@@ -229,9 +284,27 @@ export function createLocalRepositoryProxy<T extends Record<string, any>>(
             return createEntityInstance(entity, result);
           };
 
+        case "createMany":
+          return async (args: CreateManyArgs<T>) => {
+            const result = await executeLocalCreateMany(args, entityName, source);
+            return createEntityInstances(entity, result);
+          };
+
         case "update":
           return async (args: UpdateArgs<T>) => {
             const result = await executeLocalUpdate(args, entityName, source);
+            return createEntityInstance(entity, result);
+          };
+
+        case "updateMany":
+          return async (args: UpdateManyArgs<T>) => {
+            const result = await executeLocalUpdateMany(args, entityName, source);
+            return createEntityInstances(entity, result);
+          };
+
+        case "upsert":
+          return async (args: UpsertArgs<T>) => {
+            const result = await executeLocalUpsert(args, entityName, source);
             return createEntityInstance(entity, result);
           };
 
@@ -407,6 +480,39 @@ export function createHybridRepositoryProxy<T extends Record<string, any>>(
             }
           };
 
+        case "createMany":
+          return async (args: CreateManyArgs<T>) => {
+            if (!shouldFallbackToHttp(entityName, source)) {
+              try {
+                const localResult = await executeLocalCreateMany(
+                  args,
+                  entityName,
+                  source!
+                );
+                return createEntityInstances(entity, localResult);
+              } catch (error) {
+                console.warn(`Local createMany failed for ${entityName}:`, error);
+                throw error;
+              }
+            }
+
+            try {
+              const httpResult = await makeHttpRequest<T[]>(
+                {
+                  method: "POST",
+                  url: `/${entityName}/create_many`,
+                  params: { source, context },
+                  data: { data: args.data },
+                },
+                httpConfig
+              );
+              return createEntityInstances(entity, httpResult);
+            } catch (httpError) {
+              logHttpFallbackWarning(entityName, "createMany", httpError);
+              throw httpError;
+            }
+          };
+
         case "update":
           return async (args: UpdateArgs<T>) => {
             if (!shouldFallbackToHttp(entityName, source)) {
@@ -439,6 +545,79 @@ export function createHybridRepositoryProxy<T extends Record<string, any>>(
               return createEntityInstance(entity, httpResult);
             } catch (httpError) {
               logHttpFallbackWarning(entityName, "update", httpError);
+              throw httpError;
+            }
+          };
+
+        case "updateMany":
+          return async (args: UpdateManyArgs<T>) => {
+            if (!shouldFallbackToHttp(entityName, source)) {
+              try {
+                const localResult = await executeLocalUpdateMany(
+                  args,
+                  entityName,
+                  source!
+                );
+                return createEntityInstances(entity, localResult);
+              } catch (error) {
+                console.warn(`Local updateMany failed for ${entityName}:`, error);
+                throw error;
+              }
+            }
+
+            try {
+              const httpResult = await makeHttpRequest<T[]>(
+                {
+                  method: "PATCH",
+                  url: `/${entityName}/update_many`,
+                  params: { source, context },
+                  data: {
+                    where: args.where,
+                    data: args.data,
+                  },
+                },
+                httpConfig
+              );
+              return createEntityInstances(entity, httpResult);
+            } catch (httpError) {
+              logHttpFallbackWarning(entityName, "updateMany", httpError);
+              throw httpError;
+            }
+          };
+
+        case "upsert":
+          return async (args: UpsertArgs<T>) => {
+            if (!shouldFallbackToHttp(entityName, source)) {
+              try {
+                const localResult = await executeLocalUpsert(
+                  args,
+                  entityName,
+                  source!
+                );
+                return createEntityInstance(entity, localResult);
+              } catch (error) {
+                console.warn(`Local upsert failed for ${entityName}:`, error);
+                throw error;
+              }
+            }
+
+            try {
+              const httpResult = await makeHttpRequest<T>(
+                {
+                  method: "POST",
+                  url: `/${entityName}/upsert`,
+                  params: { source, context },
+                  data: {
+                    where: args.where,
+                    update: args.update,
+                    create: args.create,
+                  },
+                },
+                httpConfig
+              );
+              return createEntityInstance(entity, httpResult);
+            } catch (httpError) {
+              logHttpFallbackWarning(entityName, "upsert", httpError);
               throw httpError;
             }
           };

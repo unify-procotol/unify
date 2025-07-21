@@ -6,7 +6,10 @@ import type {
   FindManyArgs,
   FindOneArgs,
   CreationArgs,
+  CreateManyArgs,
   UpdateArgs,
+  UpdateManyArgs,
+  UpsertArgs,
   DeletionArgs,
   CallArgs,
 } from "@unilab/urpc-core";
@@ -37,7 +40,10 @@ export interface ProxyRepo<T extends Record<string, any>> {
   findMany(args?: FindManyArgs<T>): Promise<T[]>;
   findOne(args: FindOneArgs<T>): Promise<T | null>;
   create(args: CreationArgs<T>): Promise<T>;
+  createMany(args: CreateManyArgs<T>): Promise<T[]>;
   update(args: UpdateArgs<T>): Promise<T>;
+  updateMany(args: UpdateManyArgs<T>): Promise<T[]>;
+  upsert(args: UpsertArgs<T>): Promise<T>;
   delete(args: DeletionArgs<T>): Promise<boolean>;
   call(args: CallArgs<T>): Promise<T | Response>;
 }

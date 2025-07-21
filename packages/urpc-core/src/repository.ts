@@ -1,11 +1,14 @@
 import { getGlobalMiddlewareManager } from "./middleware-manager";
 import type {
   CreationArgs,
+  CreateManyArgs,
   DataSourceAdapter,
   DeletionArgs,
   FindManyArgs,
   FindOneArgs,
   UpdateArgs,
+  UpdateManyArgs,
+  UpsertArgs,
   MiddlewareMetadata,
   CallArgs,
   ReqCtx,
@@ -68,6 +71,22 @@ export class Repository<T extends Record<string, any>> {
     );
   }
 
+  async createMany(
+    args: CreateManyArgs<T>,
+    metadata?: MiddlewareMetadata
+  ): Promise<T[]> {
+    return getGlobalMiddlewareManager().execute(
+      {
+        args,
+        operation: "createMany",
+        metadata: metadata,
+      },
+      async () => {
+        return this.adapter.createMany(args);
+      }
+    );
+  }
+
   async update(args: UpdateArgs<T>, metadata?: MiddlewareMetadata): Promise<T> {
     return getGlobalMiddlewareManager().execute(
       {
@@ -77,6 +96,38 @@ export class Repository<T extends Record<string, any>> {
       },
       async () => {
         return this.adapter.update(args);
+      }
+    );
+  }
+
+  async updateMany(
+    args: UpdateManyArgs<T>,
+    metadata?: MiddlewareMetadata
+  ): Promise<T[]> {
+    return getGlobalMiddlewareManager().execute(
+      {
+        args,
+        operation: "updateMany",
+        metadata: metadata,
+      },
+      async () => {
+        return this.adapter.updateMany(args);
+      }
+    );
+  }
+
+  async upsert(
+    args: UpsertArgs<T>,
+    metadata?: MiddlewareMetadata
+  ): Promise<T> {
+    return getGlobalMiddlewareManager().execute(
+      {
+        args,
+        operation: "upsert",
+        metadata: metadata,
+      },
+      async () => {
+        return this.adapter.upsert(args);
       }
     );
   }

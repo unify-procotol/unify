@@ -3,7 +3,9 @@ import {
   FindManyArgs,
   FindOneArgs,
   CreationArgs,
+  CreateManyArgs,
   UpdateArgs,
+  UpdateManyArgs,
   DeletionArgs,
   UpsertArgs,
 } from "@unilab/urpc-core";
@@ -91,6 +93,17 @@ export class MockAdapter<T extends Record<string, any>> extends BaseAdapter<T> {
     return newItem;
   }
 
+  async createMany(args: CreateManyArgs<T>): Promise<T[]> {
+    await this.simulateDelay();
+    this.simulateError();
+    const newItems = args.data.map(data => ({
+      ...data,
+    } as unknown as T));
+
+    this.items.push(...newItems);
+    return newItems;
+  }
+
   async update(args: UpdateArgs<T>): Promise<T> {
     await this.simulateDelay();
     this.simulateError();
@@ -108,6 +121,26 @@ export class MockAdapter<T extends Record<string, any>> extends BaseAdapter<T> {
 
     this.items[index] = updatedItem;
     return updatedItem;
+  }
+
+  async updateMany(args: UpdateManyArgs<T>): Promise<T[]> {
+    await this.simulateDelay();
+    this.simulateError();
+    const updatedItems: T[] = [];
+    
+    for (let i = 0; i < this.items.length; i++) {
+      if (matchesWhere(this.items[i], args.where)) {
+        const updatedItem = {
+          ...this.items[i],
+          ...args.data,
+        } as T;
+        
+        this.items[i] = updatedItem;
+        updatedItems.push(updatedItem);
+      }
+    }
+    
+    return updatedItems;
   }
 
   async delete(args: DeletionArgs<T>): Promise<boolean> {

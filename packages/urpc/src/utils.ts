@@ -2,7 +2,10 @@ import type {
   FindManyArgs,
   FindOneArgs,
   CreationArgs,
+  CreateManyArgs,
   UpdateArgs,
+  UpdateManyArgs,
+  UpsertArgs,
   DeletionArgs,
   CallArgs,
 } from "@unilab/urpc-core";
@@ -319,6 +322,22 @@ export async function executeLocalCreate<T extends Record<string, any>>(
   });
 }
 
+export async function executeLocalCreateMany<T extends Record<string, any>>(
+  args: CreateManyArgs<T>,
+  entityName: string,
+  source: string
+): Promise<T[]> {
+  const repo = getRepo(entityName, source);
+  if (!repo) {
+    throw new Error(`Unknown data source: ${source} for entity ${entityName}`);
+  }
+
+  return await repo.createMany(args, {
+    entity: entityName,
+    source,
+  });
+}
+
 export async function executeLocalUpdate<T extends Record<string, any>>(
   args: UpdateArgs<T>,
   entityName: string,
@@ -330,6 +349,38 @@ export async function executeLocalUpdate<T extends Record<string, any>>(
   }
 
   return await repo.update(args, {
+    entity: entityName,
+    source,
+  });
+}
+
+export async function executeLocalUpdateMany<T extends Record<string, any>>(
+  args: UpdateManyArgs<T>,
+  entityName: string,
+  source: string
+): Promise<T[]> {
+  const repo = getRepo(entityName, source);
+  if (!repo) {
+    throw new Error(`Unknown data source: ${source} for entity ${entityName}`);
+  }
+
+  return await repo.updateMany(args, {
+    entity: entityName,
+    source,
+  });
+}
+
+export async function executeLocalUpsert<T extends Record<string, any>>(
+  args: UpsertArgs<T>,
+  entityName: string,
+  source: string
+): Promise<T> {
+  const repo = getRepo(entityName, source);
+  if (!repo) {
+    throw new Error(`Unknown data source: ${source} for entity ${entityName}`);
+  }
+
+  return await repo.upsert(args, {
     entity: entityName,
     source,
   });
