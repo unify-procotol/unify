@@ -2,8 +2,8 @@ import { Logging } from "@unilab/urpc-core/middleware";
 import { URPC, URPCAPI } from "@unilab/urpc-next/app-router";
 import { MastraPlugin } from "@unilab/mastra-plugin/next-app-router";
 import { Plugin } from "@unilab/urpc-core";
-import { UserEntity } from "@/entities/user";
-import { PostEntity } from "@/entities/post";
+import { UserEntity } from "./entities/user";
+import { PostEntity } from "./entities/post";
 import { MockAdapter } from "@unilab/urpc-adapters";
 import { WalletPlugin } from "@unilab/uniweb3";
 
@@ -16,8 +16,8 @@ export function getAPI() {
 
     api = URPC.init({
       plugins: [
-        WalletPlugin,
         DataPlugin,
+        WalletPlugin,
         MastraPlugin({
           defaultModel: "google/gemini-2.0-flash-001",
           openrouterApiKey: process.env.OPENROUTER_API_KEY,

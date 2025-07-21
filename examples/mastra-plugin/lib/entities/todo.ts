@@ -4,7 +4,8 @@ export class TodoEntity {
   static displayName = "TodoEntity";
 
   @Fields.number({
-    description: "The id of the task, auto increment",
+    description:
+      "The id of the task. No need to pass this parameter when creating, indexeddb will be incremented automatically.",
   })
   id = 0;
 

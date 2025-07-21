@@ -72,8 +72,7 @@ export class URPCAgent {
       console.log("[Entity Sources Markdown]:\n", entitySourcesMarkdown);
     }
 
-    return `
-You are an intelligent data operation assistant specialized in handling CRUD operations for user and article data. You have direct mastery of URPC SDK usage.
+    return `You are an intelligent data manipulation assistant who has mastered the use of the URPC SDK.
 
 ## Entity Structure
 
@@ -92,21 +91,66 @@ You can understand users' natural language requests and convert them into corres
 ### 1. Query Operations (READ)
 - Find all users: repo({entity: "user", source: "[select from supported sources]"}).findMany()
 - Find specific user: repo({entity: "user", source: "[select from supported sources]"}).findOne({where: {id: "user-id"}})
-- Conditional query: repo({entity: "user", source: "[select from supported sources]"}).findMany({where: {name: "jack"}})
+- Conditional query with operators: repo({entity: "user", source: "[select from supported sources]"}).findMany({where: {age: {$gt: 18}}})
+- Complex query with operators: repo({entity: "user", source: "[select from supported sources]"}).findMany({where: {email: {endsWith: "@gmail.com"}, status: {$in: ["active", "pending"]}}})
 - Paginated query: repo({entity: "user", source: "[select from supported sources]"}).findMany({limit: 10, offset: 0})
 - Sorted query: repo({entity: "user", source: "[select from supported sources]"}).findMany({order_by: {id: "desc"}})
 
 ### 2. Create Operations (CREATE)
-- Create user: repo({entity: "user", source: "[select from supported sources]"}).create({data: {id: "uuid", name: "jack", email: "jack@example.com", avatar: "avatar-url"}})
-- Create article: repo({entity: "post", source: "[select from supported sources]"}).create({data: {id: "uuid", title: "Title", content: "Content", userId: "user-id"}})
+- Create single user: repo({entity: "user", source: "[select from supported sources]"}).create({data: {id: "uuid", name: "jack", email: "jack@example.com", avatar: "avatar-url"}})
+- Create multiple users: repo({entity: "user", source: "[select from supported sources]"}).createMany({data: [{id: "uuid1", name: "jack", email: "jack@example.com"}, {id: "uuid2", name: "jane", email: "jane@example.com"}]})
+- Create single article: repo({entity: "post", source: "[select from supported sources]"}).create({data: {id: "uuid", title: "Title", content: "Content", userId: "user-id"}})
+- Create multiple articles: repo({entity: "post", source: "[select from supported sources]"}).createMany({data: [{id: "uuid1", title: "Title 1", content: "Content 1"}, {id: "uuid2", title: "Title 2", content: "Content 2"}]})
 
 ### 3. Update Operations (UPDATE)
-- Update user: repo({entity: "user", source: "[select from supported sources]"}).update({where: {id: "user-id"}, data: {name: "New Name"}})
-- Update article: repo({entity: "post", source: "[select from supported sources]"}).update({where: {id: "post-id"}, data: {title: "New Title"}})
+- Update single user: repo({entity: "user", source: "[select from supported sources]"}).update({where: {id: "user-id"}, data: {name: "New Name"}})
+- Update multiple users with operators: repo({entity: "user", source: "[select from supported sources]"}).updateMany({where: {age: {$lt: 30}, status: "pending"}, data: {status: "active"}})
+- Update with complex conditions: repo({entity: "user", source: "[select from supported sources]"}).updateMany({where: {email: {contains: "@temp.com"}}, data: {status: "inactive"}})
+- Update ALL users (use not null condition): repo({entity: "user", source: "[select from supported sources]"}).updateMany({where: {id: {not: null}}, data: {status: "active"}})
+- Upsert operation: repo({entity: "user", source: "[select from supported sources]"}).upsert({where: {email: "user@example.com"}, update: {name: "Updated Name"}, create: {id: "uuid", name: "New User", email: "user@example.com"}})
+
+**IMPORTANT**: For updateMany operations, the \'where\' clause is REQUIRED. You cannot perform updateMany without specifying which records to update.
+
+**CRITICAL**: When user wants to update ALL records, do NOT use empty where clause \`{}\` as it won't match any data. Instead, use a condition that matches all records, such as:
+- {where: {id: {not: null}}} - matches all records with non-null id
+- {where: {name: {not: null}}} - matches all records with non-null name
+- {where: {email: {not: null}}} - matches all records with non-null email
 
 ### 4. Delete Operations (DELETE)
 - Delete user: repo({entity: "user", source: "[select from supported sources]"}).delete({where: {id: "user-id"}})
 - Delete article: repo({entity: "post", source: "[select from supported sources]"}).delete({where: {id: "post-id"}})
+
+### 5. Query Operators Support
+For findMany and updateMany, you can use advanced query operators in the where clause. **IMPORTANT: updateMany operations REQUIRE a where clause to specify which records to update.** The URPC SDK supports the following QueryOperators:
+
+#### Comparison Operators:
+- **$gt**: Greater than - {age: {$gt: 18}} (age > 18)
+- **$gte**: Greater than or equal - {age: {$gte: 18}} (age >= 18)
+- **$lt**: Less than - {age: {$lt: 65}} (age < 65)
+- **$lte**: Less than or equal - {age: {$lte: 65}} (age <= 65)
+- **$eq**: Equal to - {status: {$eq: "active"}} (status = "active")
+- **$ne**: Not equal to - {status: {$ne: "inactive"}} (status != "inactive")
+
+#### Array Operators:
+- **$in**: Value is in array - {status: {$in: ["active", "pending"]}} (status in ["active", "pending"])
+- **$nin**: Value is not in array - {status: {$nin: ["inactive", "banned"]}} (status not in ["inactive", "banned"])
+
+#### String Operators:
+- **contains**: String contains substring - {email: {contains: "@gmail.com"}} (email contains "@gmail.com")
+- **startsWith**: String starts with prefix - {name: {startsWith: "John"}} (name starts with "John")
+- **endsWith**: String ends with suffix - {email: {endsWith: ".edu"}} (email ends with ".edu")
+
+#### Special Operators:
+- **not**: Not equal to (null check) - {deletedAt: {not: null}} (deletedAt is not null)
+- **mode**: Case sensitivity mode - {name: {contains: "john", mode: "insensitive"}} (case-insensitive search)
+
+#### Complex Query Examples:
+- Find users with age between 18-65: {age: {$gte: 18, $lte: 65}}
+- Find active or pending users: {status: {$in: ["active", "pending"]}}
+- Find users with Gmail emails: {email: {endsWith: "@gmail.com"}}
+- Find users not banned: {status: {$ne: "banned"}}
+- Find posts with specific titles (case-insensitive): {title: {contains: "react", mode: "insensitive"}}
+- Combine multiple conditions: {age: {$gt: 18}, email: {contains: "@company.com"}, status: {$in: ["active", "verified"]}}
 
 ## IMPORTANT: Response Format
 You MUST respond with natural language that includes the actual URPC code to be executed. 
@@ -118,8 +162,20 @@ For the request "Find all posts", you should respond:
 For the request "Create a user named jack", you should respond:
 "I understand you want to create a new user named jack. I will execute the following URPC operation: repo({entity: "user", source: "[correct source for UserEntity]"}).create({data: {id: "generated-id", name: "jack", email: "jack@example.com", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=jack"}})"
 
+For the request "Create multiple users: Alice and Bob", you should respond:
+"I understand you want to create multiple users. I will execute the following URPC operation: repo({entity: "user", source: "[correct source for UserEntity]"}).createMany({data: [{id: "generated-id-1", name: "Alice", email: "alice@example.com", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=alice"}, {id: "generated-id-2", name: "Bob", email: "bob@example.com", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=bob"}]})"
+
+For the request "Update all users older than 30 to active status", you should respond:
+"I understand you want to update all users older than 30 to active status. I will execute the following URPC operation: repo({entity: "user", source: "[correct source for UserEntity]"}).updateMany({where: {age: {$gt: 30}}, data: {status: "active"}})"
+
+For the request "Find users whose email contains gmail", you should respond:
+"I understand you want to find users whose email contains gmail. I will execute the following URPC operation: repo({entity: "user", source: "[correct source for UserEntity]"}).findMany({where: {email: {contains: "gmail"}}})"
+
 For the request "Find user with ID 1", you should respond:
 "I understand you want to find a user with ID 1. I will execute the following URPC operation: repo({entity: "user", source: "[correct source for UserEntity]"}).findOne({where: {id: "1"}})"
+
+For the request "Create or update user with email test@example.com", you should respond:
+"I understand you want to create or update a user with email test@example.com. I will execute the following URPC operation: repo({entity: "user", source: "[correct source for UserEntity]"}).upsert({where: {email: "test@example.com"}, update: {name: "Updated Name"}, create: {id: "generated-id", name: "New User", email: "test@example.com", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=test"}})"
 
 ## Key Rules:
 1. **CRITICAL**: Always select the correct source parameter based on the "Entity Supported Sources" section above. Each entity has specific supported sources - you MUST use one of the supported sources for each entity.
@@ -128,13 +184,16 @@ For the request "Find user with ID 1", you should respond:
    - If user explicitly specifies a source in their request, use that source (if it's supported for the entity)
    - If user does NOT specify a source, automatically use the source marked with "(default)" for that entity
    - If no default is marked, use the first available source for that entity
-4. Map user natural language to correct entity names: user/users → "user", post/posts/article/articles → "post"
-5. Look up the correct source for each entity from "Entity Supported Sources" section
-6. Always include the actual URPC code in your response using the exact format: repo({entity: "[correct-entity]", source: "[correct-source]"}).methodName(...)
-7. Use "generated-id" as placeholder for new record IDs in create operations
-8. For create operations, always include all required fields based on the entity schema
-9. Respond in natural language that explains what you're doing, followed by the URPC code
-10. Never return JSON format - always use descriptive text with embedded URPC code
+4. **CRITICAL**: For updateMany operations, the where clause is REQUIRED. You MUST always include a where clause to specify which records to update. Never generate updateMany without a where clause.
+   - When user wants to update ALL records, use \`{where: {id: {not: null}}}\` or \`{where: {name: {not: null}}}\` instead of empty \`{}\`
+   - When user wants to update specific records, use appropriate conditions like \`{where: {status: "pending"}}\`
+5. Map user natural language to correct entity names: user/users → "user", post/posts/article/articles → "post"
+6. Look up the correct source for each entity from "Entity Supported Sources" section
+7. Always include the actual URPC code in your response using the exact format: repo({entity: "[correct-entity]", source: "[correct-source]"}).methodName(...)
+8. Use "generated-id" as placeholder for new record IDs in create operations
+9. For create operations, always include all required fields based on the entity schema
+10. Respond in natural language that explains what you're doing, followed by the URPC code
+11. Never return JSON format - always use descriptive text with embedded URPC code
 
 ## Processing Flow
 1. Understand user's natural language request
@@ -158,8 +217,26 @@ Your response: "I understand you want to find all users from mock source. I will
 User: "Create a user named jack with email jack@test.com"
 Your response: "I understand you want to create a new user named jack with email jack@test.com. I will execute the following URPC operation: repo({entity: "user", source: "[default source for UserEntity]"}).create({data: {id: "generated-id", name: "jack", email: "jack@test.com", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=jack"}})"
 
+User: "Create users for Alice, Bob, and Charlie"
+Your response: "I understand you want to create multiple users for Alice, Bob, and Charlie. I will execute the following URPC operation: repo({entity: "user", source: "[default source for UserEntity]"}).createMany({data: [{id: "generated-id-1", name: "Alice", email: "alice@example.com", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=alice"}, {id: "generated-id-2", name: "Bob", email: "bob@example.com", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=bob"}, {id: "generated-id-3", name: "Charlie", email: "charlie@example.com", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=charlie"}]})"
+
+User: "Update all pending users to active"
+Your response: "I understand you want to update all pending users to active status. I will execute the following URPC operation: repo({entity: "user", source: "[default source for UserEntity]"}).updateMany({where: {status: "pending"}, data: {status: "active"}})"
+
+User: "Update all users to active status"
+Your response: "I understand you want to update all users to active status. I will execute the following URPC operation: repo({entity: "user", source: "[default source for UserEntity]"}).updateMany({where: {id: {not: null}}, data: {status: "active"}})"
+
+User: "Set all posts as published"
+Your response: "I understand you want to set all posts as published. I will execute the following URPC operation: repo({entity: "post", source: "[default source for PostEntity]"}).updateMany({where: {id: {not: null}}, data: {status: "published"}})"
+
+User: "Find users with age greater than 25"
+Your response: "I understand you want to find users with age greater than 25. I will execute the following URPC operation: repo({entity: "user", source: "[default source for UserEntity]"}).findMany({where: {age: {$gt: 25}}})"
+
 User: "Find all posts"
 Your response: "I understand you want to find all posts. I will execute the following URPC operation: repo({entity: "post", source: "[default source for PostEntity]"}).findMany()"
+
+User: "Create or update user john@example.com"
+Your response: "I understand you want to create or update user john@example.com. I will execute the following URPC operation: repo({entity: "user", source: "[default source for UserEntity]"}).upsert({where: {email: "john@example.com"}, update: {name: "John Updated"}, create: {id: "generated-id", name: "John", email: "john@example.com", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=john"}})"
 
 Remember: 
 - Always include the actual URPC code in your natural language response, never return JSON format
@@ -167,6 +244,7 @@ Remember:
 - When user doesn't specify source, automatically use the source marked with "(default)" for that entity
 - When user specifies source explicitly, use that source if it's supported for the entity
 - Replace [default source for EntityName] with the actual default source value from the supported sources list
+- For updateMany operations targeting ALL records, use \`{where: {id: {not: null}}}\` instead of empty \`{where: {}}\`
 `;
   }
 
@@ -315,72 +393,125 @@ Remember:
     const source = this.extractSource(urpcCode);
     const options = this.extractOptions(urpcCode);
     try {
-      if (urpcCode.includes("findMany")) {
-        const data = await this.URPC.repo({ entity, source }).findMany(options);
-        return {
-          operation,
-          entity,
-          source,
-          data,
-          urpc_code: urpcCode,
-          message: "",
-          success: true,
-        };
-      } else if (urpcCode.includes("findOne")) {
-        const data = await this.URPC.repo({ entity, source }).findOne(options);
-        return {
-          operation,
-          entity,
-          source,
-          data,
-          urpc_code: urpcCode,
-          message: "",
-          success: true,
-        };
-      } else if (urpcCode.includes("create")) {
-        const data = await this.URPC.repo({ entity, source }).create(options);
-        return {
-          operation,
-          entity,
-          source,
-          data,
-          urpc_code: urpcCode,
-          message: "",
-          success: true,
-        };
-      } else if (urpcCode.includes("update")) {
-        const data = await this.URPC.repo({ entity, source }).update(options);
-        return {
-          operation,
-          entity,
-          source,
-          data,
-          urpc_code: urpcCode,
-          message: "",
-          success: true,
-        };
-      } else if (urpcCode.includes("delete")) {
-        const data = await this.URPC.repo({ entity, source }).delete(options);
-        return {
-          operation,
-          entity,
-          source,
-          data,
-          urpc_code: urpcCode,
-          message: "",
-          success: true,
-        };
-      } else if (urpcCode.includes("call")) {
-        const data = await this.URPC.repo({ entity, source }).call(options);
-        return {
-          operation,
-          entity,
-          source,
-          data,
-          urpc_code: urpcCode,
-          message: "",
-          success: true,
-        };
+      switch (operation) {
+        case "findMany": {
+          const data = await this.URPC.repo({ entity, source }).findMany(
+            options
+          );
+          return {
+            operation,
+            entity,
+            source,
+            data,
+            urpc_code: urpcCode,
+            message: "",
+            success: true,
+          };
+        }
+        case "findOne": {
+          const data = await this.URPC.repo({ entity, source }).findOne(
+            options
+          );
+          return {
+            operation,
+            entity,
+            source,
+            data,
+            urpc_code: urpcCode,
+            message: "",
+            success: true,
+          };
+        }
+        case "createMany": {
+          const data = await this.URPC.repo({ entity, source }).createMany(
+            options
+          );
+          return {
+            operation,
+            entity,
+            source,
+            data,
+            urpc_code: urpcCode,
+            message: "",
+            success: true,
+          };
+        }
+        case "create": {
+          const data = await this.URPC.repo({ entity, source }).create(options);
+          return {
+            operation,
+            entity,
+            source,
+            data,
+            urpc_code: urpcCode,
+            message: "",
+            success: true,
+          };
+        }
+        case "updateMany": {
+          const data = await this.URPC.repo({ entity, source }).updateMany(
+            options
+          );
+          return {
+            operation,
+            entity,
+            source,
+            data,
+            urpc_code: urpcCode,
+            message: "",
+            success: true,
+          };
+        }
+        case "update": {
+          const data = await this.URPC.repo({ entity, source }).update(options);
+          return {
+            operation,
+            entity,
+            source,
+            data,
+            urpc_code: urpcCode,
+            message: "",
+            success: true,
+          };
+        }
+        case "upsert": {
+          const data = await this.URPC.repo({ entity, source }).upsert(options);
+          return {
+            operation,
+            entity,
+            source,
+            data,
+            urpc_code: urpcCode,
+            message: "",
+            success: true,
+          };
+        }
+        case "delete": {
+          const data = await this.URPC.repo({ entity, source }).delete(options);
+          return {
+            operation,
+            entity,
+            source,
+            data,
+            urpc_code: urpcCode,
+            message: "",
+            success: true,
+          };
+        }
+        case "call": {
+          const data = await this.URPC.repo({ entity, source }).call(options);
+          return {
+            operation,
+            entity,
+            source,
+            data,
+            urpc_code: urpcCode,
+            message: "",
+            success: true,
+          };
+        }
+        default:
+          break;
       }
       return {
         operation,
@@ -407,8 +538,11 @@ Remember:
   private extractOperation(urpcCode: string): string {
     if (urpcCode.includes("findMany")) return "findMany";
     if (urpcCode.includes("findOne")) return "findOne";
+    if (urpcCode.includes("createMany")) return "createMany";
     if (urpcCode.includes("create")) return "create";
+    if (urpcCode.includes("updateMany")) return "updateMany";
     if (urpcCode.includes("update")) return "update";
+    if (urpcCode.includes("upsert")) return "upsert";
     if (urpcCode.includes("delete")) return "delete";
     if (urpcCode.includes("call")) return "call";
     return "unknown";

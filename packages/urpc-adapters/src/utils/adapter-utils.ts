@@ -18,6 +18,10 @@ export function matchesWhere<T extends Record<string, any>>(
   item: T,
   where: WhereConditionWithOperators<T> | WhereCondition<T>
 ): boolean {
+  if (where && Object.keys(where).length === 0) {
+    return false;
+  }
+
   return Object.entries(where).every(([key, value]) => {
     if (typeof value === "object" && value !== null) {
       // Handle query operators
