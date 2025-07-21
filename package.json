@@ -18,6 +18,8 @@
     "dev:urpc-hono": "cd packages/urpc-hono && bun run dev",
     "build:urpc-next": "cd packages/urpc-next && bun run build",
     "dev:urpc-next": "cd packages/urpc-next && bun run dev",
+    "build:layout-installer": "cd packages/layout-installer && bun run build",
+    "dev:layout-installer": "cd packages/layout-installer && bun run dev",
     "build:urpc": "cd packages/urpc && bun run build",
     "dev:urpc": "cd packages/urpc && bun run dev",
     "build:uniweb3": "cd packages/uniweb3 && bun run build",

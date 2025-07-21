@@ -1,0 +1,58 @@
+{
+  "name": "@unilab/layout-installer",
+  "version": "0.0.1",
+  "description": "Install custom layout components for URPC projects",
+  "main": "dist/index.js",
+  "bin": {
+    "install-layouts": "bin/install-layouts.js",
+    "unilab-layouts": "bin/install-layouts.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "prepublishOnly": "npm run build",
+    "test": "node dist/index.js"
+  },
+  "keywords": [
+    "urpc",
+    "layouts",
+    "components",
+    "installer",
+    "unilab",
+    "react",
+    "tailwindcss",
+    "cli",
+    "interactive"
+  ],
+  "author": "Unilab",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/unify-procotol/unify.git",
+    "directory": "packages/layout-installer"
+  },
+  "homepage": "https://github.com/unify-procotol/unify/tree/main/packages/layout-installer#readme",
+  "bugs": {
+    "url": "https://github.com/unify-procotol/unify/issues"
+  },
+  "dependencies": {
+    "fs-extra": "^11.2.0",
+    "chalk": "^4.1.2",
+    "inquirer": "^8.2.6"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "^11.0.4",
+    "@types/inquirer": "^8.2.10",
+    "typescript": "^5.3.0"
+  },
+  "files": [
+    "dist",
+    "bin",
+    "templates",
+    "README.md",
+    "CHANGELOG.md"
+  ],
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}

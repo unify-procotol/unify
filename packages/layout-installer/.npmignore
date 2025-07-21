@@ -1,0 +1,29 @@
+# Source files
+src/
+*.ts
+!dist/**/*.d.ts
+
+# Development files
+.vscode/
+.idea/
+*.log
+*.tgz
+
+# Test files
+test/
+tests/
+**/*.test.ts
+**/*.test.js
+
+# Documentation (keep README.md)
+docs/
+.github/
+
+# Build tools
+tsconfig.json
+.eslintrc*
+.prettierrc*
+
+# OS files
+.DS_Store
+Thumbs.db 
