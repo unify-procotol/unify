@@ -1,4 +1,4 @@
-import { SchemaObject } from "@unilab/urpc-core";
+import { SchemaObject } from "../decorators";
 
 export interface URPC {
   getEntitySchemas(): Record<string, SchemaObject>;

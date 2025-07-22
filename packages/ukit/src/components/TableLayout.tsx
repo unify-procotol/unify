@@ -148,6 +148,7 @@ export const TableLayout: React.FC<ExtendedLayoutProps> = ({
 
     const startIndex = (adjustedPage - 1) * pageSize;
     const endIndex = Math.min(startIndex + pageSize, filteredData.length);
+    console.log("filteredData=====>", filteredData);
     const paginatedData = filteredData.slice(startIndex, endIndex);
 
     return {

@@ -1,10 +1,10 @@
-import { BaseAdapter, FindManyArgs, FindOneArgs } from "@unilab/urpc-core";
+import { BaseAdapter } from "../../adapter";
+import { FindManyArgs, FindOneArgs } from "../../types";
 import { SchemaEntity } from "../entities/schema";
 import { URPC } from "../type";
 
 export class SchemaAdapter extends BaseAdapter<SchemaEntity> {
   static displayName = "SchemaAdapter";
-
   private urpc: URPC;
 
   constructor(urpc: URPC) {
@@ -21,7 +21,6 @@ export class SchemaAdapter extends BaseAdapter<SchemaEntity> {
     const where = args?.where || {};
     const schemas = this.urpc.getEntitySchemas();
     const entity = where.name;
-
     if (entity) {
       const actualEntityName = typeof entity === "string" ? entity : entity.$eq;
       if (actualEntityName) {
@@ -39,7 +38,6 @@ export class SchemaAdapter extends BaseAdapter<SchemaEntity> {
         }
       }
     }
-
     return Object.keys(schemas).map((name) => {
       return {
         name,

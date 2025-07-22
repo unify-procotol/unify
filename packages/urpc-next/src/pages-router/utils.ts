@@ -50,18 +50,21 @@ export function parseQueryParams(request: NextApiRequest) {
     params.offset = offset;
   }
 
+  return params;
+}
+
+export function parseContext(
+  request: NextApiRequest
+): Record<string, any> | undefined {
   const contextParam = Array.isArray(request.query.context)
     ? request.query.context[0]
     : request.query.context;
   if (contextParam) {
     try {
-      params.context = JSON.parse(contextParam);
-    } catch (e) {
-      console.warn("Invalid context parameter", e);
-    }
+      return JSON.parse(contextParam);
+    } catch (e) {}
   }
-
-  return params;
+  return undefined;
 }
 
 export function handleError(error: unknown, res: NextApiResponse) {
@@ -73,19 +76,6 @@ export function handleError(error: unknown, res: NextApiResponse) {
   return res.status(500).json({
     error: error instanceof Error ? error.message : "Unknown error",
   });
-}
-
-export function validateSource(
-  source: string | null | undefined,
-  res: NextApiResponse
-): boolean {
-  if (!source) {
-    res.status(400).json({
-      error: "source parameter is required",
-    });
-    return false;
-  }
-  return true;
 }
 
 export function getSourceFromQuery(request: NextApiRequest): string | null {

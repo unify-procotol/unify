@@ -26,7 +26,7 @@ const isClientSide = () => typeof window !== "undefined";
 const isUrpcInitialized = (): boolean => {
   try {
     // Try to access the global instance to check if URPC is initialized
-    (URPC as any).getGlobalInstance();
+    URPC.getGlobalInstance();
     return true;
   } catch (error) {
     return false;

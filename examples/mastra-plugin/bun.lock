@@ -7,14 +7,14 @@
         "@mastra/core": "^0.10.8",
         "@openrouter/ai-sdk-provider": "^0.7.2",
         "@tailwindcss/postcss": "^4.1.11",
-        "@unilab/mastra-client-plugin": "^0.0.2",
-        "@unilab/mastra-plugin": "^0.0.7",
-        "@unilab/ukit": "^0.0.9",
-        "@unilab/uniweb3": "^0.0.10",
-        "@unilab/urpc": "^0.0.13",
-        "@unilab/urpc-adapters": "^0.0.10",
-        "@unilab/urpc-core": "^0.0.8",
-        "@unilab/urpc-next": "^0.0.13",
+        "@unilab/mastra-client-plugin": "^0.0.3",
+        "@unilab/mastra-plugin": "^0.0.8",
+        "@unilab/ukit": "^0.0.10",
+        "@unilab/uniweb3": "^0.0.11",
+        "@unilab/urpc": "^0.0.14",
+        "@unilab/urpc-adapters": "^0.0.11",
+        "@unilab/urpc-core": "^0.0.9",
+        "@unilab/urpc-next": "^0.0.14",
         "autoprefixer": "^10.4.16",
         "class-variance-authority": "^0.7.0",
         "clsx": "^2.0.0",
@@ -536,23 +536,21 @@
 
     "@ungap/structured-clone": ["@ungap/structured-clone@1.3.0", "", {}, "sha512-WmoN8qaIAo7WTYWbAZuG8PYEhn5fkz7dZrqTBZ7dtt//lL2Gwms1IcnQ5yHqjDfX8Ft5j4YzDM23f87zBfDe9g=="],
 
-    "@unilab/builtin-plugin": ["@unilab/builtin-plugin@0.0.6", "", { "dependencies": { "@unilab/urpc-core": "^0.0.8" } }, "sha512-rbHlwxyZWzGQRbgPR2cuUQnhVFalyvXK9NY7YgJkCfZy+7NgZ4V1sScyLoEPreCm+9OTKSns+dduvOjrwxvrDQ=="],
+    "@unilab/mastra-client-plugin": ["@unilab/mastra-client-plugin@0.0.3", "", { "dependencies": { "@mastra/core": "^0.10.12", "@openrouter/ai-sdk-provider": "^0.7.2", "@unilab/urpc": "^0.0.14", "@unilab/urpc-core": "^0.0.9" } }, "sha512-Zy7k5n229AYw7xEwrE6nCGyRjYDquKP3d6IPU5j1Dgb0Syevy/mW50qVQ+Jxk5/SlhqrtxScU+aFaU1jZI/vkA=="],
 
-    "@unilab/mastra-client-plugin": ["@unilab/mastra-client-plugin@0.0.2", "", { "dependencies": { "@mastra/core": "^0.10.12", "@openrouter/ai-sdk-provider": "^0.7.2", "@unilab/urpc": "^0.0.13", "@unilab/urpc-core": "^0.0.8" } }, "sha512-WL6tzzmrPJyKTHOEPdBaUzuADPIj2vBJoUJoyYkiOFNsOncx5Nk0utZdw0LeJHRxFaIs0+FlhZeGiRo5lp3Exw=="],
+    "@unilab/mastra-plugin": ["@unilab/mastra-plugin@0.0.8", "", { "dependencies": { "@mastra/core": "^0.10.12", "@openrouter/ai-sdk-provider": "^0.7.2", "@unilab/urpc-core": "^0.0.9" } }, "sha512-Qpo9nPnoQFetBiHoWCFPQ2VQRaN6yOrDrRxHO0iTM6k/4lK8M9JqDemL9vooOFTAf7eBbCprr2+6d3p9wWui4A=="],
 
-    "@unilab/mastra-plugin": ["@unilab/mastra-plugin@0.0.7", "", { "dependencies": { "@mastra/core": "^0.10.12", "@openrouter/ai-sdk-provider": "^0.7.2", "@unilab/urpc-core": "^0.0.8" } }, "sha512-alra+tTtHQ7XXR/IoRps/8AQdkU+QbzxGrS5Wq6yt5LQyNz9BWP48qGr/rHV7O+FBeZ56GI/Rbai7wzhm8z+Bg=="],
+    "@unilab/ukit": ["@unilab/ukit@0.0.10", "", { "dependencies": { "@radix-ui/react-alert-dialog": "^1.1.1", "@radix-ui/react-avatar": "^1.1.0", "@radix-ui/react-dialog": "^1.1.14", "@radix-ui/react-dropdown-menu": "^2.1.1", "@radix-ui/react-hover-card": "^1.1.1", "@radix-ui/react-label": "^2.1.7", "@radix-ui/react-menubar": "^1.1.1", "@radix-ui/react-navigation-menu": "^1.2.0", "@radix-ui/react-popover": "^1.1.1", "@radix-ui/react-progress": "^1.1.0", "@radix-ui/react-scroll-area": "^1.1.0", "@radix-ui/react-select": "^2.1.1", "@radix-ui/react-separator": "^1.1.0", "@radix-ui/react-slot": "^1.2.3", "@radix-ui/react-switch": "^1.1.0", "@radix-ui/react-tabs": "^1.1.0", "@radix-ui/react-toast": "^1.2.1", "@radix-ui/react-toggle": "^1.1.0", "@radix-ui/react-tooltip": "^1.1.2", "@unilab/urpc": "^0.0.14", "@unilab/urpc-core": "^0.0.9", "class-variance-authority": "^0.7.0", "clsx": "^2.1.1", "lucide-react": "^0.400.0", "tailwind-merge": "^2.4.0" }, "peerDependencies": { "react": ">=16.8.0", "react-dom": ">=16.8.0", "tailwindcss": ">=4.0.0" } }, "sha512-DBV+fyXANZZm75pCIMzC0YjgXGHMSFfKMMKm6Akd0N7UxdTTEfe1L3tFspHEsW6AbD1yH63FHDmL6+1B94zPEA=="],
 
-    "@unilab/ukit": ["@unilab/ukit@0.0.9", "", { "dependencies": { "@radix-ui/react-alert-dialog": "^1.1.1", "@radix-ui/react-avatar": "^1.1.0", "@radix-ui/react-dialog": "^1.1.14", "@radix-ui/react-dropdown-menu": "^2.1.1", "@radix-ui/react-hover-card": "^1.1.1", "@radix-ui/react-label": "^2.1.7", "@radix-ui/react-menubar": "^1.1.1", "@radix-ui/react-navigation-menu": "^1.2.0", "@radix-ui/react-popover": "^1.1.1", "@radix-ui/react-progress": "^1.1.0", "@radix-ui/react-scroll-area": "^1.1.0", "@radix-ui/react-select": "^2.1.1", "@radix-ui/react-separator": "^1.1.0", "@radix-ui/react-slot": "^1.2.3", "@radix-ui/react-switch": "^1.1.0", "@radix-ui/react-tabs": "^1.1.0", "@radix-ui/react-toast": "^1.2.1", "@radix-ui/react-toggle": "^1.1.0", "@radix-ui/react-tooltip": "^1.1.2", "@unilab/urpc": "^0.0.13", "@unilab/urpc-core": "^0.0.8", "class-variance-authority": "^0.7.0", "clsx": "^2.1.1", "lucide-react": "^0.400.0", "tailwind-merge": "^2.4.0" }, "peerDependencies": { "react": ">=16.8.0", "react-dom": ">=16.8.0", "tailwindcss": ">=4.0.0" } }, "sha512-7nnpz8H0b7m33/o8SPACOO6r3cRRqVHkNpzGYkLbBLSjdZVSy0jIH6Lb5w/WXpRmuQ+TiqYXOinXugnwzk7Gzg=="],
+    "@unilab/uniweb3": ["@unilab/uniweb3@0.0.11", "", { "dependencies": { "@solana/web3.js": "^1.95.2", "@unilab/urpc-core": "^0.0.9", "ethers": "^6.13.2", "reflect-metadata": "^0.2.2" } }, "sha512-vme5Cb8u7wFOeuynFvawWqbLPXKjkZIF8Is1UsUi0KpV6XnPwPPH7UqFefXqwLYPtjaoyhrAM5YLsvkd0VY0EQ=="],
 
-    "@unilab/uniweb3": ["@unilab/uniweb3@0.0.10", "", { "dependencies": { "@solana/web3.js": "^1.95.2", "@unilab/urpc-core": "^0.0.8", "ethers": "^6.13.2", "reflect-metadata": "^0.2.2" } }, "sha512-FewNQkvBwwABabHu1fMHp88KtoGUGGV0izaoAbnCv2cEcyuV8IyFbaZpI07p5R1CquSXxfuacAggs+Jt7zBYXw=="],
+    "@unilab/urpc": ["@unilab/urpc@0.0.14", "", { "dependencies": { "@unilab/urpc-core": "^0.0.9" } }, "sha512-8eXXotdK6bY7DphItO3/6ynOoaBEHFAY0U1GLGxX5ceNb1RD8DUwYOjPip6m7D/S2cVq7WCHZBOuSrtoDQvBPQ=="],
 
-    "@unilab/urpc": ["@unilab/urpc@0.0.13", "", { "dependencies": { "@unilab/builtin-plugin": "^0.0.6", "@unilab/urpc-core": "^0.0.8" } }, "sha512-uwsjKtMxIcKaia+NVxBXawI4cwWuZRiCPbckGjbKNcoi8VNWskgF+UqQFKpQYUhgpDuesjKhu1wC3p+rsQ+pQg=="],
+    "@unilab/urpc-adapters": ["@unilab/urpc-adapters@0.0.11", "", { "dependencies": { "@unilab/urpc-core": "^0.0.9" } }, "sha512-xSKtVgX3Wj6jylHgaXdgskuqHwinM8YQje5U0Sj1jWbkqGQDejyr8SI3PzvbJap97qlUTs2q2uj0p1fYEPs/dQ=="],
 
-    "@unilab/urpc-adapters": ["@unilab/urpc-adapters@0.0.10", "", { "dependencies": { "@unilab/urpc-core": "^0.0.8" } }, "sha512-JFNfqHEqZZX3WVuM+/fpKmq2ogObmG1yMrjWVRJ7wElygWdJJjFb6SqYhx/QjOhQnRmMh+Rd5Lw3SSrjSeJadA=="],
+    "@unilab/urpc-core": ["@unilab/urpc-core@0.0.9", "", { "dependencies": { "reflect-metadata": "^0.2.2" } }, "sha512-0PRX4FdR4cugzUQxdbdseylZrso5Ei81KKse22dY34GROhuhDkLCI8j3z0Nln73vsZQk6uDhhM82MMahlxvG6Q=="],
 
-    "@unilab/urpc-core": ["@unilab/urpc-core@0.0.8", "", { "dependencies": { "reflect-metadata": "^0.2.2" } }, "sha512-elJ+vTly8SwOqHjwHwCAEZ40AR/33FFllDg5hH5UY0T2JfwbDkiORAe0usJ+wTF9PdeKv0Kz9K5PRpi58mvEdA=="],
-
-    "@unilab/urpc-next": ["@unilab/urpc-next@0.0.13", "", { "dependencies": { "@unilab/builtin-plugin": "^0.0.6", "@unilab/urpc-core": "^0.0.8", "next": "^14.0.0" } }, "sha512-DvoHFtnCHNpOwkw6S91GNzkQ4p1A6g5nqc7beHvVPDBzVokV9GiY3ea9SrNvLujblZsfma3R1auu5l9c4KMqdw=="],
+    "@unilab/urpc-next": ["@unilab/urpc-next@0.0.14", "", { "dependencies": { "@unilab/urpc-core": "^0.0.9", "next": "^14.0.0" } }, "sha512-rbXLjg080Y/HEVpb7XxKrVZ5BF8jaWrH9Mo1rYc0xELtOVLhXy18l/d7ROtKTO/4Lm7VzwEqBkF+i3351WXlXw=="],
 
     "@unrs/resolver-binding-android-arm-eabi": ["@unrs/resolver-binding-android-arm-eabi@1.11.1", "", { "os": "android", "cpu": "arm" }, "sha512-ppLRUgHVaGRWUx0R0Ut06Mjo9gBaBkg3v/8AxusGLhsIotbBLuRk51rAzqLC8gq6NyyAojEXglNjzf6R948DNw=="],
 

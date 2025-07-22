@@ -116,10 +116,7 @@ export class Repository<T extends Record<string, any>> {
     );
   }
 
-  async upsert(
-    args: UpsertArgs<T>,
-    metadata?: MiddlewareMetadata
-  ): Promise<T> {
+  async upsert(args: UpsertArgs<T>, metadata?: MiddlewareMetadata): Promise<T> {
     return getGlobalMiddlewareManager().execute(
       {
         args,
@@ -166,6 +163,23 @@ export class Repository<T extends Record<string, any>> {
           stream: reqOptions?.stream,
         });
         return result;
+      }
+    );
+  }
+
+  async customMethod(
+    methodName: string,
+    args: any,
+    metadata?: MiddlewareMetadata
+  ) {
+    return getGlobalMiddlewareManager().execute(
+      {
+        args,
+        operation: methodName,
+        metadata: metadata,
+      },
+      async () => {
+        return this.adapter[methodName](args);
       }
     );
   }

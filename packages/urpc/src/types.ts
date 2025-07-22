@@ -46,6 +46,8 @@ export interface ProxyRepo<T extends Record<string, any>> {
   upsert(args: UpsertArgs<T>): Promise<T>;
   delete(args: DeletionArgs<T>): Promise<boolean>;
   call(args: CallArgs<T>): Promise<T | Response>;
+  // custom methods
+  [key: string]: (args: any) => Promise<any>;
 }
 
 export interface LocalConfig {
