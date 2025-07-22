@@ -1,94 +1,86 @@
 # @unilab/layout-installer
 
-🎨 One-click installer for beautiful URPC layout components
+🎨 shadcn/ui style component registry for beautiful URPC layout components
 
-## Features
+## ✨ New Installation Method
 
-- 📦 **One-click Install**: Quick installation using `npx` commands
-- 🎨 **Multiple Layouts**: 5+ different layout templates available
-- 🔧 **Interactive Setup**: Choose which layout components to install
-- 📂 **Custom Paths**: Configurable installation directory
-- 🚀 **Plug & Play**: Ready to use after installation, no extra setup required
+We've upgraded to use **shadcn/ui's component installation system**! This means you can now install layout components directly using URLs, just like official shadcn/ui components.
 
-## Installation & Usage
+## 🚀 Quick Installation
 
-### Quick Start
-
-Run in your project root directory:
+### Install Individual Components
 
 ```bash
-npx @unilab/layout-installer
+# Install card layout (automatically includes Tailwind CSS dependencies)
+npx shadcn@latest add https://layouts.unilab.dev/r/card-layout.json
+
+# Install blog layout (automatically includes Tailwind CSS dependencies)
+npx shadcn@latest add https://layouts.unilab.dev/r/blog-layout.json
+
+# Install social media layout
+npx shadcn@latest add https://layouts.unilab.dev/r/social-layout.json
+
+# Install magazine layout
+npx shadcn@latest add https://layouts.unilab.dev/r/magazine-layout.json
+
+# Install minimal layout
+npx shadcn@latest add https://layouts.unilab.dev/r/minimal-layout.json
+
+# Install common UI components
+npx shadcn@latest add https://layouts.unilab.dev/r/common-ui.json
 ```
 
-Or use the short command:
+### Install All Components at Once
 
 ```bash
-npx unilab-layouts
+# Install all layout components (automatically includes Tailwind CSS dependencies)
+npx shadcn@latest add https://layouts.unilab.dev/r/all-layouts.json
 ```
 
-### Interactive Installation
+### Manual Installation (Alternative)
 
-After running the command, you'll see an interactive interface:
-
-1. **Select Layouts**: Choose which layout components to install
-2. **Choose Directory**: Specify installation path (default: `src/components/layouts`)
-3. **Auto Install**: System automatically copies files and generates index file
-
-## Available Layouts
-
-### 🏷️ Card Layout
-- **File**: `custom-layouts.tsx`
-- **Function**: `renderCustomCardLayout`
-- **Style**: daily.dev inspired card grid layout
-- **Use Cases**: News, articles, product showcase
-
-### 📖 Blog Layout
-- **File**: `custom-blog-layout.tsx`
-- **Function**: `renderBlogLayout`
-- **Style**: Modern blog article list layout
-- **Use Cases**: Blogs, news sites, content platforms
-
-### 📱 Social Layout
-- **File**: `custom-social-layout.tsx`
-- **Function**: `renderSocialLayout`
-- **Style**: Social media style feed layout
-- **Use Cases**: Social platforms, activity feeds
-
-### 📰 Magazine Layout
-- **File**: `custom-magazine-layout.tsx`
-- **Function**: `renderMagazineLayout`
-- **Style**: Magazine-style article list
-- **Use Cases**: News, magazines, journals
-
-### ⚡ Minimal Layout
-- **File**: `custom-minimal-layout.tsx`
-- **Function**: `renderMinimalLayout`
-- **Style**: Minimalist list layout
-- **Use Cases**: Clean content display
-
-### 🔧 Common UI Components
-- **File**: `common-ui.tsx`
-- **Components**: `LoadingState`, `ErrorState`
-- **Purpose**: Loading and error state components
-
-## Usage
-
-### 1. Import Layout Components
-
-```tsx
-import { 
-  renderCustomCardLayout,
-  renderBlogLayout,
-  LoadingState,
-  ErrorState
-} from './src/components/layouts';
+```bash
+# Install all components individually (each includes Tailwind CSS dependencies)
+npx shadcn@latest add \
+  https://layouts.unilab.dev/r/card-layout.json \
+  https://layouts.unilab.dev/r/blog-layout.json \
+  https://layouts.unilab.dev/r/social-layout.json \
+  https://layouts.unilab.dev/r/magazine-layout.json \
+  https://layouts.unilab.dev/r/minimal-layout.json \
+  https://layouts.unilab.dev/r/common-ui.json
 ```
 
-### 2. Use in URPC Components
+## 📦 Available Components
+
+| Component | Description | Installation Command |
+|-----------|-------------|---------------------|
+| **Card Layout** | Daily.dev inspired card grid | `npx shadcn@latest add https://layouts.unilab.dev/r/card-layout.json` |
+| **Blog Layout** | Modern blog article list | `npx shadcn@latest add https://layouts.unilab.dev/r/blog-layout.json` |
+| **Social Layout** | Social media style feed | `npx shadcn@latest add https://layouts.unilab.dev/r/social-layout.json` |
+| **Magazine Layout** | Magazine-style articles | `npx shadcn@latest add https://layouts.unilab.dev/r/magazine-layout.json` |
+| **Minimal Layout** | Clean minimalist list | `npx shadcn@latest add https://layouts.unilab.dev/r/minimal-layout.json` |
+| **Common UI** | Loading & error states | `npx shadcn@latest add https://layouts.unilab.dev/r/common-ui.json` |
+
+## 🎯 Prerequisites
+
+Before installing layout components, make sure you have:
+
+1. **shadcn/ui initialized** in your project:
+   ```bash
+   npx shadcn@latest init
+   ```
+
+2. **Tailwind CSS** configured (usually done by shadcn/ui init)
+
+3. **React 16.8+** for hooks support
+
+## 💻 Usage
+
+After installation, components will be added to your project. Import and use them with URPC:
 
 ```tsx
 import { UniRender } from '@unilab/urpc';
-import { renderCustomCardLayout } from './components/layouts';
+import { renderCustomCardLayout } from './components/custom-layouts';
 
 function MyComponent() {
   return (
@@ -97,130 +89,153 @@ function MyComponent() {
       entity={MyEntity}
       renderAs={renderCustomCardLayout}
       options={{
-        // Layout options
+        // Layout customization options
       }}
     />
   );
 }
 ```
 
-### 3. Customize Styles
+## 🎨 Component Examples
 
-All layouts use Tailwind CSS classes. You can:
-
-- Directly modify the generated files to customize styles
-- Override default styles through Tailwind configuration
-- Add custom styles using CSS-in-JS
-
-## Requirements
-
-- **React**: ≥ 16.8.0
-- **Tailwind CSS**: ≥ 3.0.0 (recommended)
-- **URPC**: ≥ 1.0.0
-
-## Project Structure
-
-After installation, your project structure:
-
-```
-src/
-  components/
-    layouts/
-      ├── custom-layouts.tsx       # Card layout
-      ├── custom-blog-layout.tsx   # Blog layout
-      ├── custom-social-layout.tsx # Social layout
-      ├── custom-magazine-layout.tsx # Magazine layout
-      ├── custom-minimal-layout.tsx # Minimal layout
-      ├── common-ui.tsx           # Common UI components
-      └── index.ts               # Auto-generated index file
-```
-
-## Advanced Configuration
-
-### Custom Installation Path
-
-```bash
-# Specify custom path
-npx @unilab/layout-installer
-# Then in the interactive interface, enter: components/ui/layouts
-```
-
-### Selective Installation
-
-You can install only the layout components you need instead of all of them. Simply uncheck components you don't need in the interactive interface.
-
-### Style Customization
-
-Each layout component accepts `options` parameter for customization:
-
+### Card Layout Usage
 ```tsx
-const customOptions = {
-  className: 'my-custom-class',
-  showImages: false,
-  compact: true
-};
+import { renderCustomCardLayout } from './components/custom-layouts';
 
+// Use with URPC
 <UniRender 
-  renderAs={(data, options) => renderCustomCardLayout(data, { ...options, ...customOptions })}
+  adapter={dataAdapter}
+  entity={PostEntity}
+  renderAs={renderCustomCardLayout}
 />
 ```
 
-## Troubleshooting
+### Blog Layout Usage
+```tsx
+import { renderBlogLayout } from './components/custom-blog-layout';
 
-### Common Issues
-
-**Q: Styles not displaying correctly after installation?**
-A: Make sure Tailwind CSS is installed and configured in your project.
-
-**Q: TypeScript errors?**
-A: Ensure `@types/react` and related type definitions are installed.
-
-**Q: Cannot import components?**
-A: Check if the installation path is correct and confirm `index.ts` file is generated.
-
-### Reinstall
-
-If you encounter issues during installation, you can delete the installation directory and run the installation command again:
-
-```bash
-rm -rf src/components/layouts
-npx @unilab/layout-installer
+// Perfect for articles and blog posts
+<UniRender 
+  adapter={blogAdapter}
+  entity={ArticleEntity}
+  renderAs={renderBlogLayout}
+/>
 ```
 
-## Development
+### Loading & Error States
+```tsx
+import { LoadingState, ErrorState } from './components/common-ui';
 
-### Local Development
+// Use with conditional rendering
+{isLoading && <LoadingState />}
+{error && <ErrorState message={error.message} />}
+```
+
+## 🏗️ Project Structure After Installation
+
+After running installation commands, your project will have:
+
+```
+src/
+├── components/
+│   ├── custom-layouts.tsx        # Card layout
+│   ├── custom-blog-layout.tsx    # Blog layout
+│   ├── custom-social-layout.tsx  # Social layout
+│   ├── custom-magazine-layout.tsx # Magazine layout
+│   ├── custom-minimal-layout.tsx # Minimal layout
+│   └── common-ui.tsx             # Common components
+└── ...
+```
+
+## 🔧 Local Development
+
+### Run Registry Server Locally
+
+For testing or contributing:
 
 ```bash
-# Clone the project
-git clone <repo-url>
-cd packages/layout-installer
+# Clone the repository
+git clone https://github.com/unify-procotol/unify.git
+cd unify/packages/layout-installer
 
 # Install dependencies
 npm install
 
-# Build project
-npm run build
+# Build registry files
+npm run registry:build
 
-# Test installer
-npm link
-npx @unilab/layout-installer
+# Start local server
+npm run registry:serve
 ```
 
-### Adding New Layouts
+Then use local URLs:
+```bash
+npx shadcn@latest add http://localhost:3001/r/card-layout.json
+```
 
-1. Add a new `.tsx` file in the `templates/` directory
-2. Add configuration to the `layouts` array in `src/index.ts`
-3. Update the export logic in the `generateIndexFile` function
+## 🌐 Registry API
 
-## License
+### Browse Available Components
+Visit: `https://layouts.unilab.dev/registry`
 
-MIT License
+### Component Metadata
+Each component provides:
+- JSON schema validation
+- TypeScript definitions
+- Tailwind CSS classes
+- Usage examples
+- Dependency information
 
-## Contributing
+## ⚡ Benefits of New Installation Method
 
-Issues and Pull Requests are welcome!
+✅ **No npm dependencies** - Components are copied directly to your project  
+✅ **Version control friendly** - Components become part of your codebase  
+✅ **Customizable** - Modify components after installation  
+✅ **Framework agnostic** - Works with any React setup  
+✅ **Official shadcn/ui workflow** - Familiar installation process  
+✅ **Self-contained** - No external package dependencies  
+
+## 🆕 Migration from Old Version
+
+If you were using the old npm-based installation:
+
+1. **Uninstall old package**:
+   ```bash
+   npm uninstall @unilab/layout-installer
+   ```
+
+2. **Install shadcn/ui** (if not already):
+   ```bash
+   npx shadcn@latest init
+   ```
+
+3. **Install components using new method**:
+   ```bash
+   npx shadcn@latest add https://layouts.unilab.dev/r/card-layout.json
+   ```
+
+## 🤝 Contributing
+
+We welcome contributions! To add new layout components:
+
+1. Fork the repository
+2. Add your component to `registry/default/[component-name]/`
+3. Update `registry.json`
+4. Run `npm run registry:build`
+5. Test installation locally
+6. Submit a pull request
+
+## 📄 License
+
+MIT License - see [LICENSE.md](./LICENSE.md) for details.
+
+## 🔗 Links
+
+- **Documentation**: [https://docs.unilab.dev](https://docs.unilab.dev)
+- **Registry**: [https://layouts.unilab.dev](https://layouts.unilab.dev)
+- **GitHub**: [https://github.com/unify-procotol/unify](https://github.com/unify-procotol/unify)
+- **Issues**: [Report a bug](https://github.com/unify-procotol/unify/issues)
 
 ---
 
-Made with ❤️ by Unilab Team 
+Made with ❤️ by the Unilab Team 

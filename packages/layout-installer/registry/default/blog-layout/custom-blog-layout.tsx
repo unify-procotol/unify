@@ -1,7 +1,7 @@
 import React from 'react';
 
 // Modern blog layout renderer
-export const renderBlogLayout = (data: any[], options: any) => {
+export const BlogLayout = (data: any[], options: any) => {
   const formatDate = (dateString: string) => {
     if (!dateString) return "Unknown";
     const date = new Date(dateString);
@@ -147,4 +147,4 @@ export const renderBlogLayout = (data: any[], options: any) => {
       </div>
     </div>
   );
-}; 
+};

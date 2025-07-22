@@ -1,7 +1,7 @@
 import React from 'react';
 
 // Minimal layout renderer
-export const renderMinimalLayout = (data: any[], options: any) => {
+export const MinimalLayout = (data: any[], options: any) => {
   return (
     <div className="max-w-3xl mx-auto px-6 py-6">
       <div className="space-y-6">
@@ -13,20 +13,20 @@ export const renderMinimalLayout = (data: any[], options: any) => {
           return (
             <div 
               key={record.id + Math.random() || index} 
-              className="pb-6 border-b border-border last:border-b-0"
+              className="py-4 border-b border-gray-100 last:border-b-0"
             >
-              <h2 className="text-xl font-bold text-foreground mb-3 hover:text-primary cursor-pointer line-clamp-2 transition-colors">
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
                 {title}
-              </h2>
+              </h3>
               
               {content && (
-                <p className="text-muted-foreground mb-4 leading-relaxed line-clamp-3">
+                <p className="text-gray-600 text-sm mb-2 leading-relaxed">
                   {content}
                 </p>
               )}
               
-              <div className="text-sm text-muted-foreground/70">
-                {author}
+              <div className="text-xs text-gray-500">
+                By {author}
               </div>
             </div>
           );
@@ -34,4 +34,4 @@ export const renderMinimalLayout = (data: any[], options: any) => {
       </div>
     </div>
   );
-}; 
+};

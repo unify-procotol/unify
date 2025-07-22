@@ -1,7 +1,7 @@
 import React from 'react';
 
 // Modern social media layout renderer
-export const renderSocialLayout = (data: any[], options: any) => {
+export const SocialLayout = (data: any[], options: any) => {
   const getAuthorInitials = (name: string) => {
     if (!name) return "??";
     return name.split(' ').map(word => word[0]).join('').toUpperCase().slice(0, 2);
@@ -148,4 +148,4 @@ export const renderSocialLayout = (data: any[], options: any) => {
       })}
     </div>
   );
-}; 
+};

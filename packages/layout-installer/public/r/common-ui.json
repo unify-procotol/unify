@@ -1,0 +1,15 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "common-ui",
+  "type": "registry:component",
+  "title": "Common UI Components",
+  "description": "Loading and error state components for layout consistency",
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "registry/default/common-ui/common-ui.tsx",
+      "content": "import React from 'react';\n\nexport const LoadingState = () => {\n  return (\n    <div className=\"flex items-center justify-center h-64\">\n      <div className=\"text-center\">\n        <div className=\"animate-spin w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full mx-auto mb-4\"></div>\n        <div className=\"text-gray-600 font-medium\">Initializing URPC...</div>\n        <div className=\"text-gray-400 text-sm mt-1\">\n          Setting up data adapters and mock data\n        </div>\n      </div>\n    </div>\n  );\n};\n\nexport const ErrorState = ({ \n  error, \n  onRetry \n}: { \n  error: string; \n  onRetry: () => void; \n}) => {\n  return (\n    <div className=\"flex items-center justify-center h-64\">\n      <div className=\"text-center max-w-md\">\n        <div className=\"w-16 h-16 mx-auto mb-4 text-red-400\">\n          <svg\n            fill=\"none\"\n            stroke=\"currentColor\"\n            viewBox=\"0 0 24 24\"\n            className=\"w-full h-full\"\n          >\n            <path\n              strokeLinecap=\"round\"\n              strokeLinejoin=\"round\"\n              strokeWidth=\"2\"\n              d=\"M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z\"\n            />\n          </svg>\n        </div>\n        <div className=\"text-red-600 text-lg font-semibold mb-2\">\n          Initialization Failed\n        </div>\n        <p className=\"text-gray-600 mb-4\">{error}</p>\n        <button\n          onClick={onRetry}\n          className=\"px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm\"\n        >\n          Retry\n        </button>\n      </div>\n    </div>\n  );\n}; ",
+      "type": "registry:component"
+    }
+  ]
+}
