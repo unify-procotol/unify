@@ -43,16 +43,22 @@ export function parseQueryParams(request: NextRequest) {
     params.offset = offset;
   }
 
+  return params;
+}
+
+export function parseContext(
+  request: NextRequest
+): Record<string, any> | undefined {
+  const url = new URL(request.url);
   const contextParam = url.searchParams.get("context");
   if (contextParam) {
     try {
-      params.context = JSON.parse(contextParam);
+      return JSON.parse(contextParam);
     } catch (e) {
       console.warn("Invalid context parameter", e);
     }
   }
-
-  return params;
+  return undefined;
 }
 
 export function handleError(error: unknown): NextResponse {
@@ -63,16 +69,4 @@ export function handleError(error: unknown): NextResponse {
     { error: error instanceof Error ? error.message : "Unknown error" },
     { status: 500 }
   );
-}
-
-export function validateSource(
-  source: string | null | undefined
-): NextResponse | null {
-  if (!source) {
-    return NextResponse.json(
-      { error: "source parameter is required" },
-      { status: 400 }
-    );
-  }
-  return null;
 }

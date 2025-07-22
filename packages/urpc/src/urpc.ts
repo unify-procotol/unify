@@ -1,19 +1,4 @@
-import type {
-  Plugin,
-  SchemaObject,
-  Middleware,
-  EntityConfigs,
-  DataSourceAdapter,
-} from "@unilab/urpc-core";
-import {
-  generateSchemas,
-  registerAdapter,
-  useGlobalMiddleware,
-  getGlobalMiddlewareManager,
-  simplifyEntityName,
-  extractAdapterName,
-  extractEntityClassName,
-} from "@unilab/urpc-core";
+import { BaseURPC } from "@unilab/urpc-core";
 import type {
   LocalConfig,
   HttpClientConfig,
@@ -23,7 +8,6 @@ import type {
   JoinRepoOptions,
   ProxyRepo,
 } from "./types";
-import { BuiltinPlugin } from "@unilab/builtin-plugin";
 import { isHttpClientConfig, isLocalConfig, isHybridConfig } from "./utils";
 import {
   createHttpRepositoryProxy,
@@ -37,50 +21,36 @@ enum Mode {
   Hybrid = "hybrid",
 }
 
-export class URPC {
-  private entitySchemas: Record<string, SchemaObject> = {};
-  private entitySources: Record<string, string[]> = {};
-  private entityConfigs: EntityConfigs = {};
-  private httpConfig: HttpClientConfig | null = null;
-  private mode: Mode = Mode.Local;
+export class URPC extends BaseURPC {
+  private static globalInstance: URPC | null = null;
+  private static httpConfig: HttpClientConfig | null = null;
+  private static mode: Mode = Mode.Local;
 
   constructor(config: URPCConfig) {
-    this.initializeConfig(config);
-  }
-
-  private initializeConfig(config: URPCConfig): void {
+    super();
     if (isHybridConfig(config)) {
-      this.setupHybridMode(config);
+      URPC.setupHybridMode(config);
     } else if (isHttpClientConfig(config)) {
-      this.setupHttpMode(config);
+      URPC.setupHttpMode(config);
     } else if (isLocalConfig(config)) {
-      this.setupLocalMode(config);
-    } else {
-      throw new Error("Invalid configuration provided");
+      URPC.setupLocalMode(config);
     }
   }
 
-  private setupHybridMode(config: HybridConfig): void {
+  static init(config: URPCConfig): void {
+    if (!URPC.globalInstance) {
+      URPC.globalInstance = new URPC(config);
+    }
+  }
+
+  private static setupHybridMode(config: HybridConfig): void {
     this.mode = Mode.Hybrid;
-
-    //  Initializing the Local Configuration
-    const plugins = [...config.plugins, BuiltinPlugin(URPC)];
-    this.registerPluginAdapters(plugins);
-    this.registerGlobalAdapters({
-      plugins: plugins,
+    super.init({
+      plugins: config.plugins,
+      middlewares: config.middlewares,
+      entityConfigs: config.entityConfigs,
       globalAdapters: config.globalAdapters,
     });
-    this.setEntityConfigs(config.entityConfigs);
-    this.applyMiddlewareToRepos({
-      plugins: plugins,
-      middlewares: config.middlewares || [],
-    });
-    this.analyzeEntities({
-      plugins: plugins,
-      globalAdapters: config.globalAdapters,
-    });
-
-    // Initializing the HTTP Configuration
     this.httpConfig = {
       baseUrl: config.baseUrl,
       timeout: config.timeout || 5000,
@@ -91,7 +61,8 @@ export class URPC {
     };
   }
 
-  private setupHttpMode(config: HttpClientConfig): void {
+  private static setupHttpMode(config: HttpClientConfig): void {
+    this.mode = Mode.Http;
     this.httpConfig = {
       timeout: 5000,
       headers: {
@@ -99,137 +70,19 @@ export class URPC {
       },
       ...config,
     };
-    this.mode = Mode.Http;
   }
 
-  private setupLocalMode(config: LocalConfig): void {
+  private static setupLocalMode(config: LocalConfig): void {
     this.mode = Mode.Local;
-    const plugins = [...config.plugins, BuiltinPlugin(URPC)];
-    this.registerPluginAdapters(plugins);
-    this.registerGlobalAdapters({
-      plugins: plugins,
-      globalAdapters: config.globalAdapters,
-    });
-    this.setEntityConfigs(config.entityConfigs);
-    this.applyMiddlewareToRepos({
-      plugins: plugins,
-      middlewares: config.middlewares || [],
-    });
-    this.analyzeEntities({
-      plugins: plugins,
+    super.init({
+      plugins: config.plugins,
+      middlewares: config.middlewares,
+      entityConfigs: config.entityConfigs,
       globalAdapters: config.globalAdapters,
     });
   }
 
-  private registerPluginAdapters(plugins: Plugin[]) {
-    const adapters = plugins.flatMap((p) => p.adapters || []);
-    if (adapters.length) {
-      adapters.forEach(({ entity, source, adapter }) =>
-        registerAdapter(entity, source, adapter)
-      );
-    }
-  }
-
-  private registerGlobalAdapters({
-    plugins,
-    globalAdapters = [],
-  }: {
-    plugins: Plugin[];
-    globalAdapters?: (new () => DataSourceAdapter<any>)[];
-  }): void {
-    if (globalAdapters.length > 0) {
-      const entities = plugins.flatMap((p) => p.entities || []);
-      globalAdapters.forEach((Adapter) => {
-        const source = Adapter.name;
-        entities.forEach((entity) => {
-          const entityName = extractEntityClassName(entity);
-          registerAdapter(entityName, source, new Adapter());
-        });
-      });
-    }
-  }
-
-  private setEntityConfigs(entityConfigs: any): void {
-    if (entityConfigs) {
-      this.entityConfigs = entityConfigs;
-      getGlobalMiddlewareManager().setEntityConfigs(entityConfigs);
-    }
-  }
-
-  private analyzeEntities({
-    plugins,
-    globalAdapters,
-  }: {
-    plugins: Plugin[];
-    globalAdapters?: (new () => DataSourceAdapter<any>)[];
-  }) {
-    const entities = plugins.flatMap((p) => p.entities || []);
-    const adapters = plugins.flatMap((p) => p.adapters || []);
-
-    if (entities.length > 0) {
-      this.entitySchemas = generateSchemas(entities);
-    }
-
-    const entitySources: Record<string, string[]> = {};
-
-    adapters.forEach(({ source, entity }) => {
-      if (!entitySources[entity]) {
-        entitySources[entity] = [];
-      }
-      entitySources[entity].push(source);
-    });
-
-    if (globalAdapters && entities) {
-      globalAdapters.forEach((adapter) => {
-        entities.forEach((entity) => {
-          const entityName = extractEntityClassName(entity);
-          const source = extractAdapterName(adapter)
-            .toLowerCase()
-            .replace("adapter", "");
-          if (!entitySources[entityName]) {
-            entitySources[entityName] = [];
-          }
-          entitySources[entityName].push(source);
-        });
-      });
-    }
-
-    this.entitySources = entitySources;
-  }
-
-  private applyMiddlewareToRepos({
-    plugins,
-    middlewares,
-  }: {
-    plugins: Plugin[];
-    middlewares: Middleware<any>[];
-  }): void {
-    if (middlewares.length > 0) {
-      middlewares.forEach((m) => {
-        const requiredEntities = m.required?.entities;
-        if (requiredEntities) {
-          const entities = plugins.flatMap((p) => p.entities || []);
-          const entityNames = entities.map((e) => simplifyEntityName(e.name));
-          const missingEntities = requiredEntities.filter(
-            (entity) => !entityNames.includes(simplifyEntityName(entity))
-          );
-          if (missingEntities.length > 0) {
-            throw new Error(
-              `Middleware ${m.name} requires entities: ${missingEntities.join(
-                ", "
-              )}`
-            );
-          }
-        }
-        useGlobalMiddleware(m);
-      });
-      console.log(
-        `✅ Registered middlewares: ${middlewares.map((m) => m.name).join(", ")}`
-      );
-    }
-  }
-
-  createRepositoryProxy<T extends Record<string, any>>(
+  private static createRepositoryProxy<T extends Record<string, any>>(
     options: RepoOptions<T>
   ): ProxyRepo<T> {
     if (this.mode === Mode.Hybrid) {
@@ -249,15 +102,7 @@ export class URPC {
     }
   }
 
-  private static globalInstance: URPC | null = null;
-
-  static init(config: URPCConfig): void {
-    if (!URPC.globalInstance) {
-      URPC.globalInstance = new URPC(config);
-    }
-  }
-
-  private static getGlobalInstance(): URPC {
+  static getGlobalInstance(): URPC {
     if (!URPC.globalInstance) {
       throw new Error("URPC not initialized. Call URPC.init() first.");
     }
@@ -267,7 +112,7 @@ export class URPC {
   static repo<T extends Record<string, any>>(
     options: RepoOptions<T>
   ): ProxyRepo<T> {
-    return URPC.getGlobalInstance().createRepositoryProxy<T>(options);
+    return this.createRepositoryProxy<T>(options);
   }
 
   static joinRepo<F extends Record<string, any>, L extends Record<string, any>>(
@@ -290,18 +135,6 @@ export class URPC {
         return originalMethod;
       },
     });
-  }
-
-  static getEntitySchemas(): Record<string, SchemaObject> {
-    return URPC.getGlobalInstance().entitySchemas;
-  }
-
-  static getEntitySources(): Record<string, string[]> {
-    return URPC.getGlobalInstance().entitySources;
-  }
-
-  static getEntityConfigs(): EntityConfigs {
-    return URPC.getGlobalInstance().entityConfigs;
   }
 }
 

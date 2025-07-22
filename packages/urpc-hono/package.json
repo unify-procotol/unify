@@ -1,12 +1,11 @@
 {
   "name": "@unilab/urpc-hono",
-  "version": "0.0.11",
+  "version": "0.0.12",
   "description": "URPC Hono Adapter",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {
-    ".": "./dist/index.js",
-    "./builtin-plugins": "./dist/builtin-plugins/entities/index.js"
+    ".": "./dist/index.js"
   },
   "publishConfig": {
     "access": "public"
@@ -23,8 +22,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@unilab/urpc-core": "^0.0.8",
-    "@unilab/builtin-plugin": "^0.0.6",
+    "@unilab/urpc-core": "^0.0.9",
     "hono": "^4.7.11",
     "@hono/node-server": "^1.12.2"
   },

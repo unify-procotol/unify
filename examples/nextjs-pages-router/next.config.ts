@@ -10,8 +10,7 @@ const nextConfig: NextConfig = {
     "@unilab/urpc",
     "@unilab/urpc-core",
     "@unilab/urpc-next",
-    "@unilab/uniweb3",
-    "@unilab/builtin-plugin",
+    "@unilab/uniweb3"
   ],
 };
 

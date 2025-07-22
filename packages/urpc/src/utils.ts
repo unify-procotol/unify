@@ -1,26 +1,16 @@
-import type {
-  FindManyArgs,
-  FindOneArgs,
-  CreationArgs,
-  CreateManyArgs,
-  UpdateArgs,
-  UpdateManyArgs,
-  UpsertArgs,
-  DeletionArgs,
-  CallArgs,
-} from "@unilab/urpc-core";
 import {
   simplifyEntityName,
   getRepo,
   extractEntityClassName,
+  MethodsForPost,
 } from "@unilab/urpc-core";
 import type {
   LocalConfig,
   HttpClientConfig,
   HybridConfig,
   URPCConfig,
-  RepoOptions,
   HttpRequestOptions,
+  RepoOptions,
 } from "./types";
 
 export function isHttpClientConfig(
@@ -74,7 +64,7 @@ export function createEntityInstances<T extends Record<string, any>>(
   return dataArray;
 }
 
-export async function makeHttpRequest<T>(
+export async function makeHttpRequest<T = any>(
   options: HttpRequestOptions,
   httpConfig: HttpClientConfig
 ): Promise<T> {
@@ -121,7 +111,7 @@ export async function makeHttpRequest<T>(
   clearTimeout(timeoutId);
 
   if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
+    throw new Error(`HTTP error! status: ${response.status}, message: ${response.statusText}`);
   }
 
   const result = await response.json();
@@ -168,7 +158,7 @@ export async function makeStreamRequest(
   const response = await fetch(fullUrl.toString(), requestInit);
 
   if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
+    throw new Error(`HTTP error! status: ${response.status}, message: ${response.statusText}`);
   }
 
   return response;
@@ -243,187 +233,187 @@ export async function loadRelationsForMany<T extends Record<string, any>>(
   return results;
 }
 
-export function buildHttpFindManyParams<T extends Record<string, any>>(
-  args: FindManyArgs<T>,
-  source: string | undefined,
-  context: any
-): Record<string, any> {
-  const params: Record<string, any> = { source, context };
+export async function executeRemoteMethod({
+  entity,
+  entityName,
+  source,
+  funcName,
+  args,
+  context,
+  httpConfig,
+}: {
+  entity: RepoOptions<any>["entity"];
+  entityName: string;
+  source: string | undefined;
+  funcName: string;
+  args: any;
+  context: any;
+  httpConfig: HttpClientConfig;
+}) {
+  if (funcName === "findMany") {
+    const result = await makeHttpRequest(
+      {
+        method: "GET",
+        url: `/${entityName}/findMany`,
+        params: {
+          source,
+          context,
+          ...args,
+        },
+      },
+      httpConfig
+    );
 
-  if (args.where) params.where = args.where;
-  if (args.order_by) params.order_by = args.order_by;
-  if (args.limit) params.limit = args.limit;
-  if (args.offset) params.offset = args.offset;
-
-  return params;
-}
-
-export function buildHttpFindOneParams<T extends Record<string, any>>(
-  args: FindOneArgs<T>,
-  source: string | undefined,
-  context: any
-): Record<string, any> {
-  return {
-    source,
-    context,
-    where: args.where,
-  };
-}
-
-export async function executeLocalFindMany<T extends Record<string, any>>(
-  args: FindManyArgs<T>,
-  entityName: string,
-  source: string,
-  context: any
-): Promise<T[]> {
-  const repo = getRepo(entityName, source);
-  if (!repo) {
-    throw new Error(`Unknown data source: ${source} for entity ${entityName}`);
-  }
-
-  return await repo.findMany(args, {
-    entity: entityName,
-    source,
-    context,
-  });
-}
-
-export async function executeLocalFindOne<T extends Record<string, any>>(
-  args: FindOneArgs<T>,
-  entityName: string,
-  source: string,
-  context: any
-): Promise<T | null> {
-  const repo = getRepo(entityName, source);
-  if (!repo) {
-    throw new Error(`Unknown data source: ${source} for entity ${entityName}`);
-  }
-
-  return await repo.findOne(args, {
-    entity: entityName,
-    source,
-    context,
-  });
-}
-
-export async function executeLocalCreate<T extends Record<string, any>>(
-  args: CreationArgs<T>,
-  entityName: string,
-  source: string
-): Promise<T> {
-  const repo = getRepo(entityName, source);
-  if (!repo) {
-    throw new Error(`Unknown data source: ${source} for entity ${entityName}`);
-  }
-
-  return await repo.create(args, {
-    entity: entityName,
-    source,
-  });
-}
-
-export async function executeLocalCreateMany<T extends Record<string, any>>(
-  args: CreateManyArgs<T>,
-  entityName: string,
-  source: string
-): Promise<T[]> {
-  const repo = getRepo(entityName, source);
-  if (!repo) {
-    throw new Error(`Unknown data source: ${source} for entity ${entityName}`);
-  }
-
-  return await repo.createMany(args, {
-    entity: entityName,
-    source,
-  });
-}
-
-export async function executeLocalUpdate<T extends Record<string, any>>(
-  args: UpdateArgs<T>,
-  entityName: string,
-  source: string
-): Promise<T> {
-  const repo = getRepo(entityName, source);
-  if (!repo) {
-    throw new Error(`Unknown data source: ${source} for entity ${entityName}`);
-  }
-
-  return await repo.update(args, {
-    entity: entityName,
-    source,
-  });
-}
-
-export async function executeLocalUpdateMany<T extends Record<string, any>>(
-  args: UpdateManyArgs<T>,
-  entityName: string,
-  source: string
-): Promise<T[]> {
-  const repo = getRepo(entityName, source);
-  if (!repo) {
-    throw new Error(`Unknown data source: ${source} for entity ${entityName}`);
-  }
-
-  return await repo.updateMany(args, {
-    entity: entityName,
-    source,
-  });
-}
-
-export async function executeLocalUpsert<T extends Record<string, any>>(
-  args: UpsertArgs<T>,
-  entityName: string,
-  source: string
-): Promise<T> {
-  const repo = getRepo(entityName, source);
-  if (!repo) {
-    throw new Error(`Unknown data source: ${source} for entity ${entityName}`);
-  }
-
-  return await repo.upsert(args, {
-    entity: entityName,
-    source,
-  });
-}
-
-export async function executeLocalDelete<T extends Record<string, any>>(
-  args: DeletionArgs<T>,
-  entityName: string,
-  source: string
-): Promise<boolean> {
-  const repo = getRepo(entityName, source);
-  if (!repo) {
-    throw new Error(`Unknown data source: ${source} for entity ${entityName}`);
-  }
-
-  return await repo.delete(args, {
-    entity: entityName,
-    source,
-  });
-}
-
-export async function executeLocalCall<T extends Record<string, any>>(
-  args: CallArgs<T>,
-  entityName: string,
-  source: string,
-  context: any
-): Promise<T | Response> {
-  const repo = getRepo(entityName, source);
-  if (!repo) {
-    throw new Error(`Unknown data source: ${source} for entity ${entityName}`);
-  }
-
-  return await repo.call(
-    args,
-    {
-      entity: entityName,
-      source,
-      context,
-    },
-    {
-      stream: context?.stream,
+    if (args?.include && result && result.length > 0) {
+      const resultWithRelations = await loadRelationsForMany(
+        result,
+        args.include
+      );
+      return createEntityInstances(entity, resultWithRelations);
     }
+
+    return createEntityInstances(entity, result);
+  }
+
+  if (funcName === "findOne") {
+    const result = await makeHttpRequest(
+      {
+        method: "GET",
+        url: `/${entityName}/findOne`,
+        params: {
+          source,
+          context,
+          ...args,
+        },
+      },
+      httpConfig
+    );
+
+    if (args?.include && result) {
+      const resultWithRelations = await loadRelations(result, args.include);
+      return createEntityInstance(entity, resultWithRelations);
+    }
+
+    return result ? createEntityInstance(entity, result) : null;
+  }
+
+  if (MethodsForPost.includes(funcName)) {
+    if (funcName === "call") {
+      // For stream requests, we need to handle the response differently
+      if (context?.stream) {
+        return await makeStreamRequest(
+          {
+            method: "POST",
+            url: `/${entityName}/call`,
+            params: { source, context },
+            data: { data: args },
+          },
+          httpConfig
+        );
+      } else {
+        const result = await makeHttpRequest(
+          {
+            method: "POST",
+            url: `/${entityName}/call`,
+            params: { source, context },
+            data: { data: args },
+          },
+          httpConfig
+        );
+        return result;
+      }
+    } else {
+      const result = await makeHttpRequest(
+        {
+          method: "POST",
+          url: `/${entityName}/${funcName}`,
+          params: { source, context },
+          data: args,
+        },
+        httpConfig
+      );
+      return createEntityInstance(entity, result);
+    }
+  }
+
+  // custom method
+  const result = await makeHttpRequest(
+    {
+      method: "POST",
+      url: `/${entityName}/${funcName}`,
+      params: { source, context },
+      data: args,
+    },
+    httpConfig
   );
+  return result;
+}
+
+export async function executeLocalMethod({
+  entity,
+  entityName,
+  source,
+  funcName,
+  args,
+  context,
+}: {
+  entity: RepoOptions<any>["entity"];
+  entityName: string;
+  source: string;
+  funcName: string;
+  args: any;
+  context: any;
+}) {
+  const repo = getRepo(entityName, source);
+  if (!repo) {
+    throw new Error(`Unknown data source: ${source} for entity ${entityName}`);
+  }
+
+  if (funcName === "call") {
+    return repo.call(
+      args,
+      {
+        entity: entityName,
+        source,
+        context,
+      },
+      {
+        stream: context?.stream,
+      }
+    );
+  }
+
+  // @ts-ignore
+  const result = await repo[funcName](args, {
+    entity: entityName,
+    source,
+    context,
+  });
+
+  if (funcName === "findMany") {
+    if (args?.include && result && result.length > 0) {
+      const resultWithRelations = await loadRelationsForMany(
+        result,
+        args.include
+      );
+      return createEntityInstances(entity, resultWithRelations);
+    }
+    return createEntityInstances(entity, result);
+  }
+
+  if (funcName === "findOne") {
+    if (args?.include && result) {
+      const resultWithRelations = await loadRelations(result, args.include);
+      return createEntityInstance(entity, resultWithRelations);
+    }
+    return result ? createEntityInstance(entity, result) : null;
+  }
+
+  if (MethodsForPost.includes(funcName)) {
+    return createEntityInstance(entity, result);
+  }
+
+  return result;
 }
 
 export function shouldFallbackToHttp(

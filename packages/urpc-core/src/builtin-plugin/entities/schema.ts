@@ -1,4 +1,4 @@
-import { SchemaObject } from "@unilab/urpc-core";
+import { SchemaObject } from "../../decorators";
 
 export class SchemaEntity {
   static displayName = "SchemaEntity";

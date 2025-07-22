@@ -47,4 +47,5 @@ export class BaseAdapter<T extends Record<string, any>>
   ): Promise<T | Response | PageRouterStreamResponse> {
     throw new URPCError(ErrorCodes.NOT_FOUND, "Method not implemented.");
   }
+  [methodName: string]: any;
 }

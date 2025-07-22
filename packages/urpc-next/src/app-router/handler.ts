@@ -1,26 +1,14 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import { handleError, parseQueryParams, validateSource } from "./utils";
+import { handleError, parseContext, parseQueryParams } from "./utils";
 import {
-  registerAdapter,
   getRepo,
-  EntityConfigs,
-  getGlobalMiddlewareManager,
-  simplifyEntityName,
-  DataSourceAdapter,
-  extractEntityClassName,
-  extractAdapterName,
-} from "@unilab/urpc-core";
-import {
-  generateSchemas,
+  BaseURPC,
+  MethodsForGet,
+  MethodsForPost,
+  BaseURPCConfig,
   Repository,
-  SchemaObject,
-  Middleware,
-  Plugin,
-  useGlobalMiddleware,
 } from "@unilab/urpc-core";
-import { URPCConfig } from "../type";
-import { BuiltinPlugin } from "@unilab/builtin-plugin";
 
 type RouteHandler = (
   request: NextRequest,
@@ -30,152 +18,16 @@ type RouteHandler = (
 export interface URPCAPI {
   GET: RouteHandler;
   POST: RouteHandler;
-  PATCH: RouteHandler;
-  DELETE: RouteHandler;
 }
 
-export class URPC {
-  private static entitySchemas: Record<string, SchemaObject> = {};
-  private static entitySources: Record<string, string[]> = {};
-  private static entityConfigs: EntityConfigs = {};
-  private static initialized = false;
-
-  static init(config: URPCConfig): URPCAPI {
-    if (!this.initialized) {
-      const plugins = [...config.plugins, BuiltinPlugin(this)];
-      this.registerPluginAdapters(plugins);
-      this.registerGlobalAdapters({
-        plugins,
-        globalAdapters: config.globalAdapters,
-      });
-
-      if (config.entityConfigs) {
-        this.entityConfigs = config.entityConfigs;
-        getGlobalMiddlewareManager().setEntityConfigs(this.entityConfigs);
-      }
-
-      if (config.middlewares) {
-        this.applyMiddlewareToRepos({
-          plugins,
-          middlewares: config.middlewares,
-        });
-      }
-
-      this.analyzeEntities({
-        plugins: plugins,
-        globalAdapters: config.globalAdapters,
-      });
-
-      this.initialized = true;
-    }
+export class URPC extends BaseURPC {
+  static init(config: BaseURPCConfig): URPCAPI {
+    super.init(config);
 
     return {
       GET: this.handler,
       POST: this.handler,
-      PATCH: this.handler,
-      DELETE: this.handler,
     };
-  }
-
-  private static registerPluginAdapters(plugins: Plugin[]) {
-    const adapters = plugins.flatMap((p) => p.adapters || []);
-    if (adapters.length) {
-      adapters.forEach(({ entity, source, adapter }) =>
-        registerAdapter(entity, source, adapter)
-      );
-    }
-  }
-
-  private static registerGlobalAdapters({
-    plugins,
-    globalAdapters = [],
-  }: {
-    plugins: Plugin[];
-    globalAdapters?: (new () => DataSourceAdapter<any>)[];
-  }): void {
-    if (globalAdapters.length > 0) {
-      const entities = plugins.flatMap((p) => p.entities || []);
-      globalAdapters.forEach((Adapter) => {
-        const source = extractAdapterName(Adapter)
-          .toLowerCase()
-          .replace("adapter", "");
-        entities.forEach((entity) => {
-          const entityName = extractEntityClassName(entity);
-          registerAdapter(entityName, source, new Adapter());
-        });
-      });
-    }
-  }
-
-  private static applyMiddlewareToRepos({
-    plugins,
-    middlewares,
-  }: {
-    plugins: Plugin[];
-    middlewares: Middleware<any>[];
-  }) {
-    const entities = plugins.flatMap((p) => p.entities || []);
-    middlewares.forEach((m) => {
-      const requiredEntities = m.required?.entities;
-      if (requiredEntities) {
-        const entityNames = entities.map((e) => simplifyEntityName(e.name));
-        const missingEntities = requiredEntities.filter(
-          (entity) => !entityNames.includes(simplifyEntityName(entity))
-        );
-        if (missingEntities.length > 0) {
-          throw new Error(
-            `Middleware ${m.name} requires entities: ${missingEntities.join(
-              ", "
-            )}`
-          );
-        }
-      }
-      useGlobalMiddleware(m);
-    });
-    console.log(
-      `✅ Registered middlewares: ${middlewares.map((m) => m.name).join(", ")}`
-    );
-  }
-
-  private static analyzeEntities({
-    plugins,
-    globalAdapters,
-  }: {
-    plugins: Plugin[];
-    globalAdapters?: (new () => DataSourceAdapter<any>)[];
-  }) {
-    const entities = plugins.flatMap((p) => p.entities || []);
-    const adapters = plugins.flatMap((p) => p.adapters || []);
-
-    if (entities.length > 0) {
-      this.entitySchemas = generateSchemas(entities);
-    }
-
-    const entitySources: Record<string, string[]> = {};
-
-    adapters.forEach(({ source, entity }) => {
-      if (!entitySources[entity]) {
-        entitySources[entity] = [];
-      }
-      entitySources[entity].push(source);
-    });
-
-    if (globalAdapters && entities) {
-      globalAdapters.forEach((adapter) => {
-        entities.forEach((entity) => {
-          const entityName = extractEntityClassName(entity);
-          const source = extractAdapterName(adapter)
-            .toLowerCase()
-            .replace("adapter", "");
-          if (!entitySources[entityName]) {
-            entitySources[entityName] = [];
-          }
-          entitySources[entityName].push(source);
-        });
-      });
-    }
-
-    this.entitySources = entitySources;
   }
 
   static repo<T extends Record<string, any>>(options: {
@@ -196,13 +48,12 @@ export class URPC {
     { params }: { params: Promise<{ urpc: string[] }> }
   ): Promise<NextResponse> {
     try {
-      const method = request.method;
       const resolvedParams = await URPC.resolveParams(params);
-      const [entity, action] = resolvedParams.urpc;
+      const [entity, funcName] = resolvedParams.urpc;
 
-      if (!entity || !action) {
+      if (!entity || !funcName) {
         return NextResponse.json(
-          { error: "Entity and action are required" },
+          { error: "Entity and function name are required" },
           { status: 400 }
         );
       }
@@ -211,13 +62,16 @@ export class URPC {
       const source =
         url.searchParams.get("source") ||
         this.entityConfigs[entity]?.defaultSource;
+      const context = parseContext(request);
 
-      const sourceError = validateSource(source);
-      if (sourceError) {
-        return sourceError;
+      if (!source) {
+        return NextResponse.json(
+          { error: "Source is required" },
+          { status: 400 }
+        );
       }
 
-      const repo = getRepo(entity, source!);
+      const repo = getRepo(entity, source);
       if (!repo) {
         return NextResponse.json(
           { error: "Repository not found" },
@@ -225,327 +79,58 @@ export class URPC {
         );
       }
 
-      switch (`${method}:${action}`) {
-        case "GET:list":
-          return await URPC.handleFindMany(request, repo, entity, source!);
-        case "GET:find_one":
-          return await URPC.handleFindOne(request, repo, entity, source!);
-        case "POST:create":
-          return await URPC.handleCreate(request, repo, entity, source!);
-        case "POST:create_many":
-          return await URPC.handleCreateMany(request, repo, entity, source!);
-        case "PATCH:update":
-          return await URPC.handleUpdate(request, repo, entity, source!);
-        case "PATCH:update_many":
-          return await URPC.handleUpdateMany(request, repo, entity, source!);
-        case "POST:upsert":
-          return await URPC.handleUpsert(request, repo, entity, source!);
-        case "DELETE:delete":
-          return await URPC.handleDelete(request, repo, entity, source!);
-        case "POST:call":
-          return await URPC.handleCall(request, repo, entity, source!);
-        default:
-          return NextResponse.json(
-            { error: `Unsupported operation: ${method}:${action}` },
-            { status: 400 }
-          );
+      if (MethodsForGet.includes(funcName)) {
+        const params = parseQueryParams(request);
+        // @ts-ignore
+        const result = await repo[funcName](params, {
+          entity,
+          source,
+          context,
+        });
+        return NextResponse.json({ data: result }, { status: 200 });
       }
-    } catch (error) {
-      return handleError(error);
-    }
-  }
 
-  private static async handleFindMany(
-    request: NextRequest,
-    repo: Repository<any>,
-    entity: string,
-    source: string
-  ): Promise<NextResponse> {
-    try {
-      const { context, ...params } = parseQueryParams(request);
-      const result = await repo.findMany(params, {
+      if (MethodsForPost.includes(funcName)) {
+        const body: any = await request.json();
+        if (funcName === "call") {
+          const result = await repo.call(
+            body.data,
+            { entity, source, context },
+            { nextRequest: request, stream: context?.stream }
+          );
+
+          if (result instanceof Response) {
+            return result as any;
+          }
+          return NextResponse.json({ data: result }, { status: 200 });
+        } else {
+          // @ts-ignore
+          const result = await repo[funcName](body, {
+            entity,
+            source,
+            context,
+          });
+          return NextResponse.json({ data: result }, { status: 200 });
+        }
+      }
+
+      // custom method
+      const body: any = await request.json();
+      const result = await repo.customMethod(funcName, body, {
         entity,
         source,
         context,
       });
-
-      return NextResponse.json({ data: result });
+      return NextResponse.json({ data: result }, { status: 200 });
     } catch (error) {
       return handleError(error);
     }
   }
+}
 
-  private static async handleFindOne(
-    request: NextRequest,
-    repo: Repository<any>,
-    entity: string,
-    source: string
-  ): Promise<NextResponse> {
-    try {
-      const { context, ...params } = parseQueryParams(request);
-      if (!params.where) {
-        return NextResponse.json(
-          { error: "where parameter is required" },
-          { status: 400 }
-        );
-      }
-
-      const result = await repo.findOne(
-        {
-          where: params.where,
-        },
-        {
-          entity,
-          source,
-          context,
-        }
-      );
-
-      return NextResponse.json({ data: result });
-    } catch (error) {
-      return handleError(error);
-    }
-  }
-
-  private static async handleCreate(
-    request: NextRequest,
-    repo: Repository<any>,
-    entity: string,
-    source: string
-  ): Promise<NextResponse> {
-    try {
-      const body = (await request.json()) as { data?: any };
-      if (!body.data) {
-        return NextResponse.json(
-          { error: "data field is required" },
-          { status: 400 }
-        );
-      }
-
-      const result = await repo.create(
-        {
-          data: body.data,
-        },
-        {
-          entity,
-          source,
-        }
-      );
-
-      return NextResponse.json({ data: result }, { status: 201 });
-    } catch (error) {
-      return handleError(error);
-    }
-  }
-
-  private static async handleCreateMany(
-    request: NextRequest,
-    repo: Repository<any>,
-    entity: string,
-    source: string
-  ): Promise<NextResponse> {
-    try {
-      const body = (await request.json()) as { data?: any[] };
-      if (!body.data || !Array.isArray(body.data)) {
-        return NextResponse.json(
-          { error: "data field is required and must be an array" },
-          { status: 400 }
-        );
-      }
-
-      const result = await repo.createMany(
-        {
-          data: body.data,
-        },
-        {
-          entity,
-          source,
-        }
-      );
-
-      return NextResponse.json({ data: result }, { status: 201 });
-    } catch (error) {
-      return handleError(error);
-    }
-  }
-
-  private static async handleUpdate(
-    request: NextRequest,
-    repo: Repository<any>,
-    entity: string,
-    source: string
-  ): Promise<NextResponse> {
-    try {
-      const body = (await request.json()) as { where?: any; data?: any };
-      if (!body.where || !body.data) {
-        return NextResponse.json(
-          { error: "where and data fields are required" },
-          { status: 400 }
-        );
-      }
-
-      const result = await repo.update(
-        {
-          where: body.where,
-          data: body.data,
-        },
-        {
-          entity,
-          source,
-        }
-      );
-
-      return NextResponse.json({ data: result });
-    } catch (error) {
-      return handleError(error);
-    }
-  }
-
-  private static async handleUpdateMany(
-    request: NextRequest,
-    repo: Repository<any>,
-    entity: string,
-    source: string
-  ): Promise<NextResponse> {
-    try {
-      const body = (await request.json()) as { where?: any; data?: any };
-      if (!body.where || !body.data) {
-        return NextResponse.json(
-          { error: "where and data fields are required" },
-          { status: 400 }
-        );
-      }
-
-      const result = await repo.updateMany(
-        {
-          where: body.where,
-          data: body.data,
-        },
-        {
-          entity,
-          source,
-        }
-      );
-
-      return NextResponse.json({ data: result });
-    } catch (error) {
-      return handleError(error);
-    }
-  }
-
-  private static async handleUpsert(
-    request: NextRequest,
-    repo: Repository<any>,
-    entity: string,
-    source: string
-  ): Promise<NextResponse> {
-    try {
-      const body = (await request.json()) as { where?: any; update?: any; create?: any };
-      if (!body.where || !body.update || !body.create) {
-        return NextResponse.json(
-          { error: "where, update, and create fields are required" },
-          { status: 400 }
-        );
-      }
-
-      const result = await repo.upsert(
-        {
-          where: body.where,
-          update: body.update,
-          create: body.create,
-        },
-        {
-          entity,
-          source,
-        }
-      );
-
-      return NextResponse.json({ data: result }, { status: 201 });
-    } catch (error) {
-      return handleError(error);
-    }
-  }
-
-  private static async handleDelete(
-    request: NextRequest,
-    repo: Repository<any>,
-    entity: string,
-    source: string
-  ): Promise<NextResponse> {
-    try {
-      const params = parseQueryParams(request);
-      if (!params.where) {
-        return NextResponse.json(
-          { error: "where parameter is required" },
-          { status: 400 }
-        );
-      }
-
-      const result = await repo.delete(
-        {
-          where: params.where,
-        },
-        {
-          entity,
-          source,
-        }
-      );
-
-      return NextResponse.json({ data: { success: result } });
-    } catch (error) {
-      return handleError(error);
-    }
-  }
-
-  private static async handleCall(
-    request: NextRequest,
-    repo: Repository<any>,
-    entity: string,
-    source: string
-  ): Promise<NextResponse> {
-    try {
-      const body = (await request.json()) as { data?: any };
-      if (!body.data) {
-        return NextResponse.json(
-          { error: "data field is required" },
-          { status: 400 }
-        );
-      }
-
-      const { context } = parseQueryParams(request);
-
-      const result = await repo.call(
-        body.data,
-        {
-          entity,
-          source,
-          context,
-        },
-        {
-          nextRequest: request,
-          stream: context?.stream,
-        }
-      );
-
-      if (context?.stream) {
-        return result;
-      }
-
-      return NextResponse.json({ data: result });
-    } catch (error) {
-      return handleError(error);
-    }
-  }
-
-  static getEntitySchemas(): Record<string, SchemaObject> {
-    return this.entitySchemas;
-  }
-
-  static getEntitySources(): Record<string, string[]> {
-    return this.entitySources;
-  }
-
-  static getEntityConfigs(): EntityConfigs {
-    return this.entityConfigs;
-  }
+export function repo<T extends Record<string, any>>(options: {
+  entity: string;
+  source: string;
+}): Repository<T> {
+  return URPC.repo<T>(options);
 }

@@ -1,7 +1,8 @@
 import { URPC } from "@unilab/urpc-hono";
 import { Plugin } from "@unilab/urpc-core";
-import { UserEntity } from "../../examples/hono-basic/entities/user";
-import { PostEntity } from "../../examples/hono-basic/entities/post";
+import { UserEntity } from "./entities/user";
+import { PostEntity } from "./entities/post";
+import { MockAdapter } from "@unilab/urpc-adapters";
 
 const MyPlugin: Plugin = {
   entities: [UserEntity, PostEntity],
@@ -9,6 +10,7 @@ const MyPlugin: Plugin = {
 
 const app = URPC.init({
   plugins: [MyPlugin],
+  globalAdapters: [MockAdapter],
 });
 
 export default {

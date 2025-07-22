@@ -4,6 +4,6 @@ export * from "./repository";
 export * from "./decorators";
 export * from "./middleware-manager";
 export * from "./repo-register";
-
-// Types are exported separately for TypeScript
+export * from "./urpc";
+export * from "./routes";
 export type * from "./types";
