@@ -68,15 +68,30 @@ export default function HomePage() {
 function CodeExample() {
   const [activeTab, setActiveTab] = useState<"server" | "client">("server");
 
-  const serverCode = `URPC.init({
+  const serverCode = `// preview code
+URPC.init({
   plugins: [
-    WalletPlugin,
-    MyPlugin,
-    MastraPlugin({
-      openrouterApiKey: process.env.OPENROUTER_API_KEY,
-    })
+    AIPlugin,
+    S3Plugin,
+    IoTPlugin,
+    Web3Plugin,
+    PaymentPlugin,
+    SupabasePlugin,
   ],
-  globalAdapters: [MockAdapter],
+  middlewares:[
+    tracing({}),
+    caching({ttl: 300}),
+    logging({level: 'info'}),
+    auth({provider: "better-auth"}),
+  ],
+  globalAdapters: [
+    MockAdapter,
+    SqlAdapter,
+    MQTTAdapter,
+    MongoAdapter,
+    KafkaAdapter,
+    RabbitMQAdapter,
+  ]
 });
 `;
 
@@ -149,7 +164,7 @@ const aiResult = await repo<ChatEntity>({
             code={serverCode}
             language="typescript"
             classNames={{
-              code: "h-[240px]",
+              code: "h-[540px]",
             }}
           />
         )}
