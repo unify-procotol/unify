@@ -24,12 +24,12 @@ export type WhereConditionWithOperators<T> = {
 
 export type RelationCallbackSingle<
   T extends Record<string, any>,
-  R extends Record<string, any>,
+  R extends Record<string, any>
 > = (entity: T) => Promise<R | null>;
 
 export type RelationCallbackMany<
   T extends Record<string, any>,
-  R extends Record<string, any>,
+  R extends Record<string, any>
 > = (entities: T[]) => Promise<R[]>;
 
 export interface FindManyArgs<T extends Record<string, any>> {
@@ -96,6 +96,7 @@ export interface MiddlewareMetadata {
   context?: {
     lang?: string;
   };
+  honoContext?: any;
 }
 
 export type MiddlewareContext<T extends Record<string, any>> = {
@@ -147,7 +148,7 @@ export interface Plugin {
 
 export interface RelationMapping<
   T extends Record<string, any>,
-  F extends Record<string, any>,
+  F extends Record<string, any>
 > {
   localField: keyof F;
   foreignField: keyof T;
@@ -163,7 +164,7 @@ export interface RepoOptions {
 
 export type JoinRepoOptions<
   F extends Record<string, any> = Record<string, any>,
-  L extends Record<string, any> = Record<string, any>,
+  L extends Record<string, any> = Record<string, any>
 > = RepoOptions & RelationMapping<F, L>;
 
 export interface I18nConfig {
@@ -175,6 +176,16 @@ export interface FieldConfig {
   i18n?: I18nConfig | boolean;
 }
 
+export type PermissionRule =
+  | boolean
+  | string
+  | string[]
+  | ((user: AuthUser | null) => boolean)
+  | ((
+      user: AuthUser | null,
+      entityData: Record<string, any> | Record<string, any>[] | null
+    ) => boolean);
+
 export interface EntityConfig {
   defaultSource?: string;
   cache?: {
@@ -183,6 +194,12 @@ export interface EntityConfig {
   fields?: {
     [fieldName: string]: FieldConfig;
   };
+  // Permission configurations
+  allowApiCrud?: PermissionRule;
+  allowApiRead?: PermissionRule;
+  allowApiCreate?: PermissionRule;
+  allowApiUpdate?: PermissionRule;
+  allowApiDelete?: PermissionRule;
 }
 
 export interface EntityConfigs {
@@ -194,4 +211,12 @@ export interface BaseURPCConfig {
   middlewares?: Middleware<any>[];
   entityConfigs?: EntityConfigs;
   globalAdapters?: (new () => DataSourceAdapter<any>)[];
+}
+
+export interface AuthUser {
+  id: string;
+  name: string;
+  email: string;
+  roles: string[];
+  [key: string]: any;
 }

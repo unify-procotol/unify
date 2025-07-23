@@ -1,0 +1,33 @@
+{
+  "name": "hono-auth",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.ts",
+  "scripts": {
+    "dev": "bun run server.ts --watch",
+    "start": "bun run server.ts",
+    "client": "bun run client.ts"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.12.2",
+    "@unilab/urpc": "workspace:*",
+    "@unilab/urpc-core": "workspace:*",
+    "@unilab/urpc-hono": "workspace:*",
+    "hono": "^4.7.11",
+    "jsonwebtoken": "^9.0.2",
+    "lru-cache": "^11.1.0"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.1.12",
+    "@types/jsonwebtoken": "^9.0.10",
+    "typescript": "^5.3.0"
+  },
+  "keywords": [
+    "hono",
+    "unilab",
+    "api",
+    "example"
+  ],
+  "author": "",
+  "license": "MIT"
+}

@@ -43,6 +43,19 @@ export class URPC extends BaseURPC {
     }
   }
 
+  static setHeaders(headers: Record<string, string>): void {
+    if (!this.httpConfig) {
+      throw new Error(
+        "URPC not initialized in HTTP mode. Call URPC.init() with HTTP config first."
+      );
+    }
+
+    this.httpConfig.headers = {
+      ...this.httpConfig.headers,
+      ...headers,
+    };
+  }
+
   private static setupHybridMode(config: HybridConfig): void {
     this.mode = Mode.Hybrid;
     super.init({

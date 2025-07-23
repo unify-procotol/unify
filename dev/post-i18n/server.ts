@@ -1,7 +1,7 @@
 import { URPC } from "@unilab/urpc-hono";
 import { Plugin } from "@unilab/urpc-core";
 import { GhostAdapter } from "./adapters/ghost";
-import { i18nAIMiddleware, Logging } from "@unilab/urpc-core/middleware";
+import { i18nAI, logging } from "@unilab/urpc-core/middleware";
 import { PostEntity } from "./entities/post";
 import { UserEntity } from "./entities/user";
 import { UserAdapter } from "./adapters/user";
@@ -49,12 +49,12 @@ const LLMPlugin: Plugin = {
 const app = URPC.init({
   plugins: [GhostPlugin, CachePlugin, LLMPlugin],
   middlewares: [
-    i18nAIMiddleware({
+    i18nAI({
       required: {
         entities: ["llm", "cache"],
       },
     }),
-    Logging(),
+    logging(),
   ],
   entityConfigs: {
     cache: {

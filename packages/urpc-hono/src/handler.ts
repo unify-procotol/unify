@@ -78,6 +78,7 @@ export class URPC extends BaseURPC {
           entity,
           source,
           context,
+          honoContext: c,
         });
         return c.json({ data: result }, 200);
       }
@@ -89,6 +90,7 @@ export class URPC extends BaseURPC {
           entity,
           source,
           context,
+          honoContext: c,
         });
         return c.json({ data: result }, 200);
       }
@@ -99,6 +101,7 @@ export class URPC extends BaseURPC {
         entity,
         source,
         context,
+        honoContext: c,
       });
       return c.json({ data: result }, 200);
     } catch (error: any) {

@@ -24,7 +24,7 @@ const languageMap = {
   hi: "Hindi",
 } as const;
 
-export function i18nAIMiddleware<T extends Record<string, any>>(options?: {
+export function i18nAI<T extends Record<string, any>>(options?: {
   required: {
     entities: string[];
   };

@@ -22,7 +22,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@unilab/urpc-core": "^0.0.10",
+    "@unilab/urpc-core": "workspace:*",
     "hono": "^4.7.11",
     "@hono/node-server": "^1.12.2"
   },
