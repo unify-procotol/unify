@@ -53,6 +53,14 @@ export const TEMPLATES: Template[] = [
     githubPath: 'unify-procotol/unify',
     defaultPort: 3000,
     startScript: 'dev'
+  },
+  {
+    name: 'ai-chat-example',
+    displayName: 'AI Chat Example',
+    description: 'A simple AI chat example with URPC',
+    githubPath: 'unify-procotol/unify',
+    defaultPort: 3000,
+    startScript: 'dev'
   }
 ];
 
