@@ -14,11 +14,11 @@
   },
   "dependencies": {
     "@hono/node-server": "^1.12.2",
-    "@unilab/urpc": "^0.0.14",
-    "@unilab/urpc-core": "^0.0.9",
-    "@unilab/urpc-hono": "^0.0.12",
-    "@unilab/urpc-adapters": "^0.0.11",
-    "@unilab/uniweb3": "^0.0.11",
+    "@unilab/urpc": "^0.0.15",
+    "@unilab/urpc-core": "^0.0.10",
+    "@unilab/urpc-hono": "^0.0.13",
+    "@unilab/urpc-adapters": "^0.0.12",
+    "@unilab/uniweb3": "^0.0.12",
     "hono": "^4.7.11"
   },
   "devDependencies": {

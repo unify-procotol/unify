@@ -75,41 +75,13 @@ export class URPC extends BaseURPC {
 
       if (MethodsForPost.includes(funcName)) {
         const body: any = req.body;
-        if (funcName === "call") {
-          const result = await repo.call(
-            body.data,
-            { entity, source, context },
-            { nextApiRequest: req, stream: context?.stream }
-          );
-
-          // Check if result is a Pages Router stream response from adapter
-          if (
-            result &&
-            typeof result === "object" &&
-            (result as any).__isPageRouterStream
-          ) {
-            const streamResult = result as any;
-            await streamResult.streamHandler(res);
-            return;
-          }
-
-          if (result instanceof Response) {
-            return res.status(200).json({
-              data: null,
-              message: "stream response not supported yet",
-            });
-          }
-
-          return res.status(200).json({ data: result });
-        } else {
-          // @ts-ignore
-          const result = await repo[funcName](body, {
-            entity,
-            source,
-            context,
-          });
-          return res.status(200).json({ data: result });
-        }
+        // @ts-ignore
+        const result = await repo[funcName](body, {
+          entity,
+          source,
+          context,
+        });
+        return res.status(200).json({ data: result });
       }
 
       // custom method

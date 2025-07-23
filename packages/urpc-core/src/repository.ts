@@ -1,3 +1,4 @@
+import { ErrorCodes, URPCError } from "./error";
 import { getGlobalMiddlewareManager } from "./middleware-manager";
 import type {
   CreationArgs,
@@ -10,9 +11,6 @@ import type {
   UpdateManyArgs,
   UpsertArgs,
   MiddlewareMetadata,
-  CallArgs,
-  ReqCtx,
-  PageRouterStreamResponse,
 } from "./types";
 
 export class Repository<T extends Record<string, any>> {
@@ -146,32 +144,14 @@ export class Repository<T extends Record<string, any>> {
     );
   }
 
-  async call(
-    args: CallArgs<T>,
-    metadata?: MiddlewareMetadata,
-    reqOptions?: ReqCtx
-  ): Promise<T | Response | PageRouterStreamResponse> {
-    return getGlobalMiddlewareManager().execute(
-      {
-        args,
-        operation: "call",
-        metadata: metadata,
-      },
-      async () => {
-        const result = await this.adapter.call(args, {
-          honoCtx: reqOptions?.honoCtx,
-          stream: reqOptions?.stream,
-        });
-        return result;
-      }
-    );
-  }
-
   async customMethod(
     methodName: string,
     args: any,
     metadata?: MiddlewareMetadata
   ) {
+    if (!this.adapter[methodName]) {
+      throw new URPCError(ErrorCodes.NOT_FOUND, "Method not implemented.");
+    }
     return getGlobalMiddlewareManager().execute(
       {
         args,

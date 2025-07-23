@@ -1,1 +1,1 @@
-export * from "./plugins/wallet";
+export * from "./plugins";

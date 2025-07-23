@@ -28,7 +28,7 @@ export default function Home() {
         }).findOne({
           where: {
             address: "0x8E76cAEbaca6c0e390F825fa44Dfd1fCb74B9C36",
-            network: "ethereum",
+            chainId: 1,
           },
         });
         if (data) {
