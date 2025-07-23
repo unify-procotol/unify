@@ -7,9 +7,9 @@
     "start": "next start",
     "build": "next build",
     "pages:build": "npx @cloudflare/next-on-pages",
-    "preview": "npm run pages:build && wrangler pages dev",
-    "deploy": "npm run pages:build && wrangler pages deploy",
-    "cf:deploy": "npm run pages:build && wrangler pages deploy --project-name=unify-docs --branch=unify-docs",
+    "preview": "bun run pages:build && wrangler pages dev",
+    "deploy": "bun run pages:build && wrangler pages deploy",
+    "cf:deploy": "bun run pages:build && wrangler pages deploy --project-name=unify-docs --branch=unify-docs",
     "cf:deploy:only": "npx wrangler pages deploy --project-name=unify-docs --branch=unify-docs",
     "postinstall": "fumadocs-mdx"
   },

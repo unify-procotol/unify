@@ -18,7 +18,7 @@ on:
       build-command:
         required: false
         type: string
-        default: 'npm run pages:build'
+        default: 'bun run pages:build'
         description: 'Command to build the project'
     secrets:
       CLOUDFLARE_API_TOKEN:
@@ -37,15 +37,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Setup Node.js and Bun
+        uses: oven-sh/setup-bun@v1
         with:
-          node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: '${{ inputs.working-directory }}/package.json'
-
+          bun-version: latest
+          
       - name: Install dependencies
-        run: npm ci
+        run: bun install
 
       - name: Build project
         run: ${{ inputs.build-command }}
