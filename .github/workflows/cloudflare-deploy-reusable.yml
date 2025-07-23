@@ -1,0 +1,59 @@
+name: Reusable Cloudflare Pages Deployment
+
+on:
+  workflow_call:
+    inputs:
+      working-directory:
+        required: true
+        type: string
+        description: 'The directory containing the project to deploy'
+      project-name:
+        required: true
+        type: string
+        description: 'Cloudflare Pages project name'
+      branch-name:
+        required: true
+        type: string
+        description: 'Cloudflare Pages branch name'
+      build-command:
+        required: false
+        type: string
+        default: 'npm run pages:build'
+        description: 'Command to build the project'
+    secrets:
+      CLOUDFLARE_API_TOKEN:
+        required: true
+      CLOUDFLARE_ACCOUNT_ID:
+        required: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory }}
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: '${{ inputs.working-directory }}/package.json'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build project
+        run: ${{ inputs.build-command }}
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy --project-name=${{ inputs.project-name }} --branch=${{ inputs.branch-name }}
+          workingDirectory: ${{ inputs.working-directory }} 
