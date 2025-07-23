@@ -99,11 +99,6 @@ export default function ChatWidget({
             : selectedModel,
       });
 
-      if (result instanceof Response) {
-        // stream response, not supported yet
-        return;
-      }
-
       const output = result.output;
       console.log("output=>", output);
 
