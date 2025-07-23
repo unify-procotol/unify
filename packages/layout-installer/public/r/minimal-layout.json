@@ -1,0 +1,15 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "minimal-layout",
+  "type": "registry:component",
+  "title": "Minimal Layout",
+  "description": "Minimalist list layout for clean content display",
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "registry/default/minimal-layout/custom-minimal-layout.tsx",
+      "content": "import React from 'react';\n\n// Minimal layout renderer\nexport const MinimalLayout = (data: any[], options: any) => {\n  return (\n    <div className=\"max-w-3xl mx-auto px-6 py-6\">\n      <div className=\"space-y-6\">\n        {data.map((record, index) => {\n          const title = record.name || record.title || `Item ${index + 1}`;\n          const content = record.content || record.description || \"\";\n          const author = record.email || record.author || 'Author';\n          \n          return (\n            <div \n              key={record.id + Math.random() || index} \n              className=\"py-4 border-b border-gray-100 last:border-b-0\"\n            >\n              <h3 className=\"text-lg font-medium text-gray-900 mb-2\">\n                {title}\n              </h3>\n              \n              {content && (\n                <p className=\"text-gray-600 text-sm mb-2 leading-relaxed\">\n                  {content}\n                </p>\n              )}\n              \n              <div className=\"text-xs text-gray-500\">\n                By {author}\n              </div>\n            </div>\n          );\n        })}\n      </div>\n    </div>\n  );\n};\n",
+      "type": "registry:component"
+    }
+  ]
+}

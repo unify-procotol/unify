@@ -2,171 +2,25 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import {
   handleError,
   parseQueryParams,
-  validateSource,
   getSourceFromQuery,
+  parseContext,
 } from "./utils";
 import {
-  registerAdapter,
   getRepo,
-  EntityConfigs,
-  getGlobalMiddlewareManager,
-  simplifyEntityName,
-  DataSourceAdapter,
-  extractAdapterName,
-  extractEntityClassName,
-} from "@unilab/urpc-core";
-import {
-  generateSchemas,
+  BaseURPC,
+  BaseURPCConfig,
+  MethodsForGet,
+  MethodsForPost,
   Repository,
-  SchemaObject,
-  Middleware,
-  Plugin,
-  useGlobalMiddleware,
 } from "@unilab/urpc-core";
-import { URPCConfig } from "../type";
-import { BuiltinPlugin } from "@unilab/builtin-plugin";
 
-export class URPC {
-  private static entitySchemas: Record<string, SchemaObject> = {};
-  private static entitySources: Record<string, string[]> = {};
-  private static entityConfigs: EntityConfigs = {};
-  private static initialized = false;
-
-  static init(config: URPCConfig) {
-    if (this.initialized) {
-      return;
-    }
-
-    const plugins = [...config.plugins, BuiltinPlugin(this)];
-    this.registerPluginAdapters(plugins);
-    this.registerGlobalAdapters({
-      plugins,
-      globalAdapters: config.globalAdapters,
-    });
-
-    if (config.entityConfigs) {
-      this.entityConfigs = config.entityConfigs;
-      getGlobalMiddlewareManager().setEntityConfigs(this.entityConfigs);
-    }
-
-    if (config.middlewares) {
-      this.applyMiddlewareToRepos({
-        plugins,
-        middlewares: config.middlewares,
-      });
-    }
-
-    this.analyzeEntities({
-      plugins: plugins,
-      globalAdapters: config.globalAdapters,
-    });
-
-    this.initialized = true;
+export class URPC extends BaseURPC {
+  static init(config: BaseURPCConfig) {
+    super.init(config);
 
     return async function handler(req: NextApiRequest, res: NextApiResponse) {
       return await URPC.handler(req, res);
     };
-  }
-
-  private static registerPluginAdapters(plugins: Plugin[]) {
-    const adapters = plugins.flatMap((p) => p.adapters || []);
-    if (adapters.length) {
-      adapters.forEach(({ entity, source, adapter }) =>
-        registerAdapter(entity, source, adapter)
-      );
-    }
-  }
-
-  private static registerGlobalAdapters({
-    plugins,
-    globalAdapters = [],
-  }: {
-    plugins: Plugin[];
-    globalAdapters?: (new () => DataSourceAdapter<any>)[];
-  }): void {
-    if (globalAdapters.length > 0) {
-      const entities = plugins.flatMap((p) => p.entities || []);
-      globalAdapters.forEach((Adapter) => {
-        const source = extractAdapterName(Adapter)
-          .toLowerCase()
-          .replace("adapter", "");
-        entities.forEach((entity) => {
-          const entityName = extractEntityClassName(entity);
-          registerAdapter(entityName, source, new Adapter());
-        });
-      });
-    }
-  }
-
-  private static applyMiddlewareToRepos({
-    plugins,
-    middlewares,
-  }: {
-    plugins: Plugin[];
-    middlewares: Middleware<any>[];
-  }) {
-    const entities = plugins.flatMap((p) => p.entities || []);
-    middlewares.forEach((m) => {
-      const requiredEntities = m.required?.entities;
-      if (requiredEntities) {
-        const entityNames = entities.map((e) => simplifyEntityName(e.name));
-        const missingEntities = requiredEntities.filter(
-          (entity) => !entityNames.includes(simplifyEntityName(entity))
-        );
-        if (missingEntities.length > 0) {
-          throw new Error(
-            `Middleware ${m.name} requires entities: ${missingEntities.join(
-              ", "
-            )}`
-          );
-        }
-      }
-      useGlobalMiddleware(m);
-    });
-    console.log(
-      `✅ Registered middlewares: ${middlewares.map((m) => m.name).join(", ")}`
-    );
-  }
-
-  private static analyzeEntities({
-    plugins,
-    globalAdapters,
-  }: {
-    plugins: Plugin[];
-    globalAdapters?: (new () => DataSourceAdapter<any>)[];
-  }) {
-    const entities = plugins.flatMap((p) => p.entities || []);
-    const adapters = plugins.flatMap((p) => p.adapters || []);
-
-    if (entities.length > 0) {
-      this.entitySchemas = generateSchemas(entities);
-    }
-
-    const entitySources: Record<string, string[]> = {};
-
-    adapters.forEach(({ source, entity }) => {
-      if (!entitySources[entity]) {
-        entitySources[entity] = [];
-      }
-      entitySources[entity].push(source);
-    });
-
-    if (globalAdapters && entities) {
-      globalAdapters.forEach((adapter) => {
-        entities.forEach((entity) => {
-          const entityName = extractEntityClassName(entity);
-          const source = extractAdapterName(adapter)
-            .toLowerCase()
-            .replace("adapter", "");
-          if (!entitySources[entityName]) {
-            entitySources[entityName] = [];
-          }
-          entitySources[entityName].push(source);
-        });
-      });
-    }
-
-    this.entitySources = entitySources;
   }
 
   static repo<T extends Record<string, any>>(options: {
@@ -181,370 +35,100 @@ export class URPC {
     res: NextApiResponse
   ): Promise<void> {
     try {
-      const method = req.method || "GET";
-
       const routeParams = req.query.urpc;
       const route = Array.isArray(routeParams)
         ? (routeParams as string[])
         : [routeParams as string].filter(Boolean);
 
-      const [entity, action] = route;
+      const [entity, funcName] = route;
 
-      if (!entity || !action) {
+      if (!entity || !funcName) {
         return res.status(400).json({
-          error: "Entity and action are required",
+          error: "Entity and function name are required",
         });
       }
 
       const source =
         getSourceFromQuery(req) || this.entityConfigs[entity]?.defaultSource;
 
-      if (!validateSource(source, res)) {
-        return;
+      if (!source) {
+        return res.status(400).json({ error: "Source is required" });
       }
 
-      const repo = getRepo(entity, source!);
+      const repo = getRepo(entity, source);
       if (!repo) {
         return res.status(404).json({ error: "Repository not found" });
       }
 
-      switch (`${method}:${action}`) {
-        case "GET:list":
-          return await this.handleFindMany(req, res, repo, entity, source!);
-        case "GET:find_one":
-          return await this.handleFindOne(req, res, repo, entity, source!);
-        case "POST:create":
-          return await this.handleCreate(req, res, repo, entity, source!);
-        case "POST:create_many":
-          return await this.handleCreateMany(req, res, repo, entity, source!);
-        case "PATCH:update":
-          return await this.handleUpdate(req, res, repo, entity, source!);
-        case "PATCH:update_many":
-          return await this.handleUpdateMany(req, res, repo, entity, source!);
-        case "POST:upsert":
-          return await this.handleUpsert(req, res, repo, entity, source!);
-        case "DELETE:delete":
-          return await this.handleDelete(req, res, repo, entity, source!);
-        case "POST:call":
-          return await this.handleCall(req, res, repo, entity, source!);
-        default:
-          return res.status(400).json({
-            error: `Unsupported operation: ${method}:${action}`,
-          });
-      }
-    } catch (error) {
-      return handleError(error, res);
-    }
-  }
+      const context = parseContext(req);
 
-  private static async handleFindMany(
-    req: NextApiRequest,
-    res: NextApiResponse,
-    repo: Repository<any>,
-    entity: string,
-    source: string
-  ): Promise<void> {
-    try {
-      const { context, ...params } = parseQueryParams(req);
-      const result = await repo.findMany(params, {
+      if (MethodsForGet.includes(funcName)) {
+        const params = parseQueryParams(req);
+        // @ts-ignore
+        const result = await repo[funcName](params, {
+          entity,
+          source,
+          context,
+        });
+        return res.status(200).json({ data: result });
+      }
+
+      if (MethodsForPost.includes(funcName)) {
+        const body: any = req.body;
+        if (funcName === "call") {
+          const result = await repo.call(
+            body.data,
+            { entity, source, context },
+            { nextApiRequest: req, stream: context?.stream }
+          );
+
+          // Check if result is a Pages Router stream response from adapter
+          if (
+            result &&
+            typeof result === "object" &&
+            (result as any).__isPageRouterStream
+          ) {
+            const streamResult = result as any;
+            await streamResult.streamHandler(res);
+            return;
+          }
+
+          if (result instanceof Response) {
+            return res.status(200).json({
+              data: null,
+              message: "stream response not supported yet",
+            });
+          }
+
+          return res.status(200).json({ data: result });
+        } else {
+          // @ts-ignore
+          const result = await repo[funcName](body, {
+            entity,
+            source,
+            context,
+          });
+          return res.status(200).json({ data: result });
+        }
+      }
+
+      // custom method
+      const body: any = req.body;
+      const result = await repo.customMethod(funcName, body, {
         entity,
         source,
         context,
       });
-
       return res.status(200).json({ data: result });
     } catch (error) {
       return handleError(error, res);
     }
   }
+}
 
-  private static async handleFindOne(
-    req: NextApiRequest,
-    res: NextApiResponse,
-    repo: Repository<any>,
-    entity: string,
-    source: string
-  ): Promise<void> {
-    try {
-      const { context, ...params } = parseQueryParams(req);
-      if (!params.where) {
-        return res.status(400).json({
-          error: "where parameter is required",
-        });
-      }
-
-      const result = await repo.findOne(
-        {
-          where: params.where,
-        },
-        {
-          entity,
-          source,
-          context,
-        }
-      );
-
-      return res.status(200).json({ data: result });
-    } catch (error) {
-      return handleError(error, res);
-    }
-  }
-
-  private static async handleCreate(
-    req: NextApiRequest,
-    res: NextApiResponse,
-    repo: Repository<any>,
-    entity: string,
-    source: string
-  ): Promise<void> {
-    try {
-      const body = req.body as { data?: any };
-      if (!body || !body.data) {
-        return res.status(400).json({
-          error: "data field is required",
-        });
-      }
-
-      const result = await repo.create(
-        {
-          data: body.data,
-        },
-        {
-          entity,
-          source,
-        }
-      );
-
-      return res.status(201).json({ data: result });
-    } catch (error) {
-      return handleError(error, res);
-    }
-  }
-
-  private static async handleCreateMany(
-    req: NextApiRequest,
-    res: NextApiResponse,
-    repo: Repository<any>,
-    entity: string,
-    source: string
-  ): Promise<void> {
-    try {
-      const body = req.body as { data?: any[] };
-      if (!body || !body.data || !Array.isArray(body.data)) {
-        return res.status(400).json({
-          error: "data field is required and must be an array",
-        });
-      }
-
-      const result = await repo.createMany(
-        {
-          data: body.data,
-        },
-        {
-          entity,
-          source,
-        }
-      );
-
-      return res.status(201).json({ data: result });
-    } catch (error) {
-      return handleError(error, res);
-    }
-  }
-
-  private static async handleUpdate(
-    req: NextApiRequest,
-    res: NextApiResponse,
-    repo: Repository<any>,
-    entity: string,
-    source: string
-  ): Promise<void> {
-    try {
-      const body = req.body as { where?: any; data?: any };
-      if (!body || !body.where || !body.data) {
-        return res.status(400).json({
-          error: "where and data fields are required",
-        });
-      }
-
-      const result = await repo.update(
-        {
-          where: body.where,
-          data: body.data,
-        },
-        {
-          entity,
-          source,
-        }
-      );
-
-      return res.status(200).json({ data: result });
-    } catch (error) {
-      return handleError(error, res);
-    }
-  }
-
-  private static async handleUpdateMany(
-    req: NextApiRequest,
-    res: NextApiResponse,
-    repo: Repository<any>,
-    entity: string,
-    source: string
-  ): Promise<void> {
-    try {
-      const body = req.body as { where?: any; data?: any };
-      if (!body || !body.where || !body.data) {
-        return res.status(400).json({
-          error: "where and data fields are required",
-        });
-      }
-
-      const result = await repo.updateMany(
-        {
-          where: body.where,
-          data: body.data,
-        },
-        {
-          entity,
-          source,
-        }
-      );
-
-      return res.status(200).json({ data: result });
-    } catch (error) {
-      return handleError(error, res);
-    }
-  }
-
-  private static async handleUpsert(
-    req: NextApiRequest,
-    res: NextApiResponse,
-    repo: Repository<any>,
-    entity: string,
-    source: string
-  ): Promise<void> {
-    try {
-      const body = req.body as { where?: any; update?: any; create?: any };
-      if (!body || !body.where || !body.update || !body.create) {
-        return res.status(400).json({
-          error: "where, update, and create fields are required",
-        });
-      }
-
-      const result = await repo.upsert(
-        {
-          where: body.where,
-          update: body.update,
-          create: body.create,
-        },
-        {
-          entity,
-          source,
-        }
-      );
-
-      return res.status(201).json({ data: result });
-    } catch (error) {
-      return handleError(error, res);
-    }
-  }
-
-  private static async handleDelete(
-    req: NextApiRequest,
-    res: NextApiResponse,
-    repo: Repository<any>,
-    entity: string,
-    source: string
-  ): Promise<void> {
-    try {
-      const params = parseQueryParams(req);
-      if (!params.where) {
-        return res.status(400).json({
-          error: "where parameter is required",
-        });
-      }
-
-      const result = await repo.delete(
-        {
-          where: params.where,
-        },
-        {
-          entity,
-          source,
-        }
-      );
-
-      return res
-        .status(200)
-        .json({ data: { success: result }, entity, source });
-    } catch (error) {
-      return handleError(error, res);
-    }
-  }
-
-  private static async handleCall(
-    req: NextApiRequest,
-    res: NextApiResponse,
-    repo: Repository<any>,
-    entity: string,
-    source: string
-  ): Promise<void> {
-    try {
-      const body = req.body as { data?: any };
-      if (!body || !body.data) {
-        return res.status(400).json({
-          error: "data field is required",
-        });
-      }
-
-      const { context } = parseQueryParams(req);
-
-      const result = await repo.call(
-        body.data,
-        {
-          entity,
-          source,
-          context,
-        },
-        {
-          nextApiRequest: req,
-          stream: context?.stream,
-        }
-      );
-
-      // Check if result is a Pages Router stream response from adapter
-      if (
-        result &&
-        typeof result === "object" &&
-        (result as any).__isPageRouterStream
-      ) {
-        const streamResult = result as any;
-        await streamResult.streamHandler(res);
-        return;
-      }
-
-      if (result instanceof Response) {
-        // TODO: stream response, not supported yet
-        return res
-          .status(200)
-          .json({ data: null, message: "stream response not supported yet" });
-      }
-
-      return res.status(200).json({ data: result });
-    } catch (error) {
-      return handleError(error, res);
-    }
-  }
-
-  static getEntitySchemas(): Record<string, SchemaObject> {
-    return this.entitySchemas;
-  }
-
-  static getEntitySources(): Record<string, string[]> {
-    return this.entitySources;
-  }
-
-  static getEntityConfigs(): EntityConfigs {
-    return this.entityConfigs;
-  }
+export function repo<T extends Record<string, any>>(options: {
+  entity: string;
+  source: string;
+}): Repository<T> {
+  return URPC.repo<T>(options);
 }

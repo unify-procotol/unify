@@ -104,6 +104,8 @@ export interface DataSourceAdapter<T extends Record<string, any>> {
     args: CallArgs<T>,
     ctx?: ReqCtx
   ): Promise<T | Response | PageRouterStreamResponse>;
+  // custom methods
+  [methodName: string]: any;
 }
 
 export interface MiddlewareMetadata {
@@ -115,16 +117,7 @@ export interface MiddlewareMetadata {
 }
 
 export type MiddlewareContext<T extends Record<string, any>> = {
-  operation:
-    | "findMany"
-    | "findOne"
-    | "create"
-    | "createMany"
-    | "update"
-    | "updateMany"
-    | "upsert"
-    | "delete"
-    | "call";
+  operation: string; // findMany, findOne, create, createMany, update, updateMany, upsert, delete, call
   args: any;
   result?: any;
   metadata?: MiddlewareMetadata;
@@ -212,4 +205,11 @@ export interface EntityConfig {
 
 export interface EntityConfigs {
   [entityName: string]: EntityConfig;
+}
+
+export interface BaseURPCConfig {
+  plugins: Plugin[];
+  middlewares?: Middleware<any>[];
+  entityConfigs?: EntityConfigs;
+  globalAdapters?: (new () => DataSourceAdapter<any>)[];
 }
