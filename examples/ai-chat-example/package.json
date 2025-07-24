@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "cf:deploy": "wrangler pages deploy --project-name=ai-chat-example --branch=main"
   },
   "dependencies": {
     "@copilotkit/react-core": "^1.9.3",
