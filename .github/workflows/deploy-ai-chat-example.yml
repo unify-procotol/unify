@@ -15,7 +15,7 @@ jobs:
       working-directory: ./examples/ai-chat-example
       project-name: unify-ai-chat
       branch-name: main
-      build-command: npm run build
+      build-command: 'bun run build'
     secrets:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }} 
