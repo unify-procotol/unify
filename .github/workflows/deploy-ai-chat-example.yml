@@ -13,7 +13,7 @@ jobs:
     uses: ./.github/workflows/cloudflare-deploy-reusable.yml
     with:
       working-directory: ./examples/ai-chat-example
-      project-name: unify-ai-chat
+      project-name: ai-chat-example
       branch-name: main
       build-command: 'bun run build'
     secrets:
