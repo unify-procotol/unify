@@ -1,4 +1,9 @@
-import { BaseAdapter, FindManyArgs, FindOneArgs, OperationContext } from "@unilab/urpc-core";
+import {
+  BaseAdapter,
+  FindManyArgs,
+  FindOneArgs,
+  OperationContext,
+} from "@unilab/urpc-core";
 import { PostEntity } from "../entities/post";
 
 const mockData = [
@@ -11,7 +16,10 @@ const mockData = [
 ];
 
 export class GhostAdapter extends BaseAdapter<PostEntity> {
-  async findMany(args: FindManyArgs<PostEntity>, ctx?: OperationContext): Promise<PostEntity[]> {
+  async findMany(
+    args: FindManyArgs<PostEntity>,
+    ctx?: OperationContext
+  ): Promise<PostEntity[]> {
     const _slug = args.where?.slug;
     const slug = typeof _slug === "string" ? _slug : _slug?.$eq;
     if (slug) {
@@ -20,7 +28,10 @@ export class GhostAdapter extends BaseAdapter<PostEntity> {
     return mockData;
   }
 
-  async findOne(args: FindOneArgs<PostEntity>, ctx?: OperationContext): Promise<PostEntity | null> {
+  async findOne(
+    args: FindOneArgs<PostEntity>,
+    ctx?: OperationContext
+  ): Promise<PostEntity | null> {
     console.log("ctx?.user=>", ctx?.user);
     await new Promise((resolve) => setTimeout(resolve, 1000));
     const slug = args.where?.slug;
@@ -28,5 +39,11 @@ export class GhostAdapter extends BaseAdapter<PostEntity> {
       return mockData.find((post) => post.slug === slug) || null;
     }
     return null;
+  }
+
+  async call(args: any, ctx?: OperationContext): Promise<any> {
+    console.log("args=>", args);
+    console.log("ctx?.user=>", ctx?.user);
+    return "Hello World";
   }
 }

@@ -97,7 +97,7 @@ export class URPC extends BaseURPC {
 
       // custom method
       const body = await c.req.json();
-      const result = repo.customMethod(funcName, body, {
+      const result = await repo.customMethod(funcName, body, {
         entity,
         source,
         context,

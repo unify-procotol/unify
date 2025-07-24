@@ -1,6 +1,6 @@
 {
   "name": "@unilab/urpc",
-  "version": "0.0.17",
+  "version": "0.0.18",
   "description": "Unify RPC Framework",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -18,7 +18,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@unilab/urpc-core": "^0.0.12"
+    "@unilab/urpc-core": "^0.0.13"
   },
   "devDependencies": {
     "typescript": "^5.3.0"

@@ -77,10 +77,12 @@ const app = URPC.init({
           ttl: "30s",
         },
         // custom methods
-        call: {
-          ttl: "1m",
-          grace: "6h",
-        },
+        // call: {
+        //   ttl: "1m",
+        //   grace: "6h",
+        // },
+
+        call: true
       },
     },
   },

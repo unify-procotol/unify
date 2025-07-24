@@ -229,12 +229,12 @@
     },
     "packages/mastra-client-plugin": {
       "name": "@unilab/mastra-client-plugin",
-      "version": "0.0.6",
+      "version": "0.0.7",
       "dependencies": {
         "@mastra/core": "^0.10.12",
         "@openrouter/ai-sdk-provider": "^0.7.2",
-        "@unilab/urpc": "^0.0.17",
-        "@unilab/urpc-core": "^0.0.12",
+        "@unilab/urpc": "^0.0.18",
+        "@unilab/urpc-core": "^0.0.13",
       },
       "devDependencies": {
         "@types/node": "^20.10.0",
@@ -243,11 +243,11 @@
     },
     "packages/mastra-plugin": {
       "name": "@unilab/mastra-plugin",
-      "version": "0.0.11",
+      "version": "0.0.12",
       "dependencies": {
         "@mastra/core": "^0.10.12",
         "@openrouter/ai-sdk-provider": "^0.7.2",
-        "@unilab/urpc-core": "^0.0.12",
+        "@unilab/urpc-core": "^0.0.13",
       },
       "devDependencies": {
         "@types/node": "^20.10.0",
@@ -256,7 +256,7 @@
     },
     "packages/ukit": {
       "name": "@unilab/ukit",
-      "version": "0.0.13",
+      "version": "0.0.14",
       "dependencies": {
         "@radix-ui/react-alert-dialog": "^1.1.1",
         "@radix-ui/react-avatar": "^1.1.0",
@@ -277,8 +277,8 @@
         "@radix-ui/react-toast": "^1.2.1",
         "@radix-ui/react-toggle": "^1.1.0",
         "@radix-ui/react-tooltip": "^1.1.2",
-        "@unilab/urpc": "^0.0.17",
-        "@unilab/urpc-core": "^0.0.12",
+        "@unilab/urpc": "^0.0.18",
+        "@unilab/urpc-core": "^0.0.13",
         "ajv": "^8.17.1",
         "class-variance-authority": "^0.7.0",
         "clsx": "^2.1.1",
@@ -304,11 +304,11 @@
     },
     "packages/uniweb3": {
       "name": "@unilab/uniweb3",
-      "version": "0.0.14",
+      "version": "0.0.15",
       "dependencies": {
         "@solana/web3.js": "^1.95.2",
-        "@unilab/urpc-adapters": "^0.0.14",
-        "@unilab/urpc-core": "^0.0.12",
+        "@unilab/urpc-adapters": "^0.0.15",
+        "@unilab/urpc-core": "^0.0.13",
         "reflect-metadata": "^0.2.2",
         "viem": "^2.33.0",
       },
@@ -318,9 +318,9 @@
     },
     "packages/urpc": {
       "name": "@unilab/urpc",
-      "version": "0.0.17",
+      "version": "0.0.18",
       "dependencies": {
-        "@unilab/urpc-core": "^0.0.12",
+        "@unilab/urpc-core": "^0.0.13",
       },
       "devDependencies": {
         "typescript": "^5.3.0",
@@ -328,9 +328,9 @@
     },
     "packages/urpc-adapters": {
       "name": "@unilab/urpc-adapters",
-      "version": "0.0.14",
+      "version": "0.0.15",
       "dependencies": {
-        "@unilab/urpc-core": "^0.0.12",
+        "@unilab/urpc-core": "^0.0.13",
       },
       "devDependencies": {
         "tsup": "^8.0.0",
@@ -374,7 +374,7 @@
     },
     "packages/urpc-core": {
       "name": "@unilab/urpc-core",
-      "version": "0.0.12",
+      "version": "0.0.13",
       "dependencies": {
         "reflect-metadata": "^0.2.2",
       },
@@ -385,7 +385,7 @@
     },
     "packages/urpc-hono": {
       "name": "@unilab/urpc-hono",
-      "version": "0.0.15",
+      "version": "0.0.16",
       "dependencies": {
         "@hono/node-server": "^1.12.2",
         "@unilab/urpc-core": "^0.0.11",
@@ -398,9 +398,9 @@
     },
     "packages/urpc-next": {
       "name": "@unilab/urpc-next",
-      "version": "0.0.17",
+      "version": "0.0.18",
       "dependencies": {
-        "@unilab/urpc-core": "^0.0.12",
+        "@unilab/urpc-core": "^0.0.13",
         "next": "^14.0.0",
       },
       "devDependencies": {

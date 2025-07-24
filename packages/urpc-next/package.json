@@ -1,6 +1,6 @@
 {
   "name": "@unilab/urpc-next",
-  "version": "0.0.17",
+  "version": "0.0.18",
   "description": "URPC Next.js Adapter",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -26,7 +26,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@unilab/urpc-core": "^0.0.12",
+    "@unilab/urpc-core": "^0.0.13",
     "next": "^14.0.0"
   },
   "devDependencies": {

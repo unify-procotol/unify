@@ -187,10 +187,12 @@ export type PermissionRule =
       entityData: Record<string, any> | Record<string, any>[] | null
     ) => boolean);
 
-export interface OperationCacheConfig {
-  ttl?: string;
-  grace?: string;
-}
+export type OperationCacheConfig =
+  | {
+      ttl?: string;
+      grace?: string;
+    }
+  | boolean;
 
 export type EntityCacheConfig = {
   findOne?: OperationCacheConfig;

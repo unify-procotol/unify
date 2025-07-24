@@ -1,9 +1,4 @@
-import {
-  Middleware,
-  MiddlewareContext,
-  MiddlewareNext,
-  OperationCacheConfig,
-} from "../types";
+import { Middleware, MiddlewareContext, MiddlewareNext } from "../types";
 import { getGlobalMiddlewareManager } from "../middleware-manager";
 import crypto from "crypto";
 
@@ -27,9 +22,14 @@ export function cache<T extends Record<string, any>>({
     const entityConfig = entityConfigs[entityName];
 
     const cacheConfig = entityConfig?.cache;
-    let operationConfig: OperationCacheConfig | undefined;
-    if (cacheConfig) {
-      operationConfig = cacheConfig[operation];
+    if (!cacheConfig) {
+      return await next();
+    }
+
+    const operationConfig = cacheConfig[operation];
+
+    if (operationConfig === false || operationConfig === undefined) {
+      return await next();
     }
 
     // Generate cache key based on entity, operation, and args
@@ -41,8 +41,14 @@ export function cache<T extends Record<string, any>>({
         factory: async () => {
           return await next();
         },
-        ttl: operationConfig?.ttl,
-        grace: operationConfig?.grace,
+        ttl:
+          typeof operationConfig === "object"
+            ? operationConfig?.ttl
+            : undefined,
+        grace:
+          typeof operationConfig === "object"
+            ? operationConfig?.grace
+            : undefined,
       });
 
       return result;

@@ -1,4 +1,4 @@
-import { EntityConfigs, Repository, SchemaObject } from "@unilab/urpc-core";
+import { EntityConfigs, SchemaObject } from "@unilab/urpc-core";
 
 export interface URPC {
   getEntitySchemas(): Record<string, SchemaObject>;
@@ -7,7 +7,7 @@ export interface URPC {
   repo<T extends Record<string, any>>(options: {
     entity: string;
     source: string;
-  }): Repository<T>;
+  }): any;
 }
 
 export interface MastraOptions {
