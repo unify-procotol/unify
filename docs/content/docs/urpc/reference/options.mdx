@@ -185,7 +185,6 @@ interface MiddlewareMetadata {
 
 type MiddlewareOptions = {
   position?: "before" | "after" | "around";
-  priority?: number;
   name?: string;
   required?: {
     entities: string[];
@@ -997,7 +996,6 @@ useGlobalMiddleware(async (context, next) => {
 }, {
   name: "logger",
   position: "around",
-  priority: 1
 });
 
 // Add caching middleware
@@ -1015,7 +1013,6 @@ useGlobalMiddleware(async (context, next) => {
 }, {
   name: "cache",
   position: "around",
-  priority: 2
 });
 ```
 

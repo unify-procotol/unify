@@ -33,6 +33,8 @@ export function i18nAI<T extends Record<string, any>>(options?: {
     const metadata = context.metadata;
     const targetLanguage = metadata?.context?.lang;
 
+
+
     // If no target language specified, execute normally without translation
     if (!targetLanguage) {
       console.log(
@@ -48,6 +50,11 @@ export function i18nAI<T extends Record<string, any>>(options?: {
     }
 
     const entityName = metadata.entity;
+
+    if (entityName === "cache" || entityName === "llm") {
+      return await next();
+    }
+
     const entityConfigs = getGlobalMiddlewareManager().entityConfigs;
     const entityConfig = entityConfigs[entityName];
 
@@ -192,7 +199,7 @@ export function i18nAI<T extends Record<string, any>>(options?: {
       // Cache the translated result
       try {
         // Getting TTL from entity-level configuration
-        const ttl = entityConfig?.cache?.ttl || 1000 * 60 * 60 * 24; // Default 24 hours
+        const ttl = 1000 * 60 * 60 * 24; // Default 24 hours
         await cacheRepo.create(
           {
             data: {

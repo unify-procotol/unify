@@ -24,12 +24,12 @@ export type WhereConditionWithOperators<T> = {
 
 export type RelationCallbackSingle<
   T extends Record<string, any>,
-  R extends Record<string, any>,
+  R extends Record<string, any>
 > = (entity: T) => Promise<R | null>;
 
 export type RelationCallbackMany<
   T extends Record<string, any>,
-  R extends Record<string, any>,
+  R extends Record<string, any>
 > = (entities: T[]) => Promise<R[]>;
 
 export interface FindManyArgs<T extends Record<string, any>> {
@@ -113,23 +113,17 @@ export type MiddlewareContext<T extends Record<string, any>> = {
   user?: AuthUser | null;
 };
 
-export type MiddlewareNext<T extends Record<string, any>> = () => Promise<any>;
-
-export type Middleware<T extends Record<string, any>> = {
-  name: string;
-  required?: {
-    entities: string[];
-  };
-  fn: (context: MiddlewareContext<T>, next: MiddlewareNext<T>) => Promise<any>;
-};
-
 export type MiddlewareOptions = {
-  position?: "before" | "after" | "around";
-  priority?: number;
   name?: string;
   required?: {
     entities: string[];
   };
+};
+
+export type MiddlewareNext<T extends Record<string, any>> = () => Promise<any>;
+
+export type Middleware<T extends Record<string, any>> = MiddlewareOptions & {
+  fn: (context: MiddlewareContext<T>, next: MiddlewareNext<T>) => Promise<any>;
 };
 
 export interface MiddlewareManagerInterface<T extends Record<string, any>> {
@@ -155,7 +149,7 @@ export interface Plugin {
 
 export interface RelationMapping<
   T extends Record<string, any>,
-  F extends Record<string, any>,
+  F extends Record<string, any>
 > {
   localField: keyof F;
   foreignField: keyof T;
@@ -171,7 +165,7 @@ export interface RepoOptions {
 
 export type JoinRepoOptions<
   F extends Record<string, any> = Record<string, any>,
-  L extends Record<string, any> = Record<string, any>,
+  L extends Record<string, any> = Record<string, any>
 > = RepoOptions & RelationMapping<F, L>;
 
 export interface I18nConfig {
@@ -193,11 +187,27 @@ export type PermissionRule =
       entityData: Record<string, any> | Record<string, any>[] | null
     ) => boolean);
 
+export interface OperationCacheConfig {
+  ttl?: string;
+  grace?: string;
+}
+
+export type EntityCacheConfig = {
+  findOne?: OperationCacheConfig;
+  findMany?: OperationCacheConfig;
+  create?: OperationCacheConfig;
+  createMany?: OperationCacheConfig;
+  update?: OperationCacheConfig;
+  updateMany?: OperationCacheConfig;
+  upsert?: OperationCacheConfig;
+  delete?: OperationCacheConfig;
+} & {
+  [operation: string]: OperationCacheConfig;
+};
+
 export interface EntityConfig {
   defaultSource?: string;
-  cache?: {
-    ttl?: number;
-  };
+  cache?: EntityCacheConfig;
   fields?: {
     [fieldName: string]: FieldConfig;
   };

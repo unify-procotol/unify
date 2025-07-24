@@ -22,6 +22,7 @@ export class GhostAdapter extends BaseAdapter<PostEntity> {
 
   async findOne(args: FindOneArgs<PostEntity>, ctx?: OperationContext): Promise<PostEntity | null> {
     console.log("ctx?.user=>", ctx?.user);
+    await new Promise((resolve) => setTimeout(resolve, 1000));
     const slug = args.where?.slug;
     if (slug) {
       return mockData.find((post) => post.slug === slug) || null;

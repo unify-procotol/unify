@@ -66,7 +66,14 @@ const app = URPC.init({
     },
     post: {
       defaultSource: "ghost",
-      cache: { ttl: 1000 * 60 * 5 },
+      cache: {
+        findOne: {
+          ttl: "24h",
+        },
+        findMany: {
+          ttl: "24h",
+        },
+      },
       fields: {
         title: {
           i18n: {

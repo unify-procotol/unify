@@ -22,21 +22,10 @@ class MiddlewareManager<T extends Record<string, any>>
   }
 
   use(middleware: Middleware<T>, options: MiddlewareOptions = {}): void {
-    const middlewareConfig = {
+    this.middlewares.push({
       middleware,
-      options: {
-        position: options.position || "around",
-        priority: options.priority || 0,
-        name: options.name || `middleware_${Date.now()}`,
-      },
-    };
-
-    this.middlewares.push(middlewareConfig);
-
-    // Sort by priority (higher priority first)
-    this.middlewares.sort(
-      (a, b) => (b.options.priority || 0) - (a.options.priority || 0)
-    );
+      options,
+    });
   }
 
   remove(name: string): boolean {
@@ -55,50 +44,16 @@ class MiddlewareManager<T extends Record<string, any>>
   ): Promise<any> {
     if (this.middlewares.length === 0) {
       return operation({
-        user: context.user,
+        user: null,
       });
-    }
-
-    const entity = context.metadata?.entity;
-    const entityConfig = entity ? this.entityConfigs[entity] : undefined;
-    const hasI18n = entityConfig?.fields
-      ? Object.values(entityConfig.fields).some((field) => field.i18n)
-      : false;
-
-    const filteredMiddlewares = this.middlewares.filter((m) => {
-      if (!hasI18n && m.options.name === "i18nAIMiddleware") {
-        return false;
-      }
-      return true;
-    });
-
-    if (filteredMiddlewares.length === 0) {
-      return operation({
-        user: context.user,
-      });
-    }
-
-    const beforeMiddlewares = filteredMiddlewares.filter(
-      (m) => m.options.position === "before"
-    );
-    const afterMiddlewares = filteredMiddlewares.filter(
-      (m) => m.options.position === "after"
-    );
-    const aroundMiddlewares = filteredMiddlewares.filter(
-      (m) => m.options.position === "around"
-    );
-
-    // Execute before middlewares
-    for (const { middleware } of beforeMiddlewares) {
-      await middleware.fn(context, async () => {});
     }
 
     // Execute around middlewares with the operation
     let finalOperation = operation;
 
     // Wrap the operation with around middlewares (in reverse order to create proper nesting)
-    for (let i = aroundMiddlewares.length - 1; i >= 0; i--) {
-      const { middleware } = aroundMiddlewares[i];
+    for (let i = this.middlewares.length - 1; i >= 0; i--) {
+      const { middleware } = this.middlewares[i];
       const currentOperation = finalOperation;
       finalOperation = async () => {
         return middleware.fn(context, async () =>
@@ -113,12 +68,8 @@ class MiddlewareManager<T extends Record<string, any>>
     const result = await finalOperation({
       user: context.user,
     });
-    context.result = result;
 
-    // Execute after middlewares
-    for (const { middleware } of afterMiddlewares) {
-      await middleware.fn(context, async () => result);
-    }
+    context.result = result;
 
     return result;
   }
@@ -159,13 +110,10 @@ export function useGlobalMiddleware<T extends Record<string, any>>(
   middleware: Middleware<T>,
   options?: MiddlewareOptions
 ): void {
-  middleware;
-  const middlewareOptions = {
-    ...options,
+  GlobalMiddleware.use(middleware, {
+    name: options?.name || middleware.name,
     required: options?.required || middleware.required,
-    name: options?.name || middleware.name || `middleware_${Date.now()}`,
-  };
-  GlobalMiddleware.use(middleware, middlewareOptions);
+  });
 }
 
 export function removeGlobalMiddleware(name: string): boolean {

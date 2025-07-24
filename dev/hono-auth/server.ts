@@ -2,12 +2,13 @@ import { repo, URPC } from "@unilab/urpc-hono";
 export { Allow } from "@unilab/urpc-core";
 import { Allow, AuthUser, Plugin } from "@unilab/urpc-core";
 import { GhostAdapter } from "./adapters/ghost";
-import { auth } from "@unilab/urpc-core/middleware";
+import { auth, cache, logging } from "@unilab/urpc-core/middleware";
 import { PostEntity } from "./entities/post";
 import { UserEntity } from "./entities/user";
 import { UserAdapter } from "./adapters/user";
 import { Context } from "hono";
 import { decodeToken } from "./jwt";
+import { bentocache } from "./bentocache";
 
 const GhostPlugin: Plugin = {
   entities: [PostEntity, UserEntity],
@@ -35,6 +36,10 @@ const app = URPC.init({
         }
       },
     }),
+    cache({
+      bentocache,
+    }),
+    logging(),
   ],
   entityConfigs: {
     user: {
@@ -63,6 +68,20 @@ const app = URPC.init({
       // allowApiCreate
       // allowApiUpdate
       // allowApiDelete
+
+      cache: {
+        findMany: {
+          ttl: "30s",
+        },
+        findOne: {
+          ttl: "30s",
+        },
+        // custom methods
+        call: {
+          ttl: "1m",
+          grace: "6h",
+        },
+      },
     },
   },
 });
