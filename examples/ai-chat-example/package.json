@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "cf:deploy": "wrangler pages deploy --project-name=ai-chat-example --branch=main"
+    "cf:deploy": "wrangler pages deploy --project-name=ai-chat-example --branch=main",
+    "pages:build": "npx @cloudflare/next-on-pages",
+    "pages:deploy": "npx wrangler pages deploy .vercel/output/static"
   },
   "dependencies": {
     "@copilotkit/react-core": "^1.9.3",
