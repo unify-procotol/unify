@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "cf:deploy": "wrangler pages deploy --project-name=ai-chat-example --branch=main",
-    "pages:build": "npx @cloudflare/next-on-pages",
+    "pages:build": "npx @cloudflare/next-on-pages@1",
     "pages:deploy": "npx wrangler pages deploy .vercel/output/static"
   },
   "dependencies": {
