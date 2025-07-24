@@ -3,9 +3,9 @@ import {
   MiddlewareContext,
   MiddlewareNext,
   FieldConfig,
-} from "../types";
-import { getRepo } from "../repo-register";
-import { getGlobalMiddlewareManager } from "../middleware-manager";
+} from "@unilab/urpc-core";
+import { getRepo } from "@unilab/urpc-core";
+import { getGlobalMiddlewareManager } from "@unilab/urpc-core";
 
 const languageMap = {
   zh: "Chinese",
@@ -24,7 +24,7 @@ const languageMap = {
   hi: "Hindi",
 } as const;
 
-export function i18nAIMiddleware<T extends Record<string, any>>(options?: {
+export function i18nAI<T extends Record<string, any>>(options?: {
   required: {
     entities: string[];
   };
@@ -143,7 +143,9 @@ export function i18nAIMiddleware<T extends Record<string, any>>(options?: {
                   typeof i18n === "object" && i18n.prompt
                     ? i18n.prompt
                     : "Please translate the following content";
-                const prompt = `${promptText}, translate to ${languageMap[targetLanguage as keyof typeof languageMap]}:\n\n${originalValue}`;
+                const prompt = `${promptText}, translate to ${
+                  languageMap[targetLanguage as keyof typeof languageMap]
+                }:\n\n${originalValue}`;
 
                 const translationResponse = await llmRepo.create(
                   {

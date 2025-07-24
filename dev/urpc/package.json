@@ -11,10 +11,12 @@
     "localstorage": "VITE_ENTRY=localstorage.html vite --port 3000"
   },
   "dependencies": {
+    "@unilab/uniweb3": "workspace:*",
     "@unilab/urpc": "workspace:*",
-    "@unilab/urpc-core": "workspace:*",
     "@unilab/urpc-adapters": "workspace:*",
-    "@unilab/urpc-hono": "workspace:*"
+    "@unilab/urpc-core": "workspace:*",
+    "@unilab/urpc-hono": "workspace:*",
+    "viem": "^2.33.0"
   },
   "devDependencies": {
     "typescript": "^5.3.0",

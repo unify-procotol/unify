@@ -1,4 +1,4 @@
-name: Reusable Cloudflare Pages Deployment
+name: Reusable Cloudflare Deployment
 
 on:
   workflow_call:
@@ -7,14 +7,19 @@ on:
         required: true
         type: string
         description: 'The directory containing the project to deploy'
+      deployment-type:
+        required: false
+        type: string
+        default: 'workers'
+        description: 'Deployment type: workers or pages'
       project-name:
-        required: true
+        required: false
         type: string
-        description: 'Cloudflare Pages project name'
+        description: 'Cloudflare Pages project name (only needed for Pages deployments)'
       branch-name:
-        required: true
+        required: false
         type: string
-        description: 'Cloudflare Pages branch name'
+        description: 'Cloudflare Pages branch name (only needed for Pages deployments)'
       build-command:
         required: false
         type: string
@@ -48,10 +53,20 @@ jobs:
       - name: Build project
         run: ${{ inputs.build-command }}
 
+      - name: Deploy to Cloudflare Workers with OpenNext
+        if: ${{ inputs.deployment-type == 'workers' }}
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: bun run deploy
+
       - name: Deploy to Cloudflare Pages
+        if: ${{ inputs.deployment-type == 'pages' }}
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: pages deploy --project-name=${{ inputs.project-name }} --branch=${{ inputs.branch-name }}
-          workingDirectory: ${{ inputs.working-directory }} 
+          workingDirectory: ${{ inputs.working-directory }}
+          packageManager: bun 
+          wranglerVersion: "4.25.1"

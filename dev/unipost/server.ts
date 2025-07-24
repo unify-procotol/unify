@@ -1,5 +1,5 @@
 import { Plugin } from "@unilab/urpc-core";
-import { Logging } from "@unilab/urpc-core/middleware";
+import { logging } from "@unilab/urpc-core/middleware";
 import { URPC } from "@unilab/urpc-hono";
 import { PostAdapter } from "./adapters/post";
 import { ProjectAdapter } from "./adapters/project";
@@ -25,7 +25,7 @@ const PostgresPlugin: Plugin = {
 
 const app = URPC.init({
   plugins: [PostgresPlugin],
-  middlewares: [Logging()],
+  middlewares: [logging()],
   entityConfigs: {
     project: {
       defaultSource: "postgres",
@@ -58,7 +58,7 @@ app.get("/process", async (c) => {
   const i18n = await gptTranslation(
     pendingPosts.title,
     pendingPosts.content,
-    project!.locales
+    Object.keys(project!.locales)
   );
 
   await postEntity.update({

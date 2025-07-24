@@ -2,6 +2,7 @@ import {
   simplifyEntityName,
   getRepo,
   extractEntityClassName,
+  MethodsForGet,
   MethodsForPost,
 } from "@unilab/urpc-core";
 import type {
@@ -34,8 +35,7 @@ export function getEntityName(entity: any): string {
 }
 
 export function isEntityClass(entity: any) {
-  const isEntityClass = typeof entity != "string";
-  return isEntityClass;
+  return typeof entity != "string";
 }
 
 export function createEntityInstance<T extends Record<string, any>>(
@@ -43,25 +43,24 @@ export function createEntityInstance<T extends Record<string, any>>(
   data: T
 ): T {
   if (isEntityClass(entity)) {
-    const entityInstance = new entity();
-    Object.assign(entityInstance, data);
-    return entityInstance;
+    if (entity.prototype.constructor.length > 0) {
+      return new entity(data);
+    } else {
+      const entityInstance = new entity();
+      Object.assign(entityInstance, data);
+      return entityInstance;
+    }
   }
   return data;
 }
 
 export function createEntityInstances<T extends Record<string, any>>(
   entity: any,
-  dataArray: T[]
+  data: T[]
 ): T[] {
-  if (isEntityClass(entity)) {
-    return dataArray.map((item) => {
-      const entityInstance = new entity();
-      Object.assign(entityInstance, item);
-      return entityInstance;
-    });
-  }
-  return dataArray;
+  return data.map((item) => {
+    return createEntityInstance(entity, item);
+  });
 }
 
 export async function makeHttpRequest<T = any>(
@@ -111,57 +110,13 @@ export async function makeHttpRequest<T = any>(
   clearTimeout(timeoutId);
 
   if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}, message: ${response.statusText}`);
+    throw new Error(
+      `HTTP error! status: ${response.status}, message: ${response.statusText}`
+    );
   }
 
   const result = await response.json();
   return result.data;
-}
-
-export async function makeStreamRequest(
-  options: HttpRequestOptions,
-  httpConfig: HttpClientConfig
-): Promise<Response> {
-  const { method, url, params, data, headers } = options;
-
-  const baseUrl = httpConfig.baseUrl.endsWith("/")
-    ? httpConfig.baseUrl.slice(0, -1)
-    : httpConfig.baseUrl;
-  const cleanUrl = url.startsWith("/") ? url.slice(1) : url;
-  const fullUrl = new URL(`${baseUrl}/${cleanUrl}`);
-
-  if (params) {
-    Object.entries(params).forEach(([key, value]) => {
-      if (value !== undefined && value !== null) {
-        if (typeof value === "object") {
-          fullUrl.searchParams.set(key, JSON.stringify(value));
-        } else {
-          fullUrl.searchParams.set(key, String(value));
-        }
-      }
-    });
-  }
-
-  const requestInit: RequestInit = {
-    method,
-    headers: {
-      ...httpConfig.headers,
-      ...headers,
-      "Content-Type": "application/json",
-    },
-  };
-
-  if (data && (method === "POST" || method === "PATCH")) {
-    requestInit.body = JSON.stringify(data);
-  }
-
-  const response = await fetch(fullUrl.toString(), requestInit);
-
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}, message: ${response.statusText}`);
-  }
-
-  return response;
 }
 
 export async function loadRelations<T extends Record<string, any>>(
@@ -250,11 +205,11 @@ export async function executeRemoteMethod({
   context: any;
   httpConfig: HttpClientConfig;
 }) {
-  if (funcName === "findMany") {
+  if (MethodsForGet.includes(funcName)) {
     const result = await makeHttpRequest(
       {
         method: "GET",
-        url: `/${entityName}/findMany`,
+        url: `/${entityName}/${funcName}`,
         params: {
           source,
           context,
@@ -264,89 +219,38 @@ export async function executeRemoteMethod({
       httpConfig
     );
 
-    if (args?.include && result && result.length > 0) {
-      const resultWithRelations = await loadRelationsForMany(
-        result,
-        args.include
-      );
-      return createEntityInstances(entity, resultWithRelations);
+    if (funcName === "findMany") {
+      if (args?.include && result && result.length > 0) {
+        const resultWithRelations = await loadRelationsForMany(
+          result,
+          args.include
+        );
+        return createEntityInstances(entity, resultWithRelations);
+      }
+      return createEntityInstances(entity, result);
     }
 
-    return createEntityInstances(entity, result);
-  }
-
-  if (funcName === "findOne") {
-    const result = await makeHttpRequest(
-      {
-        method: "GET",
-        url: `/${entityName}/findOne`,
-        params: {
-          source,
-          context,
-          ...args,
-        },
-      },
-      httpConfig
-    );
-
-    if (args?.include && result) {
-      const resultWithRelations = await loadRelations(result, args.include);
-      return createEntityInstance(entity, resultWithRelations);
+    if (funcName === "findOne") {
+      if (args?.include && result) {
+        const resultWithRelations = await loadRelations(result, args.include);
+        return createEntityInstance(entity, resultWithRelations);
+      }
+      return result ? createEntityInstance(entity, result) : null;
     }
 
     return result ? createEntityInstance(entity, result) : null;
+  } else {
+    const result = await makeHttpRequest(
+      {
+        method: "POST",
+        url: `/${entityName}/${funcName}`,
+        params: { source, context },
+        data: args,
+      },
+      httpConfig
+    );
+    return result ? createEntityInstance(entity, result) : null;
   }
-
-  if (MethodsForPost.includes(funcName)) {
-    if (funcName === "call") {
-      // For stream requests, we need to handle the response differently
-      if (context?.stream) {
-        return await makeStreamRequest(
-          {
-            method: "POST",
-            url: `/${entityName}/call`,
-            params: { source, context },
-            data: { data: args },
-          },
-          httpConfig
-        );
-      } else {
-        const result = await makeHttpRequest(
-          {
-            method: "POST",
-            url: `/${entityName}/call`,
-            params: { source, context },
-            data: { data: args },
-          },
-          httpConfig
-        );
-        return result;
-      }
-    } else {
-      const result = await makeHttpRequest(
-        {
-          method: "POST",
-          url: `/${entityName}/${funcName}`,
-          params: { source, context },
-          data: args,
-        },
-        httpConfig
-      );
-      return createEntityInstance(entity, result);
-    }
-  }
-
-  // custom method
-  const result = await makeHttpRequest(
-    {
-      method: "POST",
-      url: `/${entityName}/${funcName}`,
-      params: { source, context },
-      data: args,
-    },
-    httpConfig
-  );
-  return result;
 }
 
 export async function executeLocalMethod({
@@ -369,51 +273,42 @@ export async function executeLocalMethod({
     throw new Error(`Unknown data source: ${source} for entity ${entityName}`);
   }
 
-  if (funcName === "call") {
-    return repo.call(
-      args,
-      {
-        entity: entityName,
-        source,
-        context,
-      },
-      {
-        stream: context?.stream,
+  if (MethodsForGet.includes(funcName) || MethodsForPost.includes(funcName)) {
+    // @ts-ignore
+    const result = await repo[funcName](args, {
+      entity: entityName,
+      source,
+      context,
+    });
+
+    if (funcName === "findMany") {
+      if (args?.include && result && result.length > 0) {
+        const resultWithRelations = await loadRelationsForMany(
+          result,
+          args.include
+        );
+        return createEntityInstances(entity, resultWithRelations);
       }
-    );
-  }
-
-  // @ts-ignore
-  const result = await repo[funcName](args, {
-    entity: entityName,
-    source,
-    context,
-  });
-
-  if (funcName === "findMany") {
-    if (args?.include && result && result.length > 0) {
-      const resultWithRelations = await loadRelationsForMany(
-        result,
-        args.include
-      );
-      return createEntityInstances(entity, resultWithRelations);
+      return createEntityInstances(entity, result);
     }
-    return createEntityInstances(entity, result);
-  }
 
-  if (funcName === "findOne") {
-    if (args?.include && result) {
-      const resultWithRelations = await loadRelations(result, args.include);
-      return createEntityInstance(entity, resultWithRelations);
+    if (funcName === "findOne") {
+      if (args?.include && result) {
+        const resultWithRelations = await loadRelations(result, args.include);
+        return createEntityInstance(entity, resultWithRelations);
+      }
+      return result ? createEntityInstance(entity, result) : null;
     }
+
+    return result ? createEntityInstance(entity, result) : null;
+  } else {
+    const result = await repo.customMethod(funcName, args, {
+      entity: entityName,
+      source,
+      context,
+    });
     return result ? createEntityInstance(entity, result) : null;
   }
-
-  if (MethodsForPost.includes(funcName)) {
-    return createEntityInstance(entity, result);
-  }
-
-  return result;
 }
 
 export function shouldFallbackToHttp(

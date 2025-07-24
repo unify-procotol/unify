@@ -23,43 +23,34 @@ export default function IoTPage() {
     if (devices.length > 0) {
       return devices;
     }
-    const d1 = await repo<LEDEntity>({
+    return repo<LEDEntity>({
       entity: "led",
       source: "iot",
-    }).create({
-      data: {
-        id: "led-1",
-        name: "Living Room Light",
-        isOn: false,
-        brightness: 100,
-        location: "Living Room",
-      },
+    }).createMany({
+      data: [
+        {
+          id: "led-1",
+          name: "Living Room Light",
+          isOn: false,
+          brightness: 100,
+          location: "Living Room",
+        },
+        {
+          id: "led-2",
+          name: "Bedroom Light",
+          isOn: false,
+          brightness: 80,
+          location: "Bedroom",
+        },
+        {
+          id: "led-3",
+          name: "Kitchen Light",
+          isOn: false,
+          brightness: 90,
+          location: "Kitchen",
+        },
+      ],
     });
-    const d2 = await repo<LEDEntity>({
-      entity: "led",
-      source: "iot",
-    }).create({
-      data: {
-        id: "led-2",
-        name: "Bedroom Light",
-        isOn: false,
-        brightness: 80,
-        location: "Bedroom",
-      },
-    });
-    const d3 = await await repo<LEDEntity>({
-      entity: "led",
-      source: "iot",
-    }).create({
-      data: {
-        id: "led-3",
-        name: "Kitchen Light",
-        isOn: false,
-        brightness: 90,
-        location: "Kitchen",
-      },
-    });
-    return [d1, d2, d3];
   };
 
   const initACs = async () => {
@@ -70,35 +61,31 @@ export default function IoTPage() {
     if (acs.length > 0) {
       return acs;
     }
-    const ac1 = await repo<ACEntity>({
+    return repo<ACEntity>({
       entity: "ac",
       source: "iot",
-    }).create({
-      data: {
-        id: "ac-1",
-        name: "Living Room AC",
-        isOn: false,
-        temperature: 24,
-        mode: "cool",
-        fanSpeed: "medium",
-        location: "Living Room",
-      },
+    }).createMany({
+      data: [
+        {
+          id: "ac-1",
+          name: "Living Room AC",
+          isOn: false,
+          temperature: 24,
+          mode: "cool",
+          fanSpeed: "medium",
+          location: "Living Room",
+        },
+        {
+          id: "ac-2",
+          name: "Bedroom AC",
+          isOn: false,
+          temperature: 26,
+          mode: "cool",
+          fanSpeed: "low",
+          location: "Bedroom",
+        },
+      ],
     });
-    const ac2 = await repo<ACEntity>({
-      entity: "ac",
-      source: "iot",
-    }).create({
-      data: {
-        id: "ac-2",
-        name: "Bedroom AC",
-        isOn: false,
-        temperature: 26,
-        mode: "cool",
-        fanSpeed: "low",
-        location: "Bedroom",
-      },
-    });
-    return [ac1, ac2];
   };
 
   const fetchLEDs = async () => {

@@ -4,6 +4,7 @@ import {
   MiddlewareContext,
   MiddlewareManagerInterface,
   MiddlewareOptions,
+  OperationContext,
 } from "./types";
 
 class MiddlewareManager<T extends Record<string, any>>
@@ -50,10 +51,12 @@ class MiddlewareManager<T extends Record<string, any>>
 
   async execute(
     context: MiddlewareContext<T>,
-    operation: () => Promise<any>
+    operation: (ctx: OperationContext) => Promise<any>
   ): Promise<any> {
     if (this.middlewares.length === 0) {
-      return operation();
+      return operation({
+        user: context.user,
+      });
     }
 
     const entity = context.metadata?.entity;
@@ -70,7 +73,9 @@ class MiddlewareManager<T extends Record<string, any>>
     });
 
     if (filteredMiddlewares.length === 0) {
-      return operation();
+      return operation({
+        user: context.user,
+      });
     }
 
     const beforeMiddlewares = filteredMiddlewares.filter(
@@ -96,12 +101,18 @@ class MiddlewareManager<T extends Record<string, any>>
       const { middleware } = aroundMiddlewares[i];
       const currentOperation = finalOperation;
       finalOperation = async () => {
-        return middleware.fn(context, currentOperation);
+        return middleware.fn(context, async () =>
+          currentOperation({
+            user: context.user,
+          })
+        );
       };
     }
 
     // Execute the final wrapped operation
-    const result = await finalOperation();
+    const result = await finalOperation({
+      user: context.user,
+    });
     context.result = result;
 
     // Execute after middlewares

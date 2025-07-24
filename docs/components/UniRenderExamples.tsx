@@ -3,11 +3,9 @@
 import { UniRender } from "@unilab/ukit";
 import { repo, URPC } from "@unilab/urpc";
 import { Plugin } from "@unilab/urpc-core";
-import { Logging } from "@unilab/urpc-core/middleware";
-import { IndexedDBAdapter, MemoryAdapter } from "@unilab/urpc-adapters";
+import { MemoryAdapter } from "@unilab/urpc-adapters";
 import { PostEntity } from "./entities/post";
 import { UserEntity } from "./entities/user";
-import { LoadingState, ErrorState } from "./shared/common-ui";
 import { renderCustomCardLayout } from "./shared/custom-layouts";
 import { renderMagazineLayout } from "./shared/custom-magazine-layout";
 import { renderSocialLayout } from "./shared/custom-social-layout";
@@ -29,7 +27,7 @@ export async function initUrpcClient() {
         const MyPlugin: Plugin = {
           entities: [UserEntity, PostEntity]
         };
-        
+
         URPC.init({
           plugins: [MyPlugin],
           entityConfigs: {
@@ -37,7 +35,7 @@ export async function initUrpcClient() {
               defaultSource: "memory",
             },
             post: {
-              defaultSource: "memory", 
+              defaultSource: "memory",
             },
             schema: {
               defaultSource: "_global",
@@ -48,7 +46,7 @@ export async function initUrpcClient() {
 
         // Create mock data
         await createMockData();
-        
+
         initialized = true;
         return true;
       } catch (error) {
@@ -57,10 +55,10 @@ export async function initUrpcClient() {
         return false;
       }
     })();
-    
+
     return initPromise;
   }
-  
+
   return initialized;
 }
 
@@ -120,7 +118,7 @@ async function createMockData() {
         imageUrl: images[Math.floor(Math.random() * images.length)],
       },
       {
-        id: "2", 
+        id: "2",
         name: "Understanding TypeScript Generics",
         email: "jane.smith@example.com",
         role: "Backend",
@@ -135,7 +133,7 @@ async function createMockData() {
       {
         id: "3",
         name: "Building Scalable APIs",
-        email: "bob.johnson@example.com", 
+        email: "bob.johnson@example.com",
         role: "DevOps",
         type: "guide",
         category: "backend",
@@ -149,7 +147,7 @@ async function createMockData() {
         id: "4",
         name: "CSS Grid Layout Mastery",
         email: "alice.davis@example.com",
-        role: "Designer", 
+        role: "Designer",
         type: "workshop",
         category: "design",
         status: "published",
@@ -163,7 +161,7 @@ async function createMockData() {
         name: "Database Optimization Strategies",
         email: "charlie.brown@example.com",
         role: "Database",
-        type: "article", 
+        type: "article",
         category: "database",
         status: "published",
         isActive: true,
@@ -177,7 +175,7 @@ async function createMockData() {
         email: "diana.wilson@example.com",
         role: "Frontend",
         type: "reference",
-        category: "javascript", 
+        category: "javascript",
         status: "published",
         isActive: true,
         content: "Explore the latest JavaScript features including async/await, destructuring, modules, and more.",
@@ -212,7 +210,7 @@ export function UniRenderExample({ type }: ExampleProps) {
         const success = await initUrpcClient();
         if (success) {
           setIsInitialized(true);
-          
+
           // Call refresh after initialization is complete and component is mounted
           setTimeout(() => {
             if (uniRenderRef.current?.refresh) {
@@ -227,7 +225,7 @@ export function UniRenderExample({ type }: ExampleProps) {
         setInitError(error instanceof Error ? error.message : "Unknown initialization error");
       }
     };
-    
+
     init();
   }, []);
 
@@ -613,7 +611,7 @@ export function UniRenderExample({ type }: ExampleProps) {
   // Ensure required properties exist
   finalProps.entity = finalProps.entity;
   finalProps.source = finalProps.source;
-  finalProps.layout = finalProps.layout ;
+  finalProps.layout = finalProps.layout;
 
   // Add debug information
   if (process.env.NODE_ENV === 'development') {

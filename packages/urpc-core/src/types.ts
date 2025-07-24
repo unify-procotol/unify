@@ -77,35 +77,21 @@ export interface DeletionArgs<T extends Record<string, any>> {
   where: WhereCondition<T>;
 }
 
-export type CallArgs<T extends Record<string, any>> = Partial<T>;
-
-export type ReqCtx = {
-  stream?: boolean;
-  honoCtx?: any;
-  nextRequest?: any;
-  nextApiRequest?: any;
-};
-
-export interface PageRouterStreamResponse {
-  __isPageRouterStream: true;
-  streamHandler: (res: any) => Promise<void>;
+export interface OperationContext {
+  user?: AuthUser | null;
 }
 
 export interface DataSourceAdapter<T extends Record<string, any>> {
-  findMany(args?: FindManyArgs<T>): Promise<T[]>;
-  findOne(args: FindOneArgs<T>): Promise<T | null>;
-  create(args: CreationArgs<T>): Promise<T>;
-  createMany(args: CreateManyArgs<T>): Promise<T[]>;
-  update(args: UpdateArgs<T>): Promise<T>;
-  updateMany(args: UpdateManyArgs<T>): Promise<T[]>;
-  upsert(args: UpsertArgs<T>): Promise<T>;
-  delete(args: DeletionArgs<T>): Promise<boolean>;
-  call(
-    args: CallArgs<T>,
-    ctx?: ReqCtx
-  ): Promise<T | Response | PageRouterStreamResponse>;
+  findMany(args?: FindManyArgs<T>, ctx?: OperationContext): Promise<T[]>;
+  findOne(args: FindOneArgs<T>, ctx?: OperationContext): Promise<T | null>;
+  create(args: CreationArgs<T>, ctx?: OperationContext): Promise<T>;
+  createMany(args: CreateManyArgs<T>, ctx?: OperationContext): Promise<T[]>;
+  update(args: UpdateArgs<T>, ctx?: OperationContext): Promise<T>;
+  updateMany(args: UpdateManyArgs<T>, ctx?: OperationContext): Promise<T[]>;
+  upsert(args: UpsertArgs<T>, ctx?: OperationContext): Promise<T>;
+  delete(args: DeletionArgs<T>, ctx?: OperationContext): Promise<boolean>;
   // custom methods
-  [methodName: string]: any;
+  [funcName: string]: (args: any, ctx?: OperationContext) => Promise<any>;
 }
 
 export interface MiddlewareMetadata {
@@ -114,6 +100,9 @@ export interface MiddlewareMetadata {
   context?: {
     lang?: string;
   };
+  honoContext?: any;
+  nextApiRequest?: any;
+  nextRequest?: any;
 }
 
 export type MiddlewareContext<T extends Record<string, any>> = {
@@ -121,6 +110,7 @@ export type MiddlewareContext<T extends Record<string, any>> = {
   args: any;
   result?: any;
   metadata?: MiddlewareMetadata;
+  user?: AuthUser | null;
 };
 
 export type MiddlewareNext<T extends Record<string, any>> = () => Promise<any>;
@@ -193,6 +183,16 @@ export interface FieldConfig {
   i18n?: I18nConfig | boolean;
 }
 
+export type PermissionRule =
+  | boolean
+  | string
+  | string[]
+  | ((user: AuthUser | null) => boolean)
+  | ((
+      user: AuthUser | null,
+      entityData: Record<string, any> | Record<string, any>[] | null
+    ) => boolean);
+
 export interface EntityConfig {
   defaultSource?: string;
   cache?: {
@@ -201,6 +201,12 @@ export interface EntityConfig {
   fields?: {
     [fieldName: string]: FieldConfig;
   };
+  // Permission configurations
+  allowApiCrud?: PermissionRule;
+  allowApiRead?: PermissionRule;
+  allowApiCreate?: PermissionRule;
+  allowApiUpdate?: PermissionRule;
+  allowApiDelete?: PermissionRule;
 }
 
 export interface EntityConfigs {
@@ -212,4 +218,12 @@ export interface BaseURPCConfig {
   middlewares?: Middleware<any>[];
   entityConfigs?: EntityConfigs;
   globalAdapters?: (new () => DataSourceAdapter<any>)[];
+}
+
+export interface AuthUser {
+  id: string;
+  name: string;
+  email: string;
+  roles: string[];
+  [key: string]: any;
 }

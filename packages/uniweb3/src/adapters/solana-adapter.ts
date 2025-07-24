@@ -1,14 +1,33 @@
 import { BaseAdapter, type FindOneArgs } from "@unilab/urpc-core";
+import { Connection, PublicKey, LAMPORTS_PER_SOL } from "@solana/web3.js";
 import type { WalletEntity } from "../entities/wallet";
-import { SolanaHandler } from "../handlers/solana";
-
-const handler = new SolanaHandler();
 
 export class SolanaAdapter extends BaseAdapter<WalletEntity> {
   static displayName = "SolanaAdapter";
+  private connection: Connection;
+  private rpcUrl: string = "https://api.mainnet-beta.solana.com";
+
+  constructor() {
+    super();
+    this.connection = new Connection(this.rpcUrl);
+  }
+
+  private async getBalance(address: string): Promise<number> {
+    try {
+      const publicKey = new PublicKey(address);
+      const balanceInLamports = await this.connection.getBalance(publicKey);
+      return balanceInLamports / LAMPORTS_PER_SOL;
+    } catch (error) {
+      throw new Error(
+        `Failed to get Solana balance: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
+    }
+  }
 
   async findOne(args: FindOneArgs<WalletEntity>): Promise<WalletEntity | null> {
-    const { address } = args.where;
+    const { address, rpcUrl } = args.where;
 
     if (!address) {
       throw {
@@ -16,13 +35,21 @@ export class SolanaAdapter extends BaseAdapter<WalletEntity> {
         message: "Invalid arguments",
       };
     }
-    const balance = await handler.getBalance(address);
+
+    if (rpcUrl) {
+      this.rpcUrl = rpcUrl;
+      this.connection = new Connection(this.rpcUrl);
+    }
+
+    const balance = await this.getBalance(address);
     return {
       address: address,
       balance: balance.toString(),
-      network: "solana",
+      rpcUrl: this.rpcUrl,
+      chainId: undefined,
+      source: "solana",
       token: {
-        symbol: handler.symbol,
+        symbol: "SOL",
         decimals: 9,
       },
     };

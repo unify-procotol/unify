@@ -1,6 +1,5 @@
 import {
   BaseAdapter,
-  CallArgs,
   EntityConfigs,
   ErrorCodes,
   SchemaObject,
@@ -43,7 +42,7 @@ export class MastraClientAdapter extends BaseAdapter<ChatEntity> {
     };
   }
 
-  async call(args: CallArgs<ChatEntity>): Promise<ChatEntity | Response> {
+  async call(args: Partial<ChatEntity>): Promise<ChatEntity> {
     const { input, model } = args;
     if (!input) {
       throw new URPCError(ErrorCodes.BAD_REQUEST, "input is required");
@@ -63,10 +62,6 @@ export class MastraClientAdapter extends BaseAdapter<ChatEntity> {
       entitySources,
       entityConfigs,
     });
-
-    if (result instanceof Response) {
-      return result;
-    }
 
     const output = result.output;
     const urpcCode = output.urpc_code;

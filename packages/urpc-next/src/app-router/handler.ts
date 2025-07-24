@@ -86,32 +86,21 @@ export class URPC extends BaseURPC {
           entity,
           source,
           context,
+          nextRequest: request,
         });
         return NextResponse.json({ data: result }, { status: 200 });
       }
 
       if (MethodsForPost.includes(funcName)) {
         const body: any = await request.json();
-        if (funcName === "call") {
-          const result = await repo.call(
-            body.data,
-            { entity, source, context },
-            { nextRequest: request, stream: context?.stream }
-          );
-
-          if (result instanceof Response) {
-            return result as any;
-          }
-          return NextResponse.json({ data: result }, { status: 200 });
-        } else {
-          // @ts-ignore
-          const result = await repo[funcName](body, {
-            entity,
-            source,
-            context,
-          });
-          return NextResponse.json({ data: result }, { status: 200 });
-        }
+        // @ts-ignore
+        const result = await repo[funcName](body, {
+          entity,
+          source,
+          context,
+          nextRequest: request,
+        });
+        return NextResponse.json({ data: result }, { status: 200 });
       }
 
       // custom method
@@ -120,6 +109,7 @@ export class URPC extends BaseURPC {
         entity,
         source,
         context,
+        nextRequest: request,
       });
       return NextResponse.json({ data: result }, { status: 200 });
     } catch (error) {

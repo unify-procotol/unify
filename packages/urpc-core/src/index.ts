@@ -6,4 +6,5 @@ export * from "./middleware-manager";
 export * from "./repo-register";
 export * from "./urpc";
 export * from "./routes";
+export * from "./allow";
 export type * from "./types";

@@ -1,0 +1,20 @@
+name = "ai-chat-example"
+main = ".open-next/worker.js"
+compatibility_date = "2025-04-01"
+compatibility_flags = [
+  "nodejs_compat",
+  "global_fetch_strictly_public",
+]
+keep_names = false
+
+[build]
+command = "npm run build"
+
+[assets]
+directory = ".open-next/assets"
+binding = "ASSETS"
+
+[[services]]
+binding = "WORKER_SELF_REFERENCE"
+service = "ai-chat-example"
+

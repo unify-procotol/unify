@@ -498,18 +498,6 @@ Remember:
             success: true,
           };
         }
-        case "call": {
-          const data = await this.URPC.repo({ entity, source }).call(options);
-          return {
-            operation,
-            entity,
-            source,
-            data,
-            urpc_code: urpcCode,
-            message: "",
-            success: true,
-          };
-        }
         default:
           break;
       }
@@ -544,7 +532,6 @@ Remember:
     if (urpcCode.includes("update")) return "update";
     if (urpcCode.includes("upsert")) return "upsert";
     if (urpcCode.includes("delete")) return "delete";
-    if (urpcCode.includes("call")) return "call";
     return "unknown";
   }
 

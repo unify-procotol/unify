@@ -217,6 +217,7 @@ URPC.init({
                 </button>
               </div>
               <div className="bg-slate-900 dark:bg-slate-950">
+                {/* @ts-ignore */}
                 <SyntaxHighlighter
                   language="javascript"
                   style={oneDark}
@@ -285,6 +286,7 @@ URPC.init({
                 </button>
               </div>
               <div className="bg-slate-900 dark:bg-slate-950">
+                {/* @ts-ignore */}
                 <SyntaxHighlighter
                   language="jsx"
                   style={oneDark}

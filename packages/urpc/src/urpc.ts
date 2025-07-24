@@ -1,12 +1,12 @@
 import { BaseURPC } from "@unilab/urpc-core";
 import type {
-  LocalConfig,
   HttpClientConfig,
   HybridConfig,
   URPCConfig,
   RepoOptions,
   JoinRepoOptions,
   ProxyRepo,
+  LocalConfig,
 } from "./types";
 import { isHttpClientConfig, isLocalConfig, isHybridConfig } from "./utils";
 import {
@@ -43,6 +43,19 @@ export class URPC extends BaseURPC {
     }
   }
 
+  static setHeaders(headers: Record<string, string>): void {
+    if (!this.httpConfig) {
+      throw new Error(
+        "URPC not initialized in HTTP mode. Call URPC.init() with HTTP config first."
+      );
+    }
+
+    this.httpConfig.headers = {
+      ...this.httpConfig.headers,
+      ...headers,
+    };
+  }
+
   private static setupHybridMode(config: HybridConfig): void {
     this.mode = Mode.Hybrid;
     super.init({
@@ -64,11 +77,12 @@ export class URPC extends BaseURPC {
   private static setupHttpMode(config: HttpClientConfig): void {
     this.mode = Mode.Http;
     this.httpConfig = {
-      timeout: 5000,
+      baseUrl: config.baseUrl,
+      timeout: config.timeout || 5000,
       headers: {
         "Content-Type": "application/json",
+        ...config.headers,
       },
-      ...config,
     };
   }
 

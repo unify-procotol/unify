@@ -13,6 +13,7 @@ jobs:
     uses: ./.github/workflows/cloudflare-deploy-reusable.yml
     with:
       working-directory: ./docs
+      deployment-type: pages
       project-name: unify-docs
       branch-name: unify-docs
       build-command: 'bun run pages:build'

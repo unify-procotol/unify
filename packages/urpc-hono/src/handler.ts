@@ -70,6 +70,7 @@ export class URPC extends BaseURPC {
       if (!repo) {
         return c.json({ error: "Repository not found" }, 404);
       }
+      
       if (MethodsForGet.includes(funcName)) {
         const params = parseQueryParams(c);
         // @ts-ignore
@@ -77,31 +78,21 @@ export class URPC extends BaseURPC {
           entity,
           source,
           context,
+          honoContext: c,
         });
         return c.json({ data: result }, 200);
       }
 
       if (MethodsForPost.includes(funcName)) {
         const body = await c.req.json();
-        if (funcName === "call") {
-          const result = await repo.call(
-            body.data,
-            { entity, source, context },
-            { honoCtx: c, stream: context?.stream }
-          );
-          if (result instanceof Response) {
-            return result;
-          }
-          return c.json({ data: result }, 200);
-        } else {
-          // @ts-ignore
-          const result = await repo[funcName](body, {
-            entity,
-            source,
-            context,
-          });
-          return c.json({ data: result }, 200);
-        }
+        // @ts-ignore
+        const result = await repo[funcName](body, {
+          entity,
+          source,
+          context,
+          honoContext: c,
+        });
+        return c.json({ data: result }, 200);
       }
 
       // custom method
@@ -110,6 +101,7 @@ export class URPC extends BaseURPC {
         entity,
         source,
         context,
+        honoContext: c,
       });
       return c.json({ data: result }, 200);
     } catch (error: any) {

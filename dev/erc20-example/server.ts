@@ -1,12 +1,12 @@
 import { URPC } from "@unilab/urpc-hono";
 import type { Plugin } from "@unilab/urpc-core";
-import { createHookMiddleware, Logging } from "@unilab/urpc-core/middleware";
+import { createHookMiddleware, logging } from "@unilab/urpc-core/middleware";
 
 // Import Mimo related files
 import { PairEntity } from "./entities/pair";
 import { MimoAdapter } from "./adapters/mimo-adapter";
 
-const HookMiddleware = createHookMiddleware((hookManager) => {
+const hook = createHookMiddleware((hookManager) => {
   hookManager
     .beforeCreate(async (context) => {
       console.log(
@@ -39,7 +39,7 @@ const MimoPlugin: Plugin = {
 // Create URPC app and configure
 const app = URPC.init({
   plugins: [MimoPlugin],
-  middlewares: [HookMiddleware, Logging()],
+  middlewares: [hook, logging()],
 });
 
 // Add health check endpoint

@@ -12,6 +12,9 @@ import { MastraClientPlugin } from "@unilab/mastra-client-plugin";
 import { IoTAdapter } from "./adapters/iot-adapter";
 
 export function initUrpcClient() {
+  if(typeof window === 'undefined') {
+    return;
+  }
   const TodoPlugin: Plugin = {
     entities: [TodoEntity],
     adapters: [
@@ -60,6 +63,10 @@ export function initUrpcClient() {
     ],
   };
 
+  const baseUrl = typeof window !== 'undefined' 
+    ? `${window.location.origin}/api`
+    : `/api`;
+
   URPC.init({
     // local urpc server
     plugins: [TodoPlugin, IoTPlugin, BlogPlugin, MastraClientPlugin()],
@@ -86,7 +93,7 @@ export function initUrpcClient() {
     },
 
     // remote urpc server
-    baseUrl: `${process.env.NEXT_PUBLIC_WEBSITE_URL}/api`,
+    baseUrl,
     timeout: 20000,
   });
 }

@@ -36,9 +36,14 @@ export class ProjectEntity {
   })
   updated_at = "";
 
-  @Fields.record({
-    key: Fields.string({ description: "Locale code" }),
-    value: Fields.string({ description: "Locale name" }),
-  })
+  @Fields.record(() => Locales)
   locales: Record<string, string> = {};
+}
+
+class Locales {
+  @Fields.string({ description: "Locale code" })
+  key = "";
+
+  @Fields.string({ description: "Locale name" })
+  value = "";
 }

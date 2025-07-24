@@ -29,7 +29,7 @@ export default function NextjsAppRouter() {
   const [solanaAddress, setSolanaAddress] = useState(
     "11111111111111111111111111111112"
   );
-  const [evmNetwork, setEvmNetwork] = useState("ethereum");
+  const [chainId, setChainId] = useState(1);
 
   // Query code snippets for display - now dynamic
   const evmQueryCode = `const data = await repo<WalletEntity>({
@@ -38,7 +38,7 @@ export default function NextjsAppRouter() {
 }).findOne({
   where: {
     address: "${evmAddress}",
-    network: "${evmNetwork}",
+    chainId: ${chainId},
   },
 });`;
 
@@ -68,7 +68,7 @@ export default function NextjsAppRouter() {
       }).findOne({
         where: {
           address: evmAddress,
-          network: evmNetwork,
+          chainId: chainId,
         },
       });
       setEvmBalanceData(data);
@@ -163,14 +163,14 @@ export default function NextjsAppRouter() {
                         Network
                       </label>
                       <select
-                        value={evmNetwork}
-                        onChange={(e) => setEvmNetwork(e.target.value)}
+                        value={String(chainId)}
+                        onChange={(e) => setChainId(Number(e.target.value))}
                         className="w-full px-3 py-2 text-xs border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       >
-                        <option value="ethereum">Ethereum</option>
-                        <option value="polygon">Polygon</option>
-                        <option value="bsc">BSC</option>
-                        <option value="iotex">IoTeX</option>
+                        <option value="1">Ethereum</option>
+                        <option value="137">Polygon</option>
+                        <option value="56">BSC</option>
+                        <option value="4689">IoTeX</option>
                       </select>
                     </div>
                   </div>
@@ -424,7 +424,7 @@ export default function NextjsAppRouter() {
         entity="chat"
         source="mastra"
         quickCommands={[
-          "Query the balance of ethereum network wallet address 0x8E76cAEbaca6c0e390F825fa44Dfd1fCb74B9C36",
+          "Query the balance of chainId 1 wallet address 0x8E76cAEbaca6c0e390F825fa44Dfd1fCb74B9C36",
           "Query the balance of solana wallet address 11111111111111111111111111111112",
         ]}
       />

@@ -1,6 +1,8 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+@source "../../../packages/ukit/dist/**/*.{js,ts,jsx,tsx}";
+@source "../../../packages/ukit/src/**/*.{js,ts,jsx,tsx}";
 @source "../node_modules/@unilab/ukit/dist/**/*.{js,ts,jsx,tsx}";
 @source "../node_modules/@unilab/ukit/src/**/*.{js,ts,jsx,tsx}";
 
