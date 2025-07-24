@@ -27,4 +27,9 @@ export class PostEntity {
     description: "The author of the post",
   })
   author?: UserEntity;
+
+  @Fields.string({
+    description: "The organization id of the post",
+  })
+  orgId = "";
 }

@@ -1,4 +1,4 @@
-import { BaseAdapter, FindManyArgs, FindOneArgs } from "@unilab/urpc-core";
+import { BaseAdapter, FindManyArgs, FindOneArgs, OperationContext } from "@unilab/urpc-core";
 import { PostEntity } from "../entities/post";
 
 const mockData = [
@@ -11,7 +11,7 @@ const mockData = [
 ];
 
 export class GhostAdapter extends BaseAdapter<PostEntity> {
-  async findMany(args: FindManyArgs<PostEntity>): Promise<PostEntity[]> {
+  async findMany(args: FindManyArgs<PostEntity>, ctx?: OperationContext): Promise<PostEntity[]> {
     const _slug = args.where?.slug;
     const slug = typeof _slug === "string" ? _slug : _slug?.$eq;
     if (slug) {
@@ -20,7 +20,8 @@ export class GhostAdapter extends BaseAdapter<PostEntity> {
     return mockData;
   }
 
-  async findOne(args: FindOneArgs<PostEntity>): Promise<PostEntity | null> {
+  async findOne(args: FindOneArgs<PostEntity>, ctx?: OperationContext): Promise<PostEntity | null> {
+    console.log("ctx?.user=>", ctx?.user);
     const slug = args.where?.slug;
     if (slug) {
       return mockData.find((post) => post.slug === slug) || null;

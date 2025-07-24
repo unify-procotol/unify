@@ -24,12 +24,12 @@ export type WhereConditionWithOperators<T> = {
 
 export type RelationCallbackSingle<
   T extends Record<string, any>,
-  R extends Record<string, any>
+  R extends Record<string, any>,
 > = (entity: T) => Promise<R | null>;
 
 export type RelationCallbackMany<
   T extends Record<string, any>,
-  R extends Record<string, any>
+  R extends Record<string, any>,
 > = (entities: T[]) => Promise<R[]>;
 
 export interface FindManyArgs<T extends Record<string, any>> {
@@ -77,17 +77,21 @@ export interface DeletionArgs<T extends Record<string, any>> {
   where: WhereCondition<T>;
 }
 
+export interface OperationContext {
+  user?: AuthUser | null;
+}
+
 export interface DataSourceAdapter<T extends Record<string, any>> {
-  findMany(args?: FindManyArgs<T>): Promise<T[]>;
-  findOne(args: FindOneArgs<T>): Promise<T | null>;
-  create(args: CreationArgs<T>): Promise<T>;
-  createMany(args: CreateManyArgs<T>): Promise<T[]>;
-  update(args: UpdateArgs<T>): Promise<T>;
-  updateMany(args: UpdateManyArgs<T>): Promise<T[]>;
-  upsert(args: UpsertArgs<T>): Promise<T>;
-  delete(args: DeletionArgs<T>): Promise<boolean>;
+  findMany(args?: FindManyArgs<T>, ctx?: OperationContext): Promise<T[]>;
+  findOne(args: FindOneArgs<T>, ctx?: OperationContext): Promise<T | null>;
+  create(args: CreationArgs<T>, ctx?: OperationContext): Promise<T>;
+  createMany(args: CreateManyArgs<T>, ctx?: OperationContext): Promise<T[]>;
+  update(args: UpdateArgs<T>, ctx?: OperationContext): Promise<T>;
+  updateMany(args: UpdateManyArgs<T>, ctx?: OperationContext): Promise<T[]>;
+  upsert(args: UpsertArgs<T>, ctx?: OperationContext): Promise<T>;
+  delete(args: DeletionArgs<T>, ctx?: OperationContext): Promise<boolean>;
   // custom methods
-  [funcName: string]: (args: any) => Promise<any>;
+  [funcName: string]: (args: any, ctx?: OperationContext) => Promise<any>;
 }
 
 export interface MiddlewareMetadata {
@@ -106,6 +110,7 @@ export type MiddlewareContext<T extends Record<string, any>> = {
   args: any;
   result?: any;
   metadata?: MiddlewareMetadata;
+  user?: AuthUser | null;
 };
 
 export type MiddlewareNext<T extends Record<string, any>> = () => Promise<any>;
@@ -150,7 +155,7 @@ export interface Plugin {
 
 export interface RelationMapping<
   T extends Record<string, any>,
-  F extends Record<string, any>
+  F extends Record<string, any>,
 > {
   localField: keyof F;
   foreignField: keyof T;
@@ -166,7 +171,7 @@ export interface RepoOptions {
 
 export type JoinRepoOptions<
   F extends Record<string, any> = Record<string, any>,
-  L extends Record<string, any> = Record<string, any>
+  L extends Record<string, any> = Record<string, any>,
 > = RepoOptions & RelationMapping<F, L>;
 
 export interface I18nConfig {

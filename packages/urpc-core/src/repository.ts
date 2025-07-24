@@ -30,8 +30,8 @@ export class Repository<T extends Record<string, any>> {
         operation: "findMany",
         metadata: metadata,
       },
-      async () => {
-        return this.adapter.findMany(args);
+      async (ctx) => {
+        return this.adapter.findMany(args, ctx);
       }
     );
   }
@@ -46,8 +46,8 @@ export class Repository<T extends Record<string, any>> {
         operation: "findOne",
         metadata: metadata,
       },
-      async () => {
-        return this.adapter.findOne(args);
+      async (ctx) => {
+        return this.adapter.findOne(args, ctx);
       }
     );
   }
@@ -62,8 +62,8 @@ export class Repository<T extends Record<string, any>> {
         operation: "create",
         metadata: metadata,
       },
-      async () => {
-        const result = await this.adapter.create(args);
+      async (ctx) => {
+        const result = await this.adapter.create(args, ctx);
         return result;
       }
     );
@@ -79,8 +79,8 @@ export class Repository<T extends Record<string, any>> {
         operation: "createMany",
         metadata: metadata,
       },
-      async () => {
-        return this.adapter.createMany(args);
+      async (ctx) => {
+        return this.adapter.createMany(args, ctx);
       }
     );
   }
@@ -92,8 +92,8 @@ export class Repository<T extends Record<string, any>> {
         operation: "update",
         metadata: metadata,
       },
-      async () => {
-        return this.adapter.update(args);
+      async (ctx) => {
+        return this.adapter.update(args, ctx);
       }
     );
   }
@@ -108,8 +108,8 @@ export class Repository<T extends Record<string, any>> {
         operation: "updateMany",
         metadata: metadata,
       },
-      async () => {
-        return this.adapter.updateMany(args);
+      async (ctx) => {
+        return this.adapter.updateMany(args, ctx);
       }
     );
   }
@@ -121,8 +121,8 @@ export class Repository<T extends Record<string, any>> {
         operation: "upsert",
         metadata: metadata,
       },
-      async () => {
-        return this.adapter.upsert(args);
+      async (ctx) => {
+        return this.adapter.upsert(args, ctx);
       }
     );
   }
@@ -137,8 +137,8 @@ export class Repository<T extends Record<string, any>> {
         operation: "delete",
         metadata: metadata,
       },
-      async () => {
-        const result = await this.adapter.delete(args);
+      async (ctx) => {
+        const result = await this.adapter.delete(args, ctx);
         return result;
       }
     );
@@ -158,8 +158,8 @@ export class Repository<T extends Record<string, any>> {
         operation: methodName,
         metadata: metadata,
       },
-      async () => {
-        return this.adapter[methodName](args);
+      async (ctx) => {
+        return this.adapter[methodName](args, ctx);
       }
     );
   }

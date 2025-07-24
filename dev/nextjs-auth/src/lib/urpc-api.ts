@@ -32,6 +32,7 @@ export const api = URPC.init({
                 name: session.user.name,
                 email: session.user.email,
                 roles: [session.user.role || ""],
+                activeOrganizationId: session.session.activeOrganizationId,
               }
             : null;
           return user;
@@ -55,11 +56,11 @@ export const api = URPC.init({
       // allowApiCrud: true, // Allows all CRUD operations
       // allowApiCrud: "admin", // Only users with the 'admin' role can update
       // allowApiDelete: ["admin", "manager"], // Only users with 'admin' or 'manager' roles can delete,
-      allowApiCrud: (user: AuthUser | null) => {
-        console.log("user=>", user);
-        return user?.name == "Jane";
-      }, // Only the user 'Jane' can read
-      // allowApiRead: (user, entityData) => {
+      // allowApiCrud: (user: AuthUser | null) => {
+      //   console.log("user=>", user);
+      //   return user?.name == "osdodo";
+      // }, // Only the user 'Jane' can read
+      // allowApiUpdate: (user, entityData) => {
       //   console.log("entityData=>", entityData);
       //   console.log("user=>", user);
       //   if (Array.isArray(entityData)) {
@@ -67,6 +68,15 @@ export const api = URPC.init({
       //   }
       //   return entityData?.authorId == user?.id;
       // }, // Users can only update posts they own
+      
+      allowApiCrud: (user, entityData) => {
+        console.log("entityData=>", entityData);
+        console.log("user=>", user);
+        if (Array.isArray(entityData)) {
+          return true;
+        }
+        return entityData?.orgId == user?.activeOrganizationId;
+      },
 
       // allowApiCreate
       // allowApiUpdate

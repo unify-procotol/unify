@@ -46,6 +46,8 @@ export function auth<T extends Record<string, any>>(
       }
     }
 
+    context.user = authUser;
+
     const { data, ok } = await checkPermission(
       entityConfig,
       operation,

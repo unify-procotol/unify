@@ -13,7 +13,7 @@ const token = generateToken({
 console.log("token=>", token);
 
 URPC.init({
-  baseUrl: "http://localhost:3000",
+  baseUrl: "http://localhost:9000",
   timeout: 10000,
   // headers: {
   //   Authorization: `Bearer ${token}`,
