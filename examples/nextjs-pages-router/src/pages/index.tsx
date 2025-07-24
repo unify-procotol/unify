@@ -20,14 +20,14 @@ export default function Home() {
     const fetchWalletData = async (
       source: "evm" | "solana",
       address: string,
-      network?: string
+      chainId?: number
     ) => {
       try {
         const data = await repo<WalletEntity>({
           entity: "wallet",
           source,
         }).findOne({
-          where: { address, ...(network && { network }) },
+          where: { address, ...(chainId && { chainId }) },
         });
         return data;
       } catch (error) {
@@ -43,7 +43,7 @@ export default function Home() {
           fetchWalletData(
             "evm",
             "0x8E76cAEbaca6c0e390F825fa44Dfd1fCb74B9C36",
-            "ethereum"
+            1
           ),
           fetchWalletData("solana", "11111111111111111111111111111112"),
         ]);
@@ -109,11 +109,11 @@ export default function Home() {
               </p>
             </div>
 
-            {data.network && (
+            {data.chainId && (
               <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
-                <p className="text-sm text-white/80 mb-1">Network</p>
+                <p className="text-sm text-white/80 mb-1">Chain ID</p>
                 <p className="text-white font-semibold capitalize">
-                  {data.network}
+                  {data.chainId}
                 </p>
               </div>
             )}

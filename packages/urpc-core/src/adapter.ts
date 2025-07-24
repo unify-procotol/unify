@@ -1,13 +1,10 @@
 import {
-  CallArgs,
   CreationArgs,
   CreateManyArgs,
   DataSourceAdapter,
   DeletionArgs,
   FindManyArgs,
   FindOneArgs,
-  PageRouterStreamResponse,
-  ReqCtx,
   UpdateArgs,
   UpdateManyArgs,
   UpsertArgs,
@@ -39,12 +36,6 @@ export class BaseAdapter<T extends Record<string, any>>
     throw new URPCError(ErrorCodes.NOT_FOUND, "Method not implemented.");
   }
   async delete(args: DeletionArgs<T>): Promise<boolean> {
-    throw new URPCError(ErrorCodes.NOT_FOUND, "Method not implemented.");
-  }
-  async call(
-    args: CallArgs<T>,
-    ctx?: ReqCtx
-  ): Promise<T | Response | PageRouterStreamResponse> {
     throw new URPCError(ErrorCodes.NOT_FOUND, "Method not implemented.");
   }
   [methodName: string]: any;

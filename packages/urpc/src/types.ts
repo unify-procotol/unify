@@ -1,8 +1,4 @@
 import type {
-  Middleware,
-  Plugin,
-  EntityConfigs,
-  DataSourceAdapter,
   FindManyArgs,
   FindOneArgs,
   CreationArgs,
@@ -11,11 +7,11 @@ import type {
   UpdateManyArgs,
   UpsertArgs,
   DeletionArgs,
-  CallArgs,
+  BaseURPCConfig,
 } from "@unilab/urpc-core";
 
 export interface RepoOptions<T extends Record<string, any>> {
-  entity: string | { new (): T; name: string };
+  entity: string | { new (...args: any[]): T; displayName?: string };
   source?: string;
   context?: {
     lang?: string;
@@ -45,17 +41,11 @@ export interface ProxyRepo<T extends Record<string, any>> {
   updateMany(args: UpdateManyArgs<T>): Promise<T[]>;
   upsert(args: UpsertArgs<T>): Promise<T>;
   delete(args: DeletionArgs<T>): Promise<boolean>;
-  call(args: CallArgs<T>): Promise<T | Response>;
   // custom methods
-  [key: string]: (args: any) => Promise<any>;
+  [funcName: string]: (args: any) => Promise<any>;
 }
 
-export interface LocalConfig {
-  plugins: Plugin[];
-  middlewares?: Middleware<any>[];
-  entityConfigs?: EntityConfigs;
-  globalAdapters?: (new () => DataSourceAdapter<any>)[];
-}
+export interface LocalConfig extends BaseURPCConfig {}
 
 export interface HttpClientConfig {
   baseUrl: string;

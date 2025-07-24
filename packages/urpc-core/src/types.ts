@@ -77,20 +77,6 @@ export interface DeletionArgs<T extends Record<string, any>> {
   where: WhereCondition<T>;
 }
 
-export type CallArgs<T extends Record<string, any>> = Partial<T>;
-
-export type ReqCtx = {
-  stream?: boolean;
-  honoCtx?: any;
-  nextRequest?: any;
-  nextApiRequest?: any;
-};
-
-export interface PageRouterStreamResponse {
-  __isPageRouterStream: true;
-  streamHandler: (res: any) => Promise<void>;
-}
-
 export interface DataSourceAdapter<T extends Record<string, any>> {
   findMany(args?: FindManyArgs<T>): Promise<T[]>;
   findOne(args: FindOneArgs<T>): Promise<T | null>;
@@ -100,12 +86,8 @@ export interface DataSourceAdapter<T extends Record<string, any>> {
   updateMany(args: UpdateManyArgs<T>): Promise<T[]>;
   upsert(args: UpsertArgs<T>): Promise<T>;
   delete(args: DeletionArgs<T>): Promise<boolean>;
-  call(
-    args: CallArgs<T>,
-    ctx?: ReqCtx
-  ): Promise<T | Response | PageRouterStreamResponse>;
   // custom methods
-  [methodName: string]: any;
+  [funcName: string]: (args: any) => Promise<any>;
 }
 
 export interface MiddlewareMetadata {

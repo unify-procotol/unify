@@ -1,12 +1,12 @@
 import { BaseURPC } from "@unilab/urpc-core";
 import type {
-  LocalConfig,
   HttpClientConfig,
   HybridConfig,
   URPCConfig,
   RepoOptions,
   JoinRepoOptions,
   ProxyRepo,
+  LocalConfig,
 } from "./types";
 import { isHttpClientConfig, isLocalConfig, isHybridConfig } from "./utils";
 import {
@@ -146,7 +146,7 @@ export function repo<T extends Record<string, any>>(
 
 export function joinRepo<
   F extends Record<string, any> = Record<string, any>,
-  L extends Record<string, any> = Record<string, any>,
+  L extends Record<string, any> = Record<string, any>
 >(options: JoinRepoOptions<F, L>): ProxyRepo<F> {
   return URPC.joinRepo<F, L>(options);
 }

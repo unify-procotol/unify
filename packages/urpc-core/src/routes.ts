@@ -5,6 +5,5 @@ export const MethodsForPost = [
   "update",
   "updateMany",
   "upsert",
-  "delete",
-  "call",
+  "delete"
 ];
