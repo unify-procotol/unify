@@ -1,0 +1,6 @@
+name = "unify-ai-chat"
+compatibility_date = "2024-12-01"
+pages_build_output_dir = ".next"
+
+[env.production]
+compatibility_date = "2024-12-01" 
