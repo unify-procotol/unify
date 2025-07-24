@@ -77,11 +77,12 @@ export class URPC extends BaseURPC {
   private static setupHttpMode(config: HttpClientConfig): void {
     this.mode = Mode.Http;
     this.httpConfig = {
-      timeout: 5000,
+      baseUrl: config.baseUrl,
+      timeout: config.timeout || 5000,
       headers: {
         "Content-Type": "application/json",
+        ...config.headers,
       },
-      ...config,
     };
   }
 
@@ -159,7 +160,7 @@ export function repo<T extends Record<string, any>>(
 
 export function joinRepo<
   F extends Record<string, any> = Record<string, any>,
-  L extends Record<string, any> = Record<string, any>
+  L extends Record<string, any> = Record<string, any>,
 >(options: JoinRepoOptions<F, L>): ProxyRepo<F> {
   return URPC.joinRepo<F, L>(options);
 }
