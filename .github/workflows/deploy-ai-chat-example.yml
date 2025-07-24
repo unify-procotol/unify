@@ -13,9 +13,9 @@ jobs:
     uses: ./.github/workflows/cloudflare-deploy-reusable.yml
     with:
       working-directory: ./examples/ai-chat-example
-      project-name: unify-ai-chat
+      project-name: ai-chat-example
       branch-name: main
-      build-command: npm run build
+      build-command: 'bun run pages:build'
     secrets:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }} 
