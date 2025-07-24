@@ -69,6 +69,7 @@ export class URPC extends BaseURPC {
           entity,
           source,
           context,
+          nextApiRequest: req,
         });
         return res.status(200).json({ data: result });
       }
@@ -80,6 +81,7 @@ export class URPC extends BaseURPC {
           entity,
           source,
           context,
+          nextApiRequest: req,
         });
         return res.status(200).json({ data: result });
       }
@@ -90,6 +92,7 @@ export class URPC extends BaseURPC {
         entity,
         source,
         context,
+        nextApiRequest: req,
       });
       return res.status(200).json({ data: result });
     } catch (error) {

@@ -97,6 +97,8 @@ export interface MiddlewareMetadata {
     lang?: string;
   };
   honoContext?: any;
+  nextApiRequest?: any;
+  nextRequest?: any;
 }
 
 export type MiddlewareContext<T extends Record<string, any>> = {

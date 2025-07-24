@@ -1,7 +1,8 @@
 import { URPC } from "@unilab/urpc-hono";
 import { Plugin } from "@unilab/urpc-core";
 import { GhostAdapter } from "./adapters/ghost";
-import { i18nAI, logging } from "@unilab/urpc-core/middleware";
+import { i18nAI } from "./middleware/i18n";
+import { logging } from "@unilab/urpc-core/middleware";
 import { PostEntity } from "./entities/post";
 import { UserEntity } from "./entities/user";
 import { UserAdapter } from "./adapters/user";

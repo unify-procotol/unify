@@ -1,13 +1,12 @@
-import { repo, URPC } from "@unilab/urpc-hono";
-export { Allow } from "@unilab/urpc-core";
+import { URPC } from "@unilab/urpc-next/app-router";
 import { Allow, AuthUser, Plugin } from "@unilab/urpc-core";
-import { GhostAdapter } from "./adapters/ghost";
-import { auth } from "@unilab/urpc-core/middleware";
-import { PostEntity } from "./entities/post";
 import { UserEntity } from "./entities/user";
+import { PostEntity } from "./entities/post";
+import { GhostAdapter } from "./adapters/ghost";
 import { UserAdapter } from "./adapters/user";
-import { Context } from "hono";
-import { decodeToken } from "./jwt";
+import { auth } from "@unilab/urpc-core/middleware";
+import { auth as betterAuth } from "./auth";
+import { headers } from "next/headers";
 
 const GhostPlugin: Plugin = {
   entities: [PostEntity, UserEntity],
@@ -17,18 +16,24 @@ const GhostPlugin: Plugin = {
   ],
 };
 
-const app = URPC.init({
+export const api = URPC.init({
   plugins: [GhostPlugin],
   middlewares: [
     auth({
-      getUser: async (c: Context) => {
+      getUser: async (request: any) => {
         try {
-          const token = c.req.header("Authorization")?.split(" ")[1];
-          if (!token) {
-            return null;
-          }
-          const user = decodeToken(token);
-          console.log("getUser=>", user);
+          const session = await betterAuth.api.getSession({
+            headers: await headers(),
+          });
+          console.log("session=>", session);
+          const user = session
+            ? {
+                id: session.user.id,
+                name: session.user.name,
+                email: session.user.email,
+                roles: [session.user.role || ""],
+              }
+            : null;
           return user;
         } catch (error) {
           return null;
@@ -50,15 +55,18 @@ const app = URPC.init({
       // allowApiCrud: true, // Allows all CRUD operations
       // allowApiCrud: "admin", // Only users with the 'admin' role can update
       // allowApiDelete: ["admin", "manager"], // Only users with 'admin' or 'manager' roles can delete,
-      // allowApiCrud: (user: AuthUser | null) => user?.name == "Jane", // Only the user 'Jane' can read
-      allowApiRead: (user, entityData) => {
-        console.log("entityData=>", entityData);
+      allowApiCrud: (user: AuthUser | null) => {
         console.log("user=>", user);
-        if (Array.isArray(entityData)) {
-          return true;
-        }
-        return entityData?.authorId == user?.id;
-      }, // Users can only update posts they own
+        return user?.name == "Jane";
+      }, // Only the user 'Jane' can read
+      // allowApiRead: (user, entityData) => {
+      //   console.log("entityData=>", entityData);
+      //   console.log("user=>", user);
+      //   if (Array.isArray(entityData)) {
+      //     return true;
+      //   }
+      //   return entityData?.authorId == user?.id;
+      // }, // Users can only update posts they own
 
       // allowApiCreate
       // allowApiUpdate
@@ -66,9 +74,3 @@ const app = URPC.init({
     },
   },
 });
-
-export default {
-  port: 3000,
-  timeout: 30000,
-  fetch: app.fetch,
-};

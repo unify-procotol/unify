@@ -34,8 +34,16 @@ export function auth<T extends Record<string, any>>(
     }
 
     let authUser: AuthUser | null = null;
-    if (options.getUser && metadata?.honoContext) {
-      authUser = await options.getUser(metadata.honoContext);
+    if (options.getUser) {
+      if (metadata?.honoContext) {
+        authUser = await options.getUser(metadata.honoContext);
+      }
+      if (metadata?.nextApiRequest) {
+        authUser = await options.getUser(metadata.nextApiRequest);
+      }
+      if (metadata?.nextRequest) {
+        authUser = await options.getUser(metadata.nextRequest);
+      }
     }
 
     const { data, ok } = await checkPermission(

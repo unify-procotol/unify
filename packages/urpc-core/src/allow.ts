@@ -3,7 +3,7 @@ import { AuthUser } from "./types";
 export class Allow {
   static everyone = (): boolean => true;
 
-  static authenticated = (user?: AuthUser): boolean => {
+  static authenticated = (user?: AuthUser | null): boolean => {
     return !!user;
   };
 
