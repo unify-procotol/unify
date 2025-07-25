@@ -11,25 +11,18 @@ description: Logging Middleware is a powerful middleware that automatically logs
 
 ## Basic Usage
 
-### Default Console Logging
-
-The simplest way to use logging middleware is with the default console logger:
-
 ```typescript
-import { Logging } from '@unilab/urpc-core/middleware';
+import { logging } from "@unilab/urpc-core/middleware";
 
 const app = URPC.init({
-  middlewares: [Logging()],
+  middlewares: [logging()],
 });
-
 ```
 
 ### Custom Logger Implementation
 
-You can provide your own logging function for custom log formatting or integration with external logging services:
-
 ```typescript
-import { Logging } from '@unilab/urpc-core/middleware';
+import { logging } from "@unilab/urpc-core/middleware";
 
 // Custom logger function
 const customLogger = (message: string, context?: any) => {
@@ -38,90 +31,25 @@ const customLogger = (message: string, context?: any) => {
 };
 
 const app = URPC.init({
-  middlewares: [Logging(customLogger)],
-});
-```
-
-## Logger Function Signature
-
-The logger function receives two parameters:
-
-```typescript
-type LoggerFunction = (
-  message: string,    // Formatted log message
-  context?: any       // Additional context data
-) => void;
-```
-
-### Message Format
-
-The middleware generates structured log messages:
-- **Start**: `[{operation}] Starting operation`
-- **Success**: `[{operation}] Operation completed in {duration}ms`
-- **Error**: `[{operation}] Operation failed after {duration}ms`
-
-### Context Data
-
-The context object contains:
-- `args`: Operation arguments passed to the repository method
-- `result`: Operation result (for successful operations)
-- `error`: Error object (for failed operations)
-
-## Advanced Usage Examples
-
-### File-Based Logging
-
-```typescript
-class CustomLogger {
-  private logs: string[] = [];
-
-  log(message: string, context?: any): void {
-    const timestamp = new Date().toISOString();
-    const logEntry = `[${timestamp}] ${message}`;
-
-    if (context) {
-      console.log(logEntry, context);
-      this.logs.push(`${logEntry} ${JSON.stringify(context)}`);
-    } else {
-      console.log(logEntry);
-      this.logs.push(logEntry);
-    }
-  }
-
-  getLogs(): string[] {
-    return [...this.logs];
-  }
-
-  clear(): void {
-    this.logs = [];
-  }
-}
-
-const customLogger = new CustomLogger();
-const customLoggingMiddleware = Logging((message, context) =>
-  customLogger.log(`CUSTOM: ${message}`, context)
-);
-
-const app = URPC.init({
-  middlewares: [customLoggingMiddleware],
+  middlewares: [logging(customLogger)],
 });
 ```
 
 ### Integration with External Logging Services
 
 ```typescript
-import winston from 'winston';
+import winston from "winston";
 
 const logger = winston.createLogger({
-  level: 'info',
+  level: "info",
   format: winston.format.json(),
   transports: [
-    new winston.transports.File({ filename: 'error.log', level: 'error' }),
-    new winston.transports.File({ filename: 'combined.log' })
-  ]
+    new winston.transports.File({ filename: "error.log", level: "error" }),
+    new winston.transports.File({ filename: "combined.log" }),
+  ],
 });
 
-const winstonLoggingMiddleware = Logging((message, context) => {
+const winstonLogging = logging((message, context) => {
   if (context?.error) {
     logger.error(message, context);
   } else {
@@ -130,7 +58,7 @@ const winstonLoggingMiddleware = Logging((message, context) => {
 });
 
 const app = URPC.init({
-  middlewares: [winstonLoggingMiddleware],
+  middlewares: [winstonLogging],
 });
 ```
 
@@ -139,10 +67,10 @@ const app = URPC.init({
 ```typescript
 const conditionalLogger = (message: string, context?: any) => {
   // Only log slow operations (> 1000ms)
-  if (message.includes('completed') || message.includes('failed')) {
+  if (message.includes("completed") || message.includes("failed")) {
     const durationMatch = message.match(/(\d+)ms/);
     const duration = durationMatch ? parseInt(durationMatch[1]) : 0;
-    
+
     if (duration > 1000) {
       console.warn(`SLOW OPERATION: ${message}`, context);
     }
@@ -151,32 +79,8 @@ const conditionalLogger = (message: string, context?: any) => {
   }
 };
 
-const conditionalLoggingMiddleware = Logging(conditionalLogger);
+const conditionalLogging = logging(conditionalLogger);
 ```
-
-## Performance Considerations
-
-- **Logging Overhead**: The middleware adds minimal overhead, primarily from timing operations
-- **Context Serialization**: Large result objects in context may impact performance
-- **Async Loggers**: Ensure your custom logger handles async operations properly if needed
-- **Log Volume**: Consider log rotation and cleanup for high-traffic applications
-
-## Best Practices
-
-1. **Use Appropriate Log Levels**: Implement log levels in your custom logger
-2. **Sanitize Sensitive Data**: Remove passwords, tokens, and PII from logged context
-3. **Configure for Environment**: Use different logging strategies for development vs production
-4. **Monitor Log Volume**: Implement log rotation and archival strategies
-5. **Structure Your Logs**: Use consistent log formats for easier parsing and analysis
-6. **Handle Errors Gracefully**: Ensure logging failures don't break your application
-
-## Troubleshooting
-
-### Common Issues
-
-**Logs Not Appearing**: Ensure the middleware is registered before repository operations
-**Performance Impact**: Consider reducing context data or using async loggers
-**Memory Usage**: Implement log rotation for long-running applications
 
 ### Debug Mode
 
@@ -184,11 +88,10 @@ For development, you can create a debug-specific logger:
 
 ```typescript
 const debugLogger = (message: string, context?: any) => {
-  if (process.env.NODE_ENV === 'development') {
+  if (process.env.NODE_ENV === "development") {
     console.debug(`[DEBUG] ${message}`, context);
   }
 };
 
-const debugLoggingMiddleware = Logging(debugLogger);
+const debugLogging = logging(debugLogger);
 ```
-

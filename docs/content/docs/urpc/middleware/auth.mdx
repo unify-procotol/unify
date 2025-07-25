@@ -1,0 +1,194 @@
+---
+title: Auth Middleware
+description: Authentication middleware for URPC
+---
+
+## Basic Usage
+
+```typescript
+import { URPC } from "@unilab/urpc-hono";
+import { auth } from "@unilab/urpc-core/middleware";
+import { Allow } from "@unilab/urpc-core";
+
+const app = URPC.init({
+  middlewares: [
+    auth({
+      getUser: async (c: Context) => {
+        try {
+          const token = c.req.header("Authorization")?.split(" ")[1];
+          if (!token) {
+            return null;
+          }
+          const user = decodeToken(token);
+          return user;
+        } catch (error) {
+          return null;
+        }
+      },
+    }),
+  ],
+});
+```
+
+## Entity Access Control
+
+### Built-in Allow Options
+
+```typescript
+const app = URPC.init({
+  entityConfigs: {
+    post: {
+      // Only authenticated users can perform CRUD operations
+      allowApiCrud: Allow.authenticated,
+
+      // Allows all CRUD operations
+      allowApiCrud: Allow.everyone,
+
+      // Same as Allow.everyone
+      allowApiCrud: true,
+    },
+  },
+});
+```
+
+### Role-based Access Control
+
+```typescript
+const app = URPC.init({
+  entityConfigs: {
+    post: {
+      // Only users with the 'admin' role can update
+      allowApiCrud: "admin",
+
+      // Only users with 'admin' or 'manager' roles can delete
+      allowApiDelete: ["admin", "manager"],
+    },
+  },
+});
+```
+
+### Custom Authorization Functions
+
+```typescript
+const app = URPC.init({
+  entityConfigs: {
+    post: {
+      // Only the user 'Jane' can read
+      allowApiCrud: (user: AuthUser | null) => user?.name == "Jane",
+
+      // Users can only read posts they own
+      allowApiRead: (user, entityData) => {
+        if (Array.isArray(entityData)) {
+          return true;
+        }
+        return entityData?.authorId == user?.id;
+      },
+    },
+  },
+});
+```
+
+### Granular Permissions
+
+```typescript
+const app = URPC.init({
+  entityConfigs: {
+    post: {
+      allowApiCreate: Allow.authenticated,
+      allowApiRead: Allow.everyone,
+      allowApiUpdate: (user, entityData) => entityData?.authorId == user?.id,
+      allowApiDelete: ["admin", "manager"],
+    },
+  },
+});
+```
+
+### Client Configuration
+
+```typescript
+import { URPC } from "@unilab/urpc";
+
+URPC.init({
+  baseUrl: "http://localhost:9000",
+  timeout: 10000,
+});
+
+URPC.setHeaders({
+  Authorization: `Bearer ${token}`,
+});
+```
+
+## Better-Auth Integration
+
+### Better-Auth Setup
+
+```typescript
+import { betterAuth } from "better-auth";
+import { admin, organization } from "better-auth/plugins";
+import { Pool } from "pg";
+
+export const auth = betterAuth({
+  database: new Pool({
+    connectionString: process.env.DATABASE_URL!,
+    ssl: {},
+  }),
+  socialProviders: {
+    github: {
+      clientId: process.env.GITHUB_CLIENT_ID!,
+      clientSecret: process.env.GITHUB_CLIENT_SECRET!,
+    },
+    google: {
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    },
+  },
+  session: {
+    expiresIn: 60 * 60 * 24 * 30, // 30 days
+  },
+  plugins: [admin(), organization()],
+});
+```
+
+### URPC Integration with Better-Auth
+
+```typescript
+import { URPC } from "@unilab/urpc-next/app-router";
+import { auth as authMiddleware } from "@unilab/urpc-core/middleware";
+import { auth as betterAuth } from "./lib/auth";
+import { headers } from "next/headers";
+
+export const api = URPC.init({
+  middlewares: [
+    authMiddleware({
+      getUser: async (request: any) => {
+        try {
+          const session = await betterAuth.api.getSession({
+            headers: await headers(),
+          });
+
+          const user = session
+            ? {
+                id: session.user.id,
+                name: session.user.name,
+                email: session.user.email,
+                roles: [session.user.role || ""],
+                activeOrganizationId: session.session.activeOrganizationId,
+              }
+            : null;
+          return user;
+        } catch (error) {
+          return null;
+        }
+      },
+    }),
+  ],
+  entityConfigs: {
+    post: {
+      allowApiCreate: Allow.authenticated,
+      allowApiRead: Allow.everyone,
+      allowApiUpdate: (user, entityData) => entityData?.authorId == user?.id,
+      allowApiDelete: ["admin", "manager"],
+    },
+  },
+});
+```

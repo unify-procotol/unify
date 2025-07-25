@@ -1,0 +1,82 @@
+---
+title: Cache Middleware
+description: Cache Middleware for URPC
+---
+
+### Configure Cache Provider
+
+```typescript
+// bentocache.ts
+import Redis from "ioredis";
+import { BentoCache, bentostore } from "bentocache";
+import { memoryDriver } from "bentocache/drivers/memory";
+import { redisDriver } from "bentocache/drivers/redis";
+
+export const bentocache = new BentoCache({
+  prefix: "urpc-demo",
+  default: "multitier",
+  stores: {
+    multitier: bentostore()
+      .useL1Layer(memoryDriver({ maxItems: 300, maxSize: 10_000_000 }))
+      .useL2Layer(
+        redisDriver({
+          connection: new Redis({
+            host: process.env.REDIS_HOST!,
+            port: parseInt(process.env.REDIS_PORT!),
+            password: process.env.REDIS_PASSWORD!,
+            connectionName: "urpc-demo",
+            tls: {
+              servername: process.env.REDIS_HOST!,
+            },
+            maxRetriesPerRequest: 5,
+            db: 0,
+          }),
+        })
+      ),
+  },
+  timeout: "1s",
+  hardTimeout: "5s",
+  ttl: "1m",
+  grace: "24h",
+  graceBackoff: "1m",
+});
+```
+
+### Apply Cache Middleware
+
+```typescript
+import { URPC } from "@unilab/urpc-hono";
+import { cache } from "@unilab/urpc-core/middleware";
+import { bentocache } from "./bentocache";
+
+const app = URPC.init({
+  middlewares: [
+    cache({
+      bentocache,
+    }),
+  ],
+});
+```
+
+### Cache Configuration
+
+```typescript
+const app = URPC.init({
+  entityConfigs: {
+    post: {
+      cache: {
+        findOne: true,
+      },
+      findMany: {
+        ttl: "5m",
+      },
+      // custom methods
+      call: {
+        ttl: "1m",
+        grace: "6h",
+      },
+      // create, update, delete methods not cached
+    },
+  },
+});
+```

@@ -1,184 +1,7 @@
 ---
 title: Relations
 description: Relations in URPC allow you to define connections between different entities using flexible callback functions. This approach enables you to query related data in a single request with complete control over the relation logic.
-
 ---
-
-## Overview
-
-URPC supports flexible relation queries through callback functions:
-- **One-to-Many Relations**: Load multiple related entities for each main entity
-- **One-to-One Relations**: Load a single related entity for each main entity
-- **Custom Logic**: Define complex relation logic based on any entity properties
-- **Join Repository**: Use `joinRepo` for optimized relation mappings
-
-## Key Concepts
-
-### Callback-Based Relations
-
-Instead of pre-defining relations with decorators, you define relation logic at query time using callback functions:
-
-- For `findOne` queries: callbacks receive the single entity as parameter
-- For `findMany` queries: callbacks receive an array of entities as parameter
-
-### Type Safety
-
-The relation callbacks are fully type-safe and automatically inferred based on the query type:
-
-```typescript
-// findOne - callback receives single entity
-include: {
-  user: (post: PostEntity) => Promise<UserEntity | null>
-}
-
-// findMany - callback receives entity array  
-include: {
-  posts: (users: UserEntity[]) => Promise<PostEntity[]>
-}
-```
-
-### Join Repository
-
-The `joinRepo` function provides an optimized way to handle relations with explicit field mappings:
-
-```typescript
-import { joinRepo } from "@unilab/urpc";
-
-joinRepo<PostEntity, UserEntity>({
-  entity: "post",
-  source: "demo",
-  localField: "id",
-  foreignField: "userId",
-})
-```
-
-## Entity Definition
-
-Entities are defined with `@Fields` decorators but relations are handled via callback functions:
-
-**entities/user.ts**
-```typescript
-import { Fields } from "@unilab/urpc-core";
-import { PostEntity } from "./post";
-
-export class UserEntity {
-  @Fields.string()
-  id = "";
-
-  @Fields.string()
-  name = "";
-
-  @Fields.string()
-  email = "";
-
-  @Fields.string()
-  avatar = "";
-
-  @Fields.array(() => PostEntity, {
-    optional: true,
-  })
-  posts?: PostEntity[];
-}
-```
-
-**entities/post.ts**
-```typescript
-import { Fields } from "@unilab/urpc-core";
-import type { UserEntity } from "./user";
-
-export class PostEntity {
-  @Fields.string()
-  id = "";
-
-  @Fields.string()
-  title = "";
-
-  @Fields.string()
-  content = "";
-
-  @Fields.string()
-  userId = "";
-
-  @Fields.record(() => require("./user").UserEntity, {
-    optional: true,
-  })
-  user?: UserEntity;
-}
-```
-
-## Server Setup
-
-Configure your server with the URPC framework and register your adapters:
-
-```typescript
-import { URPC } from "@unilab/urpc-hono";
-import { UserAdapter } from "./adapters/user";
-import { PostAdapter } from "./adapters/post";
-import { UserEntity } from "./entities/user";
-import { PostEntity } from "./entities/post";
-import { createHookMiddleware, Logging } from "@unilab/urpc-core/middleware";
-import { Plugin } from "@unilab/urpc-core";
-
-const MyPlugin: Plugin = {
-  entities: [UserEntity, PostEntity],
-  adapters: [
-    { source: "demo", entity: "UserEntity", adapter: new UserAdapter() },
-    { source: "demo", entity: "PostEntity", adapter: new PostAdapter() },
-  ],
-};
-
-const app = URPC.init({
-  plugins: [MyPlugin],
-  middlewares: [Logging()],
-});
-
-export default {
-  port: 3000,
-  fetch: app.fetch,
-};
-```
-
-## Adapter Implementation
-
-Your adapters need to support query operators like `$in` for efficient relation queries:
-
-```typescript
-import { BaseAdapter, FindManyArgs } from "@unilab/urpc-core";
-import { PostEntity } from "../entities/post";
-
-class PostAdapter extends BaseAdapter<PostEntity> {
-  async findMany(args?: FindManyArgs<PostEntity>): Promise<PostEntity[]> {
-    const where = args?.where || {};
-    
-    // Handle userId filtering with operators
-    if (where.userId) {
-      if (typeof where.userId === "object") {
-        // Handle $in operator for batch queries
-        if (where.userId.$in) {
-          return postData.filter((post) =>
-            where.userId.$in.includes(post.userId)
-          );
-        }
-        // Handle $eq operator
-        if (where.userId.$eq) {
-          return postData.filter(
-            (post) => post.userId === where.userId.$eq
-          );
-        }
-      } else {
-        // Direct value comparison
-        return postData.filter((post) => post.userId === where.userId);
-      }
-    }
-    
-    return postData;
-  }
-  
-  // ... other methods
-}
-```
-
-## Querying Relations
 
 ### Using Regular Repo for Simple Relations
 
@@ -221,19 +44,16 @@ const fetchUser = async () => {
     entity: "user",
     source: "demo",
   }).findMany({
-    where: {
-      id: "2",
-    },
     include: {
       posts: (userList) => {
         const ids = userList.map((user) => user.id);
-        
+
         // Use joinRepo for optimized relation mapping, if you don't set the where parameter, you must use joinRepo, but in other cases you can use repo directly.
         return joinRepo<PostEntity, UserEntity>({
           entity: "post",
           source: "demo",
-          localField: "id",        // User.id
-          foreignField: "userId",  // Post.userId
+          localField: "id", // User.id
+          foreignField: "userId", // Post.userId
         }).findMany({
           where: {
             userId: {
@@ -249,8 +69,6 @@ const fetchUser = async () => {
 ```
 
 ### One-to-One Relations (findOne)
-
-For `findOne` queries, relation callbacks receive the single entity:
 
 ```typescript
 // Query a post with its author
@@ -277,8 +95,6 @@ console.log("Post with author:", post);
 
 ### One-to-Many Relations (findMany)
 
-For `findMany` queries, relation callbacks receive an array of entities:
-
 ```typescript
 // Query users with their posts
 const users = await repo<UserEntity>({
@@ -303,97 +119,3 @@ const users = await repo<UserEntity>({
 
 console.log("Users with posts:", users);
 ```
-
-## When to Use joinRepo vs repo
-
-### Use `joinRepo` when:
-- You need explicit field mapping between entities
-- Working with queries that don't have specific where conditions
-- You want optimized relation handling
-- Building complex join operations
-
-### Use regular `repo` when:
-- You have specific where conditions in your queries
-- Simple, straightforward relation queries
-- Direct field access is sufficient
-
-## Client Setup
-
-Initialize the URPC client with your server configuration:
-
-```typescript
-import { URPC } from "@unilab/urpc";
-
-URPC.init({
-  baseUrl: "http://localhost:3000",
-  timeout: 10000,
-});
-```
-
-## Complete Example
-
-Here's a complete working example from the hono-basic implementation:
-
-```typescript
-import { UserEntity } from "./entities/user";
-import { PostEntity } from "./entities/post";
-import { repo, URPC, joinRepo } from "@unilab/urpc";
-
-URPC.init({
-  baseUrl: "http://localhost:3000",
-  timeout: 10000,
-});
-
-const fetchUser = async () => {
-  const data = await repo<UserEntity>({
-    entity: "user",
-    source: "demo",
-  }).findMany({
-    where: {
-      id: "2",
-    },
-    include: {
-      posts: (userList) => {
-        const ids = userList.map((user) => user.id);
-        
-        // If you don't set the where parameter, you must use joinRepo, but in other cases you can use repo directly.
-        return joinRepo<PostEntity, UserEntity>({
-          entity: "post",
-          source: "demo",
-          localField: "id",
-          foreignField: "userId",
-        }).findMany({
-          where: {
-            userId: {
-              $in: ids,
-            },
-          },
-        });
-      },
-    },
-  });
-};
-
-const createUser = async () => {
-  const data = await repo<UserEntity>({
-    entity: "user",
-    source: "demo",
-  }).create({
-    data: {
-      name: "John Doe",
-      email: "john.doe@example.com",
-      avatar: "https://example.com/avatar.jpg",
-    },
-  });
-};
-
-// Execute the functions
-fetchUser();
-createUser();
-```
-
-## Next Steps
-
-- Explore [Basic Usage](/docs/basic-usage) for general URPC concepts
-- Learn about [Framework Integrations](/docs/integrations) for frontend usage
-- Check out the [complete hono-basic example](https://github.com/unifi-lab/unify/tree/main/examples/hono-basic) in the repository

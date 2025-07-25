@@ -25,50 +25,35 @@ Get started with URPC in seconds using our CLI tool:
   </Tab>
 </Tabs>
 
-The CLI will guide you through project setup, install dependencies, and start the development server automatically.
-
 ## Manual Setup
 
-If you prefer to set up URPC manually:
-
-### 1. Install Dependencies
+### Install Dependencies
 
 ```package-install
 @unilab/urpc-hono @unilab/urpc @unilab/urpc-core @unilab/mastra-plugin
 ```
 
-### 2. Create Server
+### Create Server
 
 ```typescript
-// server.ts
 import { URPC } from "@unilab/urpc-hono";
 import { MastraPlugin } from "@unilab/mastra-plugin/hono";
-import { Logging } from "@unilab/urpc-core/middleware";
-import { UserEntity } from "./entities/user";
-import { UserAdapter } from "./adapters/user";
+import { logging } from "@unilab/urpc-core/middleware";
 import { MockAdapter } from "@unilab/urpc-adapters";
+import { UserEntity } from "./entities/user";
 
 const MyPlugin = {
   entities: [UserEntity],
-  // adapters: [
-  //   {
-  //     entity: "UserEntity",
-  //     source: "demo",
-  //     adapter: new UserAdapter(),
-  //   },
-  // ],
 };
 
 const app = URPC.init({
   plugins: [
     MyPlugin,
     MastraPlugin({
-      defaultModel: "openai/gpt-4o-mini",
       openrouterApiKey: process.env.OPENROUTER_API_KEY,
-      debug: true,
     }),
   ],
-  middlewares: [Logging()],
+  middlewares: [logging()],
   entityConfigs: {
     user: {
       defaultSource: "mock",
@@ -83,7 +68,7 @@ export default {
 };
 ```
 
-### 3. Use repo on the server side
+### Use repo on the server side
 
 ```typescript
 import { URPC } from "@unilab/urpc-hono";
@@ -99,10 +84,9 @@ await URPC.repo<UserEntity>({
 });
 ```
 
-### 4. Client Usage
+### Client Usage
 
 ```typescript
-// client.ts
 import { repo, URPC } from "@unilab/urpc";
 import { ChatEntity } from "@unilab/mastra-plugin/entities";
 import { UserEntity } from "./entities/user";
@@ -133,18 +117,3 @@ const aiResult = await repo<ChatEntity>({
 
 console.log(aiResult.output);
 ```
-
-## Running the Server
-
-```bash
-bun run server.ts
-# or
-node server.js
-```
-
-## Next Steps
-
-- Explore [Plugin Development](/docs/plugins/creating-plugins)
-- Learn about [Middleware](/docs/middleware/logging)
-- Check [Integration Guides](/docs/integrations/next)
-- Try [Mastra Plugin](/docs/plugins/mastra) for AI-powered natural language processing

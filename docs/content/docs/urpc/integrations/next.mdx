@@ -1,92 +1,61 @@
 ---
 title: Next.js Integration
 description: URPC provides complete Next.js support, including both App Router and Pages Router routing methods. This guide will show you how to integrate URPC in Next.js projects.
-
 ---
 
 ## Install Dependencies
-
-First, install the required dependency packages:
 
 ```package-install
 @unilab/urpc-next @unilab/urpc @unilab/urpc-core @unilab/uniweb3
 ```
 
-### App Router Additional Dependencies
-
-For App Router, no additional dependencies are required.
-
-### Pages Router Additional Dependencies
-
-For Pages Router, you need to additionally install:
-
-```package-install
-@hono/node-server hono
-```
-
 ## App Router Integration
 
-### Project Structure
-
-```
-nextjs-app-router/
-├── src/
-│   ├── api.ts                    # API configuration
-│   └── app/
-│       ├── api/
-│       │   └── [...urpc]/
-│       │       └── route.ts      # API routes
-│       ├── globals.css
-│       ├── layout.tsx
-│       └── page.tsx              # Main page
-├── package.json
-├── next.config.ts
-└── tsconfig.json
-```
-
-### API Configuration Setup
-
-Create API configuration in `src/api.ts`:
+Create API configuration in `src/lib/urpc-api.ts`:
 
 ```typescript
-import { Logging } from "@unilab/urpc-core/middleware";
 import { URPC } from "@unilab/urpc-next/app-router";
+import { logging } from "@unilab/urpc-core/middleware";
 import { WalletPlugin } from "@unilab/uniweb3";
 
 export const api = URPC.init({
   plugins: [WalletPlugin],
-  middlewares: [Logging()],
+  middlewares: [logging()],
 });
 ```
-
-### API Route Setup
 
 Create API routes in `src/app/api/[...urpc]/route.ts`:
 
 ```typescript
-import { api } from "../../../api";
+import { api } from "@/lib/urpc-api";
 
-export const { GET, POST, PATCH, DELETE } = api;
+export const { GET, POST } = api;
 ```
 
-### Client Usage
+Create urpc client in `src/lib/urpc-client.ts`:
+
+```typescript
+import { URPC } from "@unilab/urpc";
+
+export const initURPCClient = () => {
+  URPC.init({
+    baseUrl: "http://localhost:3000/api",
+    timeout: 10000,
+  });
+}
+```
 
 Using URPC client in page components:
 
 ```tsx
 "use client";
 
-import { repo, URPC } from "@unilab/urpc";
+import { initURPCClient } from "@/lib/urpc-client";
+import { repo } from "@unilab/urpc";
 import { WalletEntity } from "@unilab/uniweb3/entities";
 import { useEffect, useState } from "react";
 
-URPC.init({
-  baseUrl: "http://localhost:3000/api",
-  timeout: 10000,
-  headers: {
-    Authorization: "Bearer your-token-here",
-  },
-});
+initURPCClient()
 
 export default function Home() {
   const [evmBalanceData, setEvmBalanceData] = useState<any>(null);
@@ -101,7 +70,7 @@ export default function Home() {
         }).findOne({
           where: {
             address: "0x...",
-            network: "ethereum",
+            chainId: 1,
           },
         });
         if (data) {
@@ -145,42 +114,20 @@ export default function Home() {
 
 ## Pages Router Integration
 
-### Project Structure
-
-```
-nextjs-pages-router/
-├── src/
-│   ├── pages/
-│   │   ├── api/
-│   │   │   └── [...urpc].ts     # API routes
-│   │   ├── _app.tsx
-│   │   ├── _document.tsx
-│   │   └── index.tsx             # Main page
-│   └── styles/
-│       └── globals.css
-├── package.json
-├── next.config.ts
-└── tsconfig.json
-```
-
-### API Route Setup
-
 Create API routes in `src/pages/api/[...urpc].ts`:
 
 ```typescript
 import { URPC } from "@unilab/urpc-next/pages-router";
 import { WalletPlugin } from "@unilab/uniweb3";
-import { Logging } from "@unilab/urpc-core/middleware";
+import { logging } from "@unilab/urpc-core/middleware";
 
 const handler = URPC.init({
   plugins: [WalletPlugin],
-  middlewares: [Logging()],
+  middlewares: [logging()],
 });
 
 export default handler;
 ```
-
-### Client Usage
 
 Using URPC client in page components:
 
@@ -192,9 +139,6 @@ import { useEffect, useState } from "react";
 URPC.init({
   baseUrl: "http://localhost:3000/api",
   timeout: 10000,
-  headers: {
-    Authorization: "Bearer your-token-here",
-  },
 });
 
 export default function Home() {
@@ -210,7 +154,7 @@ export default function Home() {
         }).findOne({
           where: {
             address: "0x...",
-            network: "ethereum",
+            chainId: 1,
           },
         });
         if (data) {
@@ -251,29 +195,3 @@ export default function Home() {
   );
 }
 ```
-
-## Key Features
-
-### Plugins and Middleware
-
-Both App Router and Pages Router support:
-
-- **Plugins**: Extend functionality with plugins like `WalletPlugin`
-- **Middleware**: Add cross-cutting concerns like logging with `Logging()`
-
-### HTTP Methods Support
-
-The integration supports all standard HTTP methods:
-- `GET` - For read operations
-- `POST` - For create operations
-- `PATCH` - For update operations
-- `DELETE` - For delete operations
-
-### Client Configuration
-
-The `URPC` provides flexible configuration options:
-- **baseUrl**: API endpoint base URL
-- **timeout**: Request timeout in milliseconds
-- **headers**: Custom headers including authorization
-
-This integration provides a seamless way to use URPC in Next.js applications with both routing approaches.

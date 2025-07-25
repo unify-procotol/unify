@@ -11,24 +11,7 @@ First, install the required dependency packages:
 @unilab/urpc-hono @unilab/urpc @unilab/urpc-core @unilab/urpc-adapters hono @hono/node-server
 ```
 
-## Project Structure
-
-```
-hono-basic/
-├── entities/
-│   ├── user.ts               # User entity
-│   └── post.ts               # Post entity
-├── server.ts                 # Server setup
-├── client.ts                 # Client usage
-├── package.json
-└── tsconfig.json
-```
-
 ## Entity Definition
-
-Define your entities using URPC decorators:
-
-**User Entity:**
 
 ```typescript
 import { Fields } from "@unilab/urpc-core";
@@ -53,8 +36,6 @@ export class UserEntity {
   posts?: PostEntity[];
 }
 ```
-
-**Post Entity:**
 
 ```typescript
 import { Fields } from "@unilab/urpc-core";
@@ -82,14 +63,12 @@ export class PostEntity {
 
 ## Server Setup
 
-Configure your Hono server with URPC using MockAdapter for development:
-
 ```typescript
 import { URPC } from "@unilab/urpc-hono";
-import { UserEntity } from "./entities/user";
-import { PostEntity } from "./entities/post";
 import { Plugin } from "@unilab/urpc-core";
 import { MockAdapter } from "@unilab/urpc-adapters";
+import { UserEntity } from "./entities/user";
+import { PostEntity } from "./entities/post";
 
 const MyPlugin: Plugin = {
   entities: [UserEntity, PostEntity],
@@ -108,31 +87,6 @@ const app = URPC.init({
   globalAdapters: [MockAdapter],
 });
 
-// Initialize sample data
-await URPC.repo<UserEntity>({
-  entity: "UserEntity",
-  source: "mock",
-}).create({
-  data: {
-    id: "1",
-    name: "John Doe",
-    email: "john.doe@example.com",
-    avatar: "https://example.com/avatar.png",
-  },
-});
-
-await URPC.repo<PostEntity>({
-  entity: "PostEntity",
-  source: "mock",
-}).create({
-  data: {
-    id: "1",
-    title: "Post 1",
-    content: "Content 1",
-    userId: "1",
-  },
-});
-
 export default {
   port: 3000,
   timeout: 30000,
@@ -142,12 +96,10 @@ export default {
 
 ## Client Usage
 
-Use the URPC client to interact with your API with advanced relationship queries:
-
 ```typescript
+import { repo, URPC, joinRepo } from "@unilab/urpc";
 import { UserEntity } from "./entities/user";
 import { PostEntity } from "./entities/post";
-import { repo, URPC, joinRepo } from "@unilab/urpc";
 
 URPC.init({
   baseUrl: "http://localhost:3000",
@@ -165,7 +117,7 @@ const fetchUser = async () => {
     include: {
       posts: (userList) => {
         const ids = userList.map((user) => user.id);
-        
+
         // If you don't set the where parameter, you must use joinRepo, but in other cases you can use repo directly.
         return joinRepo<PostEntity, UserEntity>({
           entity: "post",
@@ -211,66 +163,3 @@ const fetchPost = async () => {
 fetchUser();
 fetchPost();
 ```
-
-## Running the Application
-
-Start your Hono server:
-
-```bash
-bun run dev
-# or
-bun run server.ts
-```
-
-Run the client to test the API:
-
-```bash
-bun run client
-# or  
-bun run client.ts
-```
-
-Your URPC-powered Hono API will be available at `http://localhost:3000`.
-
-## Key Features
-
-### Entity Configuration
-
-URPC allows you to configure default sources for entities:
-
-```typescript
-entityConfigs: {
-  user: {
-    defaultSource: "mock",  // Default adapter for user operations
-  },
-  post: {
-    defaultSource: "mock",  // Default adapter for post operations  
-  },
-}
-```
-
-### Global Adapters
-
-Use global adapters like MockAdapter for development:
-
-```typescript
-globalAdapters: [MockAdapter]
-```
-
-### Relationship Queries
-
-URPC supports complex relationship queries:
-
-- **Include**: Load related data with the main query
-- **JoinRepo**: Handle foreign key relationships efficiently
-- **Nested relationships**: Support for deep relationship loading
-
-### MockAdapter Benefits
-
-The MockAdapter provides:
-- In-memory data storage for development
-- No database setup required
-- Fast prototyping and testing
-- Automatic relationship handling
-
-This makes it perfect for getting started quickly with URPC and Hono integration.

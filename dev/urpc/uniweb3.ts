@@ -38,17 +38,17 @@ async function demo() {
   });
 
   console.log("data:", data);
-  // const client = data?.client;
-  // if (client) {
-  //   const blockNumber = await client.getBlockNumber();
-  //   console.log("blockNumber:", blockNumber);
-  // }
+  const client = data?.client;
+  if (client) {
+    const blockNumber = await client.getBlockNumber();
+    console.log("blockNumber:", blockNumber);
+  }
 
-  // const connection = data?.connection;
-  // if (connection) {
-  //   const blockHeight = await connection.getBlockHeight();
-  //   console.log("blockHeight:", blockHeight);
-  // }
+  const connection = data?.connection;
+  if (connection) {
+    const blockHeight = await connection.getBlockHeight();
+    console.log("blockHeight:", blockHeight);
+  }
 
   // const res = await repo({
   //   entity: ViemNetworkEntity,

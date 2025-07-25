@@ -11,14 +11,12 @@ description: Hook Middleware is a powerful middleware that allows you to hook in
 
 ## Basic Usage
 
-### Creating Hook Middleware
-
-Use the `createHookMiddleware` factory function to create a hook middleware:
-
 ```typescript
+import { URPC } from '@unilab/urpc-hono';
 import { createHookMiddleware } from '@unilab/urpc-core/middleware';
 
-const HookMiddleware = createHookMiddleware((hookManager) => {
+// Creating Hook Middleware
+const hook = createHookMiddleware((hookManager) => {
   hookManager
     .beforeCreate(async (context) => {
       console.log('Before creating:', context);
@@ -29,47 +27,11 @@ const HookMiddleware = createHookMiddleware((hookManager) => {
       // Notifications, logging, etc.
     });
 });
-```
-
-### Registering with URPC
-
-```typescript
-import { URPC } from '@unilab/urpc-hono';
 
 const app = URPC.init({
   plugins: [MyPlugin],
-  middlewares: [HookMiddleware],
+  middlewares: [hook],
 });
-```
-
-## Hook Types
-
-### Operation-Specific Hooks
-
-#### Create Hooks
-- `beforeCreate`: Executed before entity creation
-- `afterCreate`: Executed after successful entity creation
-
-#### Update Hooks
-- `beforeUpdate`: Executed before entity update
-- `afterUpdate`: Executed after successful entity update
-
-#### Delete Hooks
-- `beforeDelete`: Executed before entity deletion
-- `afterDelete`: Executed after successful entity deletion
-
-### Universal Hooks
-- `beforeAny`: Executed before any operation
-- `afterAny`: Executed after any operation
-
-## Hook Function Signature
-
-Each hook function receives three parameters:
-
-```typescript
-type HookFunction<T extends Record<string, any>> = (
-  context: MiddlewareContext<T>
-) => Promise<void> | void;
 ```
 
 ### Audit Logging

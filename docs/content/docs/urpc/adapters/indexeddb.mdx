@@ -3,21 +3,12 @@ title: IndexedDB Adapter
 description: IndexedDB Adapter provides persistent browser storage for URPC entities using the IndexedDB API. Perfect for client-side applications that need data persistence across browser sessions.
 ---
 
-## Installation
-
-The IndexedDB Adapter is part of the `@unilab/urpc-adapters` package:
-
-```bash
-npm install @unilab/urpc-adapters
-```
-
-## Basic Setup
+### Basic Setup
 
 ```typescript
 import { URPC } from "@unilab/urpc";
 import { IndexedDBAdapter } from "@unilab/urpc-adapters";
 import { UserEntity } from "./entities/user";
-import { Logging } from "@unilab/urpc-core/middleware";
 
 const MyPlugin = {
   entities: [UserEntity],
@@ -25,7 +16,6 @@ const MyPlugin = {
 
 URPC.init({
   plugins: [MyPlugin],
-  middlewares: [Logging()],
   entityConfigs: {
     user: {
       defaultSource: "indexeddb",
@@ -34,8 +24,6 @@ URPC.init({
   globalAdapters: [IndexedDBAdapter],
 });
 ```
-
-## Usage Examples
 
 ### Creating Data
 
@@ -138,7 +126,7 @@ for (const user of allUsers) {
 console.log(`✅ Cleared ${allUsers.length} users`);
 ```
 
-## Default Source Configuration
+### Default Source Configuration
 
 Set IndexedDB as the default source for entities:
 
@@ -157,78 +145,5 @@ const user = await repo({
   entity: UserEntity,
 }).findOne({
   where: { id: "user123" },
-});
-```
-
-## Features
-
-- **Persistent Storage**: Data survives browser restarts and page reloads
-- **Large Storage Capacity**: Much larger storage limits than localStorage
-- **Asynchronous Operations**: Non-blocking database operations
-- **Entity Support**: Full support for Entity classes and methods
-- **CRUD Operations**: Complete create, read, update, delete functionality
-- **Browser Native**: Uses the browser's built-in IndexedDB API
-
-## Use Cases
-
-- **Offline Applications**: Store data that persists when offline
-- **Client-Side Caching**: Cache API responses for better performance
-- **User Preferences**: Store user settings and configurations
-- **Progressive Web Apps**: Essential for PWA data persistence
-- **Large Datasets**: Handle larger amounts of data than memory storage
-
-## Browser Compatibility
-
-IndexedDB is supported in all modern browsers:
-- Chrome 23+
-- Firefox 10+
-- Safari 7+
-- Edge 12+
-
-## Development Tips
-
-### Viewing Data
-
-Open browser DevTools → Application → Storage → IndexedDB to inspect stored data.
-
-### Error Handling
-
-Always wrap IndexedDB operations in try-catch blocks:
-
-```typescript
-try {
-  const user = await repo({
-    entity: UserEntity,
-    source: "indexeddb",
-  }).create({ data: userData });
-} catch (error) {
-  console.error("Failed to create user:", error);
-}
-```
-
-## Limitations
-
-- **Browser Only**: Cannot be used in Node.js environments
-- **Same-Origin Policy**: Data is isolated per domain
-- **Storage Quotas**: Subject to browser storage quotas (usually generous)
-- **No Server Sync**: Data is local to the browser instance
-
-## Advanced Configuration
-
-Combine with other adapters for different entities:
-
-```typescript
-URPC.init({
-  plugins: [MyPlugin, WalletPlugin],
-  middlewares: [Logging()],
-  entityConfigs: {
-    user: {
-      defaultSource: "indexeddb", // Persistent user data
-    },
-    session: {
-      defaultSource: "memory", // Temporary session data
-    },
-  },
-  globalAdapters: [IndexedDBAdapter, MemoryAdapter],
 });
 ```

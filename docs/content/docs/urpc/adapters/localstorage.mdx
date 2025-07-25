@@ -1,0 +1,165 @@
+---
+title: LocalStorage Adapter
+description: LocalStorage Adapter provides persistent browser storage for URPC entities using the localStorage API. Ideal for lightweight client-side applications that need simple data persistence.
+---
+
+### Basic Setup
+
+```typescript
+import { URPC } from "@unilab/urpc";
+import { LocalStorageAdapter } from "@unilab/urpc-adapters";
+import { UserEntity } from "./entities/user";
+
+const MyPlugin = {
+  entities: [UserEntity],
+};
+
+URPC.init({
+  plugins: [MyPlugin],
+  entityConfigs: {
+    user: {
+      defaultSource: "localstorage",
+    },
+  },
+  globalAdapters: [LocalStorageAdapter],
+});
+```
+
+### Creating Data
+
+```typescript
+import { repo } from "@unilab/urpc";
+
+const newUser = await repo({
+  entity: UserEntity,
+  source: "localstorage",
+}).create({
+  data: {
+    id: "user123",
+    name: "John Doe",
+    email: "john@example.com",
+    avatar: "https://example.com/avatar.jpg",
+  },
+});
+console.log("✅ User created:", newUser);
+```
+
+### Creating Multiple Records
+
+```typescript
+const newUsers = await repo({
+  entity: UserEntity,
+  source: "localstorage",
+}).createMany({
+  data: [
+    {
+      id: "user1",
+      name: "Alice",
+      email: "alice@example.com",
+    },
+    {
+      id: "user2", 
+      name: "Bob",
+      email: "bob@example.com",
+    },
+  ],
+});
+console.log("✅ Users created:", newUsers);
+```
+
+### Finding Data
+
+```typescript
+const user = await repo({
+  entity: UserEntity,
+  source: "localstorage",
+}).findOne({
+  where: { id: "user123" },
+});
+
+if (user) {
+  console.log("✅ User found:", user);
+  // Call entity methods
+  user.greet("Welcome to LocalStorage!");
+} else {
+  console.log("❌ User not found");
+}
+```
+
+### Updating Data
+
+```typescript
+const updatedUser = await repo({
+  entity: UserEntity,
+  source: "localstorage",
+}).update({
+  where: { id: "user123" },
+  data: {
+    name: "Jane Smith",
+    email: "jane@example.com",
+  },
+});
+console.log("✅ User updated:", updatedUser);
+```
+
+### Updating Multiple Records
+
+```typescript
+const updatedUsers = await repo({
+  entity: UserEntity,
+  source: "localstorage",
+}).updateMany({
+  where: { status: "inactive" },
+  data: {
+    status: "active",
+    updatedAt: new Date(),
+  },
+});
+console.log(`✅ Updated ${updatedUsers.length} users`);
+```
+
+### Deleting Data
+
+```typescript
+const deleted = await repo({
+  entity: UserEntity,
+  source: "localstorage",
+}).delete({
+  where: { id: "user123" },
+});
+
+if (deleted) {
+  console.log("✅ User deleted successfully");
+} else {
+  console.log("❌ User not found for deletion");
+}
+```
+
+### Upsert Operations
+
+```typescript
+const user = await repo({
+  entity: UserEntity,
+  source: "localstorage",
+}).upsert({
+  where: { email: "john@example.com" },
+  update: { name: "John Updated" },
+  create: {
+    id: "new_user",
+    name: "John Doe",
+    email: "john@example.com",
+  },
+});
+console.log("✅ User upserted:", user);
+```
+
+### Listing All Data
+
+```typescript
+const users = await repo({
+  entity: UserEntity,
+  source: "localstorage",
+}).findMany();
+
+console.log(`Found ${users.length} users:`, users);
+```

@@ -3,17 +3,7 @@ title: Creating Custom Plugins
 description: Learn how to create custom plugins for URPC with entities, adapters, and complete implementations.
 ---
 
-## Overview
-
-Plugins in URPC allow you to extend functionality by defining custom entities and data source adapters. A plugin consists of:
-
-- **Entities**: Data structures that define your domain models
-- **Adapters**: Implementations that handle data operations for specific sources
-- **Registration**: Plugin configuration that connects entities with adapters
-
 ## Plugin Structure
-
-A typical plugin has the following structure:
 
 ```
 my-plugin/
@@ -40,16 +30,24 @@ Entities define the structure of your data. Use decorators from `@unilab/urpc-co
 import { Fields } from "@unilab/urpc-core";
 
 export class UserEntity {
-  @Fields.string()
+  @Fields.string({
+    description: "The ID of this user",
+  })
   id = "";
 
-  @Fields.string()
+  @Fields.string({
+    description: "The name of this user"
+  })
   name = "";
 
-  @Fields.string()
+  @Fields.string({
+    description: "The email of this user"
+  })
   email = "";
 
-  @Fields.string()
+  @Fields.string({
+    description: "The avatar of this user"
+  })
   avatar = "";
 }
 ```
@@ -68,6 +66,11 @@ import {
   URPCError,
   ErrorCodes,
 } from "@unilab/urpc-core";
+import {
+  matchesWhere,
+  performUpsert,
+  processFindManyArgs,
+} from "@unilab/urpc-adapters";
 import { UserEntity } from "../entities/user";
 
 // Mock data for demonstration
@@ -87,47 +90,22 @@ const userData = [
 ];
 
 export class UserAdapter extends BaseAdapter<UserEntity> {
-  async findMany(args: FindManyArgs<UserEntity>): Promise<UserEntity[]> {
-    const where = args?.where || {};
-    
-    if (where.id) {
-      const idValue = typeof where.id === "object" ? where.id.$eq : where.id;
-      return userData.filter((user) => user.id === idValue);
-    }
-    
-    if (where.name) {
-      const nameValue = typeof where.name === "object" ? where.name.$eq : where.name;
-      return userData.filter((user) => user.name === nameValue);
-    }
-    
-    if (where.email) {
-      const emailValue = typeof where.email === "object" ? where.email.$eq : where.email;
-      return userData.filter((user) => user.email === emailValue);
-    }
-    
-    return userData;
+  async findMany(args: FindManyArgs<UserEntity>, ctx?: OperationContext): Promise<UserEntity[]> {
+    return processFindManyArgs(userData, args);
   }
 
-  async findOne(args: FindOneArgs<UserEntity>): Promise<UserEntity | null> {
-    const { id } = args.where;
-    if (!id) {
+  async findOne(args: FindOneArgs<UserEntity>, ctx?: OperationContext): Promise<UserEntity | null> {
+    const item = userData.find((item) => matchesWhere(item, args.where));
+    if (!item) {
       return null;
     }
-    return userData.find((user) => user.id === id) || null;
+    return item;
   }
 
-  async create(args: CreationArgs<UserEntity>): Promise<UserEntity> {
-    const { name, email, avatar } = args.data;
-    if (!name || !email || !avatar) {
-      throw new URPCError(ErrorCodes.BAD_REQUEST, "Invalid arguments");
-    }
-    
-    const newUser = {
-      id: (userData.length + 1).toString(),
-      name,
-      email,
-      avatar,
-    };
+  async create(args: CreationArgs<UserEntity>, ctx?: OperationContext): Promise<UserEntity> {
+   const newUser = {
+      ...args.data,
+    } as T;
     userData.push(newUser);
     return newUser;
   }
@@ -135,8 +113,6 @@ export class UserAdapter extends BaseAdapter<UserEntity> {
 ```
 
 ### 3. Create the Plugin Definition
-
-Define your plugin by combining entities and adapters:
 
 ```typescript
 // src/plugins/index.ts
@@ -155,128 +131,3 @@ export const UserPlugin: Plugin = {
   ]
 };
 ```
-
-### 4. Export Plugin Components
-
-Create the main entry point for your plugin:
-
-```typescript
-// src/index.ts
-export * from "./entities/user";
-export * from "./adapters/user-adapter";
-export * from "./plugins";
-```
-
-## Using Your Plugin
-
-### Server Setup
-
-Register your plugin in a URPC server:
-
-```typescript
-// server.ts
-import { URPC } from "@unilab/urpc-hono";
-import { UserPlugin } from "./my-plugin";
-
-const app = URPC.init({
-  plugins: [UserPlugin]
-});
-
-export default {
-  port: 3000,
-  fetch: app.fetch
-};
-```
-
-### Client Usage
-
-Use your plugin entities from the client:
-
-```typescript
-// client.ts
-import { repo, URPC } from "@unilab/urpc";
-import { UserEntity } from "./my-plugin";
-
-URPC.init({
-  baseUrl: "http://localhost:3000",
-  timeout: 10000
-});
-
-// Create a user
-const createUser = async () => {
-  const user = await repo<UserEntity>({
-    entity: "user",
-    source: "demo",
-  }).create({
-    data: {
-      name: "Alice Johnson",
-      email: "alice@example.com",
-      avatar: "https://example.com/avatar3.png"
-    }
-  });
-  console.log("Created user:", user);
-};
-
-// Find users
-const getUsers = async () => {
-  const users = await repo<UserEntity>({
-    entity: "user",
-    source: "demo",
-  }).findMany({
-    where: { name: "John Doe" }
-  });
-  console.log("Users:", users);
-};
-
-// Update a user
-const updateUser = async () => {
-  const updated = await repo<UserEntity>({
-    entity: "user",
-    source: "demo",
-  }).update({
-    where: { id: "1" },
-    data: { email: "john.updated@example.com" }
-  });
-  console.log("Updated user:", updated);
-};
-
-createUser();
-getUsers();
-updateUser();
-```
-
-## Package Configuration
-
-Create a proper `package.json` for your plugin:
-
-```json
-{
-  "name": "@mycompany/urpc-user-plugin",
-  "version": "1.0.0",
-  "description": "User management plugin for URPC",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "scripts": {
-    "build": "tsc",
-    "test": "jest",
-    "dev": "tsc --watch"
-  },
-  "dependencies": {
-    "@unilab/urpc-core": "^1.0.0"
-  },
-  "devDependencies": {
-    "typescript": "^5.0.0",
-    "jest": "^29.0.0",
-    "@types/jest": "^29.0.0"
-  },
-  "peerDependencies": {
-    "@unilab/urpc-core": "^1.0.0"
-  }
-}
-```
-
-## Next Steps
-
-- Learn about [Middleware](/docs/middleware/hook) for adding cross-cutting concerns
-- Explore [Advanced Integrations](/docs/integrations) for specific frameworks
-- Check out the [UniWeb3 Plugin](/docs/plugins/uniweb3) as a real-world example 

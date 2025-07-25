@@ -3,27 +3,15 @@ title: Mastra Plugin
 description: The Mastra Plugin integrates AI-powered natural language processing capabilities into your URPC applications, enabling users to interact with your data through conversational interfaces.
 ---
 
-## Overview
-
-The Mastra Plugin provides a ChatEntity that can process natural language inputs and execute CRUD operations on your entities. It leverages the Mastra AI framework and supports various language models through OpenRouter.
-
-## Features
-
-- **Natural Language Processing**: Convert user queries into database operations
-- **Multiple Model Support**: Compatible with various AI models via OpenRouter
-- **Streaming Support**: Real-time response streaming for better user experience
-- **Framework Integration**: Works seamlessly with Hono, Next.js App Router, and Pages Router
-- **Automatic Schema Analysis**: Dynamically understands your entity schemas and available operations
-
 ## Installation
 
-```bash
-npm install @unilab/mastra-plugin
+```package-install
+@unilab/mastra-plugin @unilab/mastra-client-plugin
 ```
 
 ## Basic Usage
 
-### Hono Integration
+### Server
 
 ```typescript
 import { URPC } from "@unilab/urpc-hono";
@@ -48,23 +36,30 @@ const app = URPC.init({
     MastraPlugin({
       defaultModel: "openai/gpt-4o-mini",
       openrouterApiKey: process.env.OPENROUTER_API_KEY,
-      debug: true,
     }),
   ],
 });
+
+export default {
+  port: 3000,
+  fetch: app.fetch,
+};
 ```
 
-### Client Usage
+### Client
 
 ```typescript
 import { ChatEntity } from "@unilab/mastra-plugin/entities";
 import { repo, URPC } from "@unilab/urpc";
 
 URPC.init({
+  plugins: [MastraClientPlugin()],
+
   baseUrl: "http://localhost:3000",
   timeout: 10000,
 });
 
+// Generate urpc code on the server side and execute it
 const chatWithAI = async () => {
   const result = await repo<ChatEntity>({
     entity: "chat",
@@ -76,183 +71,16 @@ const chatWithAI = async () => {
 
   console.log(result.output);
 };
-```
 
-## Configuration Options
-
-### MastraOptions
-
-```typescript
-interface MastraOptions {
-  defaultModel?: string;        // Default AI model to use
-  openrouterApiKey?: string;    // OpenRouter API key
-  debug?: boolean;              // Enable debug logging
-}
-```
-
-### Supported Models
-
-The plugin supports various models through OpenRouter:
-
-- `openai/gpt-4o-mini`
-- `google/gemini-2.0-flash-001`
-- `anthropic/claude-3-sonnet`
-- And many more available through OpenRouter
-
-## ChatEntity Schema
-
-The ChatEntity defines the structure for AI interactions:
-
-```typescript
-class ChatEntity {
-  input: string;        // Natural language input
-  model?: string;       // Optional model override
-  output?: Output;      // AI response with operation details
-}
-
-class Output {
-  operation: string;    // CRUD operation performed
-  entity: string;       // Target entity
-  source: string;       // Data source used
-  data: any;           // Operation results
-  message: string;     // Human-readable response
-  success: boolean;    // Operation status
-  urpc_code: string;   // Generated URPC code
-}
-```
-
-## Streaming Support
-
-The plugin supports real-time streaming responses, though this feature is still under development and may not be fully stable:
-
-```typescript
-const streamChat = async () => {
+// Generate urpc code on the server side, execute AI generated code on the front end
+const chatWithAIProxy = async () => {
   const result = await repo<ChatEntity>({
     entity: "chat",
-    source: "mastra",
-    context: {
-      stream: true,
-    },
+    source: "mastra-client",
   }).call({
-    input: "Create a new user with name 'Alice'",
+    input: "Find all users with email containing 'example.com'",
+    model: "google/gemini-2.0-flash-001",
   });
-
-  if (result instanceof Response) {
-    const reader = result.body?.getReader();
-    if (reader) {
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        const text = new TextDecoder().decode(value);
-        console.log("Streaming response:", text);
-      }
-    }
-  }
+  console.log(result.output);
 };
 ```
-
-> **Note**: Streaming functionality is currently in development and may experience issues. For production use, consider using the non-streaming mode for more reliable responses.
-
-## Example Queries
-
-The AI can understand and execute various types of operations:
-
-### Data Retrieval
-```typescript
-// Find specific records
-"Find all users with name containing 'John'"
-"Get the user with ID 123"
-"Show me all articles published today"
-
-// Aggregation queries
-"Count how many users are registered"
-"Find the most recent articles"
-```
-
-### Data Manipulation
-```typescript
-// Create operations
-"Create a new user with name 'Alice' and email 'alice@example.com'"
-"Add a new article with title 'Getting Started'"
-
-// Update operations
-"Update user with ID 1 to have email 'newemail@example.com'"
-"Change the status of article 123 to 'published'"
-
-// Delete operations
-"Delete the user with ID 456"
-"Remove all articles older than 30 days"
-```
-
-## Framework-Specific Usage
-
-### Next.js App Router
-
-```typescript
-import { MastraPlugin } from "@unilab/mastra-plugin/next-app-router";
-
-// Use in your API routes
-const app = URPC.init({
-  plugins: [MastraPlugin(options)],
-});
-```
-
-### Next.js Pages Router
-
-```typescript
-import { MastraPlugin } from "@unilab/mastra-plugin/next-pages-router";
-
-// Use in your API routes
-const app = URPC.init({
-  plugins: [MastraPlugin(options)],
-});
-```
-
-## Error Handling
-
-The plugin provides comprehensive error handling:
-
-```typescript
-try {
-  const result = await repo<ChatEntity>({
-    entity: "chat",
-    source: "mastra",
-  }).call({
-    input: "Invalid query that cannot be processed",
-  });
-  
-  if (!result.output?.success) {
-    console.error("Operation failed:", result.output?.message);
-  }
-} catch (error) {
-  console.error("Plugin error:", error);
-}
-```
-
-## Debugging
-
-Enable debug mode to see detailed information about schema analysis and AI processing:
-
-```typescript
-MastraPlugin({
-  debug: true,
-  // ... other options
-})
-```
-
-This will log:
-- Entity schemas
-- Available data sources
-- Generated instructions for the AI
-- Processing steps
-
-## Limitations
-
-- Requires OpenRouter API key for AI functionality
-- Performance depends on the selected AI model
-- Complex queries may require multiple iterations
-- Streaming responses may have latency variations
-
-## Contributing
-
-The Mastra Plugin is part of the URPC ecosystem. Contributions are welcome through the main URPC repository.
