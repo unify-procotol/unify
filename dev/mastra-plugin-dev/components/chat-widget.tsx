@@ -5,16 +5,15 @@ import { Send, User, Bot, MessageSquare, X } from "lucide-react";
 import { repo } from "@unilab/urpc";
 import { ChatEntity } from "@unilab/mastra-plugin/entities";
 import { initUrpcClient } from "@/lib/urpc-client";
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { Output, PlanOutput } from "@unilab/mastra-client-plugin";
+import { CodeDisplay } from "./code-display";
 
 interface Message {
   id: string;
   role: "user" | "assistant";
-  content: string;
   timestamp: Date;
-  data?: any;
-  urpcCode?: string;
+  content?: string;
+  output?: Output | PlanOutput;
 }
 
 initUrpcClient();
@@ -79,8 +78,8 @@ export default function ChatWidget({
     const userMessage: Message = {
       id: Date.now().toString(),
       role: "user",
-      content: textToSend,
       timestamp: new Date(),
+      content: textToSend,
     };
 
     setMessages((prev) => [...prev, userMessage]);
@@ -109,23 +108,21 @@ export default function ChatWidget({
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: output.message,
         timestamp: new Date(),
-        data: output.data,
-        urpcCode: output.urpc_code || "",
+        output,
       };
 
       setMessages((prev) => [...prev, assistantMessage]);
 
-      if (output.success) {
+      if (output.success || output.results?.length > 0) {
         onSuccess?.();
       }
     } catch (error) {
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: "Sorry, an error occurred. Please try again later.",
         timestamp: new Date(),
+        content: "Sorry, an error occurred. Please try again later.",
       };
       setMessages((prev) => [...prev, errorMessage]);
     } finally {
@@ -214,63 +211,31 @@ export default function ChatWidget({
                         {message.role === "user" ? "You" : "Assistant"}
                       </span>
                     </div>
-                    <div className="text-sm leading-relaxed break-words">
-                      {message.content}
-                    </div>
-                    {message.urpcCode && (
-                      <div className="mt-2 p-2 bg-black/10 rounded text-xs font-mono">
-                        <div className="text-xs opacity-75">URPC Code:</div>
-                        <SyntaxHighlighter
-                          language="typescript"
-                          style={oneDark}
-                          customStyle={{
-                            margin: 0,
-                            padding: "12px",
-                            fontSize: "11px",
-                            background: "transparent",
-                            overflow: "auto",
-                          }}
-                          codeTagProps={{
-                            style: {
-                              background: "transparent",
-                            },
-                          }}
-                          showLineNumbers={false}
-                          showInlineLineNumbers={false}
-                          wrapLines={false}
-                          wrapLongLines={true}
-                        >
-                          {message.urpcCode}
-                        </SyntaxHighlighter>
+                    {message.content && (
+                      <div className="text-sm leading-relaxed break-words">
+                        {message.content}
                       </div>
                     )}
-                    {message.data && (
-                      <div className="mt-2 p-2 bg-black/10 rounded text-xs font-mono">
-                        <div className="text-xs opacity-75">Data:</div>
-                        <SyntaxHighlighter
-                          language="json"
-                          style={oneDark}
-                          customStyle={{
-                            margin: 0,
-                            padding: "12px",
-                            fontSize: "11px",
-                            background: "transparent",
-                            overflow: "auto",
-                          }}
-                          codeTagProps={{
-                            style: {
-                              background: "transparent",
-                            },
-                          }}
-                          showLineNumbers={false}
-                          showInlineLineNumbers={false}
-                          wrapLines={false}
-                          wrapLongLines={true}
-                        >
-                          {JSON.stringify(message.data, null, 2)}
-                        </SyntaxHighlighter>
-                      </div>
-                    )}
+                    {message.output &&
+                      "execution_plan" in message.output &&
+                      message.output.results && (
+                        <>
+                          {message.output.results.map((item) => (
+                            <CodeDisplay
+                              urpcCode={item.urpc_code}
+                              data={item.data}
+                            />
+                          ))}
+                        </>
+                      )}
+                    {message.output &&
+                      "urpc_code" in message.output &&
+                      message.output.urpc_code && (
+                        <CodeDisplay
+                          urpcCode={message.output.urpc_code}
+                          data={message.output.data}
+                        />
+                      )}
                   </div>
                 </div>
               ))}

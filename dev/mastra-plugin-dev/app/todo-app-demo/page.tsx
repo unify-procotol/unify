@@ -118,7 +118,7 @@ function CodeDisplay() {
 
 URPC.init({
   plugins: [TodoPlugin],
-  middlewares: [Logging()],
+  middlewares: [logging()],
   entityConfigs: {
     todo: {
       defaultSource: "indexeddb",

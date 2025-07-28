@@ -250,6 +250,7 @@ export default function IoTPage() {
         entity="chat"
         source="mastra-client"
         quickCommands={[
+          "Turn on all LED lights and adjust the brightness of the Living Room LED lights to 50%.",
           "Turn on all the lights that are turned off",
           "Turn on all LEDs",
           "Turn off all the lights that are turned on",

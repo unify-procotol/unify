@@ -2,7 +2,7 @@ import { Agent } from "@mastra/core/agent";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { convertSchemaToMarkdown } from "./entity-schema-to-markdown";
 import { convertEntitySourcesToMarkdown } from "./entity-source-to-markdown";
-import { MastraOptions, Output, URPC } from "./type";
+import { MastraOptions, Output, URPC, ExecutionPlan, PlanOutput } from "./type";
 import { EntityConfigs, SchemaObject } from "@unilab/urpc-core";
 
 export class URPCAgent {
@@ -108,6 +108,7 @@ You can understand users' natural language requests and convert them into corres
 - Update with complex conditions: repo({entity: "user", source: "[select from supported sources]"}).updateMany({where: {email: {contains: "@temp.com"}}, data: {status: "inactive"}})
 - Update ALL users (use not null condition): repo({entity: "user", source: "[select from supported sources]"}).updateMany({where: {id: {not: null}}, data: {status: "active"}})
 - Upsert operation: repo({entity: "user", source: "[select from supported sources]"}).upsert({where: {email: "user@example.com"}, update: {name: "Updated Name"}, create: {id: "uuid", name: "New User", email: "user@example.com"}})
+- Upsert multiple records: repo({entity: "user", source: "[select from supported sources]"}).upsertMany({data: [{id: "uuid1", name: "jack", email: "jack@example.com"}, {id: "uuid2", name: "jane", email: "jane@example.com"}], onConflictDoUpdate: {target: "id"}})
 
 **IMPORTANT**: For updateMany operations, the \'where\' clause is REQUIRED. You cannot perform updateMany without specifying which records to update.
 
@@ -153,7 +154,10 @@ For findMany and updateMany, you can use advanced query operators in the where c
 - Combine multiple conditions: {age: {$gt: 18}, email: {contains: "@company.com"}, status: {$in: ["active", "verified"]}}
 
 ## IMPORTANT: Response Format
-You MUST respond with natural language that includes the actual URPC code to be executed. 
+You MUST analyze the user's request and determine if it requires multiple URPC operations or just one.
+
+### For Single Operation Requests:
+Respond with natural language that includes the actual URPC code to be executed. 
 DO NOT return JSON format. Instead, use this pattern:
 
 For the request "Find all posts", you should respond:
@@ -161,6 +165,46 @@ For the request "Find all posts", you should respond:
 
 For the request "Create a user named jack", you should respond:
 "I understand you want to create a new user named jack. I will execute the following URPC operation: repo({entity: "user", source: "[correct source for UserEntity]"}).create({data: {id: "generated-id", name: "jack", email: "jack@example.com", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=jack"}})"
+
+### For Multi-Step Operation Requests:
+When the user's request requires multiple operations (like "Create a user named John and then create a post for him"), you MUST respond with an execution plan in the following JSON format:
+
+{
+  "execution_plan": {
+    "steps": [
+      {
+        "description": "Create a user named John",
+        "urpc_code": "repo({entity: \\"user\\", source: \\"[correct source for UserEntity]\\"}).create({data: {id: \\"generated-id\\", name: \\"John\\", email: \\"john@example.com\\", avatar: \\"https://api.dicebear.com/7.x/avataaars/svg?seed=john\\"}})",
+        "order": 1
+      },
+      {
+        "description": "Create a post for John",
+        "urpc_code": "repo({entity: \\"post\\", source: \\"[correct source for PostEntity]\\"}).create({data: {id: \\"generated-id\\", title: \\"John's First Post\\", content: \\"Hello, this is my first post!\\", userId: \\"user-id\\"}})",
+        "order": 2
+      }
+    ],
+    "total_steps": 2
+  }
+}
+
+### How to Identify Multi-Step Requests:
+Look for these patterns in user requests:
+- Multiple actions connected by "and", "then", "also", "plus"
+- Sequential operations like "first do X, then do Y"
+- Complex conditions that require separate operations
+- Different entities or different conditions on the same entity
+
+Examples of multi-step requests:
+- "Create a user named John and then create a post for him"
+- "Find all active users and update their status to verified"
+- "Delete all inactive posts and create a new welcome post"
+- "Update all users to active status and then create a summary post"
+
+Examples of single-step requests:
+- "Find all users"
+- "Create a user named John"
+- "Update all posts to published"
+- "Delete inactive users"
 
 For the request "Create multiple users: Alice and Bob", you should respond:
 "I understand you want to create multiple users. I will execute the following URPC operation: repo({entity: "user", source: "[correct source for UserEntity]"}).createMany({data: [{id: "generated-id-1", name: "Alice", email: "alice@example.com", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=alice"}, {id: "generated-id-2", name: "Bob", email: "bob@example.com", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=bob"}]})"
@@ -238,6 +282,9 @@ Your response: "I understand you want to find all posts. I will execute the foll
 User: "Create or update user john@example.com"
 Your response: "I understand you want to create or update user john@example.com. I will execute the following URPC operation: repo({entity: "user", source: "[default source for UserEntity]"}).upsert({where: {email: "john@example.com"}, update: {name: "John Updated"}, create: {id: "generated-id", name: "John", email: "john@example.com", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=john"}})"
 
+User: "Create or update multiple users: Alice and Bob by id"
+Your response: "I understand you want to create or update multiple users. I will execute the following URPC operation: repo({entity: "user", source: "[default source for UserEntity]"}).upsertMany({data: [{id: "generated-id-1", name: "Alice", email: "alice@example.com", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=alice"}, {id: "generated-id-2", name: "Bob", email: "bob@example.com", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=bob"}], onConflictDoUpdate: {target: "id"}})"
+
 Remember: 
 - Always include the actual URPC code in your natural language response, never return JSON format
 - ALWAYS use the correct source parameter based on the Entity Supported Sources section
@@ -288,7 +335,7 @@ Remember:
     input: string;
     model?: string;
     proxy?: boolean;
-  }): Promise<Output> {
+  }): Promise<PlanOutput | Output> {
     try {
       if (model) {
         this.model = model;
@@ -311,11 +358,24 @@ Remember:
         return this.parseAIResponse(response.text);
       } else {
         const output = this.parseAIResponse(response.text);
-        const urpcCode = output.urpc_code;
-        if (!urpcCode) {
-          return output;
+
+        if ("execution_plan" in output && output.execution_plan) {
+          return await this.executeExecutionPlan(output.execution_plan);
         }
-        return this.executeURPCCode(urpcCode);
+
+        if ("urpc_code" in output) {
+          const urpcCode = output.urpc_code;
+          if (!urpcCode) {
+            return output;
+          }
+          const result = await this.executeURPCCode(urpcCode);
+          return {
+            ...result,
+            results: [result],
+          };
+        }
+
+        return output;
       }
     } catch (error: any) {
       return {
@@ -330,10 +390,38 @@ Remember:
     }
   }
 
-  private parseAIResponse(agentResponse: string): Output {
+  private parseAIResponse(agentResponse: string): PlanOutput | Output {
     try {
-      // Try to extract URPC operation from agent response
-      // Improved regex that supports more complex parameter structures
+      // First try to parse as JSON (execution plan)
+      if (
+        agentResponse.trim().startsWith("{") ||
+        agentResponse.includes('"execution_plan"')
+      ) {
+        try {
+          const jsonMatch = agentResponse.match(/\{[\s\S]*\}/);
+          if (jsonMatch) {
+            const parsed = JSON.parse(jsonMatch[0]);
+            if (parsed.execution_plan) {
+              // Process the execution plan to replace generated-id placeholders
+              const processedPlan = this.processExecutionPlan(
+                parsed.execution_plan
+              );
+              return {
+                execution_plan: processedPlan,
+              };
+            }
+          }
+        } catch (jsonError) {
+          if (this.debug) {
+            console.log(
+              "JSON parsing failed, trying URPC code extraction:",
+              jsonError
+            );
+          }
+        }
+      }
+
+      // Try to extract single URPC operation from agent response
       const urpcCodeMatch = agentResponse.match(
         /repo\s*\(\s*\{[^}]+\}\s*\)\s*\.\s*\w+\s*\([^)]*\)/
       );
@@ -387,128 +475,154 @@ Remember:
     }
   }
 
+  private processExecutionPlan(executionPlan: ExecutionPlan): ExecutionPlan {
+    // Process each step to replace generated-id placeholders
+    let userId = "";
+    const processedSteps = executionPlan.steps.map((step) => {
+      let processedCode = step.urpc_code;
+      if (step.urpc_code.includes("create")) {
+        if (step.urpc_code.includes("generated-id")) {
+          const randomId = this.generateRandomId();
+          processedCode = step.urpc_code.replace(/generated-id/g, randomId);
+          if (this.extractEntity(step.urpc_code).includes("user")) {
+            userId = randomId;
+          }
+        }
+        if (step.urpc_code.includes("user-id")) {
+          processedCode = step.urpc_code.replace(/user-id/g, userId);
+        }
+      }
+
+      return {
+        ...step,
+        urpc_code: processedCode,
+      };
+    });
+
+    return {
+      ...executionPlan,
+      steps: processedSteps,
+    };
+  }
+
+  private async executeExecutionPlan(
+    executionPlan: ExecutionPlan
+  ): Promise<PlanOutput> {
+    const results: Output[] = [];
+    let allSuccess = true;
+    let combinedMessage = "";
+
+    // Sort steps by order
+    const sortedSteps = [...executionPlan.steps].sort(
+      (a, b) => a.order - b.order
+    );
+
+    for (const step of sortedSteps) {
+      try {
+        if (this.debug) {
+          console.log(`[执行步骤 ${step.order}]: ${step.description}`);
+          console.log(`[URPC代码]: ${step.urpc_code}`);
+        }
+
+        const result = await this.executeURPCCode(step.urpc_code);
+        results.push({
+          ...result,
+          message: `Step ${step.order}: ${step.description} - ${
+            result.message || (result.success ? "success" : "failure")
+          }`,
+        });
+
+        if (!result.success) {
+          allSuccess = false;
+          combinedMessage += `Step ${step.order} failure: ${result.message}; `;
+        } else {
+          combinedMessage += `Step ${step.order} success: ${step.description}; `;
+        }
+      } catch (error: any) {
+        allSuccess = false;
+        const errorResult: Output = {
+          success: false,
+          operation: "unknown",
+          entity: "unknown",
+          source: "unknown",
+          data: null,
+          message: `Step ${step.order} execution error: ${error.message}`,
+          urpc_code: step.urpc_code,
+        };
+        results.push(errorResult);
+        combinedMessage += `Step ${step.order} error: ${error.message};\n `;
+      }
+    }
+
+    return {
+      execution_plan: executionPlan,
+      results: results,
+    };
+  }
+
   private async executeURPCCode(urpcCode: string): Promise<Output> {
     const operation = this.extractOperation(urpcCode);
     const entity = this.extractEntity(urpcCode);
     const source = this.extractSource(urpcCode);
     const options = this.extractOptions(urpcCode);
     try {
+      let data;
       switch (operation) {
         case "findMany": {
-          const data = await this.URPC.repo({ entity, source }).findMany(
-            options
-          );
-          return {
-            operation,
-            entity,
-            source,
-            data,
-            urpc_code: urpcCode,
-            message: "",
-            success: true,
-          };
+          data = await this.URPC.repo({ entity, source }).findMany(options);
+          break;
         }
         case "findOne": {
-          const data = await this.URPC.repo({ entity, source }).findOne(
-            options
-          );
-          return {
-            operation,
-            entity,
-            source,
-            data,
-            urpc_code: urpcCode,
-            message: "",
-            success: true,
-          };
+          data = await this.URPC.repo({ entity, source }).findOne(options);
+          break;
         }
         case "createMany": {
-          const data = await this.URPC.repo({ entity, source }).createMany(
-            options
-          );
-          return {
-            operation,
-            entity,
-            source,
-            data,
-            urpc_code: urpcCode,
-            message: "",
-            success: true,
-          };
+          data = await this.URPC.repo({ entity, source }).createMany(options);
+          break;
         }
         case "create": {
-          const data = await this.URPC.repo({ entity, source }).create(options);
-          return {
-            operation,
-            entity,
-            source,
-            data,
-            urpc_code: urpcCode,
-            message: "",
-            success: true,
-          };
+          data = await this.URPC.repo({ entity, source }).create(options);
+          break;
         }
         case "updateMany": {
-          const data = await this.URPC.repo({ entity, source }).updateMany(
-            options
-          );
-          return {
-            operation,
-            entity,
-            source,
-            data,
-            urpc_code: urpcCode,
-            message: "",
-            success: true,
-          };
+          data = await this.URPC.repo({ entity, source }).updateMany(options);
+          break;
         }
         case "update": {
-          const data = await this.URPC.repo({ entity, source }).update(options);
-          return {
-            operation,
-            entity,
-            source,
-            data,
-            urpc_code: urpcCode,
-            message: "",
-            success: true,
-          };
+          data = await this.URPC.repo({ entity, source }).update(options);
+          break;
         }
         case "upsert": {
-          const data = await this.URPC.repo({ entity, source }).upsert(options);
-          return {
-            operation,
-            entity,
-            source,
-            data,
-            urpc_code: urpcCode,
-            message: "",
-            success: true,
-          };
+          data = await this.URPC.repo({ entity, source }).upsert(options);
+          break;
+        }
+        case "upsertMany": {
+          data = await this.URPC.repo({ entity, source }).upsertMany(options);
+          break;
         }
         case "delete": {
-          const data = await this.URPC.repo({ entity, source }).delete(options);
+          data = await this.URPC.repo({ entity, source }).delete(options);
+          break;
+        }
+        default:
           return {
             operation,
             entity,
             source,
-            data,
+            data: null,
             urpc_code: urpcCode,
-            message: "",
-            success: true,
+            message: `Unsupported operations: ${operation}`,
+            success: false,
           };
-        }
-        default:
-          break;
       }
       return {
         operation,
         entity,
         source,
-        data: null,
+        data,
         urpc_code: urpcCode,
-        message: `Unsupported operations: ${operation}`,
-        success: false,
+        message: "",
+        success: true,
       };
     } catch (error: any) {
       return {
@@ -530,6 +644,7 @@ Remember:
     if (urpcCode.includes("create")) return "create";
     if (urpcCode.includes("updateMany")) return "updateMany";
     if (urpcCode.includes("update")) return "update";
+    if (urpcCode.includes("upsertMany")) return "upsertMany";
     if (urpcCode.includes("upsert")) return "upsert";
     if (urpcCode.includes("delete")) return "delete";
     return "unknown";

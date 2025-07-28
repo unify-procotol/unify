@@ -6,7 +6,7 @@ import { ACEntity } from "./entities/ac";
 import { PostEntity } from "./entities/post";
 import { UserEntity } from "./entities/user";
 import { CommentEntity } from "./entities/comment";
-import { Logging } from "@unilab/urpc-core/middleware";
+import { logging } from "@unilab/urpc-core/middleware";
 import { IndexedDBAdapter } from "@unilab/urpc-adapters";
 import { MastraClientPlugin } from "@unilab/mastra-client-plugin";
 import { IoTAdapter } from "./adapters/iot-adapter";
@@ -70,7 +70,7 @@ export function initUrpcClient() {
   URPC.init({
     // local urpc server
     plugins: [TodoPlugin, IoTPlugin, BlogPlugin, MastraClientPlugin()],
-    middlewares: [Logging()],
+    middlewares: [logging()],
     entityConfigs: {
       todo: {
         defaultSource: "indexeddb",

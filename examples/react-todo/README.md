@@ -119,7 +119,7 @@ Todo 实体支持以下自定义操作：
 ```typescript
 URPC.init({
   plugins: [TodoPlugin],
-  middlewares: [Logging()],
+  middlewares: [logging()],
   entityConfigs: {
     todo: {
       defaultSource: "mock",

@@ -1,4 +1,3 @@
-import { Logging } from "@unilab/urpc-core/middleware";
 import { URPC, URPCAPI } from "@unilab/urpc-next/app-router";
 import { MastraPlugin } from "@unilab/mastra-plugin/next-app-router";
 import { Plugin } from "@unilab/urpc-core";
@@ -24,7 +23,6 @@ export function getAPI() {
           debug: true,
         }),
       ],
-      // middlewares: [Logging()],
       entityConfigs: {
         wallet: {
           defaultSource: "evm",

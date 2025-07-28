@@ -8,6 +8,8 @@ import {
   UpdateManyArgs,
   DeletionArgs,
   UpsertArgs,
+  UpsertManyArgs,
+  WhereCondition,
 } from "@unilab/urpc-core";
 import { matchesWhere, processFindManyArgs, performUpsert } from "../utils";
 
@@ -17,7 +19,7 @@ export interface LocalStorageAdapterOptions {
 }
 
 export class LocalStorageAdapter<
-  T extends Record<string, any>,
+  T extends Record<string, any>
 > extends BaseAdapter<T> {
   static displayName = "LocalStorageAdapter";
   static get name() {
@@ -100,9 +102,12 @@ export class LocalStorageAdapter<
 
   async createMany(args: CreateManyArgs<T>): Promise<T[]> {
     const items = this.getItems();
-    const newItems = args.data.map(data => ({
-      ...data,
-    } as unknown as T));
+    const newItems = args.data.map(
+      (data) =>
+        ({
+          ...data,
+        } as unknown as T)
+    );
 
     items.push(...newItems);
     this.setItems(items);
@@ -130,23 +135,23 @@ export class LocalStorageAdapter<
   async updateMany(args: UpdateManyArgs<T>): Promise<T[]> {
     const items = this.getItems();
     const updatedItems: T[] = [];
-    
+
     for (let i = 0; i < items.length; i++) {
       if (matchesWhere(items[i], args.where)) {
         const updatedItem = {
           ...items[i],
           ...args.data,
         } as T;
-        
+
         items[i] = updatedItem;
         updatedItems.push(updatedItem);
       }
     }
-    
+
     if (updatedItems.length > 0) {
       this.setItems(items);
     }
-    
+
     return updatedItems;
   }
 
@@ -172,6 +177,32 @@ export class LocalStorageAdapter<
       this.update.bind(this),
       this.create.bind(this)
     );
+  }
+
+  async upsertMany(args: UpsertManyArgs<T>): Promise<T[]> {
+    const upsertedItems: T[] = [];
+    const { data, onConflictDoUpdate } = args;
+    for (const item of data) {
+      const k = onConflictDoUpdate.target;
+      const v = item[k];
+      if (v) {
+        const res = await performUpsert(
+          {
+            where: { [k]: v } as WhereCondition<T>,
+            create: item,
+            update: item,
+          },
+          this.findOne.bind(this),
+          this.update.bind(this),
+          this.create.bind(this)
+        );
+        upsertedItems.push(res);
+      } else {
+        const res = await this.create({ data: item });
+        upsertedItems.push(res);
+      }
+    }
+    return upsertedItems;
   }
 
   /**

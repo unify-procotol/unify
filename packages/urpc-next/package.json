@@ -26,7 +26,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@unilab/urpc-core": "^0.0.13",
+    "@unilab/urpc-core": "workspace:*",
     "next": "^14.0.0"
   },
   "devDependencies": {

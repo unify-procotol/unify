@@ -18,7 +18,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@unilab/urpc-core": "^0.0.13"
+    "@unilab/urpc-core": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5.3.0"

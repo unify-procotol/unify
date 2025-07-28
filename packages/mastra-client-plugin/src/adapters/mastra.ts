@@ -7,7 +7,7 @@ import {
 } from "@unilab/urpc-core";
 import { ChatEntity } from "../entities";
 import { repo, URPC } from "@unilab/urpc";
-import { executeURPCCode } from "../utils";
+import { executeExecutionPlan, executeURPCCode } from "../utils";
 
 export class MastraClientAdapter extends BaseAdapter<ChatEntity> {
   static readonly displayName = "MastraClientAdapter";
@@ -64,6 +64,15 @@ export class MastraClientAdapter extends BaseAdapter<ChatEntity> {
     });
 
     const output = result.output;
+
+    if (output.execution_plan) {
+      const planOutput = await executeExecutionPlan(output.execution_plan);
+      return {
+        input,
+        output: planOutput,
+      };
+    }
+
     const urpcCode = output.urpc_code;
     if (!urpcCode) {
       return {

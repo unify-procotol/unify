@@ -5,7 +5,7 @@ import {
   FieldConfig,
 } from "@unilab/urpc-core";
 import { getRepo } from "@unilab/urpc-core";
-import { getGlobalMiddlewareManager } from "@unilab/urpc-core";
+import { getMiddlewareManager } from "@unilab/urpc-core";
 
 const languageMap = {
   zh: "Chinese",
@@ -55,7 +55,7 @@ export function i18nAI<T extends Record<string, any>>(options?: {
       return await next();
     }
 
-    const entityConfigs = getGlobalMiddlewareManager().entityConfigs;
+    const entityConfigs = getMiddlewareManager().entityConfigs;
     const entityConfig = entityConfigs[entityName];
 
     const fields = entityConfig?.fields;
