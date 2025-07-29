@@ -7,9 +7,7 @@
   "exports": {
     ".": "./dist/index.js",
     "./entities": "./dist/entities/index.js",
-    "./hono": "./dist/hono/index.js",
-    "./next-app-router": "./dist/next-app-router/index.js",
-    "./next-pages-router": "./dist/next-pages-router/index.js"
+    "./agents": "./dist/agents/index.js"
   },
   "publishConfig": {
     "access": "public"

@@ -1,9 +1,9 @@
-import { Output, PlanOutput } from "../type";
-
 export class ChatEntity {
   static displayName = "ChatEntity";
 
   input: string = "";
+  output: any;
   model?: string;
-  output?: Output | PlanOutput;
+  agent?: string;
+  entities?: string[];
 }

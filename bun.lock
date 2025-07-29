@@ -81,7 +81,7 @@
         "typescript": "^5.3.0",
       },
     },
-    "dev/mastra-plugin": {
+    "dev/mastra-plugin-dev": {
       "name": "mastra-plugin-dev",
       "version": "1.0.0",
       "dependencies": {
@@ -259,8 +259,8 @@
       "dependencies": {
         "@mastra/core": "^0.10.12",
         "@openrouter/ai-sdk-provider": "^0.7.2",
-        "@unilab/urpc": "^0.0.18",
-        "@unilab/urpc-core": "^0.0.13",
+        "@unilab/urpc": "workspace:*",
+        "@unilab/urpc-core": "workspace:*",
       },
       "devDependencies": {
         "@types/node": "^20.10.0",
@@ -273,7 +273,7 @@
       "dependencies": {
         "@mastra/core": "^0.10.12",
         "@openrouter/ai-sdk-provider": "^0.7.2",
-        "@unilab/urpc-core": "^0.0.13",
+        "@unilab/urpc-core": "workspace:*",
       },
       "devDependencies": {
         "@types/node": "^20.10.0",
@@ -303,8 +303,8 @@
         "@radix-ui/react-toast": "^1.2.1",
         "@radix-ui/react-toggle": "^1.1.0",
         "@radix-ui/react-tooltip": "^1.1.2",
-        "@unilab/urpc": "^0.0.18",
-        "@unilab/urpc-core": "^0.0.13",
+        "@unilab/urpc": "workspace:*",
+        "@unilab/urpc-core": "workspace:*",
         "ajv": "^8.17.1",
         "class-variance-authority": "^0.7.0",
         "clsx": "^2.1.1",
@@ -333,8 +333,8 @@
       "version": "0.0.15",
       "dependencies": {
         "@solana/web3.js": "^1.95.2",
-        "@unilab/urpc-adapters": "^0.0.15",
-        "@unilab/urpc-core": "^0.0.13",
+        "@unilab/urpc-adapters": "workspace:*",
+        "@unilab/urpc-core": "workspace:*",
         "reflect-metadata": "^0.2.2",
         "viem": "^2.33.0",
       },
@@ -346,7 +346,7 @@
       "name": "@unilab/urpc",
       "version": "0.0.18",
       "dependencies": {
-        "@unilab/urpc-core": "^0.0.13",
+        "@unilab/urpc-core": "workspace:*",
       },
       "devDependencies": {
         "typescript": "^5.3.0",
@@ -426,7 +426,7 @@
       "name": "@unilab/urpc-next",
       "version": "0.0.18",
       "dependencies": {
-        "@unilab/urpc-core": "^0.0.13",
+        "@unilab/urpc-core": "workspace:*",
         "next": "^14.0.0",
       },
       "devDependencies": {
@@ -2075,7 +2075,7 @@
 
     "magic-string": ["magic-string@0.30.17", "", { "dependencies": { "@jridgewell/sourcemap-codec": "^1.5.0" } }, "sha512-sNPKHvyjVf7gyjwS4xGTaW/mCnF8wnjtifKBEhxfZ7E/S8tQ0rssrwGNn6q8JH/ohItJfSQp9mBtQYuTlH5QnA=="],
 
-    "mastra-plugin-dev": ["mastra-plugin-dev@workspace:dev/mastra-plugin"],
+    "mastra-plugin-dev": ["mastra-plugin-dev@workspace:dev/mastra-plugin-dev"],
 
     "mastra-urpc": ["mastra-urpc@workspace:dev/mastra-urpc"],
 

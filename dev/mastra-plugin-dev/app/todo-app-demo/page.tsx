@@ -98,6 +98,7 @@ export default function ReactTodo() {
       <ChatWidget
         entity="chat"
         source="mastra-client"
+        entities={["TodoEntity"]}
         quickCommands={[
           "Query all todo tasks",
           'Add a TODO task with the title "test"',

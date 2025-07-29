@@ -1,4 +1,4 @@
-export interface Output {
+export interface StepOutput {
   operation: string;
   entity: string;
   source: string;
@@ -18,6 +18,7 @@ export interface ExecutionPlan {
 }
 
 export interface PlanOutput {
-  execution_plan?: ExecutionPlan;
-  results?: Output[];
+  execution_plan: ExecutionPlan;
+  results: StepOutput[];
+  message?: string;
 }

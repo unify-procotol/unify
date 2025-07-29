@@ -1,14 +1,11 @@
 import { URPC } from "@unilab/urpc";
-import { ExecutionPlan, Output, PlanOutput } from "./type";
+import { ExecutionPlan, StepOutput, PlanOutput } from "./type";
 
 export async function executeExecutionPlan(
   executionPlan: ExecutionPlan
 ): Promise<PlanOutput> {
-  const results: Output[] = [];
-  let allSuccess = true;
-  let combinedMessage = "";
+  const results: StepOutput[] = [];
 
-  // Sort steps by order
   const sortedSteps = [...executionPlan.steps].sort(
     (a, b) => a.order - b.order
   );
@@ -16,22 +13,9 @@ export async function executeExecutionPlan(
   for (const step of sortedSteps) {
     try {
       const result = await executeURPCCode(step.urpc_code);
-      results.push({
-        ...result,
-        message: `Step ${step.order}: ${step.description} - ${
-          result.message || (result.success ? "success" : "failure")
-        }`,
-      });
-
-      if (!result.success) {
-        allSuccess = false;
-        combinedMessage += `Step ${step.order} failure: ${result.message};\n `;
-      } else {
-        combinedMessage += `Step ${step.order} success: ${step.description}; \n`;
-      }
+      results.push(result);
     } catch (error: any) {
-      allSuccess = false;
-      const errorResult: Output = {
+      const errorResult: StepOutput = {
         success: false,
         operation: "unknown",
         entity: "unknown",
@@ -41,7 +25,6 @@ export async function executeExecutionPlan(
         urpc_code: step.urpc_code,
       };
       results.push(errorResult);
-      combinedMessage += `Step ${step.order} error: ${error.message};\n `;
     }
   }
 
@@ -51,7 +34,7 @@ export async function executeExecutionPlan(
   };
 }
 
-export async function executeURPCCode(urpcCode: string): Promise<Output> {
+export async function executeURPCCode(urpcCode: string): Promise<StepOutput> {
   const operation = extractOperation(urpcCode);
   const entity = extractEntity(urpcCode);
   const source = extractSource(urpcCode);

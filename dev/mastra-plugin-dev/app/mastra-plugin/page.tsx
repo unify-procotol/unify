@@ -16,14 +16,15 @@ import { initUrpcClient } from "@/lib/urpc-client";
 import DemoContainer from "@/components/demo-container";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { PlanOutput } from "@unilab/mastra-client-plugin";
+import { CodeDisplay } from "@/components/code-display";
 
 interface Message {
   id: string;
   role: "user" | "assistant";
-  content: string;
   timestamp: Date;
-  data?: any;
-  urpcCode?: string;
+  content?: string;
+  output?: PlanOutput;
 }
 
 interface UserData {
@@ -123,6 +124,8 @@ export default function UrpcAgent() {
           selectedModel === "google/gemini-2.0-flash-001"
             ? undefined
             : selectedModel,
+        agent: "urpc-simple-agent",
+        entities: ["UserEntity", "PostEntity"],
       });
 
       if (result instanceof Response) {
@@ -139,77 +142,35 @@ export default function UrpcAgent() {
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: output.message,
         timestamp: new Date(),
-        data: output.data,
-        urpcCode: output.urpc_code || "",
+        output,
       };
 
       setMessages((prev) => [...prev, assistantMessage]);
 
       // Update right side data display
-      if (output.entity) {
-        if (output.entity === "user") {
-          if (Array.isArray(output.data)) {
-            setUserData(output.data);
-          } else if (
-            (output.operation === "findOne" || output.operation === "update") &&
-            output.data
-          ) {
-            setUserData((prev) => {
-              const index = prev.findIndex(
-                (user) => user.id === output.data.id
-              );
-              if (index !== -1) {
-                prev[index] = output.data;
-              } else {
-                prev.push(output.data);
-              }
-              return prev;
-            });
-          } else if (output.operation === "create" && output.data) {
-            setUserData((prev) => [...prev, output.data]);
-          } else if (output.operation === "delete" && output.success) {
-            // Handle delete operation - extract user name from message
-            const deleteMatch = textToSend.match(/Delete user (.+?)$/);
-            if (deleteMatch) {
-              const userName = deleteMatch[1].trim();
-              setUserData((prev) =>
-                prev.filter((user) => user.name !== userName)
-              );
-            }
+      if (output.results?.length > 0) {
+        const { entity, source, operation, data } = output.results[0];
+        if (operation === "findMany") {
+          if (entity === "user") {
+            setUserData(data);
           }
-        } else if (output.entity === "post") {
-          if (Array.isArray(output.data)) {
-            setPostData(output.data);
-          } else if (
-            (output.operation === "findOne" || output.operation === "update") &&
-            output.data
-          ) {
-            setPostData((prev) => {
-              const index = prev.findIndex(
-                (post) => post.id === output.data.id
-              );
-              if (index !== -1) {
-                prev[index] = output.data;
-              } else {
-                prev.push(output.data);
-              }
-              return prev;
-            });
-          } else if (output.operation === "create" && output.data) {
-            setPostData((prev) => [...prev, output.data]);
-          } else if (output.operation === "delete" && output.success) {
-            // Handle delete post operation
-            const deleteMatch = textToSend.match(/ID (.+?)$/);
-            if (deleteMatch) {
-              const identifier = deleteMatch[1].trim();
-              setPostData((prev) =>
-                prev.filter(
-                  (post) => post.title !== identifier && post.id !== identifier
-                )
-              );
-            }
+          if (entity === "post") {
+            setPostData(data);
+          }
+        } else if (!operation.includes("find")) {
+          const res = await repo({
+            entity,
+            source,
+          }).findMany();
+
+          if (entity === "user") {
+            // @ts-ignore
+            setUserData(res);
+          }
+          if (entity === "post") {
+            // @ts-ignore
+            setPostData(res);
           }
         }
       }
@@ -304,63 +265,19 @@ export default function UrpcAgent() {
                           {message.role === "user" ? "You" : "URPC Assistant"}
                         </span>
                       </div>
-                      <div className="text-sm">{message.content}</div>
-                      {message.urpcCode && (
+                      {message.content && (
+                        <div className="text-sm leading-relaxed break-words">
+                          {message.content}
+                        </div>
+                      )}
+                      {message.output?.results && (
                         <>
-                          {/* Display URPC code */}
-                          <div className="mt-2 p-2 bg-gradient-background rounded text-foreground text-xs font-mono border border-border">
-                            <div className="text-muted-foreground">
-                              URPC Code:
-                            </div>
-                            <SyntaxHighlighter
-                              language="typescript"
-                              style={oneDark}
-                              customStyle={{
-                                margin: 0,
-                                padding: "12px",
-                                fontSize: "11px",
-                                background: "transparent",
-                                overflow: "auto",
-                              }}
-                              codeTagProps={{
-                                style: {
-                                  background: "transparent",
-                                },
-                              }}
-                              showLineNumbers={false}
-                              showInlineLineNumbers={false}
-                              wrapLines={false}
-                              wrapLongLines={true}
-                            >
-                              {message.urpcCode}
-                            </SyntaxHighlighter>
-                          </div>
-                          {/* Display data */}
-                          <div className="mt-2 p-2 bg-gradient-background rounded text-foreground text-xs font-mono border border-border">
-                            <div className="text-muted-foreground">Data:</div>
-                            <SyntaxHighlighter
-                              language="json"
-                              style={oneDark}
-                              customStyle={{
-                                margin: 0,
-                                padding: "12px",
-                                fontSize: "11px",
-                                background: "transparent",
-                                overflow: "auto",
-                              }}
-                              codeTagProps={{
-                                style: {
-                                  background: "transparent",
-                                },
-                              }}
-                              showLineNumbers={false}
-                              showInlineLineNumbers={false}
-                              wrapLines={false}
-                              wrapLongLines={true}
-                            >
-                              {JSON.stringify(message.data, null, 2)}
-                            </SyntaxHighlighter>
-                          </div>
+                          {message.output.results.map((item) => (
+                            <CodeDisplay
+                              urpcCode={item.urpc_code}
+                              data={item.data}
+                            />
+                          ))}
                         </>
                       )}
                     </div>

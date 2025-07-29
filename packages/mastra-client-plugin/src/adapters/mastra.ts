@@ -1,55 +1,54 @@
 import {
   BaseAdapter,
-  EntityConfigs,
   ErrorCodes,
-  SchemaObject,
+  simplifyEntityName,
   URPCError,
 } from "@unilab/urpc-core";
 import { ChatEntity } from "../entities";
 import { repo, URPC } from "@unilab/urpc";
-import { executeExecutionPlan, executeURPCCode } from "../utils";
+import { executeExecutionPlan } from "../utils";
 
 export class MastraClientAdapter extends BaseAdapter<ChatEntity> {
   static readonly displayName = "MastraClientAdapter";
-  hasEntityInfo: boolean = false;
-  entitySchemas: Record<string, SchemaObject> = {};
-  entitySources: Record<string, string[]> = {};
-  entityConfigs: EntityConfigs = {};
-  isProxyConfigured: boolean = false;
 
-  private getEntityInfo() {
-    if (!this.hasEntityInfo) {
-      const entitySchemas = URPC.getEntitySchemas();
-      const entitySources = URPC.getEntitySources();
-      const entityConfigs = URPC.getEntityConfigs();
-
-      this.entitySchemas = Object.fromEntries(
-        Object.entries(entitySchemas).filter(([key]) => key !== "ChatEntity")
-      );
-      this.entitySources = Object.fromEntries(
-        Object.entries(entitySources).filter(
-          ([key]) => key !== "ChatEntity" && key !== "SchemaEntity"
-        )
-      );
-      this.entityConfigs = entityConfigs;
-      this.hasEntityInfo = true;
-    }
-
+  private getEntityInfo(entities: string[] = []) {
+    const _entitySchemas = URPC.getEntitySchemas();
+    const _entitySources = URPC.getEntitySources();
+    const _entityConfigs = URPC.getEntityConfigs();
+    const entitySchemas = Object.fromEntries(
+      Object.entries(_entitySchemas).filter(
+        ([key]) => key !== "ChatEntity" && entities.includes(key)
+      )
+    );
+    const entitySources = Object.fromEntries(
+      Object.entries(_entitySources).filter(
+        ([key]) =>
+          key !== "ChatEntity" &&
+          key !== "SchemaEntity" &&
+          entities.includes(key)
+      )
+    );
+    const _entities = entities.map((entity) => simplifyEntityName(entity));
+    const entityConfigs = Object.fromEntries(
+      Object.entries(_entityConfigs).filter(([key]) => {
+        return _entities.includes(key);
+      })
+    );
     return {
-      entitySchemas: this.entitySchemas,
-      entitySources: this.entitySources,
-      entityConfigs: this.entityConfigs,
+      entitySchemas,
+      entitySources,
+      entityConfigs,
     };
   }
 
   async call(args: Partial<ChatEntity>): Promise<ChatEntity> {
-    const { input, model } = args;
+    const { input, model, agent: agentName, entities } = args;
     if (!input) {
       throw new URPCError(ErrorCodes.BAD_REQUEST, "input is required");
     }
 
     const { entitySchemas, entitySources, entityConfigs } =
-      this.getEntityInfo();
+      this.getEntityInfo(entities);
 
     const result = await repo({
       entity: "chat",
@@ -58,9 +57,11 @@ export class MastraClientAdapter extends BaseAdapter<ChatEntity> {
       input,
       model,
       proxy: true,
+      entities,
       entitySchemas,
       entitySources,
       entityConfigs,
+      agent: agentName,
     });
 
     const output = result.output;
@@ -73,20 +74,9 @@ export class MastraClientAdapter extends BaseAdapter<ChatEntity> {
       };
     }
 
-    const urpcCode = output.urpc_code;
-    if (!urpcCode) {
-      return {
-        input,
-        output,
-      };
-    }
-    const operationResult = await executeURPCCode(urpcCode);
     return {
       input,
-      output: {
-        ...output,
-        ...operationResult,
-      },
+      output,
     };
   }
 }

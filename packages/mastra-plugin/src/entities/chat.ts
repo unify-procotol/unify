@@ -1,13 +1,14 @@
-import { EntityConfigs, Fields, SchemaObject } from "@unilab/urpc-core";
-import { Output, PlanOutput } from "../utils/type";
+import { EntityConfigs, SchemaObject } from "@unilab/urpc-core";
 
 export class ChatEntity {
   static displayName = "ChatEntity";
 
   input: string = "";
+  output: any;
+  agent?: string;
   model?: string;
-  output?: Output | PlanOutput;
   proxy?: boolean = false;
+  entities?: string[];
   entitySchemas?: Record<string, SchemaObject> = {};
   entitySources?: Record<string, string[]> = {};
   entityConfigs?: EntityConfigs = {};

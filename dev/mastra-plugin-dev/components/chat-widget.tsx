@@ -5,7 +5,7 @@ import { Send, User, Bot, MessageSquare, X } from "lucide-react";
 import { repo } from "@unilab/urpc";
 import { ChatEntity } from "@unilab/mastra-plugin/entities";
 import { initUrpcClient } from "@/lib/urpc-client";
-import { Output, PlanOutput } from "@unilab/mastra-client-plugin";
+import { PlanOutput } from "@unilab/mastra-client-plugin";
 import { CodeDisplay } from "./code-display";
 
 interface Message {
@@ -13,7 +13,7 @@ interface Message {
   role: "user" | "assistant";
   timestamp: Date;
   content?: string;
-  output?: Output | PlanOutput;
+  output?: PlanOutput;
 }
 
 initUrpcClient();
@@ -22,11 +22,13 @@ export default function ChatWidget({
   entity,
   source,
   quickCommands,
+  entities,
   onSuccess,
 }: {
   entity: string;
   source: string;
   quickCommands?: string[];
+  entities?: string[];
   onSuccess?: () => void;
 }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -96,6 +98,8 @@ export default function ChatWidget({
           selectedModel === "google/gemini-2.0-flash-001"
             ? undefined
             : selectedModel,
+        agent: "urpc-simple-agent",
+        entities,
       });
 
       const output = result.output;
@@ -216,26 +220,16 @@ export default function ChatWidget({
                         {message.content}
                       </div>
                     )}
-                    {message.output &&
-                      "execution_plan" in message.output &&
-                      message.output.results && (
-                        <>
-                          {message.output.results.map((item) => (
-                            <CodeDisplay
-                              urpcCode={item.urpc_code}
-                              data={item.data}
-                            />
-                          ))}
-                        </>
-                      )}
-                    {message.output &&
-                      "urpc_code" in message.output &&
-                      message.output.urpc_code && (
-                        <CodeDisplay
-                          urpcCode={message.output.urpc_code}
-                          data={message.output.data}
-                        />
-                      )}
+                    {message.output?.results && (
+                      <>
+                        {message.output.results.map((item) => (
+                          <CodeDisplay
+                            urpcCode={item.urpc_code}
+                            data={item.data}
+                          />
+                        ))}
+                      </>
+                    )}
                   </div>
                 </div>
               ))}

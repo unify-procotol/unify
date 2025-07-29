@@ -34,6 +34,25 @@ const demo = async () => {
   }).findMany();
 
   console.log("res=>", res);
+
+  repo({
+    entity: "LED",
+    source: "iot",
+  }).upsertMany({
+    data: [
+      {
+        location: "Living Room",
+        brightness: 20,
+      },
+      {
+        location: "Bedroom",
+        brightness: 50,
+      },
+    ],
+    onConflictDoUpdate: {
+      target: "location",
+    },
+  });
 };
 
 demo();
