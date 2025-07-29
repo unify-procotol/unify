@@ -1,5 +1,5 @@
 import { ErrorCodes, URPCError } from "./error";
-import { getGlobalMiddlewareManager } from "./middleware-manager";
+import { getMiddlewareManager } from "./middleware-manager";
 import type {
   CreationArgs,
   CreateManyArgs,
@@ -11,6 +11,7 @@ import type {
   UpdateManyArgs,
   UpsertArgs,
   MiddlewareMetadata,
+  UpsertManyArgs,
 } from "./types";
 
 export class Repository<T extends Record<string, any>> {
@@ -24,7 +25,7 @@ export class Repository<T extends Record<string, any>> {
     args?: FindManyArgs<T>,
     metadata?: MiddlewareMetadata
   ): Promise<T[]> {
-    return getGlobalMiddlewareManager().execute(
+    return getMiddlewareManager().execute(
       {
         args,
         operation: "findMany",
@@ -40,7 +41,7 @@ export class Repository<T extends Record<string, any>> {
     args: FindOneArgs<T>,
     metadata?: MiddlewareMetadata
   ): Promise<T | null> {
-    return getGlobalMiddlewareManager().execute(
+    return getMiddlewareManager().execute(
       {
         args,
         operation: "findOne",
@@ -56,7 +57,7 @@ export class Repository<T extends Record<string, any>> {
     args: CreationArgs<T>,
     metadata?: MiddlewareMetadata
   ): Promise<T> {
-    return getGlobalMiddlewareManager().execute(
+    return getMiddlewareManager().execute(
       {
         args,
         operation: "create",
@@ -73,7 +74,7 @@ export class Repository<T extends Record<string, any>> {
     args: CreateManyArgs<T>,
     metadata?: MiddlewareMetadata
   ): Promise<T[]> {
-    return getGlobalMiddlewareManager().execute(
+    return getMiddlewareManager().execute(
       {
         args,
         operation: "createMany",
@@ -86,7 +87,7 @@ export class Repository<T extends Record<string, any>> {
   }
 
   async update(args: UpdateArgs<T>, metadata?: MiddlewareMetadata): Promise<T> {
-    return getGlobalMiddlewareManager().execute(
+    return getMiddlewareManager().execute(
       {
         args,
         operation: "update",
@@ -102,7 +103,7 @@ export class Repository<T extends Record<string, any>> {
     args: UpdateManyArgs<T>,
     metadata?: MiddlewareMetadata
   ): Promise<T[]> {
-    return getGlobalMiddlewareManager().execute(
+    return getMiddlewareManager().execute(
       {
         args,
         operation: "updateMany",
@@ -115,7 +116,7 @@ export class Repository<T extends Record<string, any>> {
   }
 
   async upsert(args: UpsertArgs<T>, metadata?: MiddlewareMetadata): Promise<T> {
-    return getGlobalMiddlewareManager().execute(
+    return getMiddlewareManager().execute(
       {
         args,
         operation: "upsert",
@@ -127,11 +128,27 @@ export class Repository<T extends Record<string, any>> {
     );
   }
 
+  async upsertMany(
+    args: UpsertManyArgs<T>,
+    metadata?: MiddlewareMetadata
+  ): Promise<T[]> {
+    return getMiddlewareManager().execute(
+      {
+        args,
+        operation: "upsertMany",
+        metadata: metadata,
+      },
+      async (ctx) => {
+        return this.adapter.upsertMany(args, ctx);
+      }
+    );
+  }
+
   async delete(
     args: DeletionArgs<T>,
     metadata?: MiddlewareMetadata
   ): Promise<boolean> {
-    return getGlobalMiddlewareManager().execute(
+    return getMiddlewareManager().execute(
       {
         args,
         operation: "delete",
@@ -152,7 +169,7 @@ export class Repository<T extends Record<string, any>> {
     if (!this.adapter[methodName]) {
       throw new URPCError(ErrorCodes.NOT_FOUND, "Method not implemented.");
     }
-    return getGlobalMiddlewareManager().execute(
+    return getMiddlewareManager().execute(
       {
         args,
         operation: methodName,

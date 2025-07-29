@@ -8,11 +8,13 @@ import {
   UpdateManyArgs,
   DeletionArgs,
   UpsertArgs,
+  UpsertManyArgs,
+  WhereCondition,
 } from "@unilab/urpc-core";
 import { matchesWhere, processFindManyArgs, performUpsert } from "../utils";
 
 export class IndexedDBAdapter<
-  T extends Record<string, any>,
+  T extends Record<string, any>
 > extends BaseAdapter<T> {
   static displayName = "IndexedDBAdapter";
   static get name() {
@@ -158,7 +160,7 @@ export class IndexedDBAdapter<
       (data) =>
         ({
           ...data,
-        }) as unknown as T
+        } as unknown as T)
     );
 
     return new Promise((resolve, reject) => {
@@ -234,7 +236,7 @@ export class IndexedDBAdapter<
         ({
           ...item,
           ...args.data,
-        }) as T
+        } as T)
     );
 
     return new Promise((resolve, reject) => {
@@ -271,6 +273,32 @@ export class IndexedDBAdapter<
       this.update.bind(this),
       this.create.bind(this)
     );
+  }
+
+  async upsertMany(args: UpsertManyArgs<T>): Promise<T[]> {
+    const upsertedItems: T[] = [];
+    const { data, onConflictDoUpdate } = args;
+    for (const item of data) {
+      const k = onConflictDoUpdate.target;
+      const v = item[k];
+      if (v) {
+        const res = await performUpsert(
+          {
+            where: { [k]: v } as WhereCondition<T>,
+            create: item,
+            update: item,
+          },
+          this.findOne.bind(this),
+          this.update.bind(this),
+          this.create.bind(this)
+        );
+        upsertedItems.push(res);
+      } else {
+        const res = await this.create({ data: item });
+        upsertedItems.push(res);
+      }
+    }
+    return upsertedItems;
   }
 
   async delete(args: DeletionArgs<T>): Promise<boolean> {

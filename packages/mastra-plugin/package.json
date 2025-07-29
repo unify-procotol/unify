@@ -1,15 +1,13 @@
 {
   "name": "@unilab/mastra-plugin",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "description": "Mastra plugin for the Unify RPC framework",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {
     ".": "./dist/index.js",
     "./entities": "./dist/entities/index.js",
-    "./hono": "./dist/hono/index.js",
-    "./next-app-router": "./dist/next-app-router/index.js",
-    "./next-pages-router": "./dist/next-pages-router/index.js"
+    "./agents": "./dist/agents/index.js"
   },
   "publishConfig": {
     "access": "public"
@@ -31,7 +29,7 @@
   "dependencies": {
     "@mastra/core": "^0.10.12",
     "@openrouter/ai-sdk-provider": "^0.7.2",
-    "@unilab/urpc-core": "^0.0.13"
+    "@unilab/urpc-core": "^0.0.14"
   },
   "devDependencies": {
     "@types/node": "^20.10.0",

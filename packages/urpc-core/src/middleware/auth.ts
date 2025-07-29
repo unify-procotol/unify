@@ -5,7 +5,7 @@ import {
   MiddlewareNext,
   PermissionRule,
 } from "../types";
-import { getGlobalMiddlewareManager } from "../middleware-manager";
+import { getMiddlewareManager } from "../middleware-manager";
 import { Allow } from "../allow";
 import { ErrorCodes, URPCError } from "../error";
 
@@ -13,10 +13,8 @@ export interface AuthOptions {
   getUser: (context: any) => AuthUser | null | Promise<AuthUser | null>;
 }
 
-export function auth<T extends Record<string, any>>(
-  options: AuthOptions
-): Middleware<T> {
-  const fn = async (context: MiddlewareContext<T>, next: MiddlewareNext<T>) => {
+export function auth(options: AuthOptions): Middleware {
+  const fn = async (context: MiddlewareContext, next: MiddlewareNext) => {
     const metadata = context.metadata;
     const entityName = metadata?.entity;
     const operation = context.operation;
@@ -25,7 +23,7 @@ export function auth<T extends Record<string, any>>(
       throw new URPCError(ErrorCodes.BAD_REQUEST, "No entity specified");
     }
 
-    const entityConfigs = getGlobalMiddlewareManager().entityConfigs;
+    const entityConfigs = getMiddlewareManager().entityConfigs;
     const entityConfig = entityConfigs[entityName];
 
     if (!entityConfig) {

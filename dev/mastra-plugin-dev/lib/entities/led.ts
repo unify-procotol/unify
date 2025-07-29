@@ -9,7 +9,7 @@ export class LEDEntity {
   id = "";
 
   @Fields.string({
-    description: "The name of the LED device",
+    description: "The name of the LED device. Support fuzzy queries",
   })
   name = "";
 

@@ -1,4 +1,4 @@
-import { URPC } from "@unilab/urpc-hono";
+import { repo, URPC } from "@unilab/urpc-hono";
 import { UserEntity } from "./entities/user";
 import { Plugin } from "@unilab/urpc-core";
 import { MockAdapter } from "@unilab/urpc-adapters";
@@ -25,7 +25,7 @@ const app = URPC.init({
 
 // Use repo on the server side
 // init data
-await URPC.repo<UserEntity>({
+await repo<UserEntity>({
   entity: "UserEntity",
   source: "api-mock",
 }).create({

@@ -14,3 +14,5 @@ export const MastraClientPlugin = (): Plugin => {
     ],
   };
 };
+
+export * from "./type";

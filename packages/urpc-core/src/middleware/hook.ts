@@ -1,25 +1,23 @@
 import type { Middleware, MiddlewareContext, MiddlewareNext } from "../types";
 
-export type HookFunction<T extends Record<string, any>> = (
-  context: MiddlewareContext<T>
-) => Promise<void> | void;
+export type HookFunction = (context: MiddlewareContext) => Promise<void> | void;
 
-export interface HookRegistry<T extends Record<string, any>> {
-  beforeCreate: HookFunction<T>[];
-  afterCreate: HookFunction<T>[];
+export interface HookRegistry {
+  beforeCreate: HookFunction[];
+  afterCreate: HookFunction[];
 
-  beforeUpdate: HookFunction<T>[];
-  afterUpdate: HookFunction<T>[];
+  beforeUpdate: HookFunction[];
+  afterUpdate: HookFunction[];
 
-  beforeDelete: HookFunction<T>[];
-  afterDelete: HookFunction<T>[];
+  beforeDelete: HookFunction[];
+  afterDelete: HookFunction[];
 
-  beforeAny: HookFunction<T>[];
-  afterAny: HookFunction<T>[];
+  beforeAny: HookFunction[];
+  afterAny: HookFunction[];
 }
 
-export class HookManager<T extends Record<string, any>> {
-  private hooks: HookRegistry<T> = {
+export class HookManager {
+  private hooks: HookRegistry = {
     beforeCreate: [],
     afterCreate: [],
     beforeUpdate: [],
@@ -30,47 +28,47 @@ export class HookManager<T extends Record<string, any>> {
     afterAny: [],
   };
 
-  beforeCreate(hook: HookFunction<T>): this {
+  beforeCreate(hook: HookFunction): this {
     this.hooks.beforeCreate.push(hook);
     return this;
   }
 
-  afterCreate(hook: HookFunction<T>): this {
+  afterCreate(hook: HookFunction): this {
     this.hooks.afterCreate.push(hook);
     return this;
   }
 
-  beforeUpdate(hook: HookFunction<T>): this {
+  beforeUpdate(hook: HookFunction): this {
     this.hooks.beforeUpdate.push(hook);
     return this;
   }
 
-  afterUpdate(hook: HookFunction<T>): this {
+  afterUpdate(hook: HookFunction): this {
     this.hooks.afterUpdate.push(hook);
     return this;
   }
 
-  beforeDelete(hook: HookFunction<T>): this {
+  beforeDelete(hook: HookFunction): this {
     this.hooks.beforeDelete.push(hook);
     return this;
   }
 
-  afterDelete(hook: HookFunction<T>): this {
+  afterDelete(hook: HookFunction): this {
     this.hooks.afterDelete.push(hook);
     return this;
   }
 
-  beforeAny(hook: HookFunction<T>): this {
+  beforeAny(hook: HookFunction): this {
     this.hooks.beforeAny.push(hook);
     return this;
   }
 
-  afterAny(hook: HookFunction<T>): this {
+  afterAny(hook: HookFunction): this {
     this.hooks.afterAny.push(hook);
     return this;
   }
 
-  async executeBefore(context: MiddlewareContext<T>): Promise<void> {
+  async executeBefore(context: MiddlewareContext): Promise<void> {
     for (const hook of this.hooks.beforeAny) {
       await hook(context);
     }
@@ -94,7 +92,7 @@ export class HookManager<T extends Record<string, any>> {
     }
   }
 
-  async executeAfter(context: MiddlewareContext<T>): Promise<void> {
+  async executeAfter(context: MiddlewareContext): Promise<void> {
     switch (context.operation) {
       case "create":
         for (const hook of this.hooks.afterCreate) {
@@ -131,21 +129,21 @@ export class HookManager<T extends Record<string, any>> {
     };
   }
 
-  clearType(type: keyof HookRegistry<T>): void {
+  clearType(type: keyof HookRegistry): void {
     this.hooks[type] = [];
   }
 }
 
-export function createHookMiddleware<T extends Record<string, any>>(
-  setupHooks?: (hookManager: HookManager<T>) => void
-): Middleware<T> {
-  const hookManager = new HookManager<T>();
+export function createHookMiddleware(
+  setupHooks?: (hookManager: HookManager) => void
+): Middleware {
+  const hookManager = new HookManager();
 
   if (setupHooks) {
     setupHooks(hookManager);
   }
 
-  const fn = async (context: MiddlewareContext<T>, next: MiddlewareNext<T>) => {
+  const fn = async (context: MiddlewareContext, next: MiddlewareNext) => {
     await hookManager.executeBefore(context);
 
     const result = await next();

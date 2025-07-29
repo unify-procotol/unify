@@ -1,132 +1,102 @@
 import { URPC } from "@unilab/urpc";
-import { Output } from "./entities/chat";
+import { ExecutionPlan, StepOutput, PlanOutput } from "./type";
 
-export async function executeURPCCode(urpcCode: string): Promise<Output> {
+export async function executeExecutionPlan(
+  executionPlan: ExecutionPlan
+): Promise<PlanOutput> {
+  const results: StepOutput[] = [];
+
+  const sortedSteps = [...executionPlan.steps].sort(
+    (a, b) => a.order - b.order
+  );
+
+  for (const step of sortedSteps) {
+    try {
+      const result = await executeURPCCode(step.urpc_code);
+      results.push(result);
+    } catch (error: any) {
+      const errorResult: StepOutput = {
+        success: false,
+        operation: "unknown",
+        entity: "unknown",
+        source: "unknown",
+        data: null,
+        message: `Step ${step.order} execution error: ${error.message}`,
+        urpc_code: step.urpc_code,
+      };
+      results.push(errorResult);
+    }
+  }
+
+  return {
+    execution_plan: executionPlan,
+    results,
+  };
+}
+
+export async function executeURPCCode(urpcCode: string): Promise<StepOutput> {
   const operation = extractOperation(urpcCode);
   const entity = extractEntity(urpcCode);
   const source = extractSource(urpcCode);
   const options = extractOptions(urpcCode);
   try {
+    let data;
     switch (operation) {
       case "findMany": {
-        const data = await URPC.repo({ entity, source }).findMany(options);
-        return {
-          operation,
-          entity,
-          source,
-          data,
-          urpc_code: urpcCode,
-          message: "",
-          success: true,
-        };
+        data = await URPC.repo({ entity, source }).findMany(options);
+        break;
       }
       case "findOne": {
-        const data = await URPC.repo({ entity, source }).findOne(options);
-        return {
-          operation,
-          entity,
-          source,
-          data,
-          urpc_code: urpcCode,
-          message: "",
-          success: true,
-        };
+        data = await URPC.repo({ entity, source }).findOne(options);
+        break;
       }
       case "createMany": {
-        const data = await URPC.repo({ entity, source }).createMany(options);
-        return {
-          operation,
-          entity,
-          source,
-          data,
-          urpc_code: urpcCode,
-          message: "",
-          success: true,
-        };
+        data = await URPC.repo({ entity, source }).createMany(options);
+        break;
       }
       case "create": {
-        const data = await URPC.repo({ entity, source }).create(options);
-        return {
-          operation,
-          entity,
-          source,
-          data,
-          urpc_code: urpcCode,
-          message: "",
-          success: true,
-        };
+        data = await URPC.repo({ entity, source }).create(options);
+        break;
       }
       case "updateMany": {
-        const data = await URPC.repo({ entity, source }).updateMany(options);
-        return {
-          operation,
-          entity,
-          source,
-          data,
-          urpc_code: urpcCode,
-          message: "",
-          success: true,
-        };
+        data = await URPC.repo({ entity, source }).updateMany(options);
+        break;
       }
       case "update": {
-        const data = await URPC.repo({ entity, source }).update(options);
-        return {
-          operation,
-          entity,
-          source,
-          data,
-          urpc_code: urpcCode,
-          message: "",
-          success: true,
-        };
+        data = await URPC.repo({ entity, source }).update(options);
+        break;
       }
       case "upsert": {
-        const data = await URPC.repo({ entity, source }).upsert(options);
-        return {
-          operation,
-          entity,
-          source,
-          data,
-          urpc_code: urpcCode,
-          message: "",
-          success: true,
-        };
+        data = await URPC.repo({ entity, source }).upsert(options);
+        break;
+      }
+      case "upsertMany": {
+        data = await URPC.repo({ entity, source }).upsertMany(options);
+        break;
       }
       case "delete": {
-        const data = await URPC.repo({ entity, source }).delete(options);
-        return {
-          operation,
-          entity,
-          source,
-          data,
-          urpc_code: urpcCode,
-          message: "",
-          success: true,
-        };
-      }
-      case "call": {
-        const data = await URPC.repo({ entity, source }).call(options);
-        return {
-          operation,
-          entity,
-          source,
-          data,
-          urpc_code: urpcCode,
-          message: "",
-          success: true,
-        };
+        data = await URPC.repo({ entity, source }).delete(options);
+        break;
       }
       default:
-        break;
+        return {
+          operation,
+          entity,
+          source,
+          data: null,
+          urpc_code: urpcCode,
+          message: `Unsupported operations: ${operation}`,
+          success: false,
+        };
     }
     return {
       operation,
       entity,
       source,
-      data: null,
+      data,
       urpc_code: urpcCode,
-      message: `Unsupported operations: ${operation}`,
-      success: false,
+      message: "",
+      success: true,
     };
   } catch (error: any) {
     return {

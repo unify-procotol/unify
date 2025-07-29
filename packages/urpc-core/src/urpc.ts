@@ -5,10 +5,7 @@ import {
   generateSchemas,
   SchemaObject,
 } from "./decorators";
-import {
-  getGlobalMiddlewareManager,
-  useGlobalMiddleware,
-} from "./middleware-manager";
+import { getMiddlewareManager } from "./middleware-manager";
 import { registerAdapter, simplifyEntityName } from "./repo-register";
 import {
   BaseURPCConfig,
@@ -33,7 +30,7 @@ export class BaseURPC {
 
     if (config.entityConfigs) {
       this.entityConfigs = config.entityConfigs;
-      getGlobalMiddlewareManager().setEntityConfigs(this.entityConfigs);
+      getMiddlewareManager().setEntityConfigs(this.entityConfigs);
     }
 
     if (config.middlewares) {
@@ -84,7 +81,7 @@ export class BaseURPC {
     middlewares,
   }: {
     plugins: Plugin[];
-    middlewares: Middleware<any>[];
+    middlewares: Middleware[];
   }) {
     const entities = plugins.flatMap((p) => p.entities || []);
     middlewares.forEach((m) => {
@@ -102,7 +99,7 @@ export class BaseURPC {
           );
         }
       }
-      useGlobalMiddleware(m);
+      getMiddlewareManager().use(m);
     });
     console.log(
       `✅ Registered middlewares: ${middlewares.map((m) => m.name).join(", ")}`

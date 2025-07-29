@@ -1,7 +1,7 @@
 import { UserEntity } from "./entities/user";
 import { repo, URPC } from "@unilab/urpc";
 import { Plugin } from "@unilab/urpc-core";
-import { Logging } from "@unilab/urpc-core/middleware";
+import { logging } from "@unilab/urpc-core/middleware";
 import { LocalStorageAdapter } from "@unilab/urpc-adapters";
 
 const MyPlugin: Plugin = {
@@ -10,7 +10,7 @@ const MyPlugin: Plugin = {
 
 URPC.init({
   plugins: [MyPlugin],
-  middlewares: [Logging()],
+  middlewares: [logging()],
   entityConfigs: {
     user: {
       defaultSource: "localstorage",
