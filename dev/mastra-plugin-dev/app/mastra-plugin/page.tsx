@@ -14,8 +14,6 @@ import { repo } from "@unilab/urpc";
 import { ChatEntity } from "@unilab/mastra-plugin/entities";
 import { initUrpcClient } from "@/lib/urpc-client";
 import DemoContainer from "@/components/demo-container";
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { PlanOutput } from "@unilab/mastra-client-plugin";
 import { CodeDisplay } from "@/components/code-display";
 

@@ -61,16 +61,23 @@ export class URPCSimpleAgent implements AgentInterface {
     const _entityConfigs = this.URPC.getEntityConfigs();
 
     if (entities) {
+      const simplifiedEntityNames = entities.map((entity) =>
+        simplifyEntityName(entity)
+      );
+
       const entitySchemas = Object.fromEntries(
-        Object.entries(_entitySchemas).filter(([key]) => entities.includes(key))
+        Object.entries(_entitySchemas).filter(([key]) =>
+          simplifiedEntityNames.includes(simplifyEntityName(key))
+        )
       );
       const entitySources = Object.fromEntries(
-        Object.entries(_entitySources).filter(([key]) => entities.includes(key))
+        Object.entries(_entitySources).filter(([key]) =>
+          simplifiedEntityNames.includes(simplifyEntityName(key))
+        )
       );
-      const _entities = entities.map((entity) => simplifyEntityName(entity));
       const entityConfigs = Object.fromEntries(
         Object.entries(_entityConfigs).filter(([key]) => {
-          return _entities.includes(key);
+          return simplifiedEntityNames.includes(simplifyEntityName(key));
         })
       );
       return {

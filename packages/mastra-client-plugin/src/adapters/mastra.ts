@@ -11,33 +11,48 @@ import { executeExecutionPlan } from "../utils";
 export class MastraClientAdapter extends BaseAdapter<ChatEntity> {
   static readonly displayName = "MastraClientAdapter";
 
-  private getEntityInfo(entities: string[] = []) {
+  private getEntityInfo(entities?: string[]) {
     const _entitySchemas = URPC.getEntitySchemas();
     const _entitySources = URPC.getEntitySources();
     const _entityConfigs = URPC.getEntityConfigs();
-    const entitySchemas = Object.fromEntries(
-      Object.entries(_entitySchemas).filter(
-        ([key]) => key !== "ChatEntity" && entities.includes(key)
-      )
-    );
-    const entitySources = Object.fromEntries(
-      Object.entries(_entitySources).filter(
-        ([key]) =>
-          key !== "ChatEntity" &&
-          key !== "SchemaEntity" &&
-          entities.includes(key)
-      )
-    );
-    const _entities = entities.map((entity) => simplifyEntityName(entity));
-    const entityConfigs = Object.fromEntries(
-      Object.entries(_entityConfigs).filter(([key]) => {
-        return _entities.includes(key);
-      })
-    );
+
+    if (entities) {
+      const simplifiedEntityNames = entities.map((entity) =>
+        simplifyEntityName(entity)
+      );
+
+      const entitySchemas = Object.fromEntries(
+        Object.entries(_entitySchemas).filter(
+          ([key]) =>
+            key !== "ChatEntity" &&
+            simplifiedEntityNames.includes(simplifyEntityName(key))
+        )
+      );
+      const entitySources = Object.fromEntries(
+        Object.entries(_entitySources).filter(
+          ([key]) =>
+            key !== "ChatEntity" &&
+            key !== "SchemaEntity" &&
+            simplifiedEntityNames.includes(simplifyEntityName(key))
+        )
+      );
+
+      const entityConfigs = Object.fromEntries(
+        Object.entries(_entityConfigs).filter(([key]) => {
+          return simplifiedEntityNames.includes(simplifyEntityName(key));
+        })
+      );
+      return {
+        entitySchemas,
+        entitySources,
+        entityConfigs,
+      };
+    }
+    
     return {
-      entitySchemas,
-      entitySources,
-      entityConfigs,
+      entitySchemas: _entitySchemas,
+      entitySources: _entitySources,
+      entityConfigs: _entityConfigs,
     };
   }
 
