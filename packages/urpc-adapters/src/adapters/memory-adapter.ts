@@ -8,11 +8,13 @@ import {
   UpdateManyArgs,
   DeletionArgs,
   UpsertArgs,
+  UpsertManyArgs,
+  WhereCondition,
 } from "@unilab/urpc-core";
 import { matchesWhere, processFindManyArgs, performUpsert } from "../utils";
 
 export class MemoryAdapter<
-  T extends Record<string, any>,
+  T extends Record<string, any>
 > extends BaseAdapter<T> {
   static displayName = "MemoryAdapter";
   static get name() {
@@ -42,9 +44,12 @@ export class MemoryAdapter<
   }
 
   async createMany(args: CreateManyArgs<T>): Promise<T[]> {
-    const newItems = args.data.map(data => ({
-      ...data,
-    } as unknown as T));
+    const newItems = args.data.map(
+      (data) =>
+        ({
+          ...data,
+        } as unknown as T)
+    );
 
     this.items.push(...newItems);
     return newItems;
@@ -69,19 +74,19 @@ export class MemoryAdapter<
 
   async updateMany(args: UpdateManyArgs<T>): Promise<T[]> {
     const updatedItems: T[] = [];
-    
+
     for (let i = 0; i < this.items.length; i++) {
       if (matchesWhere(this.items[i], args.where)) {
         const updatedItem = {
           ...this.items[i],
           ...args.data,
         } as T;
-        
+
         this.items[i] = updatedItem;
         updatedItems.push(updatedItem);
       }
     }
-    
+
     return updatedItems;
   }
 
@@ -98,5 +103,33 @@ export class MemoryAdapter<
       this.update.bind(this),
       this.create.bind(this)
     );
+  }
+
+  async upsertMany(args: UpsertManyArgs<T>): Promise<T[]> {
+    const upsertedItems: T[] = [];
+    const { data, onConflictDoUpdate } = args;
+    for (const item of data) {
+      const k = onConflictDoUpdate.target;
+      const v = item[k];
+      if (v) {
+        const res = await performUpsert(
+          {
+            where: { [k]: v } as WhereCondition<T>,
+            create: item,
+            update: item,
+          },
+          this.findOne.bind(this),
+          this.update.bind(this),
+          this.create.bind(this)
+        );
+        upsertedItems.push(res);
+      } else {
+        const res = await this.create({
+          data: item,
+        });
+        upsertedItems.push(res);
+      }
+    }
+    return upsertedItems;
   }
 }

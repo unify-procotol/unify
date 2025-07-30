@@ -73,6 +73,17 @@ export interface UpsertArgs<T extends Record<string, any>> {
   create: Partial<T>;
 }
 
+export interface UpsertManyArgs<T extends Record<string, any>> {
+  data: Partial<T>[];
+  onConflictDoUpdate: {
+    target: keyof T;
+    // setWhere?: WhereCondition<T>;
+    // set?: {
+    //   [K in keyof T]: any;
+    // };
+  };
+}
+
 export interface DeletionArgs<T extends Record<string, any>> {
   where: WhereCondition<T>;
 }
@@ -89,6 +100,7 @@ export interface DataSourceAdapter<T extends Record<string, any>> {
   update(args: UpdateArgs<T>, ctx?: OperationContext): Promise<T>;
   updateMany(args: UpdateManyArgs<T>, ctx?: OperationContext): Promise<T[]>;
   upsert(args: UpsertArgs<T>, ctx?: OperationContext): Promise<T>;
+  upsertMany(args: UpsertManyArgs<T>, ctx?: OperationContext): Promise<T[]>;
   delete(args: DeletionArgs<T>, ctx?: OperationContext): Promise<boolean>;
   // custom methods
   [funcName: string]: (args: any, ctx?: OperationContext) => Promise<any>;
@@ -105,7 +117,7 @@ export interface MiddlewareMetadata {
   nextRequest?: any;
 }
 
-export type MiddlewareContext<T extends Record<string, any>> = {
+export type MiddlewareContext = {
   operation: string; // findMany, findOne, create, createMany, update, updateMany, upsert, delete, call
   args: any;
   result?: any;
@@ -120,18 +132,18 @@ export type MiddlewareOptions = {
   };
 };
 
-export type MiddlewareNext<T extends Record<string, any>> = () => Promise<any>;
+export type MiddlewareNext = () => Promise<any>;
 
-export type Middleware<T extends Record<string, any>> = MiddlewareOptions & {
-  fn: (context: MiddlewareContext<T>, next: MiddlewareNext<T>) => Promise<any>;
+export type Middleware = MiddlewareOptions & {
+  fn: (context: MiddlewareContext, next: MiddlewareNext) => Promise<any>;
 };
 
-export interface MiddlewareManagerInterface<T extends Record<string, any>> {
-  use(middleware: Middleware<T>, options?: MiddlewareOptions): void;
+export interface MiddlewareManagerInterface {
+  use(middleware: Middleware, options?: MiddlewareOptions): void;
   remove(name: string): boolean;
   clear(): void;
   execute(
-    context: MiddlewareContext<T>,
+    context: MiddlewareContext,
     operation: () => Promise<any>
   ): Promise<any>;
 }
@@ -168,15 +180,6 @@ export type JoinRepoOptions<
   L extends Record<string, any> = Record<string, any>
 > = RepoOptions & RelationMapping<F, L>;
 
-export interface I18nConfig {
-  prompt?: string;
-  model?: string;
-}
-
-export interface FieldConfig {
-  i18n?: I18nConfig | boolean;
-}
-
 export type PermissionRule =
   | boolean
   | string
@@ -202,10 +205,20 @@ export type EntityCacheConfig = {
   update?: OperationCacheConfig;
   updateMany?: OperationCacheConfig;
   upsert?: OperationCacheConfig;
+  upsertMany?: OperationCacheConfig;
   delete?: OperationCacheConfig;
 } & {
   [operation: string]: OperationCacheConfig;
 };
+
+export interface I18nConfig {
+  prompt?: string;
+  model?: string;
+}
+
+export interface FieldConfig {
+  i18n?: I18nConfig | boolean;
+}
 
 export interface EntityConfig {
   defaultSource?: string;
@@ -227,7 +240,7 @@ export interface EntityConfigs {
 
 export interface BaseURPCConfig {
   plugins: Plugin[];
-  middlewares?: Middleware<any>[];
+  middlewares?: Middleware[];
   entityConfigs?: EntityConfigs;
   globalAdapters?: (new () => DataSourceAdapter<any>)[];
 }

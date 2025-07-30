@@ -1,7 +1,7 @@
 import { UserEntity } from "./entities/user";
 import { repo, URPC } from "@unilab/urpc";
 import { Plugin } from "@unilab/urpc-core";
-import { Logging } from "@unilab/urpc-core/middleware";
+import { logging } from "@unilab/urpc-core/middleware";
 import { MemoryAdapter } from "@unilab/urpc-adapters";
 
 const MyPlugin: Plugin = {
@@ -11,7 +11,7 @@ const MyPlugin: Plugin = {
 // Using Hybrid URPC Configuration (both local and HTTP fallback)
 URPC.init({
   plugins: [MyPlugin],
-  // middlewares: [Logging()],
+  // middlewares: [logging()],
   entityConfigs: {
     user: {
       defaultSource: "memory",

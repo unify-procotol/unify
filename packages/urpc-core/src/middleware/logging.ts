@@ -1,9 +1,9 @@
 import { Middleware, MiddlewareContext, MiddlewareNext } from "../types";
 
-export function logging<T extends Record<string, any>>(
+export function logging(
   logger: (message: string, context?: any) => void = console.log
-): Middleware<T> {
-  const fn = async (context: MiddlewareContext<T>, next: MiddlewareNext<T>) => {
+): Middleware {
+  const fn = async (context: MiddlewareContext, next: MiddlewareNext) => {
     const startTime = Date.now();
     logger(`[${context.operation}] Starting operation`, { args: context.args });
     try {

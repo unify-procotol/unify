@@ -7,13 +7,11 @@ import {
   OperationContext,
 } from "./types";
 
-class MiddlewareManager<T extends Record<string, any>>
-  implements MiddlewareManagerInterface<T>
-{
+class MiddlewareManager implements MiddlewareManagerInterface {
   entityConfigs: EntityConfigs = {};
 
   private middlewares: Array<{
-    middleware: Middleware<T>;
+    middleware: Middleware;
     options: MiddlewareOptions;
   }> = [];
 
@@ -21,10 +19,13 @@ class MiddlewareManager<T extends Record<string, any>>
     this.entityConfigs = entityConfigs;
   }
 
-  use(middleware: Middleware<T>, options: MiddlewareOptions = {}): void {
+  use(middleware: Middleware, options: MiddlewareOptions = {}): void {
     this.middlewares.push({
       middleware,
-      options,
+      options: {
+        name: options?.name || middleware.name,
+        required: options?.required || middleware.required,
+      },
     });
   }
 
@@ -39,7 +40,7 @@ class MiddlewareManager<T extends Record<string, any>>
   }
 
   async execute(
-    context: MiddlewareContext<T>,
+    context: MiddlewareContext,
     operation: (ctx: OperationContext) => Promise<any>
   ): Promise<any> {
     if (this.middlewares.length === 0) {
@@ -75,51 +76,10 @@ class MiddlewareManager<T extends Record<string, any>>
   }
 }
 
-const globalMiddlewareManager = new MiddlewareManager<any>();
-
-export class GlobalMiddleware {
-  static use<T extends Record<string, any>>(
-    middleware: Middleware<T>,
-    options?: MiddlewareOptions
-  ): void {
-    globalMiddlewareManager.use(middleware, options);
+let _middlewareManagerInstance: MiddlewareManager;
+export function getMiddlewareManager() {
+  if (!_middlewareManagerInstance) {
+    _middlewareManagerInstance = new MiddlewareManager();
   }
-
-  static remove(name: string): boolean {
-    return globalMiddlewareManager.remove(name);
-  }
-
-  static clear(): void {
-    globalMiddlewareManager.clear();
-  }
-
-  static getManager() {
-    return globalMiddlewareManager;
-  }
-
-  static getCount(): number {
-    return (globalMiddlewareManager as any).middlewares?.length || 0;
-  }
-}
-
-export function getGlobalMiddlewareManager() {
-  return globalMiddlewareManager;
-}
-
-export function useGlobalMiddleware<T extends Record<string, any>>(
-  middleware: Middleware<T>,
-  options?: MiddlewareOptions
-): void {
-  GlobalMiddleware.use(middleware, {
-    name: options?.name || middleware.name,
-    required: options?.required || middleware.required,
-  });
-}
-
-export function removeGlobalMiddleware(name: string): boolean {
-  return GlobalMiddleware.remove(name);
-}
-
-export function clearGlobalMiddlewares(): void {
-  GlobalMiddleware.clear();
+  return _middlewareManagerInstance;
 }

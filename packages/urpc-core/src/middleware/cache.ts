@@ -1,15 +1,13 @@
 import { Middleware, MiddlewareContext, MiddlewareNext } from "../types";
-import { getGlobalMiddlewareManager } from "../middleware-manager";
+import { getMiddlewareManager } from "../middleware-manager";
 import crypto from "crypto";
 
 export interface CacheOptions {
   bentocache: any; // BentoCache instance
 }
 
-export function cache<T extends Record<string, any>>({
-  bentocache,
-}: CacheOptions): Middleware<T> {
-  const fn = async (context: MiddlewareContext<T>, next: MiddlewareNext<T>) => {
+export function cache({ bentocache }: CacheOptions): Middleware {
+  const fn = async (context: MiddlewareContext, next: MiddlewareNext) => {
     const metadata = context.metadata;
     const entityName = metadata?.entity;
     const operation = context.operation;
@@ -18,7 +16,7 @@ export function cache<T extends Record<string, any>>({
       return await next();
     }
 
-    const entityConfigs = getGlobalMiddlewareManager().entityConfigs;
+    const entityConfigs = getMiddlewareManager().entityConfigs;
     const entityConfig = entityConfigs[entityName];
 
     const cacheConfig = entityConfig?.cache;

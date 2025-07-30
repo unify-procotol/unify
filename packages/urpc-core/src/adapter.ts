@@ -9,6 +9,7 @@ import {
   UpdateManyArgs,
   UpsertArgs,
   OperationContext,
+  UpsertManyArgs,
 } from "./types";
 import { URPCError, ErrorCodes } from "./error";
 
@@ -43,6 +44,12 @@ export class BaseAdapter<T extends Record<string, any>>
     throw new URPCError(ErrorCodes.NOT_FOUND, "Method not implemented.");
   }
   async upsert(args: UpsertArgs<T>, ctx?: OperationContext): Promise<T> {
+    throw new URPCError(ErrorCodes.NOT_FOUND, "Method not implemented.");
+  }
+  async upsertMany(
+    args: UpsertManyArgs<T>,
+    ctx?: OperationContext
+  ): Promise<T[]> {
     throw new URPCError(ErrorCodes.NOT_FOUND, "Method not implemented.");
   }
   async delete(

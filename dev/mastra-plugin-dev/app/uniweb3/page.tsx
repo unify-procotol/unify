@@ -423,6 +423,7 @@ export default function NextjsAppRouter() {
       <ChatWidget
         entity="chat"
         source="mastra"
+        entities={["WalletEntity"]}
         quickCommands={[
           "Query the balance of chainId 1 wallet address 0x8E76cAEbaca6c0e390F825fa44Dfd1fCb74B9C36",
           "Query the balance of solana wallet address 11111111111111111111111111111112",

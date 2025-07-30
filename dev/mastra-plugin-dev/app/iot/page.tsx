@@ -249,7 +249,9 @@ export default function IoTPage() {
       <ChatWidget
         entity="chat"
         source="mastra-client"
+        entities={["LEDEntity", "ACEntity"]}
         quickCommands={[
+          "Turn on all LED lights and adjust the brightness of the Living Room LED lights to 50%.",
           "Turn on all the lights that are turned off",
           "Turn on all LEDs",
           "Turn off all the lights that are turned on",
@@ -260,9 +262,14 @@ export default function IoTPage() {
           "Set the temperature of the AC in the Living Room to 22",
           "Change the mode of the AC in the Living Room to heat",
         ]}
-        onSuccess={() => {
-          fetchLEDs();
-          fetchACs();
+        onSuccess={(output) => {
+          const { entity } = output.results[0];
+          if (entity.toLowerCase() === "led") {
+            fetchLEDs();
+          }
+          if (entity.toLowerCase() === "ac") {
+            fetchACs();
+          }
         }}
       />
     </>
