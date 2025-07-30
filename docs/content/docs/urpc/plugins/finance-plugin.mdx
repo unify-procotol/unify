@@ -1,0 +1,210 @@
+---
+title: Finance Plugin
+description: The Finance Plugin provides access to financial market data through Alpha Vantage API, enabling real-time and historical stock, forex, and cryptocurrency data retrieval in your URPC applications.
+---
+
+## Installation
+
+```package-install
+@unilab/finance
+```
+
+## Basic Setup
+
+### Server Configuration
+
+```typescript
+import { URPC } from "@unilab/urpc-hono";
+import { FinancePlugin } from "@unilab/finance";
+
+const app = URPC.init({
+  plugins: [
+    FinancePlugin({
+      alphaVantageApiKey: process.env.ALPHA_VANTAGE_API_KEY,
+    }),
+  ],
+});
+
+export default {
+  port: 3000,
+  fetch: app.fetch,
+};
+```
+
+### Client Usage
+
+```typescript
+import { CurrencyEntity } from "@unilab/finance/entities";
+import { repo, URPC } from "@unilab/urpc";
+
+URPC.init({
+  baseUrl: "http://localhost:3000",
+});
+
+// Get daily time series data for a stock
+const getStockData = async () => {
+  const result = await repo<CurrencyEntity>({
+    entity: "CurrencyEntity",
+    source: "alpha-vantage",
+  }).findOne({
+    where: {
+      function: "TIME_SERIES_DAILY",
+      symbol: "AAPL",
+    },
+  });
+
+  console.log(result);
+  // Returns: { function: "TIME_SERIES_DAILY", symbol: "AAPL", "Time Series (Daily)": {...} }
+};
+```
+
+## Configuration
+
+### Environment Variables
+
+You need to set up your Alpha Vantage API key:
+
+```bash
+ALPHA_VANTAGE_API_KEY=your_api_key_here
+```
+
+Get your free API key from [Alpha Vantage](https://www.alphavantage.co/support/#api-key).
+
+### Plugin Options
+
+```typescript
+interface FinanceOptions {
+  alphaVantageApiKey: string;
+}
+```
+
+## Entities
+
+### CurrencyEntity
+
+Represents financial instrument data with time series information.
+
+```typescript
+class CurrencyEntity {
+  function: string;           // The API function used (e.g., "TIME_SERIES_DAILY")
+  symbol: string;            // Stock/currency symbol (e.g., "AAPL", "EURUSD")
+  "Time Series (Daily)": Record<string, TimeSeriesEntity>;
+}
+```
+
+### TimeSeriesEntity
+
+Represents individual data points in the time series.
+
+```typescript
+class TimeSeriesEntity {
+  "1. open": string;         // Opening price
+  "2. high": string;         // Highest price
+  "3. low": string;          // Lowest price
+  "4. close": string;        // Closing price
+  "5. volume": string;       // Trading volume
+}
+```
+
+## Supported Functions
+
+The plugin supports various Alpha Vantage functions. Here are some commonly used ones:
+
+- `TIME_SERIES_DAILY` - Daily time series data
+- `TIME_SERIES_WEEKLY` - Weekly time series data
+- `TIME_SERIES_MONTHLY` - Monthly time series data
+- `TIME_SERIES_INTRADAY` - Intraday time series data
+- `CURRENCY_EXCHANGE_RATE` - Real-time exchange rates
+- `FX_DAILY` - Daily forex data
+
+## Examples
+
+### Get Weekly Stock Data
+
+```typescript
+const getWeeklyData = async () => {
+  const result = await repo<CurrencyEntity>({
+    entity: "CurrencyEntity",
+    source: "alpha-vantage",
+  }).findOne({
+    where: {
+      function: "TIME_SERIES_WEEKLY",
+      symbol: "MSFT",
+    },
+  });
+
+  console.log("Weekly data for MSFT:", result);
+};
+```
+
+### Get Forex Exchange Rate
+
+```typescript
+const getForexData = async () => {
+  const result = await repo<CurrencyEntity>({
+    entity: "CurrencyEntity",
+    source: "alpha-vantage",
+  }).findOne({
+    where: {
+      function: "FX_DAILY",
+      symbol: "EURUSD",
+    },
+  });
+
+  console.log("EUR/USD exchange rate:", result);
+};
+```
+
+### Get Cryptocurrency Data
+
+```typescript
+const getCryptoData = async () => {
+  const result = await repo<CurrencyEntity>({
+    entity: "CurrencyEntity",
+    source: "alpha-vantage",
+  }).findOne({
+    where: {
+      function: "DIGITAL_CURRENCY_DAILY",
+      symbol: "BTC",
+    },
+  });
+
+  console.log("Bitcoin daily data:", result);
+};
+```
+
+## Error Handling
+
+The plugin includes built-in error handling for common scenarios:
+
+```typescript
+try {
+  const result = await repo<CurrencyEntity>({
+    entity: "CurrencyEntity",
+    source: "alpha-vantage",
+  }).findOne({
+    where: {
+      function: "TIME_SERIES_DAILY",
+      symbol: "INVALID_SYMBOL",
+    },
+  });
+} catch (error) {
+  console.error("Error fetching data:", error.message);
+  // Handle API rate limits, invalid symbols, etc.
+}
+```
+
+## Rate Limits
+
+Alpha Vantage has rate limits for their free tier:
+
+- **Free tier**: 25 requests per day
+- **Paid tiers**: Higher limits available
+
+Make sure to handle rate limiting in your application and consider caching results for frequently requested data.
+
+## Next Steps
+
+- Explore more [Alpha Vantage API functions](https://www.alphavantage.co/documentation/)
+- Learn about [URPC adapters](/docs/urpc/adapters) to create custom data sources
+- Check out [URPC middleware](/docs/urpc/middleware) for request processing 
