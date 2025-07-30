@@ -25,7 +25,7 @@ export function getAPI() {
               URPC,
               defaultModel: "google/gemini-2.0-flash-001",
               openrouterApiKey: process.env.OPENROUTER_API_KEY,
-              debug: false,
+              // debug: true,
             }),
           },
           defaultAgent: "urpc-simple-agent",

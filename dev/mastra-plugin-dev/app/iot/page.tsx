@@ -262,9 +262,14 @@ export default function IoTPage() {
           "Set the temperature of the AC in the Living Room to 22",
           "Change the mode of the AC in the Living Room to heat",
         ]}
-        onSuccess={() => {
-          fetchLEDs();
-          fetchACs();
+        onSuccess={(output) => {
+          const { entity } = output.results[0];
+          if (entity.toLowerCase() === "led") {
+            fetchLEDs();
+          }
+          if (entity.toLowerCase() === "ac") {
+            fetchACs();
+          }
         }}
       />
     </>

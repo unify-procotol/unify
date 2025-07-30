@@ -150,10 +150,10 @@ export default function UrpcAgent() {
       if (output.results?.length > 0) {
         const { entity, source, operation, data } = output.results[0];
         if (operation === "findMany") {
-          if (entity === "user") {
+          if (entity.toLowerCase() === "user") {
             setUserData(data);
           }
-          if (entity === "post") {
+          if (entity.toLowerCase() === "post") {
             setPostData(data);
           }
         } else if (!operation.includes("find")) {
@@ -162,11 +162,11 @@ export default function UrpcAgent() {
             source,
           }).findMany();
 
-          if (entity === "user") {
+          if (entity.toLowerCase() === "user") {
             // @ts-ignore
             setUserData(res);
           }
-          if (entity === "post") {
+          if (entity.toLowerCase() === "post") {
             // @ts-ignore
             setPostData(res);
           }

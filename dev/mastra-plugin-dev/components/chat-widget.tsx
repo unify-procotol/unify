@@ -29,7 +29,7 @@ export default function ChatWidget({
   source: string;
   quickCommands?: string[];
   entities?: string[];
-  onSuccess?: () => void;
+  onSuccess?: (output: PlanOutput) => void;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -119,7 +119,7 @@ export default function ChatWidget({
       setMessages((prev) => [...prev, assistantMessage]);
 
       if (output.success || output.results?.length > 0) {
-        onSuccess?.();
+        onSuccess?.(output);
       }
     } catch (error) {
       const errorMessage: Message = {
