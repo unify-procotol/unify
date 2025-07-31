@@ -46,6 +46,10 @@ class MiddlewareManager implements MiddlewareManagerInterface {
     if (this.middlewares.length === 0) {
       return operation({
         user: null,
+        stream: context.metadata?.context?.stream,
+        honoContext: context.metadata?.honoContext,
+        nextApiRequest: context.metadata?.nextApiRequest,
+        nextRequest: context.metadata?.nextRequest,
       });
     }
 
@@ -60,6 +64,10 @@ class MiddlewareManager implements MiddlewareManagerInterface {
         return middleware.fn(context, async () =>
           currentOperation({
             user: context.user,
+            stream: context.metadata?.context?.stream,
+            honoContext: context.metadata?.honoContext,
+            nextApiRequest: context.metadata?.nextApiRequest,
+            nextRequest: context.metadata?.nextRequest,
           })
         );
       };
@@ -68,6 +76,10 @@ class MiddlewareManager implements MiddlewareManagerInterface {
     // Execute the final wrapped operation
     const result = await finalOperation({
       user: context.user,
+      stream: context.metadata?.context?.stream,
+      honoContext: context.metadata?.honoContext,
+      nextApiRequest: context.metadata?.nextApiRequest,
+      nextRequest: context.metadata?.nextRequest,
     });
 
     context.result = result;

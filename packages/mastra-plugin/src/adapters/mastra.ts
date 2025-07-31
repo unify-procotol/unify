@@ -1,4 +1,9 @@
-import { BaseAdapter, ErrorCodes, URPCError } from "@unilab/urpc-core";
+import {
+  BaseAdapter,
+  ErrorCodes,
+  OperationContext,
+  URPCError,
+} from "@unilab/urpc-core";
 import { ChatEntity } from "../entities/chat";
 import { AgentInterface, MastraPluginOptions } from "../type";
 
@@ -10,7 +15,7 @@ export class MastraAdapter extends BaseAdapter<ChatEntity> {
   constructor(options: MastraPluginOptions) {
     super();
     this.agentInstances = new Map(Object.entries(options.agents));
-    this.defaultAgent = options.defaultAgent || "urpc-simple-agent";
+    this.defaultAgent = options.defaultAgent || "l1";
   }
 
   private getAgent(agentName?: string): AgentInterface {
@@ -29,7 +34,10 @@ export class MastraAdapter extends BaseAdapter<ChatEntity> {
     return agentInstance;
   }
 
-  async call(args: Partial<ChatEntity>): Promise<ChatEntity> {
+  async call(
+    args: Partial<ChatEntity>,
+    ctx: OperationContext
+  ): Promise<ChatEntity | Response> {
     const {
       input,
       model,
@@ -47,26 +55,62 @@ export class MastraAdapter extends BaseAdapter<ChatEntity> {
 
     const agent = this.getAgent(agentName);
 
-    if (proxy) {
-      if (entitySchemas && entitySources && entityConfigs) {
-        agent.setProxyConfig({
-          entitySchemas,
-          entitySources,
-          entityConfigs,
-        });
-      }
+    if (!agent.streamResponse) {
+      throw new URPCError(
+        ErrorCodes.BAD_REQUEST,
+        "Agent does not support stream response"
+      );
     }
 
-    const output = await agent.processRequest({
-      input,
-      model,
-      proxy,
-      entities,
-    });
+    if (!ctx.stream) {
+      if (proxy) {
+        if (
+          agent.setProxyConfig &&
+          entitySchemas &&
+          entitySources &&
+          entityConfigs
+        ) {
+          agent.setProxyConfig({
+            entitySchemas,
+            entitySources,
+            entityConfigs,
+          });
+        }
+      }
 
-    return {
-      input,
-      output,
-    };
+      const output = await agent.processRequest({
+        input,
+        model,
+        proxy,
+        entities,
+      });
+
+      return {
+        input,
+        output,
+      };
+    } else {
+      if (ctx.honoContext) {
+        const { stream } = await import("hono/streaming");
+        return stream(ctx.honoContext, async (stream) => {
+          const readableStream: ReadableStream<any> =
+            await agent.streamResponse?.({
+              input,
+              model,
+              proxy,
+              entities,
+            });
+          const reader = readableStream.getReader();
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            await stream.write(value);
+          }
+          await stream.close();
+        });
+      }
+
+      throw new URPCError(ErrorCodes.NOT_FOUND, "stream is not supported");
+    }
   }
 }

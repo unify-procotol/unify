@@ -65,8 +65,9 @@ export function createEntityInstances<T extends Record<string, any>>(
 
 export async function makeHttpRequest<T = any>(
   options: HttpRequestOptions,
-  httpConfig: HttpClientConfig
-): Promise<T> {
+  httpConfig: HttpClientConfig,
+  returnRawResponse?: boolean
+): Promise<T | Response> {
   const { method, url, params, data, headers } = options;
 
   const baseUrl = httpConfig.baseUrl.endsWith("/")
@@ -92,6 +93,10 @@ export async function makeHttpRequest<T = any>(
     headers: {
       ...httpConfig.headers,
       ...headers,
+      // Add Content-Type for streaming requests
+      ...(returnRawResponse && data
+        ? { "Content-Type": "application/json" }
+        : {}),
     },
   };
 
@@ -115,6 +120,12 @@ export async function makeHttpRequest<T = any>(
     );
   }
 
+  // If the raw response is needed (for streaming), return the Response object directly.
+  if (returnRawResponse) {
+    return response as Response;
+  }
+
+  //  Otherwise, parse JSON and return the data field.
   const result = await response.json();
   return result.data;
 }
@@ -247,7 +258,8 @@ export async function executeRemoteMethod({
         params: { source, context },
         data: args,
       },
-      httpConfig
+      httpConfig,
+      context?.stream
     );
     return result ? createEntityInstance(entity, result) : null;
   }

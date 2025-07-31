@@ -1,6 +1,6 @@
 {
   "name": "@unilab/ukit",
-  "version": "0.0.15",
+  "version": "0.0.16",
   "description": "A flexible and elegant UI rendering library for dynamic data visualization with multiple layout options",
   "type": "module",
   "main": "dist/index.cjs",
@@ -77,8 +77,8 @@
     "@radix-ui/react-toast": "^1.2.1",
     "@radix-ui/react-toggle": "^1.1.0",
     "@radix-ui/react-tooltip": "^1.1.2",
-    "@unilab/urpc": "^0.0.19",
-    "@unilab/urpc-core": "^0.0.14",
+    "@unilab/urpc": "^0.0.20",
+    "@unilab/urpc-core": "^0.0.15",
     "ajv": "^8.17.1",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",

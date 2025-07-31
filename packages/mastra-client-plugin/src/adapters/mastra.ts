@@ -48,7 +48,7 @@ export class MastraClientAdapter extends BaseAdapter<ChatEntity> {
         entityConfigs,
       };
     }
-    
+
     return {
       entitySchemas: _entitySchemas,
       entitySources: _entitySources,
@@ -68,6 +68,9 @@ export class MastraClientAdapter extends BaseAdapter<ChatEntity> {
     const result = await repo({
       entity: "chat",
       source: "mastra",
+      context: {
+        stream: false,
+      },
     }).call({
       input,
       model,

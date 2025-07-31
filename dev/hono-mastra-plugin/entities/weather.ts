@@ -1,15 +1,25 @@
 import { Fields } from "@unilab/urpc-core";
 
 export class WeatherEntity {
-  @Fields.number({
-    description: "input parameter: latitude",
+  @Fields.string({
+    optional: true,
+    description: "The name of the city to search for, optional. eg: London",
   })
-  latitude = 0;
+  name?: string;
 
   @Fields.number({
-    description: "input parameter: longitude",
+    optional: true,
+    description:
+      "input parameter: latitude. If the city name is passed, there is no need to pass the latitude and longitude.",
   })
-  longitude = 0;
+  latitude?: number;
+
+  @Fields.number({
+    optional: true,
+    description:
+      "input parameter: longitude. If the city name is passed, there is no need to pass the latitude and longitude.",
+  })
+  longitude?: number;
 
   @Fields.string({
     optional: true,

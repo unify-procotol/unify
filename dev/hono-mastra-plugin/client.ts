@@ -4,7 +4,7 @@ import { repo, URPC } from "@unilab/urpc";
 
 URPC.init({
   baseUrl: "http://localhost:3000",
-  timeout: 10000,
+  timeout: 100000,
 });
 
 // const fetchUser = async () => {
@@ -38,13 +38,14 @@ const testAgent = async () => {
   const result = await repo<ChatEntity>({
     entity: "chat",
     source: "mastra",
-    // context: {
-    //   stream: true,
-    // },
+    context: {
+      stream: true,
+    },
   }).call({
-    // input: "Find all users, source is mock",
+    entities: ["WeatherEntity", "UserEntity", "GeocodingEntity"],
     input: "Find all users",
-    model: "google/gemini-2.0-flash-001",
+    // input: "What are the coordinates of London?",
+    // input: "What's the weather like in Beijing?",
   });
 
   if (result instanceof Response) {
