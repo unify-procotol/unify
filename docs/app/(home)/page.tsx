@@ -79,10 +79,10 @@ URPC.init({
     SupabasePlugin,
   ],
   middlewares:[
-    tracing({}),
-    caching({ttl: 300}),
-    logging({level: 'info'}),
-    auth({provider: "better-auth"}),
+    tracing(),
+    cache({ bentocache }),
+    logging(),
+    auth({ getUser: async (c: Context) => { ... }}),
   ],
   globalAdapters: [
     MockAdapter,

@@ -58,53 +58,7 @@ const getStockData = async () => {
 };
 ```
 
-## Configuration
-
-### Environment Variables
-
-You need to set up your Alpha Vantage API key:
-
-```bash
-ALPHA_VANTAGE_API_KEY=your_api_key_here
-```
-
 Get your free API key from [Alpha Vantage](https://www.alphavantage.co/support/#api-key).
-
-### Plugin Options
-
-```typescript
-interface FinanceOptions {
-  alphaVantageApiKey: string;
-}
-```
-
-## Entities
-
-### CurrencyEntity
-
-Represents financial instrument data with time series information.
-
-```typescript
-class CurrencyEntity {
-  function: string;           // The API function used (e.g., "TIME_SERIES_DAILY")
-  symbol: string;            // Stock/currency symbol (e.g., "AAPL", "EURUSD")
-  "Time Series (Daily)": Record<string, TimeSeriesEntity>;
-}
-```
-
-### TimeSeriesEntity
-
-Represents individual data points in the time series.
-
-```typescript
-class TimeSeriesEntity {
-  "1. open": string;         // Opening price
-  "2. high": string;         // Highest price
-  "3. low": string;          // Lowest price
-  "4. close": string;        // Closing price
-  "5. volume": string;       // Trading volume
-}
-```
 
 ## Supported Functions
 
@@ -172,39 +126,3 @@ const getCryptoData = async () => {
   console.log("Bitcoin daily data:", result);
 };
 ```
-
-## Error Handling
-
-The plugin includes built-in error handling for common scenarios:
-
-```typescript
-try {
-  const result = await repo<CurrencyEntity>({
-    entity: "CurrencyEntity",
-    source: "alpha-vantage",
-  }).findOne({
-    where: {
-      function: "TIME_SERIES_DAILY",
-      symbol: "INVALID_SYMBOL",
-    },
-  });
-} catch (error) {
-  console.error("Error fetching data:", error.message);
-  // Handle API rate limits, invalid symbols, etc.
-}
-```
-
-## Rate Limits
-
-Alpha Vantage has rate limits for their free tier:
-
-- **Free tier**: 25 requests per day
-- **Paid tiers**: Higher limits available
-
-Make sure to handle rate limiting in your application and consider caching results for frequently requested data.
-
-## Next Steps
-
-- Explore more [Alpha Vantage API functions](https://www.alphavantage.co/documentation/)
-- Learn about [URPC adapters](/docs/urpc/adapters) to create custom data sources
-- Check out [URPC middleware](/docs/urpc/middleware) for request processing 
