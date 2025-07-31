@@ -3,7 +3,7 @@ import { FinancePlugin } from "@unilab/finance";
 
 const app = URPC.init({
   plugins: [FinancePlugin({
-    alphaVantageApiKey: "LTY27FR3UNPU0GT4",
+    alphaVantageApiKey: process.env.ALPHA_VANTAGE_API_KEY!,
   })],
   entityConfigs: {
     currency: {
