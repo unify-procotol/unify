@@ -103,6 +103,9 @@ export class URPC extends BaseURPC {
         context,
         honoContext: c,
       });
+      if (result instanceof Response) {
+        return result;
+      }
       return c.json({ data: result }, 200);
     } catch (error: any) {
       return handleError(error, c);

@@ -1,4 +1,9 @@
-import { BaseAdapter, FindOneArgs } from "@unilab/urpc-core";
+import {
+  BaseAdapter,
+  ErrorCodes,
+  FindOneArgs,
+  URPCError,
+} from "@unilab/urpc-core";
 import { GeocodingEntity } from "../entities/geocoding";
 
 export class GeocodingAdapter extends BaseAdapter<GeocodingEntity> {
@@ -8,7 +13,7 @@ export class GeocodingAdapter extends BaseAdapter<GeocodingEntity> {
     const { name } = args.where;
 
     if (!name) {
-      throw new Error("name is required");
+      throw new URPCError(ErrorCodes.BAD_REQUEST, "name is required");
     }
 
     const response = await fetch(
@@ -19,11 +24,10 @@ export class GeocodingAdapter extends BaseAdapter<GeocodingEntity> {
 
     const results = data.results;
     if (results.length === 0) {
-      throw new Error("No results found");
+      throw new URPCError(ErrorCodes.NOT_FOUND, "No results found");
     }
 
     const result = results[0];
-
     return {
       name,
       result: {

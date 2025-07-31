@@ -98,7 +98,7 @@ export default function ChatWidget({
           selectedModel === "google/gemini-2.0-flash-001"
             ? undefined
             : selectedModel,
-        agent: "urpc-simple-agent",
+        agent: "l1",
         entities,
       });
 

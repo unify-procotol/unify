@@ -90,6 +90,10 @@ export interface DeletionArgs<T extends Record<string, any>> {
 
 export interface OperationContext {
   user?: AuthUser | null;
+  stream?: boolean;
+  honoContext?: any;
+  nextApiRequest?: any;
+  nextRequest?: any;
 }
 
 export interface DataSourceAdapter<T extends Record<string, any>> {
@@ -111,6 +115,7 @@ export interface MiddlewareMetadata {
   source?: string;
   context?: {
     lang?: string;
+    stream?: boolean;
   };
   honoContext?: any;
   nextApiRequest?: any;

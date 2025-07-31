@@ -35,14 +35,14 @@ const app = URPC.init({
     MyPlugin,
     MastraPlugin({
       agents: {
-        "urpc-simple-agent": new URPCSimpleAgent({
+        "l1": new URPCSimpleAgent({
           URPC,
           defaultModel: "google/gemini-2.0-flash-001",
           openrouterApiKey: process.env.OPENROUTER_API_KEY,
           debug: false,
         }),
       },
-      defaultAgent: "urpc-simple-agent",
+      defaultAgent: "l1",
     }),
   ],
 });
@@ -74,7 +74,7 @@ const chatWithAI = async () => {
   }).call({
     input: "Find all users with email containing 'example.com'",
     model: "google/gemini-2.0-flash-001",
-    agent: "urpc-simple-agent",
+    agent: "l1",
     entities: ["UserEntity"],
   });
 
@@ -89,7 +89,7 @@ const chatWithAIProxy = async () => {
   }).call({
     input: "Find all users with email containing 'example.com'",
     model: "google/gemini-2.0-flash-001",
-    agent: "urpc-simple-agent",
+    agent: "l1",
     entities: ["UserEntity"],
   });
   console.log(result.output);

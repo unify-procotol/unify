@@ -28,7 +28,7 @@
     "plugin"
   ],
   "dependencies": {
-    "@unilab/urpc-core": "^0.0.13"
+    "@unilab/urpc-core": "^0.0.15"
   },
   "devDependencies": {
     "typescript": "^5.6.2"

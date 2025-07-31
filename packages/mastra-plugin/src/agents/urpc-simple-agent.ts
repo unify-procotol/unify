@@ -1,6 +1,6 @@
 import { Agent } from "@mastra/core/agent";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
-import { AgentInterface } from "../type";
+import { AgentInterface, ExecutionPlan, PlanOutput, StepOutput } from "../type";
 import { convertSchemaToMarkdown } from "../utils/entity-schema-to-markdown";
 import { convertEntitySourcesToMarkdown } from "../utils/entity-source-to-markdown";
 import {
@@ -9,31 +9,6 @@ import {
   simplifyEntityName,
 } from "@unilab/urpc-core";
 import { URPC } from "../type";
-
-export interface StepOutput {
-  operation: string;
-  entity: string;
-  source: string;
-  data: any;
-  message: string;
-  success: boolean;
-  urpc_code: string | null;
-}
-
-export interface ExecutionPlan {
-  steps: Array<{
-    description: string;
-    urpc_code: string;
-    order: number;
-  }>;
-  total_steps: number;
-}
-
-export interface PlanOutput {
-  execution_plan: ExecutionPlan;
-  results: StepOutput[];
-  message?: string;
-}
 
 export class URPCSimpleAgent implements AgentInterface {
   private URPC: URPC;
@@ -135,15 +110,15 @@ ${entitySourcesMarkdown}
 **Entity Mapping**: user/users → "user", post/posts/article/articles → "post"
 
 **CRUD Operations:**
-- **findOne**: repo({entity: "user", source: "[select from supported sources]"}).findOne({where: {name: "jack"} })
-- **findMany**: repo({entity: "user", source: "[select from supported sources]"}).findMany({where: {age: {$gt: 18}}, limit: 10})
-- **create**: repo({entity: "user", source: "[select from supported sources]"}).create({data: {id: "uuid", name: "jack", email: "jack@example.com"}})
-- **createMany**: repo({entity: "user", source: "[select from supported sources]"}).createMany({data: [{id: "uuid1", name: "jack", email: "jack@example.com"}, {id: "uuid2", name: "jane", email: "jane@example.com"}]})
-- **update**: repo({entity: "user", source: "[select from supported sources]"}).update({where: {id: "user-id"}, data: {name: "New Name"}})
-- **updateMany**: repo({entity: "user", source: "[select from supported sources]"}).updateMany({where: {status: "pending"}, data: {status: "active"}})
-- **delete**: repo({entity: "user", source: "[select from supported sources]"}).delete({where: {id: "user-id"}})
-- **upsert**: repo({entity: "user", source: "[select from supported sources]"}).upsert({where: {email: "test@test.com"}, update: {name: "Updated"}, create: {id: "uuid", name: "New", email: "test@test.com"}})
-- **upsertMany**: repo({entity: "user", source: "[select from supported sources]"}).upsertMany({data: [{id: "uuid1", name: "jack", email: "jack@example.com"}, {id: "uuid2", name: "jane", email: "jane@example.com"}], onConflictDoUpdate: {target: "id"}})
+- **Find one data**: repo({entity: "user", source: "[select from supported sources]"}).findOne({where: {name: "jack"} })
+- **Query multiple data**: repo({entity: "user", source: "[select from supported sources]"}).findMany({where: {age: {$gt: 18}}, limit: 10})
+- **Create one data**: repo({entity: "user", source: "[select from supported sources]"}).create({data: {id: "uuid", name: "jack", email: "jack@example.com"}})
+- **Create multiple data**: repo({entity: "user", source: "[select from supported sources]"}).createMany({data: [{id: "uuid1", name: "jack", email: "jack@example.com"}, {id: "uuid2", name: "jane", email: "jane@example.com"}]})
+- **Update one data**: repo({entity: "user", source: "[select from supported sources]"}).update({where: {id: "user-id"}, data: {name: "New Name"}})
+- **Update multiple data**: repo({entity: "user", source: "[select from supported sources]"}).updateMany({where: {status: "pending"}, data: {status: "active"}})
+- **Delete one data**: repo({entity: "user", source: "[select from supported sources]"}).delete({where: {id: "user-id"}})
+- **Upsert one data**: repo({entity: "user", source: "[select from supported sources]"}).upsert({where: {email: "test@test.com"}, update: {name: "Updated"}, create: {id: "uuid", name: "New", email: "test@test.com"}})
+- **Upsert multiple data**: repo({entity: "user", source: "[select from supported sources]"}).upsertMany({data: [{id: "uuid1", name: "jack", email: "jack@example.com"}, {id: "uuid2", name: "jane", email: "jane@example.com"}], onConflictDoUpdate: {target: "id"}})
 
 **Query Operators**: $gt, $gte, $lt, $lte, $eq, $ne, $in, $nin, contains, startsWith, endsWith, not, mode
 
@@ -166,7 +141,8 @@ ${entitySourcesMarkdown}
       }
     ],
     "total_steps": 1
-  }
+  },
+  "summary": false
 }
 
 ## Examples
@@ -184,7 +160,8 @@ Response:
       }
     ],
     "total_steps": 1
-  }
+  },
+  "summary": false
 }
 
 **Multi-Step Operation:**
@@ -205,7 +182,8 @@ Response:
       }
     ],
     "total_steps": 2
-  }
+  },
+  "summary": false
 }
 
 ## Key Guidelines
@@ -214,6 +192,9 @@ Response:
 - Replace [default-source] with actual default source from supported sources
 - Map user language to correct entities and operations
 - For updateMany targeting all records: {where: {id: {not: null}}}
+- **Summary Field**: Conservatively determine based on user's question complexity and intent:
+  * Set "summary": true ONLY for complex business questions that need interpretation (e.g., “What is the weather like in Beijing now?”, “Analyze user purchasing behavior”, “What are the most popular products?”)
+  * Set "summary": false for all standard CRUD operations (e.g. "find all users", "get user by id", "list posts")
 - ALWAYS return valid JSON format, never natural language responses`;
   }
 
@@ -243,6 +224,53 @@ Response:
       entitySources: entitySources,
       entityConfigs: entityConfigs,
     });
+  }
+
+  private async summarizeResults({
+    userQuestion,
+    apiResults,
+  }: {
+    userQuestion: string;
+    apiResults: any;
+    model?: string;
+    openrouterApiKey?: string;
+  }): Promise<string> {
+    const summaryAgent = new Agent({
+      name: "API Results Summary Assistant",
+      description:
+        "Professional AI assistant responsible for summarizing API execution results",
+      instructions: `You are a professional AI assistant responsible for summarizing API execution results.
+
+When users provide questions and API execution results, please generate summaries according to the following requirements:
+1. Directly answer the user's question
+2. Highlight key information and results
+3. Express in concise language
+4. If execution fails, explain the reason for failure
+
+Please return the summary content directly without additional formatting.`,
+      model: createOpenRouter({
+        apiKey: this.openrouterApiKey,
+      }).chat("openai/gpt-4o-mini"),
+    });
+
+    try {
+      const response = await summaryAgent.generate([
+        {
+          role: "user",
+          content: `
+User Question:
+${userQuestion}
+
+API Execution Results:
+${JSON.stringify(apiResults, null, 2)}
+
+Please summarize the above results.`,
+        },
+      ]);
+      return response.text;
+    } catch (error: any) {
+      return `Summary generation failed: ${error.message}`;
+    }
   }
 
   async processRequest({
@@ -284,8 +312,24 @@ Response:
         return this.parseAIResponse(response.text);
       } else {
         const output = this.parseAIResponse(response.text);
+        const planOutput = await this.executeExecutionPlan(
+          output.execution_plan
+        );
 
-        return await this.executeExecutionPlan(output.execution_plan);
+        if (output.summary && planOutput.results.length > 0) {
+          const summaryText = await this.summarizeResults({
+            userQuestion: input,
+            apiResults: planOutput.results,
+          });
+
+          return {
+            ...planOutput,
+            summary: true,
+            summaryText,
+          };
+        }
+
+        return planOutput;
       }
     } catch (error: any) {
       return {
@@ -312,6 +356,7 @@ Response:
           return {
             execution_plan: processedPlan,
             results: [],
+            summary: parsed.summary,
           };
         }
       }
@@ -323,6 +368,7 @@ Response:
         },
         results: [],
         message: `Error occurred while parsing AI response.`,
+        summary: false,
       };
     } catch (error: any) {
       return {
@@ -332,6 +378,7 @@ Response:
         },
         results: [],
         message: `Error occurred while parsing AI response.`,
+        summary: false,
       };
     }
   }
@@ -628,5 +675,209 @@ Response:
       console.log("Simple object parsing failed:", error);
       return {};
     }
+  }
+
+  async streamResponse({
+    input,
+    model,
+    proxy,
+    entities,
+  }: {
+    input: string;
+    model?: string;
+    proxy?: boolean;
+    entities?: string[];
+  }): Promise<ReadableStream> {
+    try {
+      if (model) {
+        this.model = model;
+      }
+
+      if (entities && !proxy) {
+        this.instructions = this.generateInstructions(
+          this.getEntityInfo(entities)
+        );
+      }
+
+      if (!this.instructions) {
+        this.instructions = this.generateInstructions(this.getEntityInfo());
+      }
+
+      const agent = this.createAgent();
+
+      const aiStream = await agent.stream([
+        {
+          role: "user",
+          content: input,
+        },
+      ]);
+
+      if (proxy) {
+        return aiStream.textStream;
+      }
+
+      let aiResponseBuffer = "";
+      let executionStarted = false;
+      const self = this;
+
+      return new ReadableStream({
+        async start(controller) {
+          try {
+            const reader = aiStream.textStream.getReader();
+
+            while (true) {
+              const { done, value } = await reader.read();
+
+              if (done) {
+                break;
+              }
+
+              aiResponseBuffer += value;
+            }
+
+            if (!executionStarted) {
+              executionStarted = true;
+
+              const output = self.parseAIResponse(aiResponseBuffer);
+
+              const planChunk =
+                JSON.stringify({
+                  type: "execution_plan",
+                  content: output.execution_plan,
+                  summary: output.summary,
+                  timestamp: Date.now(),
+                }) + "\n";
+              controller.enqueue(new TextEncoder().encode(planChunk));
+
+              await self.streamExecuteExecutionPlan(
+                output.execution_plan,
+                controller,
+                input,
+                output.summary || false
+              );
+            }
+
+            controller.close();
+          } catch (error: any) {
+            const errorChunk =
+              JSON.stringify({
+                type: "error",
+                content: `Stream processing error: ${error.message}`,
+                timestamp: Date.now(),
+              }) + "\n";
+            controller.enqueue(new TextEncoder().encode(errorChunk));
+            controller.close();
+          }
+        },
+      });
+    } catch (error: any) {
+      return new ReadableStream({
+        start(controller) {
+          const errorChunk =
+            JSON.stringify({
+              type: "error",
+              content: `Error occurred while processing request: ${error.message}`,
+              timestamp: Date.now(),
+            }) + "\n";
+          controller.enqueue(new TextEncoder().encode(errorChunk));
+          controller.close();
+        },
+      });
+    }
+  }
+
+  private async streamExecuteExecutionPlan(
+    executionPlan: ExecutionPlan,
+    controller: ReadableStreamDefaultController,
+    userQuestion: string,
+    needsSummary: boolean
+  ): Promise<void> {
+    const results: StepOutput[] = [];
+
+    const processedPlan = this.processExecutionPlan(executionPlan);
+
+    const sortedSteps = [...processedPlan.steps].sort(
+      (a, b) => a.order - b.order
+    );
+
+    for (const step of sortedSteps) {
+      try {
+        const executingChunk =
+          JSON.stringify({
+            type: "executing",
+            content: `In progress: ${step.description}`,
+            timestamp: Date.now(),
+          }) + "\n";
+        controller.enqueue(new TextEncoder().encode(executingChunk));
+
+        if (this.debug) {
+          console.log(`[Execution step ${step.order}]: ${step.description}`);
+          console.log(`[URPC_CODE]: ${step.urpc_code}`);
+        }
+
+        const result = await this.executeURPCCode(step.urpc_code);
+        results.push(result);
+      } catch (error: any) {
+        const errorResult: StepOutput = {
+          success: false,
+          operation: "unknown",
+          entity: "unknown",
+          source: "unknown",
+          data: null,
+          message: `Step ${step.order} execution error: ${error.message}`,
+          urpc_code: step.urpc_code,
+        };
+        results.push(errorResult);
+
+        const errorChunk =
+          JSON.stringify({
+            type: "executing",
+            content: `Failed: ${step.description} - ${error.message}`,
+            timestamp: Date.now(),
+          }) + "\n";
+        controller.enqueue(new TextEncoder().encode(errorChunk));
+      }
+    }
+
+    const finalResult: PlanOutput = {
+      execution_plan: processedPlan,
+      results: results,
+    };
+
+    if (needsSummary && results.length > 0) {
+      try {
+        const summaryText = await this.summarizeResults({
+          userQuestion,
+          apiResults: results,
+        });
+
+        finalResult.summary = true;
+        finalResult.summaryText = summaryText;
+
+        const summaryChunk =
+          JSON.stringify({
+            type: "summary",
+            content: summaryText,
+            timestamp: Date.now(),
+          }) + "\n";
+        controller.enqueue(new TextEncoder().encode(summaryChunk));
+      } catch (error: any) {
+        const summaryErrorChunk =
+          JSON.stringify({
+            type: "summary_error",
+            content: `Summary generation failed: ${error.message}`,
+            timestamp: Date.now(),
+          }) + "\n";
+        controller.enqueue(new TextEncoder().encode(summaryErrorChunk));
+      }
+    }
+
+    const finalChunk =
+      JSON.stringify({
+        type: "final_result",
+        content: finalResult,
+        timestamp: Date.now(),
+      }) + "\n";
+    controller.enqueue(new TextEncoder().encode(finalChunk));
   }
 }

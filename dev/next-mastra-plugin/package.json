@@ -1,5 +1,5 @@
 {
-  "name": "mastra-plugin-dev",
+  "name": "next-mastra-plugin",
   "version": "1.0.0",
   "description": "Mastra Plugin Demo",
   "main": "server.ts",

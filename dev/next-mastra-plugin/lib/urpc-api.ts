@@ -21,14 +21,14 @@ export function getAPI() {
         WalletPlugin,
         MastraPlugin({
           agents: {
-            "urpc-simple-agent": new URPCSimpleAgent({
+            "l1": new URPCSimpleAgent({
               URPC,
               defaultModel: "google/gemini-2.0-flash-001",
               openrouterApiKey: process.env.OPENROUTER_API_KEY,
               // debug: true,
             }),
           },
-          defaultAgent: "urpc-simple-agent",
+          defaultAgent: "l1",
         }),
       ],
       // middlewares: [logging()],
