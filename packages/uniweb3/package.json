@@ -1,6 +1,6 @@
 {
   "name": "@unilab/uniweb3",
-  "version": "0.0.17",
+  "version": "0.0.18",
   "description": "Unified source plugins for blockchain data",
   "main": "dist/index.js",
   "module": "dist/index.js",

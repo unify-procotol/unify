@@ -18,7 +18,8 @@
     "@unilab/urpc-core": "workspace:*",
     "@unilab/urpc-hono": "workspace:*",
     "dotenv": "^17.2.1",
-    "hono": "^4.7.11"
+    "hono": "^4.7.11",
+    "moralis": "^2.27.2"
   },
   "devDependencies": {
     "@types/bun": "^1.1.12",

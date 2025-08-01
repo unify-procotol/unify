@@ -110,7 +110,7 @@ export class MastraAdapter extends BaseAdapter<ChatEntity> {
         });
       }
 
-      throw new URPCError(ErrorCodes.NOT_FOUND, "stream is not supported");
+      throw new URPCError(ErrorCodes.BAD_REQUEST, "stream is not supported");
     }
   }
 }

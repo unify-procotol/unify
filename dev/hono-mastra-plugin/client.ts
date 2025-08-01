@@ -43,9 +43,9 @@ const testAgent = async () => {
     },
   }).call({
     entities: ["WeatherEntity", "UserEntity", "GeocodingEntity"],
-    input: "Find all users",
+    // input: "Find all users",
     // input: "What are the coordinates of London?",
-    // input: "What's the weather like in Beijing?",
+    input: "What's the weather like in London?",
   });
 
   if (result instanceof Response) {
@@ -61,7 +61,7 @@ const testAgent = async () => {
         console.log("[stream text]:", text);
         resultText += text;
       }
-      console.log("[result text]:", resultText);
+      // console.log("[result text]:", resultText);
     }
   } else {
     console.log("[json result]:", result);

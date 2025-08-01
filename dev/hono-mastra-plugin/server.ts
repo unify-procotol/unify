@@ -9,8 +9,17 @@ import { cors } from "hono/cors";
 import { URPCSimpleAgent } from "@unilab/mastra-plugin/agents";
 import { GeocodingEntity, GeocodingQueryResult } from "./entities/geocoding";
 import { GeocodingAdapter } from "./adapters/open-meteo-geocoding";
-import { Current, CurrentUnits, Hourly, HourlyUnits, WeatherEntity, WeatherQueryResult } from "./entities/weather";
+import {
+  Current,
+  CurrentUnits,
+  Hourly,
+  HourlyUnits,
+  WeatherEntity,
+  WeatherQueryResult,
+} from "./entities/weather";
 import { WeatherAdapter } from "./adapters/open-meteo-weather";
+import { TokenEntity } from "./entities/token";
+import { MoralisTokenAdapter } from "./adapters/moralis-token";
 
 const MyPlugin: Plugin = {
   entities: [UserEntity],
@@ -24,10 +33,7 @@ const MyPlugin: Plugin = {
 };
 
 export const GeocodingPlugin: Plugin = {
-  entities: [
-    GeocodingEntity,
-    GeocodingQueryResult,
-  ],
+  entities: [GeocodingEntity, GeocodingQueryResult],
   adapters: [
     {
       source: "open-meteo",
@@ -35,7 +41,7 @@ export const GeocodingPlugin: Plugin = {
       adapter: new GeocodingAdapter(),
     },
   ],
-}
+};
 
 export const WeatherPlugin: Plugin = {
   entities: [
@@ -55,6 +61,17 @@ export const WeatherPlugin: Plugin = {
   ],
 };
 
+const Web3Plugin: Plugin = {
+  entities: [TokenEntity],
+  adapters: [
+    {
+      source: "moralis",
+      entity: "TokenEntity",
+      adapter: new MoralisTokenAdapter(),
+    },
+  ],
+};
+
 const app = new Hono();
 app.use(cors());
 
@@ -64,9 +81,10 @@ URPC.init({
     MyPlugin,
     GeocodingPlugin,
     WeatherPlugin,
+    Web3Plugin,
     MastraPlugin({
       agents: {
-        "l1": new URPCSimpleAgent({
+        l1: new URPCSimpleAgent({
           URPC,
           defaultModel: "google/gemini-2.0-flash-001",
           openrouterApiKey: process.env.OPENROUTER_API_KEY,

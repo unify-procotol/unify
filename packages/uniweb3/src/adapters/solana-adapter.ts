@@ -1,4 +1,9 @@
-import { BaseAdapter, type FindOneArgs } from "@unilab/urpc-core";
+import {
+  BaseAdapter,
+  ErrorCodes,
+  URPCError,
+  type FindOneArgs,
+} from "@unilab/urpc-core";
 import { Connection, PublicKey, LAMPORTS_PER_SOL } from "@solana/web3.js";
 import type { WalletEntity } from "../entities/wallet";
 
@@ -18,7 +23,8 @@ export class SolanaAdapter extends BaseAdapter<WalletEntity> {
       const balanceInLamports = await this.connection.getBalance(publicKey);
       return balanceInLamports / LAMPORTS_PER_SOL;
     } catch (error) {
-      throw new Error(
+      throw new URPCError(
+        ErrorCodes.INTERNAL_SERVER_ERROR,
         `Failed to get Solana balance: ${
           error instanceof Error ? error.message : "Unknown error"
         }`
@@ -30,10 +36,7 @@ export class SolanaAdapter extends BaseAdapter<WalletEntity> {
     const { address, rpcUrl } = args.where;
 
     if (!address) {
-      throw {
-        status: 400,
-        message: "Invalid arguments",
-      };
+      throw new URPCError(ErrorCodes.BAD_REQUEST, "Invalid arguments");
     }
 
     if (rpcUrl) {

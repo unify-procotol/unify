@@ -324,6 +324,7 @@ Please summarize the above results.`,
 
           return {
             ...planOutput,
+            results: [], // After summarizing and analyzing the data, there is no need to return redundant data.
             summary: true,
             summaryText,
           };
@@ -733,6 +734,14 @@ Please summarize the above results.`,
               }
 
               aiResponseBuffer += value;
+
+              const chunk =
+                JSON.stringify({
+                  type: "ai_response",
+                  content: value,
+                  timestamp: Date.now(),
+                }) + "\n";
+              controller.enqueue(new TextEncoder().encode(chunk));
             }
 
             if (!executionStarted) {
@@ -841,7 +850,7 @@ Please summarize the above results.`,
 
     const finalResult: PlanOutput = {
       execution_plan: processedPlan,
-      results: results,
+      results: needsSummary ? [] : results, // After summarizing and analyzing the data, there is no need to return redundant data.
     };
 
     if (needsSummary && results.length > 0) {

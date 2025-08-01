@@ -1,4 +1,9 @@
-import { BaseAdapter, type FindOneArgs } from "@unilab/urpc-core";
+import {
+  BaseAdapter,
+  ErrorCodes,
+  URPCError,
+  type FindOneArgs,
+} from "@unilab/urpc-core";
 import { createPublicClient, http, formatEther, Chain } from "viem";
 import type { WalletEntity } from "../entities/wallet";
 import { getChain } from "../utils";
@@ -22,7 +27,8 @@ export class EVMAdapter extends BaseAdapter<WalletEntity> {
 
       return parseFloat(formatEther(balanceInWei));
     } catch (error) {
-      throw new Error(
+      throw new URPCError(
+        ErrorCodes.INTERNAL_SERVER_ERROR,
         `Failed to get EVM balance: ${
           error instanceof Error ? error.message : "Unknown error"
         }`
@@ -55,7 +61,8 @@ export class EVMAdapter extends BaseAdapter<WalletEntity> {
         chainId,
       };
     } catch (error) {
-      throw new Error(
+      throw new URPCError(
+        ErrorCodes.INTERNAL_SERVER_ERROR,
         `Failed to get EVM balance: ${
           error instanceof Error ? error.message : "Unknown error"
         }`
@@ -67,19 +74,16 @@ export class EVMAdapter extends BaseAdapter<WalletEntity> {
     const { address, chainId, rpcUrl } = args.where;
 
     if (!address && !chainId && !rpcUrl) {
-      throw {
-        status: 400,
-        message: "Invalid arguments",
-      };
+      throw new URPCError(ErrorCodes.BAD_REQUEST, "Invalid arguments");
     }
 
     if (address && chainId) {
       const chain = getChain(chainId);
       if (!chain) {
-        throw {
-          status: 400,
-          message: `Unsupported chainId: ${chainId} }`,
-        };
+        throw new URPCError(
+          ErrorCodes.BAD_REQUEST,
+          `Unsupported chainId: ${chainId} }`
+        );
       }
 
       const balance = await this.getBalanceByChain(address, chain);
@@ -104,10 +108,10 @@ export class EVMAdapter extends BaseAdapter<WalletEntity> {
       );
       const chain = getChain(chainId);
       if (!chain) {
-        throw {
-          status: 400,
-          message: `Unsupported chainId: ${chainId} }`,
-        };
+        throw new URPCError(
+          ErrorCodes.BAD_REQUEST,
+          `Unsupported chainId: ${chainId} }`
+        );
       }
       return {
         address,
