@@ -1,16 +1,26 @@
 import { repo, URPC } from "@unilab/urpc";
-import { StockEntity } from "@unilab/finance/entities";
+import { CompanyEntity, StockEntity } from "@unilab/finance/entities";
 
 URPC.init({
   baseUrl: "http://localhost:3000",
   timeout: 10000,
 });
 
-const stock = await repo<StockEntity>({
-  entity: "stock",
-}).findOne({
+// const stock = await repo<StockEntity>({
+//   entity: "stock",
+// }).findOne({
+//   where: {
+//     ticker: "TSLA",
+//   },
+// });
+// console.log("stock=>", stock);
+
+
+const company = await repo<CompanyEntity>({
+  entity: "company",
+}).findCompanies({
   where: {
-    ticker: "TSLA",
+    name: "Apple",
   },
 });
-console.log("stock=>", stock);
+console.log("company=>", company);

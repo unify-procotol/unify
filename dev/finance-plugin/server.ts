@@ -7,6 +7,9 @@ const app = URPC.init({
     stock: {
       defaultSource: "yahoo", // yahoo or seeking-alpha
     },
+    company: {
+      defaultSource: "company-lookup", // company-lookup
+    },
   },
 });
 
