@@ -2,12 +2,10 @@ import { URPC } from "@unilab/urpc-hono";
 import { FinancePlugin } from "@unilab/finance";
 
 const app = URPC.init({
-  plugins: [FinancePlugin({
-    alphaVantageApiKey: process.env.ALPHA_VANTAGE_API_KEY!,
-  })],
+  plugins: [FinancePlugin()],
   entityConfigs: {
-    currency: {
-      defaultSource: "alpha-vantage",
+    stock: {
+      defaultSource: "yahoo", // yahoo or seeking-alpha
     },
   },
 });

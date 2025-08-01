@@ -1,17 +1,16 @@
 import { repo, URPC } from "@unilab/urpc";
-import { CurrencyEntity } from "@unilab/finance/entities";
+import { StockEntity } from "@unilab/finance/entities";
 
 URPC.init({
   baseUrl: "http://localhost:3000",
   timeout: 10000,
 });
 
-const currency = await repo<CurrencyEntity>({
-  entity: "currency",
+const stock = await repo<StockEntity>({
+  entity: "stock",
 }).findOne({
   where: {
-    function: "TIME_SERIES_DAILY",
-    symbol: "IBM",
+    ticker: "TSLA",
   },
 });
-console.log("currency=>", currency);
+console.log("stock=>", stock);

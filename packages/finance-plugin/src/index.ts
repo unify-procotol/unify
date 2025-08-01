@@ -1,16 +1,21 @@
 import { Plugin } from "@unilab/urpc-core";
-import { CurrencyEntity } from "./entities";
-import { AlphaVantageAdapter } from "./adapters/alpha-vantage";
-import { FinanceOptions } from "./utils/type";
+import { StockEntity } from "./entities/stock";
+import { YahooAdapter } from "./adapters/yahoo";
+import { SeekingAlphaAdapter } from "./adapters/seeking-alpha";
 
-export const FinancePlugin = (options: FinanceOptions): Plugin => {
+export const FinancePlugin = (): Plugin => {
   return {
-    entities: [CurrencyEntity],
+    entities: [StockEntity],
     adapters: [
       {
-        source: "alpha-vantage",
-        entity: "CurrencyEntity",
-        adapter: new AlphaVantageAdapter(options),
+        source: "yahoo",
+        entity: "stock",
+        adapter: new YahooAdapter(),
+      },
+      {
+        source: "seeking-alpha",
+        entity: "stock",
+        adapter: new SeekingAlphaAdapter(),
       },
     ],
   };
