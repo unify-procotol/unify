@@ -46,6 +46,7 @@ const testAgent = async () => {
     // input: "Find all users",
     // input: "What are the coordinates of London?",
     input: "What's the weather like in London?",
+    // input: "What is the price of the token with the contract address 0x7d1afa7b718fb893db30a3abc0cfc608aacfebb0?",
   });
 
   if (result instanceof Response) {
