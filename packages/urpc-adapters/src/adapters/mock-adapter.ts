@@ -16,12 +16,6 @@ import { matchesWhere, processFindManyArgs, performUpsert } from "../utils";
 export interface MockAdapterOptions {
   /** Simulated delay time in milliseconds */
   delay?: number;
-  /** Whether to simulate network errors */
-  simulateNetworkError?: boolean;
-  /** Error occurrence rate (0-1) */
-  errorRate?: number;
-  /** Custom error message */
-  errorMessage?: string;
 }
 
 export class MockAdapter<T extends Record<string, any>> extends BaseAdapter<T> {
@@ -29,57 +23,29 @@ export class MockAdapter<T extends Record<string, any>> extends BaseAdapter<T> {
   static get name() {
     return "mock";
   }
-  private items: T[] = [];
-  private options: MockAdapterOptions = {
-    delay: 0,
-    simulateNetworkError: false,
-    errorRate: 0,
-    errorMessage: "Mock network error",
-  };
+  private data: T[] = [];
+  private delay: number;
 
-  constructor(options: MockAdapterOptions = {}) {
+  constructor(options: { delay?: number; data?: T[] } = {}) {
     super();
-    this.options = {
-      delay: 0,
-      simulateNetworkError: false,
-      errorRate: 0,
-      errorMessage: "Mock network error",
-      ...options,
-    };
+    this.delay = options.delay || 0;
+    this.data = options.data || [];
   }
 
-  /**
-   * Simulate delay
-   */
   private async simulateDelay(): Promise<void> {
-    if (this.options.delay && this.options.delay > 0) {
-      await new Promise((resolve) => setTimeout(resolve, this.options.delay));
-    }
-  }
-
-  /**
-   * Simulate error
-   */
-  private simulateError(): void {
-    if (
-      this.options.simulateNetworkError &&
-      this.options.errorRate &&
-      Math.random() < this.options.errorRate
-    ) {
-      throw new Error(this.options.errorMessage);
+    if (this.delay && this.delay > 0) {
+      await new Promise((resolve) => setTimeout(resolve, this.delay));
     }
   }
 
   async findMany(args?: FindManyArgs<T>): Promise<T[]> {
     await this.simulateDelay();
-    this.simulateError();
-    return processFindManyArgs(this.items, args);
+    return processFindManyArgs(this.data, args);
   }
 
   async findOne(args: FindOneArgs<T>): Promise<T | null> {
     await this.simulateDelay();
-    this.simulateError();
-    const item = this.items.find((item) => matchesWhere(item, args.where));
+    const item = this.data.find((item) => matchesWhere(item, args.where));
     if (item) {
       return item;
     }
@@ -88,61 +54,51 @@ export class MockAdapter<T extends Record<string, any>> extends BaseAdapter<T> {
 
   async create(args: CreationArgs<T>): Promise<T> {
     await this.simulateDelay();
-    this.simulateError();
+
     const newItem = {
       ...args.data,
     } as unknown as T;
 
-    this.items.push(newItem);
+    this.data.push(newItem);
     return newItem;
   }
 
   async createMany(args: CreateManyArgs<T>): Promise<T[]> {
     await this.simulateDelay();
-    this.simulateError();
-    const newItems = args.data.map(
-      (data) =>
-        ({
-          ...data,
-        } as unknown as T)
-    );
-
-    this.items.push(...newItems);
+    const newItems = args.data as T[];
+    this.data.push(...newItems);
     return newItems;
   }
 
   async update(args: UpdateArgs<T>): Promise<T> {
     await this.simulateDelay();
-    this.simulateError();
-    const index = this.items.findIndex((item) =>
-      matchesWhere(item, args.where)
-    );
+    const index = this.data.findIndex((item) => matchesWhere(item, args.where));
     if (index === -1) {
       throw new Error("Item not found");
     }
 
     const updatedItem = {
-      ...this.items[index],
+      ...this.data[index],
       ...args.data,
     } as T;
 
-    this.items[index] = updatedItem;
+    this.data[index] = updatedItem;
     return updatedItem;
   }
 
   async updateMany(args: UpdateManyArgs<T>): Promise<T[]> {
     await this.simulateDelay();
-    this.simulateError();
+
     const updatedItems: T[] = [];
 
-    for (let i = 0; i < this.items.length; i++) {
-      if (matchesWhere(this.items[i], args.where)) {
+    for (let i = 0; i < this.data.length; i++) {
+      if (matchesWhere(this.data[i], args.where)) {
         const updatedItem = {
-          ...this.items[i],
+          ...this.data[i],
           ...args.data,
         } as T;
 
-        this.items[i] = updatedItem;
+        this.data[i] = updatedItem;
         updatedItems.push(updatedItem);
       }
     }
@@ -152,15 +108,13 @@ export class MockAdapter<T extends Record<string, any>> extends BaseAdapter<T> {
 
   async delete(args: DeletionArgs<T>): Promise<boolean> {
     await this.simulateDelay();
-    this.simulateError();
-    const initialLength = this.items.length;
-    this.items = this.items.filter((item) => !matchesWhere(item, args.where));
-    return this.items.length < initialLength;
+    const initialLength = this.data.length;
+    this.data = this.data.filter((item) => !matchesWhere(item, args.where));
+    return this.data.length < initialLength;
   }
 
   async upsert(args: UpsertArgs<T>): Promise<T> {
     await this.simulateDelay();
-    this.simulateError();
     return performUpsert(
       args,
       this.findOne.bind(this),
@@ -171,7 +125,6 @@ export class MockAdapter<T extends Record<string, any>> extends BaseAdapter<T> {
 
   async upsertMany(args: UpsertManyArgs<T>): Promise<T[]> {
     await this.simulateDelay();
-    this.simulateError();
     const upsertedItems: T[] = [];
     const { data, onConflictDoUpdate } = args;
     for (const item of data) {

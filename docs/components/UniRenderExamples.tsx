@@ -21,11 +21,11 @@ export async function initUrpcClient() {
     return initPromise;
   }
 
-  if (!initialized && typeof window !== 'undefined') {
+  if (!initialized && typeof window !== "undefined") {
     initPromise = (async () => {
       try {
         const MyPlugin: Plugin = {
-          entities: [UserEntity, PostEntity]
+          entities: [UserEntity, PostEntity],
         };
 
         URPC.init({
@@ -41,7 +41,12 @@ export async function initUrpcClient() {
               defaultSource: "_global",
             },
           },
-          globalAdapters: [MemoryAdapter],
+          globalAdapters: [
+            {
+              source: "memory",
+              factory: () => new MemoryAdapter(),
+            },
+          ],
         });
 
         // Create mock data
@@ -100,7 +105,7 @@ async function createMockData() {
     const images = [
       "https://media.daily.dev/image/upload/s--AC8ihwmO--/f_auto/v1746082658/posts/xjMewZTM2",
       "https://i0.wp.com/devjournal.info/wp-content/uploads/2025/05/minio-s3-image.png?fit=600%2C452&ssl=1",
-      "https://flo-bit.dev/ui-kit/opengraph.png"
+      "https://flo-bit.dev/ui-kit/opengraph.png",
     ];
 
     const posts = [
@@ -113,7 +118,8 @@ async function createMockData() {
         category: "development",
         status: "published",
         isActive: true,
-        content: "Learn advanced techniques for optimizing React applications performance including memoization, virtualization, and code splitting strategies.",
+        content:
+          "Learn advanced techniques for optimizing React applications performance including memoization, virtualization, and code splitting strategies.",
         createdAt: new Date().toISOString(),
         imageUrl: images[Math.floor(Math.random() * images.length)],
       },
@@ -126,7 +132,8 @@ async function createMockData() {
         category: "typescript",
         status: "draft",
         isActive: true,
-        content: "A comprehensive guide to TypeScript generics, covering basic concepts to advanced patterns and real-world applications.",
+        content:
+          "A comprehensive guide to TypeScript generics, covering basic concepts to advanced patterns and real-world applications.",
         createdAt: new Date(Date.now() - 86400000).toISOString(),
         imageUrl: images[Math.floor(Math.random() * images.length)],
       },
@@ -139,7 +146,8 @@ async function createMockData() {
         category: "backend",
         status: "published",
         isActive: false,
-        content: "Best practices for designing and implementing scalable REST APIs with proper authentication, caching, and monitoring.",
+        content:
+          "Best practices for designing and implementing scalable REST APIs with proper authentication, caching, and monitoring.",
         createdAt: new Date(Date.now() - 172800000).toISOString(),
         imageUrl: images[Math.floor(Math.random() * images.length)],
       },
@@ -152,7 +160,8 @@ async function createMockData() {
         category: "design",
         status: "published",
         isActive: true,
-        content: "Master CSS Grid layout with practical examples and advanced techniques for creating responsive layouts.",
+        content:
+          "Master CSS Grid layout with practical examples and advanced techniques for creating responsive layouts.",
         createdAt: new Date(Date.now() - 259200000).toISOString(),
         imageUrl: images[Math.floor(Math.random() * images.length)],
       },
@@ -165,7 +174,8 @@ async function createMockData() {
         category: "database",
         status: "published",
         isActive: true,
-        content: "Proven strategies for optimizing database performance including indexing, query optimization, and schema design.",
+        content:
+          "Proven strategies for optimizing database performance including indexing, query optimization, and schema design.",
         createdAt: new Date(Date.now() - 345600000).toISOString(),
         imageUrl: images[Math.floor(Math.random() * images.length)],
       },
@@ -178,10 +188,11 @@ async function createMockData() {
         category: "javascript",
         status: "published",
         isActive: true,
-        content: "Explore the latest JavaScript features including async/await, destructuring, modules, and more.",
+        content:
+          "Explore the latest JavaScript features including async/await, destructuring, modules, and more.",
         createdAt: new Date(Date.now() - 432000000).toISOString(),
         imageUrl: images[Math.floor(Math.random() * images.length)],
-      }
+      },
     ];
 
     for (const post of posts) {
@@ -194,9 +205,23 @@ async function createMockData() {
   }
 }
 
-
 interface ExampleProps {
-  type: 'basic' | 'table-editable' | 'card' | 'form' | 'grid' | 'list' | 'dashboard' | 'loading' | 'error' | 'empty' | 'custom-basic' | 'custom-magazine' | 'custom-social' | 'custom-blog' | 'custom-minimal';
+  type:
+    | "basic"
+    | "table-editable"
+    | "card"
+    | "form"
+    | "grid"
+    | "list"
+    | "dashboard"
+    | "loading"
+    | "error"
+    | "empty"
+    | "custom-basic"
+    | "custom-magazine"
+    | "custom-social"
+    | "custom-blog"
+    | "custom-minimal";
 }
 
 export function UniRenderExample({ type }: ExampleProps) {
@@ -222,7 +247,11 @@ export function UniRenderExample({ type }: ExampleProps) {
         }
       } catch (error) {
         console.error("Initialization error:", error);
-        setInitError(error instanceof Error ? error.message : "Unknown initialization error");
+        setInitError(
+          error instanceof Error
+            ? error.message
+            : "Unknown initialization error"
+        );
       }
     };
 
@@ -233,7 +262,9 @@ export function UniRenderExample({ type }: ExampleProps) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
-          <div className="text-red-500 text-lg font-semibold mb-2">Initialization Error</div>
+          <div className="text-red-500 text-lg font-semibold mb-2">
+            Initialization Error
+          </div>
           <p className="text-gray-600">{initError}</p>
         </div>
       </div>
@@ -255,337 +286,373 @@ export function UniRenderExample({ type }: ExampleProps) {
   }
 
   const handleEdit = async (updatedRecord: any, index: number) => {
-    console.log('Updated record:', updatedRecord);
+    console.log("Updated record:", updatedRecord);
   };
 
   const handleDelete = async (record: any, index: number) => {
-    console.log('Deleted record:', record);
+    console.log("Deleted record:", record);
   };
 
   const examples = {
     basic: {
       entity: UserEntity,
       source: "memory",
-      layout: 'table' as const,
+      layout: "table" as const,
       config: {
-        id: { label: 'ID', width: '60px' },
-        name: { label: 'Full Name' },
-        email: { label: 'Email Address' },
-        role: { label: 'Role' },
+        id: { label: "ID", width: "60px" },
+        name: { label: "Full Name" },
+        email: { label: "Email Address" },
+        role: { label: "Role" },
         isActive: {
-          label: 'Status',
+          label: "Status",
           render: (value: boolean) => (
-            <span className={`px-2 py-1 rounded-full text-xs font-semibold ${value ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-              }`}>
-              {value ? 'Active' : 'Inactive'}
+            <span
+              className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                value
+                  ? "bg-green-100 text-green-800"
+                  : "bg-red-100 text-red-800"
+              }`}
+            >
+              {value ? "Active" : "Inactive"}
             </span>
-          )
-        }
+          ),
+        },
       },
       generalConfig: {
         showActions: true,
         actions: {
           edit: true,
-          delete: true
-        }
-      }
+          delete: true,
+        },
+      },
     },
-    'table-editable': {
+    "table-editable": {
       entity: UserEntity,
-      layout: 'table' as const,
+      layout: "table" as const,
       config: {
-        id: { label: 'ID', width: '60px', editable: false },
+        id: { label: "ID", width: "60px", editable: false },
         name: {
-          label: 'Full Name',
+          label: "Full Name",
           editable: true,
           required: true,
-          type: 'text'
+          type: "text",
         },
         email: {
-          label: 'Email Address',
+          label: "Email Address",
           editable: true,
           required: true,
-          type: 'email'
+          type: "email",
         },
         role: {
-          label: 'Role',
+          label: "Role",
           editable: true,
-          type: 'select',
-          options: ['Admin', 'User', 'Manager']
+          type: "select",
+          options: ["Admin", "User", "Manager"],
         },
         isActive: {
-          label: 'Status',
+          label: "Status",
           editable: true,
-          type: 'checkbox',
+          type: "checkbox",
           render: (value: boolean) => (
-            <span className={`px-2 py-1 rounded-full text-xs font-semibold ${value ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-              }`}>
-              {value ? 'Active' : 'Inactive'}
+            <span
+              className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                value
+                  ? "bg-green-100 text-green-800"
+                  : "bg-red-100 text-red-800"
+              }`}
+            >
+              {value ? "Active" : "Inactive"}
             </span>
-          )
-        }
+          ),
+        },
       },
       generalConfig: {
         editable: true,
         showActions: true,
         actions: {
           edit: true,
-          delete: true
-        }
+          delete: true,
+        },
       },
       onEdit: handleEdit,
-      onDelete: handleDelete
+      onDelete: handleDelete,
     },
     card: {
       entity: UserEntity,
-      layout: 'card' as const,
+      layout: "card" as const,
       config: {
         name: {
-          label: 'Name',
+          label: "Name",
           render: (value: string) => (
-            <span className="text-lg font-bold text-gray-900">
-              {value}
-            </span>
-          )
+            <span className="text-lg font-bold text-gray-900">{value}</span>
+          ),
         },
         role: {
-          label: 'Role',
+          label: "Role",
           render: (value: string) => (
-            <span className={`px-2 py-1 rounded text-xs font-semibold ${value === 'Admin' ? 'bg-purple-100 text-purple-800' :
-              value === 'Manager' ? 'bg-blue-100 text-blue-800' :
-                'bg-green-100 text-green-800'
-              }`}>
+            <span
+              className={`px-2 py-1 rounded text-xs font-semibold ${
+                value === "Admin"
+                  ? "bg-purple-100 text-purple-800"
+                  : value === "Manager"
+                    ? "bg-blue-100 text-blue-800"
+                    : "bg-green-100 text-green-800"
+              }`}
+            >
               {value}
             </span>
-          )
+          ),
         },
         email: {
-          label: 'Email',
+          label: "Email",
           render: (value: string) => (
-            <span className="text-sm text-gray-600">
-              {value}
-            </span>
-          )
+            <span className="text-sm text-gray-600">{value}</span>
+          ),
         },
         isActive: {
-          label: 'Status',
+          label: "Status",
           render: (value: boolean) => (
-            <span className={`px-2 py-1 rounded text-xs font-semibold ${value ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-              }`}>
-              {value ? 'Active' : 'Inactive'}
+            <span
+              className={`px-2 py-1 rounded text-xs font-semibold ${
+                value
+                  ? "bg-green-100 text-green-800"
+                  : "bg-red-100 text-red-800"
+              }`}
+            >
+              {value ? "Active" : "Inactive"}
             </span>
-          )
-        }
-      }
+          ),
+        },
+      },
     },
     form: {
       entity: UserEntity,
       query: {
-        where: { id: "1" }
+        where: { id: "1" },
       },
-      layout: 'form' as const,
+      layout: "form" as const,
       config: {
-        name: { label: 'Full Name' },
-        email: { label: 'Email Address' },
-        role: { label: 'Role' },
+        name: { label: "Full Name" },
+        email: { label: "Email Address" },
+        role: { label: "Role" },
         isActive: {
-          label: 'Active Status',
+          label: "Active Status",
           render: (value: boolean) => (
-            <span className={`px-2 py-1 rounded text-xs font-semibold ${value ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-              }`}>
-              {value ? 'Active' : 'Inactive'}
+            <span
+              className={`px-2 py-1 rounded text-xs font-semibold ${
+                value
+                  ? "bg-green-100 text-green-800"
+                  : "bg-red-100 text-red-800"
+              }`}
+            >
+              {value ? "Active" : "Inactive"}
             </span>
-          )
-        }
-      }
+          ),
+        },
+      },
     },
     grid: {
       entity: UserEntity,
-      layout: 'grid' as const,
+      layout: "grid" as const,
       config: {
-        name: { label: 'Name' },
+        name: { label: "Name" },
         role: {
-          label: 'Role',
+          label: "Role",
           render: (value: string) => (
             <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">
               {value}
             </span>
-          )
+          ),
         },
         email: {
-          label: 'Email',
+          label: "Email",
           render: (value: string) => (
             <span className="text-sm text-gray-600">{value}</span>
-          )
+          ),
         },
         isActive: {
-          label: 'Status',
+          label: "Status",
           render: (value: boolean) => (
-            <span className={`px-2 py-1 rounded text-xs font-semibold ${value ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-              }`}>
-              {value ? '✅ Active' : '❌ Inactive'}
+            <span
+              className={`px-2 py-1 rounded text-xs font-semibold ${
+                value
+                  ? "bg-green-100 text-green-800"
+                  : "bg-red-100 text-red-800"
+              }`}
+            >
+              {value ? "✅ Active" : "❌ Inactive"}
             </span>
-          )
-        }
-      }
+          ),
+        },
+      },
     },
     list: {
       entity: UserEntity,
-      layout: 'list' as const,
+      layout: "list" as const,
       config: {
-        name: { label: 'Name' },
-        email: { label: 'Email' },
-        role: { label: 'Role' },
+        name: { label: "Name" },
+        email: { label: "Email" },
+        role: { label: "Role" },
         isActive: {
-          label: 'Status',
+          label: "Status",
           render: (value: boolean) => (
-            <span className={`px-2 py-1 rounded text-xs font-semibold ${value ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-              }`}>
-              {value ? 'Active' : 'Inactive'}
+            <span
+              className={`px-2 py-1 rounded text-xs font-semibold ${
+                value
+                  ? "bg-green-100 text-green-800"
+                  : "bg-red-100 text-red-800"
+              }`}
+            >
+              {value ? "Active" : "Inactive"}
             </span>
-          )
-        }
-      }
+          ),
+        },
+      },
     },
     dashboard: {
       entity: UserEntity,
-      layout: 'dashboard' as const,
+      layout: "dashboard" as const,
       config: {
-        name: { label: 'User' },
+        name: { label: "User" },
         role: {
-          label: 'Role',
-          render: (value: string) => value
+          label: "Role",
+          render: (value: string) => value,
         },
         email: {
-          label: 'Email',
-          render: (value: string) => value
+          label: "Email",
+          render: (value: string) => value,
         },
         isActive: {
-          label: 'Status',
+          label: "Status",
           render: (value: boolean) => (
-            <span className={`px-2 py-1 rounded text-xs font-semibold ${value ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-              }`}>
-              {value ? 'Active' : 'Inactive'}
+            <span
+              className={`px-2 py-1 rounded text-xs font-semibold ${
+                value
+                  ? "bg-green-100 text-green-800"
+                  : "bg-red-100 text-red-800"
+              }`}
+            >
+              {value ? "Active" : "Inactive"}
             </span>
-          )
-        }
-      }
+          ),
+        },
+      },
     },
     loading: {
       entity: UserEntity,
-      layout: 'table' as const,
-      loading: true
+      layout: "table" as const,
+      loading: true,
     },
     error: {
       entity: UserEntity,
-      layout: 'table' as const,
+      layout: "table" as const,
       loading: false,
-      error: "Failed to load orders: Network connection timeout"
+      error: "Failed to load orders: Network connection timeout",
     },
     empty: {
       entity: UserEntity,
       query: {
-        where: { id: "nonexistent" }
+        where: { id: "nonexistent" },
       },
-      layout: 'table' as const,
+      layout: "table" as const,
       loading: false,
-      error: null
+      error: null,
     },
-    'custom-basic': {
+    "custom-basic": {
       entity: PostEntity,
-      layout: 'custom' as const,
+      layout: "custom" as const,
       render: renderCustomCardLayout,
       config: {
-        name: { label: 'Title' },
-        content: { label: 'Content' },
-        role: { label: 'Role' },
-        type: { label: 'Type' },
-        category: { label: 'Category' },
-        status: { label: 'Status' },
-        isActive: { label: 'Active' },
-        createdAt: { label: 'Created' }
+        name: { label: "Title" },
+        content: { label: "Content" },
+        role: { label: "Role" },
+        type: { label: "Type" },
+        category: { label: "Category" },
+        status: { label: "Status" },
+        isActive: { label: "Active" },
+        createdAt: { label: "Created" },
       },
       pagination: {
         enabled: true,
         pageSize: 6,
       },
       onEdit: handleEdit,
-      onDelete: handleDelete
+      onDelete: handleDelete,
     },
-    'custom-magazine': {
+    "custom-magazine": {
       entity: PostEntity,
-      layout: 'custom' as const,
+      layout: "custom" as const,
       render: renderMagazineLayout,
       config: {
-        name: { label: 'Article Title' },
-        content: { label: 'Content' },
-        role: { label: 'Department' },
-        type: { label: 'Type' },
-        category: { label: 'Category' },
-        status: { label: 'Status' },
+        name: { label: "Article Title" },
+        content: { label: "Content" },
+        role: { label: "Department" },
+        type: { label: "Type" },
+        category: { label: "Category" },
+        status: { label: "Status" },
       },
       pagination: {
         enabled: true,
         pageSize: 8,
       },
       onEdit: handleEdit,
-      onDelete: handleDelete
+      onDelete: handleDelete,
     },
-    'custom-social': {
+    "custom-social": {
       entity: PostEntity,
-      layout: 'custom' as const,
+      layout: "custom" as const,
       render: renderSocialLayout,
       config: {
-        name: { label: 'Post Title' },
-        content: { label: 'Content' },
-        role: { label: 'User Role' },
-        type: { label: 'Post Type' },
-        category: { label: 'Category' },
-        status: { label: 'Status' },
+        name: { label: "Post Title" },
+        content: { label: "Content" },
+        role: { label: "User Role" },
+        type: { label: "Post Type" },
+        category: { label: "Category" },
+        status: { label: "Status" },
       },
       pagination: {
         enabled: true,
         pageSize: 3,
       },
       onEdit: handleEdit,
-      onDelete: handleDelete
+      onDelete: handleDelete,
     },
-    'custom-blog': {
+    "custom-blog": {
       entity: PostEntity,
-      layout: 'custom' as const,
+      layout: "custom" as const,
       render: renderBlogLayout,
       config: {
-        name: { label: 'Blog Title' },
-        content: { label: 'Content' },
-        role: { label: 'Author Role' },
-        type: { label: 'Post Type' },
-        category: { label: 'Category' },
-        status: { label: 'Status' },
+        name: { label: "Blog Title" },
+        content: { label: "Content" },
+        role: { label: "Author Role" },
+        type: { label: "Post Type" },
+        category: { label: "Category" },
+        status: { label: "Status" },
       },
       pagination: {
         enabled: true,
         pageSize: 4,
       },
       onEdit: handleEdit,
-      onDelete: handleDelete
+      onDelete: handleDelete,
     },
-    'custom-minimal': {
+    "custom-minimal": {
       entity: PostEntity,
-      layout: 'custom' as const,
+      layout: "custom" as const,
       render: renderMinimalLayout,
       config: {
-        name: { label: 'Title' },
-        content: { label: 'Description' },
-        role: { label: 'Role' },
-        status: { label: 'Status' },
+        name: { label: "Title" },
+        content: { label: "Description" },
+        role: { label: "Role" },
+        status: { label: "Status" },
       },
       pagination: {
         enabled: true,
         pageSize: 8,
       },
       onEdit: handleEdit,
-      onDelete: handleDelete
-    }
+      onDelete: handleDelete,
+    },
   };
 
   const baseProps = examples[type];
@@ -594,12 +661,12 @@ export function UniRenderExample({ type }: ExampleProps) {
   const finalProps: any = { ...baseProps };
 
   // For special states, keep as is
-  if (type === 'loading') {
+  if (type === "loading") {
     finalProps.loading = true;
-  } else if (type === 'error') {
+  } else if (type === "error") {
     finalProps.loading = false;
     finalProps.error = "Failed to load orders: Network connection timeout";
-  } else if (type === 'empty') {
+  } else if (type === "empty") {
     finalProps.loading = false;
     finalProps.error = null;
   } else {
@@ -614,15 +681,15 @@ export function UniRenderExample({ type }: ExampleProps) {
   finalProps.layout = finalProps.layout;
 
   // Add debug information
-  if (process.env.NODE_ENV === 'development') {
-    console.log('UniRender props:', finalProps);
+  if (process.env.NODE_ENV === "development") {
+    console.log("UniRender props:", finalProps);
   }
 
-  console.log('About to render UniRender component!!!!!!!!!!!!', {
+  console.log("About to render UniRender component!!!!!!!!!!!!", {
     isInitialized,
     initError,
     type,
-    finalProps
+    finalProps,
   });
 
   return <UniRender ref={uniRenderRef} {...finalProps} />;

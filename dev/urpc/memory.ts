@@ -17,7 +17,12 @@ URPC.init({
       defaultSource: "memory",
     },
   },
-  globalAdapters: [MemoryAdapter],
+  globalAdapters: [
+    {
+      source: "memory",
+      factory: () => new MemoryAdapter(),
+    },
+  ],
 
   baseUrl: "http://localhost:3000",
   timeout: 10000,

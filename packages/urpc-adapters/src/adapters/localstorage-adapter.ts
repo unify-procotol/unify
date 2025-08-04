@@ -13,11 +13,6 @@ import {
 } from "@unilab/urpc-core";
 import { matchesWhere, processFindManyArgs, performUpsert } from "../utils";
 
-export interface LocalStorageAdapterOptions {
-  storeName?: string;
-  prefix?: string;
-}
-
 export class LocalStorageAdapter<
   T extends Record<string, any>
 > extends BaseAdapter<T> {
@@ -30,7 +25,12 @@ export class LocalStorageAdapter<
   private prefix: string;
   private storageKey: string;
 
-  constructor(options: LocalStorageAdapterOptions = {}) {
+  constructor(
+    options: {
+      storeName?: string;
+      prefix?: string;
+    } = {}
+  ) {
     super();
     this.storeName = options.storeName || "default_store";
     this.prefix = options.prefix || "urpc_";
@@ -102,13 +102,7 @@ export class LocalStorageAdapter<
 
   async createMany(args: CreateManyArgs<T>): Promise<T[]> {
     const items = this.getItems();
-    const newItems = args.data.map(
-      (data) =>
-        ({
-          ...data,
-        } as unknown as T)
-    );
-
+    const newItems = args.data as T[];
     items.push(...newItems);
     this.setItems(items);
     return newItems;

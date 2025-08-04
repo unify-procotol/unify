@@ -16,7 +16,12 @@ URPC.init({
       defaultSource: "indexeddb",
     },
   },
-  globalAdapters: [IndexedDBAdapter],
+  globalAdapters: [
+    {
+      source: "indexeddb",
+      factory: () => new IndexedDBAdapter(),
+    },
+  ],
 });
 
 declare global {

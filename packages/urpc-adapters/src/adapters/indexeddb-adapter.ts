@@ -156,12 +156,7 @@ export class IndexedDBAdapter<
 
   async createMany(args: CreateManyArgs<T>): Promise<T[]> {
     const store = await this.getStore("readwrite");
-    const newItems = args.data.map(
-      (data) =>
-        ({
-          ...data,
-        } as unknown as T)
-    );
+    const newItems = args.data as T[];
 
     return new Promise((resolve, reject) => {
       const results: T[] = [];

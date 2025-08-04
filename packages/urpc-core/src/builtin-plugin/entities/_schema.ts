@@ -1,8 +1,8 @@
 import { SchemaObject } from "../../decorators";
 
-export class SchemaEntity {
-  static displayName = "SchemaEntity";
-  
+export class _SchemaEntity {
+  static displayName = "_SchemaEntity";
+
   name: string = "";
   schema: SchemaObject = {};
   sources?: string[] = [];

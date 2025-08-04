@@ -84,7 +84,12 @@ const app = URPC.init({
       defaultSource: "mock",
     },
   },
-  globalAdapters: [MockAdapter],
+  globalAdapters: [
+    {
+      source: "mock",
+      factory: () => new MockAdapter(),
+    },
+  ],
 });
 
 export default {

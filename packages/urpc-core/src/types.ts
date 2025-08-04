@@ -227,27 +227,40 @@ export interface FieldConfig {
 
 export interface EntityConfig {
   defaultSource?: string;
+
+  // Cache configurations
   cache?: EntityCacheConfig;
-  fields?: {
-    [fieldName: string]: FieldConfig;
-  };
+
   // Permission configurations
   allowApiCrud?: PermissionRule;
   allowApiRead?: PermissionRule;
   allowApiCreate?: PermissionRule;
   allowApiUpdate?: PermissionRule;
   allowApiDelete?: PermissionRule;
+
+  // Field configurations
+  fields?: {
+    [fieldName: string]: FieldConfig;
+  };
+
+  // Init data
+  initData?: Record<string, any>[];
 }
 
 export interface EntityConfigs {
   [entityName: string]: EntityConfig;
 }
 
+export interface GlobalAdapterConfig {
+  source: string;
+  factory: (entityClassName: string) => DataSourceAdapter<any>;
+}
+
 export interface BaseURPCConfig {
   plugins: Plugin[];
   middlewares?: Middleware[];
   entityConfigs?: EntityConfigs;
-  globalAdapters?: (new () => DataSourceAdapter<any>)[];
+  globalAdapters?: GlobalAdapterConfig[];
 }
 
 export interface AuthUser {

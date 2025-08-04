@@ -16,18 +16,8 @@ export class UserEntity {
   @Fields.action({
     name: "click",
     description: "click",
-    params: {
-      name: {
-        type: "string",
-        description: "name",
-      },
-    },
-    returns: {
-      type: "string",
-      description: "name",
-    },
   })
-  click(name: string) {
+  click() {
     console.log("click=>", this.name);
   }
 

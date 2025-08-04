@@ -20,14 +20,19 @@ export class MemoryAdapter<
   static get name() {
     return "memory";
   }
-  private items: T[] = [];
+  private data: T[] = [];
+
+  constructor(options: { data?: T[] } = {}) {
+    super();
+    this.data = options.data || [];
+  }
 
   async findMany(args?: FindManyArgs<T>): Promise<T[]> {
-    return processFindManyArgs(this.items, args);
+    return processFindManyArgs(this.data, args);
   }
 
   async findOne(args: FindOneArgs<T>): Promise<T | null> {
-    const item = this.items.find((item) => matchesWhere(item, args.where));
+    const item = this.data.find((item) => matchesWhere(item, args.where));
     if (item) {
       return item;
     }
@@ -39,50 +44,42 @@ export class MemoryAdapter<
       ...args.data,
     } as unknown as T;
 
-    this.items.push(newItem);
+    this.data.push(newItem);
     return newItem;
   }
 
   async createMany(args: CreateManyArgs<T>): Promise<T[]> {
-    const newItems = args.data.map(
-      (data) =>
-        ({
-          ...data,
-        } as unknown as T)
-    );
-
-    this.items.push(...newItems);
+    const newItems = args.data as T[];
+    this.data.push(...newItems);
     return newItems;
   }
 
   async update(args: UpdateArgs<T>): Promise<T> {
-    const index = this.items.findIndex((item) =>
-      matchesWhere(item, args.where)
-    );
+    const index = this.data.findIndex((item) => matchesWhere(item, args.where));
     if (index === -1) {
       throw new Error("Item not found");
     }
 
     const updatedItem = {
-      ...this.items[index],
+      ...this.data[index],
       ...args.data,
     } as T;
 
-    this.items[index] = updatedItem;
+    this.data[index] = updatedItem;
     return updatedItem;
   }
 
   async updateMany(args: UpdateManyArgs<T>): Promise<T[]> {
     const updatedItems: T[] = [];
 
-    for (let i = 0; i < this.items.length; i++) {
-      if (matchesWhere(this.items[i], args.where)) {
+    for (let i = 0; i < this.data.length; i++) {
+      if (matchesWhere(this.data[i], args.where)) {
         const updatedItem = {
-          ...this.items[i],
+          ...this.data[i],
           ...args.data,
         } as T;
 
-        this.items[i] = updatedItem;
+        this.data[i] = updatedItem;
         updatedItems.push(updatedItem);
       }
     }
@@ -91,9 +88,9 @@ export class MemoryAdapter<
   }
 
   async delete(args: DeletionArgs<T>): Promise<boolean> {
-    const initialLength = this.items.length;
-    this.items = this.items.filter((item) => !matchesWhere(item, args.where));
-    return this.items.length < initialLength;
+    const initialLength = this.data.length;
+    this.data = this.data.filter((item) => !matchesWhere(item, args.where));
+    return this.data.length < initialLength;
   }
 
   async upsert(args: UpsertArgs<T>): Promise<T> {

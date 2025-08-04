@@ -21,7 +21,12 @@ URPC.init({
       defaultSource: "localstorage",
     },
   },
-  globalAdapters: [LocalStorageAdapter],
+  globalAdapters: [
+    {
+      source: "localstorage",
+      factory: () => new LocalStorageAdapter(),
+    },
+  ],
 });
 ```
 

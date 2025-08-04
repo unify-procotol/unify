@@ -5,7 +5,18 @@ import { Input } from "./ui/input";
 import { Card } from "./ui/card";
 import { Avatar, AvatarFallback } from "./ui/avatar";
 import { ScrollArea } from "./ui/scroll-area";
-import { Send, Bot, User, Loader2, X, MessageCircle, Code, AlertTriangle, Database, ChevronDown } from "lucide-react";
+import {
+  Send,
+  Bot,
+  User,
+  Loader2,
+  X,
+  MessageCircle,
+  Code,
+  AlertTriangle,
+  Database,
+  ChevronDown,
+} from "lucide-react";
 import { cn } from "../lib/utils";
 
 interface Message {
@@ -54,14 +65,15 @@ interface PostData {
 function isChatConfigError(error: Error): boolean {
   const errorMsg = error.message.toLowerCase();
   return (
-    errorMsg.includes('chat') && (
-      errorMsg.includes('not found') ||
-      errorMsg.includes('404') ||
-      errorMsg.includes('entity') ||
-      errorMsg.includes('source') ||
-      errorMsg.includes('mastra')
-    )
-  ) || errorMsg.includes('fetch failed') || errorMsg.includes('network error');
+    (errorMsg.includes("chat") &&
+      (errorMsg.includes("not found") ||
+        errorMsg.includes("404") ||
+        errorMsg.includes("entity") ||
+        errorMsg.includes("source") ||
+        errorMsg.includes("mastra"))) ||
+    errorMsg.includes("fetch failed") ||
+    errorMsg.includes("network error")
+  );
 }
 
 // Configuration code snippet for server setup
@@ -94,14 +106,20 @@ URPC.init({
       defaultSource: "mastra",
     },
   },
-  globalAdapters: [MockAdapter],
+  globalAdapters: [
+    {
+      source: "mock",
+      factory: () => new MockAdapter(),
+    }
+  ],
 });`;
 
 export function Chat({ className, isEmbedded = false, onClose }: ChatProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "welcome",
-      content: "Hello! I'm your AI assistant. I can help you query and analyze data. Try commands like 'Find all users' or 'Find all posts'.",
+      content:
+        "Hello! I'm your AI assistant. I can help you query and analyze data. Try commands like 'Find all users' or 'Find all posts'.",
       role: "assistant",
       timestamp: new Date(),
     },
@@ -112,7 +130,9 @@ export function Chat({ className, isEmbedded = false, onClose }: ChatProps) {
   const [showConfigHelper, setShowConfigHelper] = useState(false);
   const [userData, setUserData] = useState<UserData[]>([]);
   const [postData, setPostData] = useState<PostData[]>([]);
-  const [selectedModel, setSelectedModel] = useState("google/gemini-2.0-flash-001");
+  const [selectedModel, setSelectedModel] = useState(
+    "google/gemini-2.0-flash-001"
+  );
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -134,7 +154,9 @@ export function Chat({ className, isEmbedded = false, onClose }: ChatProps) {
   // Auto scroll to bottom when new messages arrive
   useEffect(() => {
     if (scrollAreaRef.current) {
-      const scrollContainer = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
+      const scrollContainer = scrollAreaRef.current.querySelector(
+        "[data-radix-scroll-area-viewport]"
+      );
       if (scrollContainer) {
         scrollContainer.scrollTop = scrollContainer.scrollHeight;
       }
@@ -159,7 +181,7 @@ export function Chat({ className, isEmbedded = false, onClose }: ChatProps) {
       timestamp: new Date(),
     };
 
-    setMessages(prev => [...prev, userMessage]);
+    setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setIsLoading(true);
     setError(null);
@@ -172,7 +194,10 @@ export function Chat({ className, isEmbedded = false, onClose }: ChatProps) {
         source: "mastra",
       }).call({
         input: textToSend,
-        model: selectedModel === "google/gemini-2.0-flash-001" ? undefined : selectedModel,
+        model:
+          selectedModel === "google/gemini-2.0-flash-001"
+            ? undefined
+            : selectedModel,
       });
 
       console.log("[json result]:", result);
@@ -185,7 +210,7 @@ export function Chat({ className, isEmbedded = false, onClose }: ChatProps) {
           role: "assistant",
           timestamp: new Date(),
         };
-        setMessages(prev => [...prev, errorMessage]);
+        setMessages((prev) => [...prev, errorMessage]);
         return;
       }
 
@@ -198,7 +223,7 @@ export function Chat({ className, isEmbedded = false, onClose }: ChatProps) {
           role: "assistant",
           timestamp: new Date(),
         };
-        setMessages(prev => [...prev, errorMessage]);
+        setMessages((prev) => [...prev, errorMessage]);
         return;
       }
 
@@ -214,16 +239,23 @@ export function Chat({ className, isEmbedded = false, onClose }: ChatProps) {
         success: output.success,
       };
 
-      setMessages(prev => [...prev, assistantMessage]);
+      setMessages((prev) => [...prev, assistantMessage]);
 
       // Update data displays based on entity type
       if (output.entity && output.success) {
         if (output.entity === "user") {
           if (Array.isArray(output.data)) {
             setUserData(output.data);
-          } else if (output.data && (output.operation === "findOne" || output.operation === "update" || output.operation === "create")) {
-            setUserData(prev => {
-              const index = prev.findIndex(user => user.id === output.data.id);
+          } else if (
+            output.data &&
+            (output.operation === "findOne" ||
+              output.operation === "update" ||
+              output.operation === "create")
+          ) {
+            setUserData((prev) => {
+              const index = prev.findIndex(
+                (user) => user.id === output.data.id
+              );
               if (index !== -1) {
                 prev[index] = output.data;
                 return [...prev];
@@ -235,9 +267,16 @@ export function Chat({ className, isEmbedded = false, onClose }: ChatProps) {
         } else if (output.entity === "post") {
           if (Array.isArray(output.data)) {
             setPostData(output.data);
-          } else if (output.data && (output.operation === "findOne" || output.operation === "update" || output.operation === "create")) {
-            setPostData(prev => {
-              const index = prev.findIndex(post => post.id === output.data.id);
+          } else if (
+            output.data &&
+            (output.operation === "findOne" ||
+              output.operation === "update" ||
+              output.operation === "create")
+          ) {
+            setPostData((prev) => {
+              const index = prev.findIndex(
+                (post) => post.id === output.data.id
+              );
               if (index !== -1) {
                 prev[index] = output.data;
                 return [...prev];
@@ -248,11 +287,11 @@ export function Chat({ className, isEmbedded = false, onClose }: ChatProps) {
           }
         }
       }
-
     } catch (err) {
       console.error("Chat error:", err);
-      const errorMessage = err instanceof Error ? err.message : "Failed to send message";
-      
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to send message";
+
       // Check if this is a configuration-related error
       if (err instanceof Error && isChatConfigError(err)) {
         setShowConfigHelper(true);
@@ -260,7 +299,7 @@ export function Chat({ className, isEmbedded = false, onClose }: ChatProps) {
       } else {
         setError(errorMessage);
       }
-      
+
       // Update the assistant message to show error
       const errorMsg: Message = {
         id: (Date.now() + 1).toString(),
@@ -268,7 +307,7 @@ export function Chat({ className, isEmbedded = false, onClose }: ChatProps) {
         role: "assistant",
         timestamp: new Date(),
       };
-      setMessages(prev => [...prev, errorMsg]);
+      setMessages((prev) => [...prev, errorMsg]);
     } finally {
       setIsLoading(false);
     }
@@ -285,7 +324,8 @@ export function Chat({ className, isEmbedded = false, onClose }: ChatProps) {
     setMessages([
       {
         id: "welcome",
-        content: "Hello! I'm your AI assistant. I can help you query and analyze data. Try commands like 'Find all users' or 'Find all posts'.",
+        content:
+          "Hello! I'm your AI assistant. I can help you query and analyze data. Try commands like 'Find all users' or 'Find all posts'.",
         role: "assistant",
         timestamp: new Date(),
       },
@@ -301,16 +341,20 @@ export function Chat({ className, isEmbedded = false, onClose }: ChatProps) {
   };
 
   return (
-    <div className={cn(
-      "flex h-full min-h-[400px]",
-      isEmbedded ? "flex-col w-96 h-[500px]" : "flex-row w-full",
-      className
-    )}>
+    <div
+      className={cn(
+        "flex h-full min-h-[400px]",
+        isEmbedded ? "flex-col w-96 h-[500px]" : "flex-row w-full",
+        className
+      )}
+    >
       {/* Main Chat Area */}
-      <Card className={cn(
-        "flex flex-col",
-        isEmbedded ? "w-full h-full shadow-lg border-2" : "flex-1 mr-4",
-      )}>
+      <Card
+        className={cn(
+          "flex flex-col",
+          isEmbedded ? "w-full h-full shadow-lg border-2" : "flex-1 mr-4"
+        )}
+      >
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b">
           <div className="flex items-center space-x-2">
@@ -356,10 +400,13 @@ export function Chat({ className, isEmbedded = false, onClose }: ChatProps) {
                   Server Configuration Required
                 </h4>
                 <p className="text-xs text-amber-700 mb-3">
-                  Chat functionality requires MastraPlugin. Add this to your server.ts:
+                  Chat functionality requires MastraPlugin. Add this to your
+                  server.ts:
                 </p>
                 <div className="bg-slate-900 text-slate-100 p-3 rounded text-xs font-mono overflow-x-auto mb-3">
-                  <pre className="whitespace-pre-wrap">{SERVER_CONFIG_CODE}</pre>
+                  <pre className="whitespace-pre-wrap">
+                    {SERVER_CONFIG_CODE}
+                  </pre>
                 </div>
                 <div className="flex space-x-2">
                   <Button
@@ -415,16 +462,20 @@ export function Chat({ className, isEmbedded = false, onClose }: ChatProps) {
                 key={message.id}
                 className={cn(
                   "flex items-start space-x-3",
-                  message.role === "user" ? "flex-row-reverse space-x-reverse" : ""
+                  message.role === "user"
+                    ? "flex-row-reverse space-x-reverse"
+                    : ""
                 )}
               >
                 <Avatar className="w-8 h-8 flex-shrink-0">
-                  <AvatarFallback className={cn(
-                    "text-xs",
-                    message.role === "user" 
-                      ? "bg-blue-100 text-blue-700" 
-                      : "bg-purple-100 text-purple-700"
-                  )}>
+                  <AvatarFallback
+                    className={cn(
+                      "text-xs",
+                      message.role === "user"
+                        ? "bg-blue-100 text-blue-700"
+                        : "bg-purple-100 text-purple-700"
+                    )}
+                  >
                     {message.role === "user" ? (
                       <User className="w-4 h-4" />
                     ) : (
@@ -432,21 +483,25 @@ export function Chat({ className, isEmbedded = false, onClose }: ChatProps) {
                     )}
                   </AvatarFallback>
                 </Avatar>
-                
-                <div className={cn(
-                  "flex-1 max-w-[280px]",
-                  message.role === "user" ? "flex flex-col items-end" : ""
-                )}>
-                  <div className={cn(
-                    "rounded-lg px-3 py-2 text-sm",
-                    message.role === "user"
-                      ? "bg-blue-500 text-white"
-                      : "bg-muted"
-                  )}>
+
+                <div
+                  className={cn(
+                    "flex-1 max-w-[280px]",
+                    message.role === "user" ? "flex flex-col items-end" : ""
+                  )}
+                >
+                  <div
+                    className={cn(
+                      "rounded-lg px-3 py-2 text-sm",
+                      message.role === "user"
+                        ? "bg-blue-500 text-white"
+                        : "bg-muted"
+                    )}
+                  >
                     <div className="whitespace-pre-wrap break-words">
                       {message.content}
                     </div>
-                    
+
                     {/* Display URPC Code */}
                     {message.urpcCode && (
                       <div className="mt-2 p-2 bg-slate-900 text-slate-100 rounded text-xs font-mono">
@@ -454,30 +509,34 @@ export function Chat({ className, isEmbedded = false, onClose }: ChatProps) {
                         {message.urpcCode}
                       </div>
                     )}
-                    
+
                     {/* Display Data */}
                     {message.data && (
                       <div className="mt-2 p-2 bg-slate-900 text-slate-100 rounded text-xs font-mono">
                         <div className="text-slate-300 mb-1">Data:</div>
-                        <pre className="whitespace-pre-wrap">{JSON.stringify(message.data, null, 2)}</pre>
+                        <pre className="whitespace-pre-wrap">
+                          {JSON.stringify(message.data, null, 2)}
+                        </pre>
                       </div>
                     )}
                   </div>
-                  
+
                   <div className="text-xs text-muted-foreground mt-1 flex items-center space-x-2">
                     <span>
-                      {message.timestamp.toLocaleTimeString([], { 
-                        hour: '2-digit', 
-                        minute: '2-digit' 
+                      {message.timestamp.toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
                       })}
                     </span>
                     {message.success !== undefined && (
-                      <span className={cn(
-                        "px-1 py-0.5 rounded text-xs",
-                        message.success 
-                          ? "bg-green-100 text-green-700"
-                          : "bg-red-100 text-red-700"
-                      )}>
+                      <span
+                        className={cn(
+                          "px-1 py-0.5 rounded text-xs",
+                          message.success
+                            ? "bg-green-100 text-green-700"
+                            : "bg-red-100 text-red-700"
+                        )}
+                      >
                         {message.success ? "✓" : "✗"}
                       </span>
                     )}
@@ -526,7 +585,7 @@ export function Chat({ className, isEmbedded = false, onClose }: ChatProps) {
               <ChevronDown className="absolute right-1 top-1/2 transform -translate-y-1/2 h-3 w-3 text-muted-foreground pointer-events-none" />
             </div>
           </div>
-          
+
           <div className="flex space-x-2">
             <Input
               ref={inputRef}
@@ -573,10 +632,20 @@ export function Chat({ className, isEmbedded = false, onClose }: ChatProps) {
                   {userData.map((user) => (
                     <div key={user.id} className="bg-muted rounded p-2">
                       <div className="text-xs">
-                        <div><strong>ID:</strong> {user.id}</div>
-                        <div><strong>Name:</strong> {user.name}</div>
-                        <div><strong>Email:</strong> {user.email}</div>
-                        {user.role && <div><strong>Role:</strong> {user.role}</div>}
+                        <div>
+                          <strong>ID:</strong> {user.id}
+                        </div>
+                        <div>
+                          <strong>Name:</strong> {user.name}
+                        </div>
+                        <div>
+                          <strong>Email:</strong> {user.email}
+                        </div>
+                        {user.role && (
+                          <div>
+                            <strong>Role:</strong> {user.role}
+                          </div>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -603,13 +672,40 @@ export function Chat({ className, isEmbedded = false, onClose }: ChatProps) {
                   {postData.map((post) => (
                     <div key={post.id} className="bg-muted rounded p-2">
                       <div className="text-xs">
-                        <div><strong>ID:</strong> {post.id}</div>
-                        {post.name && <div><strong>Name:</strong> {post.name}</div>}
-                        {post.title && <div><strong>Title:</strong> {post.title}</div>}
-                        {post.content && <div><strong>Content:</strong> {post.content.substring(0, 50)}...</div>}
-                        {post.email && <div><strong>Email:</strong> {post.email}</div>}
-                        {post.role && <div><strong>Role:</strong> {post.role}</div>}
-                        {post.status && <div><strong>Status:</strong> {post.status}</div>}
+                        <div>
+                          <strong>ID:</strong> {post.id}
+                        </div>
+                        {post.name && (
+                          <div>
+                            <strong>Name:</strong> {post.name}
+                          </div>
+                        )}
+                        {post.title && (
+                          <div>
+                            <strong>Title:</strong> {post.title}
+                          </div>
+                        )}
+                        {post.content && (
+                          <div>
+                            <strong>Content:</strong>{" "}
+                            {post.content.substring(0, 50)}...
+                          </div>
+                        )}
+                        {post.email && (
+                          <div>
+                            <strong>Email:</strong> {post.email}
+                          </div>
+                        )}
+                        {post.role && (
+                          <div>
+                            <strong>Role:</strong> {post.role}
+                          </div>
+                        )}
+                        {post.status && (
+                          <div>
+                            <strong>Status:</strong> {post.status}
+                          </div>
+                        )}
                       </div>
                     </div>
                   ))}

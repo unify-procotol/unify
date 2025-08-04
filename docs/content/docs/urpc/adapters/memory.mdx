@@ -21,7 +21,12 @@ URPC.init({
       defaultSource: "memory",
     },
   },
-  globalAdapters: [MemoryAdapter],
+  globalAdapters: [
+    {
+      source: "memory",
+      factory: () => new MemoryAdapter(),
+    },
+  ],
 });
 ```
 

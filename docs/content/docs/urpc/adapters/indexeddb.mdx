@@ -21,7 +21,12 @@ URPC.init({
       defaultSource: "indexeddb",
     },
   },
-  globalAdapters: [IndexedDBAdapter],
+  globalAdapters: [
+    {
+      source: "indexeddb",
+      factory: () => new IndexedDBAdapter(),
+    },
+  ],
 });
 ```
 
@@ -137,7 +142,12 @@ URPC.init({
       defaultSource: "indexeddb",
     },
   },
-  globalAdapters: [IndexedDBAdapter],
+  globalAdapters: [
+    {
+      source: "indexeddb",
+      factory: () => new IndexedDBAdapter(),
+    },
+  ],
 });
 
 // Now you can omit the source parameter

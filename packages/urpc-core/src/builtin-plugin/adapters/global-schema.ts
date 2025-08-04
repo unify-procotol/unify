@@ -1,25 +1,25 @@
 import { BaseAdapter } from "../../adapter";
 import { FindManyArgs, FindOneArgs } from "../../types";
-import { SchemaEntity } from "../entities/schema";
+import { _SchemaEntity } from "../entities/_schema";
 import { URPC } from "../type";
 
-export class SchemaAdapter extends BaseAdapter<SchemaEntity> {
+export class GlobalSchemaAdapter extends BaseAdapter<_SchemaEntity> {
   static displayName = "SchemaAdapter";
-  private urpc: URPC;
+  private URPC: URPC;
 
-  constructor(urpc: URPC) {
+  constructor(URPC: URPC) {
     super();
-    this.urpc = urpc;
+    this.URPC = URPC;
   }
 
   private getSourcesForEntity(entity: string): string[] {
-    const entitySources = this.urpc.getEntitySources();
+    const entitySources = this.URPC.getEntitySources();
     return entitySources[entity] || [];
   }
 
-  async findMany(args?: FindManyArgs<SchemaEntity>): Promise<SchemaEntity[]> {
+  async findMany(args?: FindManyArgs<_SchemaEntity>): Promise<_SchemaEntity[]> {
     const where = args?.where || {};
-    const schemas = this.urpc.getEntitySchemas();
+    const schemas = this.URPC.getEntitySchemas();
     const entity = where.name;
     if (entity) {
       const actualEntityName = typeof entity === "string" ? entity : entity.$eq;
@@ -47,9 +47,11 @@ export class SchemaAdapter extends BaseAdapter<SchemaEntity> {
     });
   }
 
-  async findOne(args: FindOneArgs<SchemaEntity>): Promise<SchemaEntity | null> {
+  async findOne(
+    args: FindOneArgs<_SchemaEntity>
+  ): Promise<_SchemaEntity | null> {
     const where = args.where;
-    const schemas = this.urpc.getEntitySchemas();
+    const schemas = this.URPC.getEntitySchemas();
     const entityName = where.name;
     if (entityName) {
       if (entityName && schemas[entityName]) {

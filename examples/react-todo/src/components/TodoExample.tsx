@@ -29,7 +29,12 @@ export function TodoExample() {
               defaultSource: "indexeddb",
             },
           },
-          globalAdapters: [IndexedDBAdapter],
+          globalAdapters: [
+            {
+              source: "indexeddb",
+              factory: () => new IndexedDBAdapter(),
+            },
+          ],
         });
 
         if (!isSessionInitialized) {

@@ -16,7 +16,12 @@ URPC.init({
       defaultSource: "localstorage",
     },
   },
-  globalAdapters: [LocalStorageAdapter],
+  globalAdapters: [
+    {
+      source: "localstorage",
+      factory: () => new LocalStorageAdapter(),
+    },
+  ],
 });
 
 declare global {
@@ -207,7 +212,10 @@ window.checkStorageQuota = async () => {
     log(`   Used: ${(quota.used / 1024).toFixed(2)} KB`);
     log(`   Available: ${(quota.available / 1024).toFixed(2)} KB`);
     log(
-      `   Usage: ${((quota.used / (quota.used + quota.available)) * 100).toFixed(2)}%`
+      `   Usage: ${(
+        (quota.used / (quota.used + quota.available)) *
+        100
+      ).toFixed(2)}%`
     );
   } catch (error) {
     log(`❌ Failed to check storage quota: ${error}`);

@@ -18,7 +18,7 @@ export function getAPI() {
         DataPlugin,
         MastraPlugin({
           agents: {
-            "l1": new URPCSimpleAgent({
+            l1: new URPCSimpleAgent({
               URPC,
               defaultModel: "google/gemini-2.0-flash-001",
               openrouterApiKey: process.env.OPENROUTER_API_KEY,
@@ -36,7 +36,12 @@ export function getAPI() {
           defaultSource: "mock",
         },
       },
-      globalAdapters: [MockAdapter],
+      globalAdapters: [
+        {
+          source: "mock",
+          factory: () => new MockAdapter(),
+        },
+      ],
     });
   }
   return api;

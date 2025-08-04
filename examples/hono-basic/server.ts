@@ -12,44 +12,52 @@ const MyPlugin: Plugin = {
 
 const app = new Hono();
 
-app.use(cors())
+app.use(cors());
 
 URPC.init({
-  plugins: [MyPlugin],
   app,
+  plugins: [MyPlugin],
+  globalAdapters: [
+    {
+      source: "mock",
+      factory: () => new MockAdapter(),
+    },
+  ],
   entityConfigs: {
+    _data: {
+      initData: [
+        {
+          key: "URPC_SERVER_INFO",
+          value: {
+            title: "Hono Basic Example",
+            desc: "Hono Basic Example, using @unilab/urpc-hono and @unilab/urpc",
+            logo: "https://example.com/logo.png",
+          },
+        },
+      ],
+    },
     user: {
       defaultSource: "mock",
+      initData: [
+        {
+          id: "1",
+          name: "John Doe",
+          email: "john.doe@example.com",
+          avatar: "https://example.com/avatar.png",
+        },
+      ],
     },
     post: {
       defaultSource: "mock",
+      initData: [
+        {
+          id: "1",
+          title: "Post 1",
+          content: "Content 1",
+          userId: "1",
+        },
+      ],
     },
-  },
-  globalAdapters: [MockAdapter],
-});
-
-// Use repo on the server side
-// init data
-await repo<UserEntity>({
-  entity: "UserEntity",
-  source: "mock",
-}).create({
-  data: {
-    id: "1",
-    name: "John Doe",
-    email: "john.doe@example.com",
-    avatar: "https://example.com/avatar.png",
-  },
-});
-await repo<PostEntity>({
-  entity: "PostEntity",
-  source: "mock",
-}).create({
-  data: {
-    id: "1",
-    title: "Post 1",
-    content: "Content 1",
-    userId: "1",
   },
 });
 

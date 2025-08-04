@@ -105,7 +105,12 @@ URPC.init({
       defaultSource: "open-meteo",
     },
   },
-  globalAdapters: [MockAdapter],
+  globalAdapters: [
+    {
+      source: "mock",
+      factory: () => new MockAdapter(),
+    },
+  ],
 });
 
 // insert user

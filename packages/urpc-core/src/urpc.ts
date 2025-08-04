@@ -1,27 +1,37 @@
 import { BuiltinPlugin } from "./builtin-plugin";
 import {
-  extractAdapterName,
   extractEntityClassName,
   generateSchemas,
   SchemaObject,
 } from "./decorators";
 import { getMiddlewareManager } from "./middleware-manager";
-import { registerAdapter, simplifyEntityName } from "./repo-register";
+import { getRepo, registerAdapter, simplifyEntityName } from "./repo-register";
 import {
   BaseURPCConfig,
-  DataSourceAdapter,
   EntityConfigs,
+  GlobalAdapterConfig,
   Middleware,
   Plugin,
 } from "./types";
 
 export class BaseURPC {
+  private static _initialized = false;
   static entitySchemas: Record<string, SchemaObject> = {};
   static entitySources: Record<string, string[]> = {};
   static entityConfigs: EntityConfigs = {};
 
   static init(config: BaseURPCConfig) {
-    const plugins = [...(config.plugins || []), BuiltinPlugin(this)];
+    if (this._initialized) {
+      return;
+    }
+    this._initialized = true;
+
+    const plugins = [
+      ...(config.plugins || []),
+      BuiltinPlugin({
+        URPC: this,
+      }),
+    ];
     this.registerPluginAdapters(plugins);
     this.registerGlobalAdapters({
       plugins: plugins,
@@ -29,7 +39,17 @@ export class BaseURPC {
     });
 
     if (config.entityConfigs) {
-      this.entityConfigs = config.entityConfigs;
+      this.entityConfigs = {
+        ...config.entityConfigs,
+        _schema: {
+          ...config.entityConfigs._schema,
+          defaultSource: "_global",
+        },
+        _data: {
+          ...config.entityConfigs._data,
+          defaultSource: "_global",
+        },
+      };
       getMiddlewareManager().setEntityConfigs(this.entityConfigs);
     }
 
@@ -44,6 +64,8 @@ export class BaseURPC {
       plugins: plugins,
       globalAdapters: config.globalAdapters,
     });
+
+    this.ininData();
   }
 
   private static registerPluginAdapters(plugins: Plugin[]) {
@@ -60,17 +82,15 @@ export class BaseURPC {
     globalAdapters = [],
   }: {
     plugins: Plugin[];
-    globalAdapters?: (new () => DataSourceAdapter<any>)[];
+    globalAdapters?: GlobalAdapterConfig[];
   }): void {
     if (globalAdapters.length > 0) {
       const entities = plugins.flatMap((p) => p.entities || []);
-      globalAdapters.forEach((Adapter) => {
-        const source = extractAdapterName(Adapter)
-          .toLowerCase()
-          .replace("adapter", "");
+      globalAdapters.forEach((config) => {
         entities.forEach((entity) => {
-          const entityName = extractEntityClassName(entity);
-          registerAdapter(entityName, source, new Adapter());
+          const entityClassName = extractEntityClassName(entity);
+          const adapter = config.factory(entityClassName);
+          registerAdapter(entityClassName, config.source, adapter);
         });
       });
     }
@@ -111,7 +131,7 @@ export class BaseURPC {
     globalAdapters,
   }: {
     plugins: Plugin[];
-    globalAdapters?: (new () => DataSourceAdapter<any>)[];
+    globalAdapters?: GlobalAdapterConfig[];
   }) {
     const entities = plugins.flatMap((p) => p.entities || []);
     const adapters = plugins.flatMap((p) => p.adapters || []);
@@ -130,21 +150,56 @@ export class BaseURPC {
     });
 
     if (globalAdapters && entities) {
-      globalAdapters.forEach((adapter) => {
+      globalAdapters.forEach((config) => {
         entities.forEach((entity) => {
           const entityName = extractEntityClassName(entity);
-          const source = extractAdapterName(adapter)
-            .toLowerCase()
-            .replace("adapter", "");
           if (!entitySources[entityName]) {
             entitySources[entityName] = [];
           }
-          entitySources[entityName].push(source);
+          entitySources[entityName].push(config.source);
         });
       });
     }
 
     this.entitySources = entitySources;
+  }
+
+  private static async ininData() {
+    Object.keys(this.entityConfigs).forEach(async (entity) => {
+      const config = this.entityConfigs[entity];
+      const initData = config.initData;
+      const source = config.defaultSource;
+      if (initData && initData.length > 0) {
+        if (source) {
+          const _repo = getRepo(entity, source);
+          if (_repo) {
+            try {
+              if (initData.length > 1) {
+                await _repo.createMany({
+                  data: initData,
+                });
+              } else {
+                await _repo.create({
+                  data: initData[0],
+                });
+              }
+            } catch (error: any) {
+              console.error(
+                `Failed to initialize data for ${entity}: ${error.message}`
+              );
+            }
+          } else {
+            console.error(
+              `Failed to initialize data for ${entity}: No repo found for ${entity} in ${source}`
+            );
+          }
+        } else {
+          console.error(
+            `Failed to initialize data for ${entity}: No defaultSource found for ${entity}`
+          );
+        }
+      }
+    });
   }
 
   static getEntitySchemas(): Record<string, SchemaObject> {

@@ -77,3 +77,8 @@ const fetchPost = async () => {
 };
 
 fetchPost();
+
+const _data = await repo({
+  entity: "_data",
+}).findMany();
+console.log("_data:", JSON.stringify(_data, null, 2));

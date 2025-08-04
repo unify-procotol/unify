@@ -68,27 +68,35 @@ src/
 ## 布局示例
 
 ### 1. Basic Table
+
 基础表格布局，显示待办事项列表和操作按钮。
 
 ### 2. Editable Table
+
 可编辑表格，支持内联编辑各个字段。
 
 ### 3. Card Layout
+
 卡片式布局，适合展示详细信息。
 
 ### 4. Form Layout
+
 表单布局，用于单个项目的详细查看。
 
 ### 5. Grid Layout
+
 网格布局，紧凑型显示。
 
 ### 6. List Layout
+
 列表布局，带有详细信息。
 
 ### 7. Dashboard Layout
+
 仪表板布局，适合数据展示。
 
 ### 8. 状态示例
+
 - Loading State - 数据加载状态
 - Error State - 错误处理状态
 - Empty State - 空数据状态
@@ -96,6 +104,7 @@ src/
 ## 实体定义
 
 Todo 实体包含以下字段：
+
 - `id` - 唯一标识符
 - `title` - 标题
 - `description` - 描述
@@ -109,6 +118,7 @@ Todo 实体包含以下字段：
 ## 自定义操作
 
 Todo 实体支持以下自定义操作：
+
 - `toggleComplete()` - 切换完成状态
 - `updatePriority(priority)` - 更新优先级
 - `setDueDate(date)` - 设置截止日期
@@ -116,6 +126,7 @@ Todo 实体支持以下自定义操作：
 ## 配置说明
 
 ### URPC 配置
+
 ```typescript
 URPC.init({
   plugins: [TodoPlugin],
@@ -125,12 +136,19 @@ URPC.init({
       defaultSource: "mock",
     },
   },
-  globalAdapters: [MockAdapter],
+  globalAdapters: [
+    {
+      source: "mock",
+      factory: () => new MockAdapter(),
+    },
+  ],
 });
 ```
 
 ### UniRender 配置
+
 每个布局都有自己的配置，包括：
+
 - 字段定义和标签
 - 渲染函数
 - 编辑权限
@@ -139,15 +157,17 @@ URPC.init({
 ## 开发指南
 
 ### 添加新字段
+
 1. 在 `src/entities/todo.ts` 中添加新的 `@Fields` 装饰器
 2. 在 `TodoExample.tsx` 中更新配置
 3. 重新启动开发服务器
 
 ### 添加新布局
+
 1. 在 `examples` 对象中添加新的布局配置
 2. 更新 `ExampleType` 类型定义
 3. 在 `App.tsx` 中添加到示例列表
 
 ## 许可证
 
-MIT License 
+MIT License
