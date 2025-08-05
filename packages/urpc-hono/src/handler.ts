@@ -70,39 +70,31 @@ export class URPC extends BaseURPC {
       if (!repo) {
         return c.json({ error: "Repository not found" }, 404);
       }
-      
+
+      const metadata = {
+        entity,
+        source,
+        honoCtx: c,
+        ...context,
+      };
+
       if (MethodsForGet.includes(funcName)) {
         const params = parseQueryParams(c);
         // @ts-ignore
-        const result = await repo[funcName](params, {
-          entity,
-          source,
-          context,
-          honoContext: c,
-        });
+        const result = await repo[funcName](params, metadata);
         return c.json({ data: result }, 200);
       }
 
       if (MethodsForPost.includes(funcName)) {
         const body = await c.req.json();
         // @ts-ignore
-        const result = await repo[funcName](body, {
-          entity,
-          source,
-          context,
-          honoContext: c,
-        });
+        const result = await repo[funcName](body, metadata);
         return c.json({ data: result }, 200);
       }
 
       // custom method
       const body = await c.req.json();
-      const result = await repo.customMethod(funcName, body, {
-        entity,
-        source,
-        context,
-        honoContext: c,
-      });
+      const result = await repo.customMethod(funcName, body, metadata);
       if (result instanceof Response) {
         return result;
       }

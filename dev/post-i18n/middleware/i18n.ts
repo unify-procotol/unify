@@ -28,12 +28,10 @@ export function i18nAI<T extends Record<string, any>>(options?: {
   required: {
     entities: string[];
   };
-}): Middleware<T> {
-  const fn = async (context: MiddlewareContext<T>, next: MiddlewareNext<T>) => {
+}): Middleware {
+  const fn = async (context: MiddlewareContext, next: MiddlewareNext) => {
     const metadata = context.metadata;
-    const targetLanguage = metadata?.context?.lang;
-
-
+    const targetLanguage = metadata?.lang;
 
     // If no target language specified, execute normally without translation
     if (!targetLanguage) {
@@ -51,7 +49,7 @@ export function i18nAI<T extends Record<string, any>>(options?: {
 
     const entityName = metadata.entity;
 
-    if (entityName === "cache" || entityName === "llm") {
+    if (!entityName || entityName === "cache" || entityName === "llm") {
       return await next();
     }
 

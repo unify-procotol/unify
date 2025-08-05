@@ -3,7 +3,6 @@ import { Plugin } from "@unilab/urpc-core";
 import { UserEntity } from "./entities/user";
 import { PostEntity } from "./entities/post";
 import { MockAdapter } from "@unilab/urpc-adapters";
-import { _SchemaEntity } from "@unilab/urpc-core/builtin-plugin-entities";
 
 const MyPlugin: Plugin = {
   entities: [UserEntity, PostEntity],
@@ -14,7 +13,10 @@ const app = URPC.init({
   globalAdapters: [
     {
       source: "mock",
-      factory: () => new MockAdapter(),
+      factory: () =>
+        new MockAdapter({
+          delay: 500,
+        }),
     },
   ],
   entityConfigs: {

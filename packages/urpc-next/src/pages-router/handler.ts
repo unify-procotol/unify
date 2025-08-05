@@ -62,38 +62,30 @@ export class URPC extends BaseURPC {
 
       const context = parseContext(req);
 
+      const metadata = {
+        entity,
+        source,
+        nextApiRequest: req,
+        ...context,
+      };
+
       if (MethodsForGet.includes(funcName)) {
         const params = parseQueryParams(req);
         // @ts-ignore
-        const result = await repo[funcName](params, {
-          entity,
-          source,
-          context,
-          nextApiRequest: req,
-        });
+        const result = await repo[funcName](params, metadata);
         return res.status(200).json({ data: result });
       }
 
       if (MethodsForPost.includes(funcName)) {
         const body: any = req.body;
         // @ts-ignore
-        const result = await repo[funcName](body, {
-          entity,
-          source,
-          context,
-          nextApiRequest: req,
-        });
+        const result = await repo[funcName](body, metadata);
         return res.status(200).json({ data: result });
       }
 
       // custom method
       const body: any = req.body;
-      const result = await repo.customMethod(funcName, body, {
-        entity,
-        source,
-        context,
-        nextApiRequest: req,
-      });
+      const result = await repo.customMethod(funcName, body, metadata);
       return res.status(200).json({ data: result });
     } catch (error) {
       return handleError(error, res);

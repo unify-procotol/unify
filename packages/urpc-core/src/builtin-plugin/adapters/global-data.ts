@@ -12,7 +12,7 @@ import {
 import { _DataEntity } from "../entities/_data";
 
 export class GlobalDataAdapter extends BaseAdapter<_DataEntity> {
-  static displayName = "URPCDataAdapter";
+  static displayName = "GlobalDataAdapter";
 
   private data: _DataEntity[] = [];
 

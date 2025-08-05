@@ -165,41 +165,32 @@ export class BaseURPC {
   }
 
   private static async ininData() {
-    Object.keys(this.entityConfigs).forEach(async (entity) => {
-      const config = this.entityConfigs[entity];
-      const initData = config.initData;
-      const source = config.defaultSource;
-      if (initData && initData.length > 0) {
-        if (source) {
-          const _repo = getRepo(entity, source);
-          if (_repo) {
-            try {
-              if (initData.length > 1) {
-                await _repo.createMany({
-                  data: initData,
-                });
-              } else {
-                await _repo.create({
-                  data: initData[0],
-                });
-              }
-            } catch (error: any) {
-              console.error(
-                `Failed to initialize data for ${entity}: ${error.message}`
-              );
-            }
-          } else {
-            console.error(
-              `Failed to initialize data for ${entity}: No repo found for ${entity} in ${source}`
-            );
-          }
-        } else {
+    const entities = Object.keys(this.entityConfigs);
+    await Promise.all(
+      entities.map(async (entity) => {
+        const config = this.entityConfigs[entity];
+        const { initData, defaultSource: source } = config;
+
+        if (!initData?.length) return;
+
+        if (!source) {
           console.error(
             `Failed to initialize data for ${entity}: No defaultSource found for ${entity}`
           );
+          return;
         }
-      }
-    });
+
+        const repo = getRepo(entity, source);
+        if (!repo) {
+          console.error(
+            `Failed to initialize data for ${entity}: No repo found for ${entity} in ${source}`
+          );
+          return;
+        }
+
+        await createInitData(repo, initData, entity);
+      })
+    );
   }
 
   static getEntitySchemas(): Record<string, SchemaObject> {
@@ -212,5 +203,26 @@ export class BaseURPC {
 
   static getEntityConfigs(): EntityConfigs {
     return this.entityConfigs;
+  }
+}
+
+async function createInitData(repo: any, initData: any[], entity: string) {
+  try {
+    await repo.createMany({ data: initData });
+  } catch (error: any) {
+    // If createMany is not supported, fall back to creating one by one
+    if (error.message?.includes("not implemented")) {
+      try {
+        await Promise.all(initData.map((data) => repo.create({ data })));
+      } catch (fallbackError: any) {
+        console.error(
+          `Failed to initialize data for ${entity}: ${fallbackError.message}`
+        );
+      }
+    } else {
+      console.error(
+        `Failed to initialize data for ${entity}: ${error.message}`
+      );
+    }
   }
 }

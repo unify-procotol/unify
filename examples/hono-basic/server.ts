@@ -67,6 +67,4 @@ const server = {
   fetch: app.fetch,
 };
 
-console.log(`🚀 Server running on http://localhost:${server.port}`);
-
 export default server;

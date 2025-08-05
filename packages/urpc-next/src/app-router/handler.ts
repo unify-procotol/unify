@@ -79,38 +79,30 @@ export class URPC extends BaseURPC {
         );
       }
 
+      const metadata = {
+        entity,
+        source,
+        nextRequest: request,
+        ...context,
+      };
+
       if (MethodsForGet.includes(funcName)) {
         const params = parseQueryParams(request);
         // @ts-ignore
-        const result = await repo[funcName](params, {
-          entity,
-          source,
-          context,
-          nextRequest: request,
-        });
+        const result = await repo[funcName](params, metadata);
         return NextResponse.json({ data: result }, { status: 200 });
       }
 
       if (MethodsForPost.includes(funcName)) {
         const body: any = await request.json();
         // @ts-ignore
-        const result = await repo[funcName](body, {
-          entity,
-          source,
-          context,
-          nextRequest: request,
-        });
+        const result = await repo[funcName](body, metadata);
         return NextResponse.json({ data: result }, { status: 200 });
       }
 
       // custom method
       const body: any = await request.json();
-      const result = await repo.customMethod(funcName, body, {
-        entity,
-        source,
-        context,
-        nextRequest: request,
-      });
+      const result = await repo.customMethod(funcName, body, metadata);
       return NextResponse.json({ data: result }, { status: 200 });
     } catch (error) {
       return handleError(error);

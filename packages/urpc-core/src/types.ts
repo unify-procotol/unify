@@ -88,39 +88,14 @@ export interface DeletionArgs<T extends Record<string, any>> {
   where: WhereCondition<T>;
 }
 
-export interface OperationContext {
-  user?: AuthUser | null;
-  stream?: boolean;
-  honoContext?: any;
-  nextApiRequest?: any;
-  nextRequest?: any;
-}
-
-export interface DataSourceAdapter<T extends Record<string, any>> {
-  findMany(args?: FindManyArgs<T>, ctx?: OperationContext): Promise<T[]>;
-  findOne(args: FindOneArgs<T>, ctx?: OperationContext): Promise<T | null>;
-  create(args: CreationArgs<T>, ctx?: OperationContext): Promise<T>;
-  createMany(args: CreateManyArgs<T>, ctx?: OperationContext): Promise<T[]>;
-  update(args: UpdateArgs<T>, ctx?: OperationContext): Promise<T>;
-  updateMany(args: UpdateManyArgs<T>, ctx?: OperationContext): Promise<T[]>;
-  upsert(args: UpsertArgs<T>, ctx?: OperationContext): Promise<T>;
-  upsertMany(args: UpsertManyArgs<T>, ctx?: OperationContext): Promise<T[]>;
-  delete(args: DeletionArgs<T>, ctx?: OperationContext): Promise<boolean>;
-  // custom methods
-  [funcName: string]: (args: any, ctx?: OperationContext) => Promise<any>;
-}
-
-export interface MiddlewareMetadata {
-  entity: string;
+export type MiddlewareMetadata = {
+  entity?: string;
   source?: string;
-  context?: {
-    lang?: string;
-    stream?: boolean;
-  };
-  honoContext?: any;
+  stream?: boolean;
+  honoCtx?: any;
   nextApiRequest?: any;
   nextRequest?: any;
-}
+} & Record<string, any>;
 
 export type MiddlewareContext = {
   operation: string; // findMany, findOne, create, createMany, update, updateMany, upsert, delete, call
@@ -153,6 +128,24 @@ export interface MiddlewareManagerInterface {
   ): Promise<any>;
 }
 
+export type OperationContext = MiddlewareMetadata & {
+  user?: AuthUser | null;
+};
+
+export interface DataSourceAdapter<T extends Record<string, any>> {
+  findMany(args?: FindManyArgs<T>, ctx?: OperationContext): Promise<T[]>;
+  findOne(args: FindOneArgs<T>, ctx?: OperationContext): Promise<T | null>;
+  create(args: CreationArgs<T>, ctx?: OperationContext): Promise<T>;
+  createMany(args: CreateManyArgs<T>, ctx?: OperationContext): Promise<T[]>;
+  update(args: UpdateArgs<T>, ctx?: OperationContext): Promise<T>;
+  updateMany(args: UpdateManyArgs<T>, ctx?: OperationContext): Promise<T[]>;
+  upsert(args: UpsertArgs<T>, ctx?: OperationContext): Promise<T>;
+  upsertMany(args: UpsertManyArgs<T>, ctx?: OperationContext): Promise<T[]>;
+  delete(args: DeletionArgs<T>, ctx?: OperationContext): Promise<boolean>;
+  // custom methods
+  [funcName: string]: (args: any, ctx?: OperationContext) => Promise<any>;
+}
+
 export interface AdapterRegistration {
   source: string;
   entity: string;
@@ -175,9 +168,7 @@ export interface RelationMapping<
 export interface RepoOptions {
   entity: string;
   source?: string;
-  context?: {
-    lang?: string;
-  };
+  context?: Record<string, any>;
 }
 
 export type JoinRepoOptions<

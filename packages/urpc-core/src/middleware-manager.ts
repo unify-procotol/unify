@@ -45,11 +45,8 @@ class MiddlewareManager implements MiddlewareManagerInterface {
   ): Promise<any> {
     if (this.middlewares.length === 0) {
       return operation({
+        ...context.metadata,
         user: null,
-        stream: context.metadata?.context?.stream,
-        honoContext: context.metadata?.honoContext,
-        nextApiRequest: context.metadata?.nextApiRequest,
-        nextRequest: context.metadata?.nextRequest,
       });
     }
 
@@ -63,11 +60,8 @@ class MiddlewareManager implements MiddlewareManagerInterface {
       finalOperation = async () => {
         return middleware.fn(context, async () =>
           currentOperation({
+            ...context.metadata,
             user: context.user,
-            stream: context.metadata?.context?.stream,
-            honoContext: context.metadata?.honoContext,
-            nextApiRequest: context.metadata?.nextApiRequest,
-            nextRequest: context.metadata?.nextRequest,
           })
         );
       };
@@ -75,11 +69,8 @@ class MiddlewareManager implements MiddlewareManagerInterface {
 
     // Execute the final wrapped operation
     const result = await finalOperation({
+      ...context.metadata,
       user: context.user,
-      stream: context.metadata?.context?.stream,
-      honoContext: context.metadata?.honoContext,
-      nextApiRequest: context.metadata?.nextApiRequest,
-      nextRequest: context.metadata?.nextRequest,
     });
 
     context.result = result;

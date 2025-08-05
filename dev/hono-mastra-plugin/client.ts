@@ -25,6 +25,8 @@ URPC.init({
 //         const readResult = await reader.read();
 //         if (readResult.done) break;
 //         console.log("[stream value]:", readResult.value);
+//         const text = new TextDecoder().decode(readResult.value);
+//         console.log("[stream text]:", text);
 //       }
 //     }
 //   } else {
@@ -42,10 +44,10 @@ const testAgent = async () => {
       stream: true,
     },
   }).call({
-    entities: ["WeatherEntity", "UserEntity", "GeocodingEntity"],
-    // input: "Find all users",
+    entities: ["UserEntity"], // ["WeatherEntity", "UserEntity", "GeocodingEntity"],
+    input: "Find all users",
     // input: "What are the coordinates of London?",
-    input: "What's the weather like in London?",
+    // input: "What's the weather like in London?",
     // input: "What is the price of the token with the contract address 0x7d1afa7b718fb893db30a3abc0cfc608aacfebb0?",
   });
 

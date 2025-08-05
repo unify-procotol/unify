@@ -4,8 +4,9 @@ import { stream } from "hono/streaming";
 
 export class UserAdapter extends BaseAdapter<UserEntity> {
   async call(args: any, ctx: OperationContext): Promise<UserEntity | Response> {
-    if (ctx?.honoContext) {
-      return stream(ctx?.honoContext, async (stream) => {
+    console.log("ctx=>", ctx);
+    if (ctx?.honoCtx) {
+      return stream(ctx?.honoCtx, async (stream) => {
         const user = {
           id: "1",
           name: "John Doe",

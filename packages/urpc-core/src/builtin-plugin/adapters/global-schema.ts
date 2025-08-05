@@ -4,7 +4,7 @@ import { _SchemaEntity } from "../entities/_schema";
 import { URPC } from "../type";
 
 export class GlobalSchemaAdapter extends BaseAdapter<_SchemaEntity> {
-  static displayName = "SchemaAdapter";
+  static displayName = "GlobalSchemaAdapter";
   private URPC: URPC;
 
   constructor(URPC: URPC) {

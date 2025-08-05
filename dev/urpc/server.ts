@@ -19,21 +19,15 @@ const app = URPC.init({
   entityConfigs: {
     user: {
       defaultSource: "api-mock",
+      initData: [
+        {
+          id: "1",
+          name: "John Doe",
+          email: "john.doe@example.com",
+          avatar: "https://example.com/avatar.png",
+        },
+      ],
     },
-  },
-});
-
-// Use repo on the server side
-// init data
-await repo<UserEntity>({
-  entity: "UserEntity",
-  source: "api-mock",
-}).create({
-  data: {
-    id: "1",
-    name: "John Doe",
-    email: "john.doe@example.com",
-    avatar: "https://example.com/avatar.png",
   },
 });
 

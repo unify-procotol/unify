@@ -90,9 +90,9 @@ export class MastraAdapter extends BaseAdapter<ChatEntity> {
         output,
       };
     } else {
-      if (ctx.honoContext) {
+      if (ctx.honoCtx) {
         const { stream } = await import("hono/streaming");
-        return stream(ctx.honoContext, async (stream) => {
+        return stream(ctx.honoCtx, async (stream) => {
           const readableStream: ReadableStream<any> =
             await agent.streamResponse?.({
               input,

@@ -48,23 +48,23 @@ importers:
         specifier: ^15.5.13
         version: 15.5.13
       '@unilab/mastra-client-plugin':
-        specifier: ^0.0.10
-        version: 0.0.10(ai@4.3.19(react@19.1.0)(zod@3.25.76))(openapi-types@12.1.3)(react@19.1.0)(zod@3.25.76)
+        specifier: latest
+        version: 0.0.11(ai@4.3.19(react@19.1.0)(zod@3.25.76))(openapi-types@12.1.3)(react@19.1.0)(zod@3.25.76)
       '@unilab/mastra-plugin':
-        specifier: ^0.0.16
-        version: 0.0.16(ai@4.3.19(react@19.1.0)(zod@3.25.76))(openapi-types@12.1.3)(react@19.1.0)(zod@3.25.76)
+        specifier: latest
+        version: 0.0.17(ai@4.3.19(react@19.1.0)(zod@3.25.76))(openapi-types@12.1.3)(react@19.1.0)(zod@3.25.76)
       '@unilab/urpc':
-        specifier: ^0.0.21
-        version: 0.0.21
+        specifier: latest
+        version: 0.0.22
       '@unilab/urpc-adapters':
-        specifier: ^0.0.18
-        version: 0.0.18
+        specifier: latest
+        version: 0.0.19
       '@unilab/urpc-core':
-        specifier: ^0.0.16
-        version: 0.0.16
+        specifier: latest
+        version: 0.0.17
       '@unilab/urpc-next':
-        specifier: ^0.0.21
-        version: 0.0.21(next@15.3.0(@opentelemetry/api@1.9.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))
+        specifier: latest
+        version: 0.0.22(next@15.3.0(@opentelemetry/api@1.9.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -104,7 +104,7 @@ importers:
     devDependencies:
       '@opennextjs/cloudflare':
         specifier: ^1.6.0
-        version: 1.6.3(wrangler@4.27.0)
+        version: 1.6.5(wrangler@4.27.0)
       '@tailwindcss/postcss':
         specifier: ^4
         version: 4.1.11
@@ -1150,12 +1150,12 @@ packages:
     resolution: {integrity: sha512-csY4qcR7jUwiZmkreNTJhcypQfts2aY2CK+a+rXgXUImZiZiySh0FvwHjRnlqWKvg+y6ae9lHFzDRjBTmqlTIQ==}
     engines: {node: '>=16.0.0'}
 
-  '@opennextjs/aws@3.7.2':
-    resolution: {integrity: sha512-OITG/97+ugbVI3G36/iYLKbRSyR5rG+Y99dsghSzei08tX2qQoNZ/WXlcPcF3yfKItsNOoRfDLOejeDK0XIPMw==}
+  '@opennextjs/aws@3.7.4':
+    resolution: {integrity: sha512-s50dmKrgQ62GliffoI/hGGQVb3q/7ZN5VRa4jJw0ZsEGLfk25XuAulO/ySCYeE7/A23KoAYuhafnKr/h+vxOeQ==}
     hasBin: true
 
-  '@opennextjs/cloudflare@1.6.3':
-    resolution: {integrity: sha512-njP3Dt+RflECy59QaixkQHWhQ2LgNlbv/TC40HmKULo5pRxG1U018ufId61VbE0anxeGFLL7zCsoKojhl7VuqA==}
+  '@opennextjs/cloudflare@1.6.5':
+    resolution: {integrity: sha512-eOoRrslJW/cK5RotFHA8Se/KlKyynOFA29i9jor4cp1JF/AkGSwatUaBNK0oLvqM4nDCq3Bo/HlYRbyc/R/T0w==}
     hasBin: true
     peerDependencies:
       wrangler: ^4.24.4
@@ -3026,25 +3026,25 @@ packages:
   '@ungap/structured-clone@1.3.0':
     resolution: {integrity: sha512-WmoN8qaIAo7WTYWbAZuG8PYEhn5fkz7dZrqTBZ7dtt//lL2Gwms1IcnQ5yHqjDfX8Ft5j4YzDM23f87zBfDe9g==}
 
-  '@unilab/mastra-client-plugin@0.0.10':
-    resolution: {integrity: sha512-JlL6zOYei74uJE8PFKI6PeX1XLEWzNDHMaEK1ijP4teeH7y7YX8Egrrjs9LqFbS7x7tK6wc6Jzo+ZYUYL1kpEA==}
+  '@unilab/mastra-client-plugin@0.0.11':
+    resolution: {integrity: sha512-LzK8T3kgPjdJ0JacPBMZmUKp5p8Fxx8S5q03KGMovBMSV4HUr+E/kcpcdULFbi6qxR2iXr5b1ikOsHHTnrtebg==}
 
-  '@unilab/mastra-plugin@0.0.16':
-    resolution: {integrity: sha512-VfdtGl6XUJzqb8/JoeNqL8pD/mlWOmkgGJS6/GSwxTiFoihQV2QNXjKc6ZuE9P8DH7feDsKW0f2KNGGFlghutQ==}
+  '@unilab/mastra-plugin@0.0.17':
+    resolution: {integrity: sha512-31nCoRBn1eIvwMWmFd2Byqt9aQEspMbt2CQ0oicYL6gUcVCkK4Aag6Mv+edFV4TG0w/2Yt0Q543dOgP+8BkGqQ==}
 
-  '@unilab/urpc-adapters@0.0.18':
-    resolution: {integrity: sha512-W7mqGSZaugZ0HjU8oTlDPbIyymmNWSLMFwzaxL+5+0wi0m6wREMgfetF06NpkRB2KuAM3vKJ1dka3ro0KJ4Mrw==}
+  '@unilab/urpc-adapters@0.0.19':
+    resolution: {integrity: sha512-DFazQ9EV206J0VDAUlpOqTaCSN/z4rYcrKVgJU+WD7k3xSpcaDSMqdAkI41pgLAFTSU7w/oRvFusHN35FBqfIA==}
 
-  '@unilab/urpc-core@0.0.16':
-    resolution: {integrity: sha512-sg++8Gz3ROEpEIQeiR6z7NGw54pi4fU3SifcEGmRMUtqhnKUP/DXGFaWoOF0pRQGji4c4h/WKn3UCwF2Zt97Dg==}
+  '@unilab/urpc-core@0.0.17':
+    resolution: {integrity: sha512-FJphlgATATCD/LYHgiKqN7O7H3FYjBIt46/sFwJx2V6x0VKJ35aL0UoP32PFGCVPcvAzTz8IJOTXXzPmK0Wayw==}
 
-  '@unilab/urpc-next@0.0.21':
-    resolution: {integrity: sha512-QgC3Tai5ZzVQZ7O3zIBOouK96xELQ9nehDqPy0+dd/VXmfEiPFav8wMkIGC4bx1JZ2AKtCHdAXIF643juz8edg==}
+  '@unilab/urpc-next@0.0.22':
+    resolution: {integrity: sha512-2AoxJMNFez33qicbhfEJm2Njl1PD+iV1/liMkhGX0UuPeaNayDL6Qt3sJHSuqdi8UWQEPMZd2TAZeKFlI/z6+Q==}
     peerDependencies:
       next: ^13.0.0 || ^14.0.0
 
-  '@unilab/urpc@0.0.21':
-    resolution: {integrity: sha512-lBYDRBESOY+PrqKwY0cFgYAE0siuJZw/1tpPBiyq4gzpU8F4w6x2TgQ8rPIn48OGSSo9hV5rWGZXAhXY9R+UWA==}
+  '@unilab/urpc@0.0.22':
+    resolution: {integrity: sha512-96k8etLL8hMg03TeICrgIpaHgPVEwf6qi0v9eOWjh4H2wdvT10Pvn+LSW/wP6qTRG7JnKnLfUFSuIVZK/a6zuw==}
 
   '@urql/core@5.2.0':
     resolution: {integrity: sha512-/n0ieD0mvvDnVAXEQgX/7qJiVcvYvNkOHeBvkwtylfjydar123caCXcl58PXFY11oU1oquJocVXHxLAbtv4x1A==}
@@ -6831,7 +6831,7 @@ snapshots:
     dependencies:
       gzip-size: 6.0.0
 
-  '@opennextjs/aws@3.7.2':
+  '@opennextjs/aws@3.7.4':
     dependencies:
       '@ast-grep/napi': 0.35.0
       '@aws-sdk/client-cloudfront': 3.398.0
@@ -6854,10 +6854,10 @@ snapshots:
       - aws-crt
       - supports-color
 
-  '@opennextjs/cloudflare@1.6.3(wrangler@4.27.0)':
+  '@opennextjs/cloudflare@1.6.5(wrangler@4.27.0)':
     dependencies:
       '@dotenvx/dotenvx': 1.31.0
-      '@opennextjs/aws': 3.7.2
+      '@opennextjs/aws': 3.7.4
       cloudflare: 4.5.0
       enquirer: 2.4.1
       glob: 11.0.3
@@ -9385,12 +9385,12 @@ snapshots:
 
   '@ungap/structured-clone@1.3.0': {}
 
-  '@unilab/mastra-client-plugin@0.0.10(ai@4.3.19(react@19.1.0)(zod@3.25.76))(openapi-types@12.1.3)(react@19.1.0)(zod@3.25.76)':
+  '@unilab/mastra-client-plugin@0.0.11(ai@4.3.19(react@19.1.0)(zod@3.25.76))(openapi-types@12.1.3)(react@19.1.0)(zod@3.25.76)':
     dependencies:
       '@mastra/core': 0.10.15(openapi-types@12.1.3)(react@19.1.0)(zod@3.25.76)
       '@openrouter/ai-sdk-provider': 0.7.3(ai@4.3.19(react@19.1.0)(zod@3.25.76))(zod@3.25.76)
-      '@unilab/urpc': 0.0.21
-      '@unilab/urpc-core': 0.0.16
+      '@unilab/urpc': 0.0.22
+      '@unilab/urpc-core': 0.0.17
     transitivePeerDependencies:
       - '@hono/arktype-validator'
       - '@hono/effect-validator'
@@ -9410,11 +9410,11 @@ snapshots:
       - zod
       - zod-openapi
 
-  '@unilab/mastra-plugin@0.0.16(ai@4.3.19(react@19.1.0)(zod@3.25.76))(openapi-types@12.1.3)(react@19.1.0)(zod@3.25.76)':
+  '@unilab/mastra-plugin@0.0.17(ai@4.3.19(react@19.1.0)(zod@3.25.76))(openapi-types@12.1.3)(react@19.1.0)(zod@3.25.76)':
     dependencies:
       '@mastra/core': 0.10.15(openapi-types@12.1.3)(react@19.1.0)(zod@3.25.76)
       '@openrouter/ai-sdk-provider': 0.7.3(ai@4.3.19(react@19.1.0)(zod@3.25.76))(zod@3.25.76)
-      '@unilab/urpc-core': 0.0.16
+      '@unilab/urpc-core': 0.0.17
     transitivePeerDependencies:
       - '@hono/arktype-validator'
       - '@hono/effect-validator'
@@ -9434,22 +9434,22 @@ snapshots:
       - zod
       - zod-openapi
 
-  '@unilab/urpc-adapters@0.0.18':
+  '@unilab/urpc-adapters@0.0.19':
     dependencies:
-      '@unilab/urpc-core': 0.0.16
+      '@unilab/urpc-core': 0.0.17
 
-  '@unilab/urpc-core@0.0.16':
+  '@unilab/urpc-core@0.0.17':
     dependencies:
       reflect-metadata: 0.2.2
 
-  '@unilab/urpc-next@0.0.21(next@15.3.0(@opentelemetry/api@1.9.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))':
+  '@unilab/urpc-next@0.0.22(next@15.3.0(@opentelemetry/api@1.9.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))':
     dependencies:
-      '@unilab/urpc-core': 0.0.16
+      '@unilab/urpc-core': 0.0.17
       next: 15.3.0(@opentelemetry/api@1.9.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
 
-  '@unilab/urpc@0.0.21':
+  '@unilab/urpc@0.0.22':
     dependencies:
-      '@unilab/urpc-core': 0.0.16
+      '@unilab/urpc-core': 0.0.17
 
   '@urql/core@5.2.0(graphql@16.11.0)':
     dependencies:

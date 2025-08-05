@@ -33,8 +33,8 @@ export function auth(options: AuthOptions): Middleware {
 
     let authUser: AuthUser | null = null;
     if (options.getUser) {
-      if (metadata?.honoContext) {
-        authUser = await options.getUser(metadata.honoContext);
+      if (metadata?.honoCtx) {
+        authUser = await options.getUser(metadata.honoCtx);
       }
       if (metadata?.nextApiRequest) {
         authUser = await options.getUser(metadata.nextApiRequest);

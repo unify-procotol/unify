@@ -13,10 +13,7 @@ import type {
 export interface RepoOptions<T extends Record<string, any>> {
   entity: string | { new (...args: any[]): T; displayName?: string };
   source?: string;
-  context?: {
-    lang?: string;
-    stream?: boolean;
-  };
+  context?: { stream?: boolean; } & Record<string, any>;
 }
 
 export interface RelationMapping<
