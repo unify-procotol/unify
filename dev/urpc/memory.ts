@@ -56,7 +56,7 @@ const demo = async () => {
     },
   });
   console.log("User by class:", userByClass);
-  userByClass?.click(" 123 ");
+  userByClass?.click();
   userByClass?.greet(" this is a test message ");
 
   // Query with string - returns JSON data
@@ -73,12 +73,12 @@ const demo = async () => {
 
 demo();
 
-// HTTP客户端模式的使用示例
+// HTTP client mode usage example
 const httpDemo = async () => {
-  // 在HTTP模式下，数据通过HTTP API获取
+  // In HTTP mode, data is obtained through HTTP API
   const users = await repo<UserEntity>({
     entity: "user",
-    source: "api-mock", // 可选，传给后端API
+    source: "api-mock", // Optional, passed to backend API
   }).findMany({
     where: {
       id: "1",
@@ -91,7 +91,6 @@ const httpDemo = async () => {
 httpDemo();
 
 // const allEntities = await repo({
-//   entity: "schema",
-//   source: "_global",
+//   entity: "_schema",
 // }).findMany();
 // console.log("All entities:", JSON.stringify(allEntities, null, 2));
