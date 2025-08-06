@@ -1,7 +1,7 @@
 {
   "name": "@unilab/pg-plugin",
   "version": "0.0.1",
-  "description": "Unified source plugins for pg",
+  "description": "A URPC plugin for PostgreSQL",
   "main": "dist/index.js",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -15,8 +15,9 @@
     "prepublishOnly": "bun run build"
   },
   "keywords": [
-    "pg",
-    "plugin"
+    "PostgreSQL",
+    "plugin",
+    "urpc"
   ],
   "dependencies": {
     "@unilab/urpc-core": "^0.0.17",

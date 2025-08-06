@@ -25,3 +25,10 @@ export interface PoolManagerConfig extends PoolConfig {
   enableMonitoring?: boolean; // Whether to enable monitoring, default true
   logLevel?: "debug" | "info" | "warn" | "error";
 }
+
+export interface EntityConfig {
+  [key: string]: {
+    schema: string;
+    table: string;
+  };
+}

@@ -7,27 +7,25 @@ const app = URPC.init({
     await PGPlugin({
       poolConfig: {
         connectionString: process.env.DATABASE_URL!,
-        max: 10,
-        min: 2,
-        idleTimeoutMillis: 30000,
-        connectionTimeoutMillis: 5000,
-        healthCheckInterval: 60000,
-        enableMonitoring: true,
-        logLevel: "debug",
+        // max: 10,
+        // min: 2,
+        // idleTimeoutMillis: 30000,
+        // connectionTimeoutMillis: 5000,
+        // healthCheckInterval: 60000,
+        // enableMonitoring: true,
+        // logLevel: "debug",
       },
       entity: {
         user: {
           schema: "public",
           table: "user",
-          fields: ["id", "name", "email", "image", "role"],
         },
-        navList: {
+        likeCount: {
           schema: "public",
-          table: "nav_list",
-          fields: ["id", "title", "url", "image", "description", "tag", "done"],
+          table: "like_count_view",
         },
       },
-      needGenerateEntityFile: true,
+      // needGenerateEntityFile: true,
     }),
   ],
   middlewares: [logging()],

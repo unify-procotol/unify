@@ -16,7 +16,6 @@ export class PoolManager {
 
   constructor(config: PoolManagerConfig) {
     this.config = {
-      // Default configuration
       max: 20,
       min: 2,
       idleTimeoutMillis: 30000,
@@ -36,7 +35,6 @@ export class PoolManager {
   }
 
   private setupEventHandlers(): void {
-    // Connection success event
     this.pool.on("connect", (client: PoolClient) => {
       this.stats.totalConnections++;
       this.log(
@@ -70,7 +68,6 @@ export class PoolManager {
       );
     });
 
-    // Error event
     this.pool.on("error", (err: Error, client: PoolClient) => {
       this.stats.totalErrors++;
       this.recordError(err.message, "pool");
@@ -238,7 +235,6 @@ export class PoolManager {
     }
   }
 
-  // Graceful shutdown, wait for all active connections to complete
   async gracefulShutdown(timeoutMs: number = 10000): Promise<void> {
     this.log("info", "Initiating graceful shutdown...");
 
@@ -270,7 +266,6 @@ export class PoolManager {
   }
 }
 
-// Singleton pattern global connection pool manager
 class GlobalPoolManager {
   private static instance: PoolManager | null = null;
   private static config: PoolManagerConfig | null = null;

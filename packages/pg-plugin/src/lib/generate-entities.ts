@@ -2,7 +2,7 @@ import * as fs from "fs";
 import * as path from "path";
 import { PoolManager, GlobalPoolManager } from "./pool-manager";
 import { PgAdapter } from "../adapters/pg-adapter";
-import { PoolManagerConfig } from "../type";
+import { EntityConfig, PoolManagerConfig } from "../type";
 import { simplifyEntityName } from "@unilab/urpc-core";
 
 interface TableColumn {
@@ -64,11 +64,6 @@ async function generateEntityFile({
     return;
   }
 
-  // Filter columns based on requested fields if provided
-  const filteredColumns = requestedFields
-    ? columns.filter((col) => requestedFields.includes(col.column_name))
-    : columns;
-
   let entityContent = `import { Fields } from "@unilab/urpc-core";
   
 export class ${entityClassName} {
@@ -77,10 +72,10 @@ export class ${entityClassName} {
 `;
 
   // Generate field properties with appropriate decorators
-  for (const column of filteredColumns) {
+  for (const column of columns) {
     const fieldType = mapPostgresToFieldType(column.data_type);
 
-    if (fieldType != "any") {
+    if (fieldType != "any" && fieldType != "date") {
       const isOptional = column.is_nullable === "YES";
       const description = `The ${column.column_name} of the ${entityName}`;
 
@@ -93,15 +88,20 @@ export class ${entityClassName} {
       }
     }
 
-    entityContent += `
-  ${
-    fieldType === "any"
-      ? `${column.column_name}: any`
-      : `})
-  ${column.column_name} = ${getDefaultValue(column, fieldType)};`
-  }
-  
+    if (fieldType === "any") {
+      entityContent += `
+  ${column.column_name}: any;\n
 `;
+    } else if (fieldType === "date") {
+      entityContent += `
+  ${column.column_name}: Date = new Date();\n
+`;
+    } else {
+      entityContent += `
+  })
+  ${column.column_name} = ${getDefaultValue(column, fieldType)};\n
+`;
+    }
   }
 
   entityContent += `}`;
@@ -111,7 +111,7 @@ export class ${entityClassName} {
 
 function mapPostgresToFieldType(
   pgType: string
-): "string" | "number" | "boolean" | "any" {
+): "string" | "number" | "boolean" | "any" | "date" {
   switch (pgType.toLowerCase()) {
     case "integer":
     case "bigint":
@@ -127,6 +127,7 @@ function mapPostgresToFieldType(
     case "jsonb":
       return "any";
     case "date":
+      return "date";
     case "timestamp":
     case "timestamp with time zone":
     case "timestamp without time zone":
@@ -160,13 +161,7 @@ export const connect = async ({
   needGenerateEntityFile = false,
 }: {
   poolConfig: PoolManagerConfig;
-  entity: {
-    [key: string]: {
-      schema: string;
-      table: string;
-      fields: string[];
-    };
-  };
+  entity: EntityConfig;
   needGenerateEntityFile?: boolean;
 }) => {
   // Initialize the global pool manager
@@ -199,9 +194,9 @@ export const connect = async ({
         config.table
       );
 
-      const entityClassName = `${entityName
-        .charAt(0)
-        .toUpperCase()}${entityName.slice(1)}Entity`;
+      const entityClassName = `${entityName.charAt(0).toUpperCase()}${entityName
+        .replace("Entity", "")
+        .slice(1)}Entity`;
 
       // Generate entity class file only if needGenerateEntityFile is true
       if (needGenerateEntityFile) {
@@ -209,7 +204,6 @@ export const connect = async ({
           entityName,
           entityClassName,
           columns,
-          requestedFields: config.fields,
         });
       }
 
@@ -236,7 +230,6 @@ export const connect = async ({
     );
   };
 
-  // Return pool manager for monitoring and graceful shutdown
   return {
     entities,
     factory,

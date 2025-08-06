@@ -1,5 +1,5 @@
 import { connect } from "./lib/generate-entities";
-import { PoolManagerConfig } from "./type";
+import { EntityConfig, PoolManagerConfig } from "./type";
 import { Plugin } from "@unilab/urpc-core";
 
 export const PGPlugin = async ({
@@ -8,19 +8,13 @@ export const PGPlugin = async ({
   needGenerateEntityFile = false,
 }: {
   poolConfig: PoolManagerConfig;
-  entity: {
-    [key: string]: {
-      schema: string;
-      table: string;
-      fields: string[];
-    };
-  };
+  entity: EntityConfig;
   needGenerateEntityFile?: boolean;
 }): Promise<Plugin> => {
   const { entities, factory } = await connect({
+    poolConfig,
     entity,
     needGenerateEntityFile,
-    poolConfig,
   });
 
   return {

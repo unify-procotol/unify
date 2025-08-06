@@ -1,5 +1,4 @@
 import { repo, URPC } from "@unilab/urpc";
-import { UserEntity } from "./entities/user";
 
 URPC.init({
   baseUrl: "http://localhost:9000",
@@ -7,27 +6,23 @@ URPC.init({
 });
 
 const demo = async () => {
-  // const user = await repo<UserEntity>({
-  //   entity: "user",
-  //   source: "pg",
-  // }).findOne({
-  //   where: {
-  //     id: "7TauFwKdrOWNrErouqzalMcJaPuAkDyh",
-  //   },
-  // });
-  // console.log("user=>", user);
-
-  const navList = await repo({
-    entity: "navList",
+  const user = await repo({
+    entity: "user",
     source: "pg",
-  }).findMany({
-    // where: {
-    //   id: 1
-    // },
-    limit: 2,
+  }).findOne({
+    where: {
+      id: "7TauFwKdrOWNrErouqzalMcJaPuAkDyh",
+    },
   });
+  console.log("user=>", user);
 
-  console.log("navList=>", navList);
+  // const likeCount = await repo({
+  //   entity: "likeCount",
+  //   source: "pg",
+  // }).findMany({
+  //   limit: 2,
+  // });
+  // console.log("likeCount=>", likeCount);
 };
 
 demo();
