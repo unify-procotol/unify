@@ -1,6 +1,8 @@
 import { Fields } from "@unilab/urpc-core";
   
 export class NavListEntity {
+  static displayName = "NavListEntity";
+
   @Fields.number({
     description: "The id of the navList",
     optional: true,

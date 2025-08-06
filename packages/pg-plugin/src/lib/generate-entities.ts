@@ -45,39 +45,6 @@ async function generateEntityFile({
   columns: TableColumn[];
   requestedFields?: string[];
 }): Promise<void> {
-  // Filter columns based on requested fields if provided
-  const filteredColumns = requestedFields
-    ? columns.filter((col) => requestedFields.includes(col.column_name))
-    : columns;
-
-  let entityContent = `import { Fields } from "@unilab/urpc-core";
-  
-export class ${entityClassName} {
-`;
-
-  // Generate field properties with appropriate decorators
-  for (const column of filteredColumns) {
-    const fieldType = mapPostgresToFieldType(column.data_type);
-    const isOptional = column.is_nullable === "YES";
-    const description = `The ${column.column_name} of the ${entityName}`;
-
-    entityContent += `  @Fields.${fieldType}({
-    description: "${description}",`;
-
-    if (isOptional) {
-      entityContent += `
-    optional: true,`;
-    }
-
-    entityContent += `
-  })
-  ${column.column_name} = ${getDefaultValue(column, fieldType)};
-  
-`;
-  }
-
-  entityContent += `}`;
-
   // Write entity file to entities directory
   const entitiesDir = path.join(process.cwd(), "entities");
 
@@ -86,20 +53,65 @@ export class ${entityClassName} {
     fs.mkdirSync(entitiesDir, { recursive: true });
   }
 
-  const filePath = path.join(entitiesDir, `${entityName}.ts`);
+  const filePath = path.join(
+    entitiesDir,
+    `${entityName.replace(/([A-Z])/g, "-$1").toLowerCase()}.ts`
+  );
 
   // Check if entity file already exists
   if (fs.existsSync(filePath)) {
-    console.log(
-      `Entity file ${entityName}.ts already exists, skipping generation.`
-    );
+    console.log(`Entity file ${filePath} already exists, skipping generation.`);
     return;
   }
+
+  // Filter columns based on requested fields if provided
+  const filteredColumns = requestedFields
+    ? columns.filter((col) => requestedFields.includes(col.column_name))
+    : columns;
+
+  let entityContent = `import { Fields } from "@unilab/urpc-core";
+  
+export class ${entityClassName} {
+  static displayName = "${entityClassName}";
+
+`;
+
+  // Generate field properties with appropriate decorators
+  for (const column of filteredColumns) {
+    const fieldType = mapPostgresToFieldType(column.data_type);
+
+    if (fieldType != "any") {
+      const isOptional = column.is_nullable === "YES";
+      const description = `The ${column.column_name} of the ${entityName}`;
+
+      entityContent += `  @Fields.${fieldType}({
+    description: "${description}",`;
+
+      if (isOptional) {
+        entityContent += `
+    optional: true,`;
+      }
+    }
+
+    entityContent += `
+  ${
+    fieldType === "any"
+      ? `${column.column_name}: any`
+      : `})
+  ${column.column_name} = ${getDefaultValue(column, fieldType)};`
+  }
+  
+`;
+  }
+
+  entityContent += `}`;
 
   fs.writeFileSync(filePath, entityContent);
 }
 
-function mapPostgresToFieldType(pgType: string): string {
+function mapPostgresToFieldType(
+  pgType: string
+): "string" | "number" | "boolean" | "any" {
   switch (pgType.toLowerCase()) {
     case "integer":
     case "bigint":
@@ -111,6 +123,9 @@ function mapPostgresToFieldType(pgType: string): string {
       return "number";
     case "boolean":
       return "boolean";
+    case "json":
+    case "jsonb":
+      return "any";
     case "date":
     case "timestamp":
     case "timestamp with time zone":

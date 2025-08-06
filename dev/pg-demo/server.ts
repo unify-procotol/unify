@@ -30,7 +30,7 @@ const app = URPC.init({
       needGenerateEntityFile: true,
     }),
   ],
-  // middlewares: [logging()],
+  middlewares: [logging()],
 });
 
 export default {
