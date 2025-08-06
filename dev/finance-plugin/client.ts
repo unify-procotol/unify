@@ -15,10 +15,19 @@ URPC.init({
 // });
 // console.log("stock=>", stock);
 
+// const stock = await repo<StockEntity>({
+//   entity: "stock",
+// }).findMany({
+//   where: {
+//     ticker: "TSLA",
+//   },
+//   limit: 10,
+// });
+// console.log("stock=>", stock);
 
 const company = await repo<CompanyEntity>({
   entity: "company",
-}).findCompanies({
+}).findMany({
   where: {
     name: "Apple",
   },

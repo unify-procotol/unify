@@ -1,6 +1,7 @@
 import {
   BaseAdapter,
   ErrorCodes,
+  FindManyArgs,
   FindOneArgs,
   URPCError,
 } from "@unilab/urpc-core";
@@ -9,18 +10,24 @@ import { StockEntity } from "../entities/stock";
 export class SeekingAlphaAdapter extends BaseAdapter<StockEntity> {
   static displayName = "SeekingAlphaAdapter";
 
-  async findTickers(args: FindOneArgs<StockEntity>): Promise<StockEntity[]> {
-    const { ticker, size = 5 } = args.where;
-    if (!process.env.RAPID_API_KEY) {
-      throw new URPCError(ErrorCodes.BAD_REQUEST, "RAPID_API_KEY is not set");
+  async findMany(args: FindManyArgs<StockEntity>): Promise<StockEntity[]> {
+    const where = args.where;
+    
+    if (!where?.ticker) {
+      throw new URPCError(ErrorCodes.BAD_REQUEST, "ticker is required");
     }
 
+    const ticker = typeof where.ticker === "string" ? where.ticker : where.ticker.$eq;
     if (!ticker) {
       throw new URPCError(ErrorCodes.BAD_REQUEST, "ticker is required");
     }
 
+    if (!process.env.RAPID_API_KEY) {
+      throw new URPCError(ErrorCodes.BAD_REQUEST, "RAPID_API_KEY is not set");
+    }
+
     const tickers = await fetch(
-      `https://seeking-alpha.p.rapidapi.com/v2/auto-complete?query=${ticker}&type=symbols&size=${size}`,
+      `https://seeking-alpha.p.rapidapi.com/v2/auto-complete?query=${ticker}&type=symbols&size=${args.limit}`,
       {
         headers: {
           "X-RapidAPI-Key": process.env.RAPID_API_KEY,

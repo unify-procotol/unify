@@ -46,5 +46,5 @@ export class StockEntity {
   @Fields.string({
     description: "The market cap of the stock",
   })
-  marketCap = "";
+  marketCap?: string;
 }
