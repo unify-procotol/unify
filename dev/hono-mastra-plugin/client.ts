@@ -40,11 +40,11 @@ const testAgent = async () => {
   const result = await repo<ChatEntity>({
     entity: "chat",
     source: "mastra",
-    // context: {
-    //   // stream: true,
-    //   // summary: true,
-    //   // analysis: true,
-    // },
+    context: {
+      // stream: true,
+      // summary: true,
+      // analysis: true,
+    },
   }).call({
     entities: ["UserEntity"], // ["WeatherEntity", "GeocodingEntity"],
     input: "Find all users",

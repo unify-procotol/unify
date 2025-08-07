@@ -122,7 +122,6 @@ export default function UrpcAgent() {
           selectedModel === "google/gemini-2.0-flash-001"
             ? undefined
             : selectedModel,
-        agent: "l1",
         entities: ["UserEntity", "PostEntity"],
       });
 

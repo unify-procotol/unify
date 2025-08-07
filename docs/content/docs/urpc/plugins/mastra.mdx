@@ -15,7 +15,8 @@ description: The Mastra Plugin integrates AI-powered natural language processing
 
 ```typescript
 import { URPC } from "@unilab/urpc-hono";
-import { MastraPlugin } from "@unilab/mastra-plugin/hono";
+import { MastraPlugin } from "@unilab/mastra-plugin";
+import { getMastraInstance } from "@unilab/mastra-plugin/agents";
 import { UserEntity } from "./entities/user";
 import { UserAdapter } from "./adapters/user";
 
@@ -34,15 +35,12 @@ const app = URPC.init({
   plugins: [
     MyPlugin,
     MastraPlugin({
-      agents: {
-        "l1": new URPCSimpleAgent({
-          URPC,
-          defaultModel: "google/gemini-2.0-flash-001",
-          openrouterApiKey: process.env.OPENROUTER_API_KEY,
-          debug: false,
-        }),
-      },
-      defaultAgent: "l1",
+      mastraInstance: getMastraInstance({
+        URPC,
+        openrouterApiKey: process.env.OPENROUTER_API_KEY!,
+        // debug: true,
+      }),
+      defaultAgent: "urpcSimpleAgent",
     }),
   ],
 });
@@ -74,8 +72,8 @@ const chatWithAI = async () => {
   }).call({
     input: "Find all users with email containing 'example.com'",
     model: "google/gemini-2.0-flash-001",
-    agent: "l1",
     entities: ["UserEntity"],
+    // agent: "urpcSimpleAgent",
   });
 
   console.log(result.output);
@@ -89,7 +87,6 @@ const chatWithAIProxy = async () => {
   }).call({
     input: "Find all users with email containing 'example.com'",
     model: "google/gemini-2.0-flash-001",
-    agent: "l1",
     entities: ["UserEntity"],
   });
   console.log(result.output);

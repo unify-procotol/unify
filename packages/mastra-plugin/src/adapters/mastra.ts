@@ -119,6 +119,24 @@ export class MastraAdapter extends BaseAdapter<ChatEntity> {
         });
       }
 
+      if (ctx.nextRequest) {
+        const readableStream: ReadableStream<any> = await streamResponse({
+          input,
+          proxy,
+          agent,
+          runtimeContext: this.runtimeContext,
+          mastraInstance: this.mastraInstance,
+          summary: ctx.summary,
+        });
+        return new Response(readableStream, {
+          headers: {
+            "Content-Type": "text/event-stream",
+            "Cache-Control": "no-cache",
+            Connection: "keep-alive",
+          },
+        });
+      }
+
       throw new URPCError(ErrorCodes.BAD_REQUEST, "stream is not supported");
     }
   }
