@@ -6,7 +6,7 @@ import { MastraPlugin } from "@unilab/mastra-plugin";
 import { MockAdapter } from "@unilab/urpc-adapters";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
-import { URPCSimpleAgent } from "@unilab/mastra-plugin/agents";
+import { getMastraInstance } from "@unilab/mastra-plugin/agents";
 import { GeocodingEntity, GeocodingQueryResult } from "./entities/geocoding";
 import { GeocodingAdapter } from "./adapters/open-meteo-geocoding";
 import {
@@ -83,20 +83,25 @@ URPC.init({
     WeatherPlugin,
     Web3Plugin,
     MastraPlugin({
-      agents: {
-        l1: new URPCSimpleAgent({
-          URPC,
-          defaultModel: "google/gemini-2.0-flash-001",
-          openrouterApiKey: process.env.OPENROUTER_API_KEY,
-          debug: true,
-        }),
-      },
-      defaultAgent: "l1",
+      mastraInstance: getMastraInstance({
+        URPC,
+        openrouterApiKey: process.env.OPENROUTER_API_KEY!,
+        debug: true,
+      }),
+      defaultAgent: "urpcSimpleAgent",
     }),
   ],
   entityConfigs: {
     user: {
       defaultSource: "mock",
+      initData: [
+        {
+          id: "1",
+          name: "John Doe",
+          email: "john.doe@example.com",
+          avatar: "https://example.com/avatar.png",
+        },
+      ],
     },
     geocoding: {
       defaultSource: "open-meteo",
@@ -111,19 +116,6 @@ URPC.init({
       factory: () => new MockAdapter(),
     },
   ],
-});
-
-// insert user
-URPC.repo({
-  entity: "UserEntity",
-  source: "mock",
-}).create({
-  data: {
-    id: "1",
-    name: "John Doe",
-    email: "john.doe@example.com",
-    avatar: "https://example.com/avatar.png",
-  },
 });
 
 export default {
