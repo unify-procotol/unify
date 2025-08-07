@@ -3,8 +3,6 @@ import { ChatEntity } from "./entities/chat";
 import { MastraAdapter } from "./adapters/mastra";
 import { MastraPluginOptions } from "./type";
 
-export { AgentInterface } from "./type";
-
 export { convertSchemaToMarkdown } from "./utils/entity-schema-to-markdown";
 export { convertEntitySourcesToMarkdown } from "./utils/entity-source-to-markdown";
 

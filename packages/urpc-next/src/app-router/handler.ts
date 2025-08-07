@@ -13,7 +13,7 @@ import {
 type RouteHandler = (
   request: NextRequest,
   context: { params: Promise<{ urpc: string[] }> }
-) => Promise<NextResponse>;
+) => Promise<NextResponse | Response>;
 
 export interface URPCAPI {
   GET: RouteHandler;
@@ -46,7 +46,7 @@ export class URPC extends BaseURPC {
   static async handler(
     request: NextRequest,
     { params }: { params: Promise<{ urpc: string[] }> }
-  ): Promise<NextResponse> {
+  ): Promise<NextResponse | Response> {
     try {
       const resolvedParams = await URPC.resolveParams(params);
       const [entity, funcName] = resolvedParams.urpc;
@@ -103,6 +103,9 @@ export class URPC extends BaseURPC {
       // custom method
       const body: any = await request.json();
       const result = await repo.customMethod(funcName, body, metadata);
+      if (result instanceof Response) {
+        return result;
+      }
       return NextResponse.json({ data: result }, { status: 200 });
     } catch (error) {
       return handleError(error);

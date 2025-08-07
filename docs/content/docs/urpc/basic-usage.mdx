@@ -7,22 +7,10 @@ description: Learn how to set up URPC with plugins and middleware
 
 Get started with URPC in seconds using our CLI tool:
 
-<Tabs items={['npm', 'yarn', 'bun']}>
-  <Tab>
-    ```bash
-    npx @unilab/urpc-cli create my-project
-    ```
-  </Tab>
-  <Tab>
-    ```bash
-    yarn create @unilab/urpc-cli my-project
-    ```
-  </Tab>
-  <Tab>
-    ```bash
-    bunx @unilab/urpc-cli create my-project
-    ```
-  </Tab>
+<Tabs items={["npm", "yarn", "bun"]}>
+  <Tab>```bash npx @unilab/urpc-cli create my-project ```</Tab>
+  <Tab>```bash yarn create @unilab/urpc-cli my-project ```</Tab>
+  <Tab>```bash bunx @unilab/urpc-cli create my-project ```</Tab>
 </Tabs>
 
 ## Manual Setup
@@ -37,7 +25,8 @@ Get started with URPC in seconds using our CLI tool:
 
 ```typescript
 import { URPC } from "@unilab/urpc-hono";
-import { MastraPlugin } from "@unilab/mastra-plugin/hono";
+import { MastraPlugin } from "@unilab/mastra-plugin";
+import { getMastraInstance } from "@unilab/mastra-plugin/agents";
 import { logging } from "@unilab/urpc-core/middleware";
 import { MockAdapter } from "@unilab/urpc-adapters";
 import { UserEntity } from "./entities/user";
@@ -50,7 +39,12 @@ const app = URPC.init({
   plugins: [
     MyPlugin,
     MastraPlugin({
-      openrouterApiKey: process.env.OPENROUTER_API_KEY,
+      mastraInstance: getMastraInstance({
+        URPC,
+        openrouterApiKey: process.env.OPENROUTER_API_KEY!,
+        // debug: true,
+      }),
+      defaultAgent: "urpcSimpleAgent",
     }),
   ],
   middlewares: [logging()],

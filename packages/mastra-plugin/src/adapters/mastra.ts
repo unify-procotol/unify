@@ -5,33 +5,44 @@ import {
   URPCError,
 } from "@unilab/urpc-core";
 import { ChatEntity } from "../entities/chat";
-import { AgentInterface, MastraPluginOptions } from "../type";
+import { MastraPluginOptions, URPCAgentRuntimeContext } from "../type";
+import { Mastra } from "@mastra/core";
+import { RuntimeContext } from "@mastra/core/runtime-context";
+import {
+  getEntityInfo,
+  processRequest,
+  streamResponse,
+} from "../agents/mastra";
 
 export class MastraAdapter extends BaseAdapter<ChatEntity> {
   static displayName = "MastraAdapter";
-  private agentInstances: Map<string, AgentInterface>;
-  private defaultAgent: string;
+  private mastraInstance: Mastra;
+  private runtimeContext: RuntimeContext;
 
   constructor(options: MastraPluginOptions) {
     super();
-    this.agentInstances = new Map(Object.entries(options.agents));
-    this.defaultAgent = options.defaultAgent || "l1";
+    this.mastraInstance = options.mastraInstance;
+    this.runtimeContext = new RuntimeContext<URPCAgentRuntimeContext>();
   }
 
-  private getAgent(agentName?: string): AgentInterface {
-    const targetAgentName = agentName || this.defaultAgent;
-    const agentInstance = this.agentInstances.get(targetAgentName);
-    if (!agentInstance) {
+  private getAgent(agentName?: string) {
+    const targetAgentName = agentName || this.defaultAgent || "urpcSimpleAgent";
+
+    try {
+      const agent = this.mastraInstance.getAgent(targetAgentName);
+      if (!agent) {
+        throw new URPCError(
+          ErrorCodes.BAD_REQUEST,
+          `Agent "${targetAgentName}" not found.`
+        );
+      }
+      return agent;
+    } catch (error) {
       throw new URPCError(
         ErrorCodes.BAD_REQUEST,
-        `Agent "${targetAgentName}" not found. Available agents: ${
-          this.options.agents
-            ? Object.keys(this.options.agents).join(", ")
-            : "none"
-        }`
+        `Agent "${targetAgentName}" not found.`
       );
     }
-    return agentInstance;
   }
 
   async call(
@@ -55,34 +66,31 @@ export class MastraAdapter extends BaseAdapter<ChatEntity> {
 
     const agent = this.getAgent(agentName);
 
-    if (!agent.streamResponse) {
-      throw new URPCError(
-        ErrorCodes.BAD_REQUEST,
-        "Agent does not support stream response"
-      );
-    }
-
     if (!ctx.stream) {
       if (proxy) {
-        if (
-          agent.setProxyConfig &&
-          entitySchemas &&
-          entitySources &&
-          entityConfigs
-        ) {
-          agent.setProxyConfig({
-            entitySchemas,
-            entitySources,
-            entityConfigs,
-          });
+        if (entitySchemas && entitySources && entityConfigs) {
+          this.runtimeContext.set("entity-schemas", entitySchemas);
+          this.runtimeContext.set("entity-sources", entitySources);
+          this.runtimeContext.set("entity-configs", entityConfigs);
         }
+      } else {
+        const entityInfo = getEntityInfo(entities);
+        this.runtimeContext.set("entity-schemas", entityInfo.entitySchemas);
+        this.runtimeContext.set("entity-sources", entityInfo.entitySources);
+        this.runtimeContext.set("entity-configs", entityInfo.entityConfigs);
       }
 
-      const output = await agent.processRequest({
+      if (model) {
+        this.runtimeContext.set("model", model);
+      }
+
+      const output = await processRequest({
         input,
-        model,
         proxy,
-        entities,
+        agent,
+        runtimeContext: this.runtimeContext,
+        mastraInstance: this.mastraInstance,
+        summary: ctx.summary,
       });
 
       return {
@@ -93,13 +101,14 @@ export class MastraAdapter extends BaseAdapter<ChatEntity> {
       if (ctx.honoCtx) {
         const { stream } = await import("hono/streaming");
         return stream(ctx.honoCtx, async (stream) => {
-          const readableStream: ReadableStream<any> =
-            await agent.streamResponse?.({
-              input,
-              model,
-              proxy,
-              entities,
-            });
+          const readableStream: ReadableStream<any> = await streamResponse({
+            input,
+            proxy,
+            agent,
+            runtimeContext: this.runtimeContext,
+            mastraInstance: this.mastraInstance,
+            summary: ctx.summary,
+          });
           const reader = readableStream.getReader();
           while (true) {
             const { done, value } = await reader.read();
@@ -107,6 +116,24 @@ export class MastraAdapter extends BaseAdapter<ChatEntity> {
             await stream.write(value);
           }
           await stream.close();
+        });
+      }
+
+      if (ctx.nextRequest) {
+        const readableStream: ReadableStream<any> = await streamResponse({
+          input,
+          proxy,
+          agent,
+          runtimeContext: this.runtimeContext,
+          mastraInstance: this.mastraInstance,
+          summary: ctx.summary,
+        });
+        return new Response(readableStream, {
+          headers: {
+            "Content-Type": "text/event-stream",
+            "Cache-Control": "no-cache",
+            Connection: "keep-alive",
+          },
         });
       }
 

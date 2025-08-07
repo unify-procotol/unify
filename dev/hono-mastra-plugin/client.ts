@@ -41,10 +41,12 @@ const testAgent = async () => {
     entity: "chat",
     source: "mastra",
     context: {
-      stream: true,
+      // stream: true,
+      // summary: true,
+      // analysis: true,
     },
   }).call({
-    entities: ["UserEntity"], // ["WeatherEntity", "UserEntity", "GeocodingEntity"],
+    entities: ["UserEntity"], // ["WeatherEntity", "GeocodingEntity"],
     input: "Find all users",
     // input: "What are the coordinates of London?",
     // input: "What's the weather like in London?",
