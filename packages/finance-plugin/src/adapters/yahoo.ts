@@ -1,7 +1,7 @@
 import {
   BaseAdapter,
   ErrorCodes,
-  FindOneArgs,
+  FindManyArgs,
   URPCError,
 } from "@unilab/urpc-core";
 import { StockEntity } from "../entities/stock";
@@ -9,15 +9,20 @@ import { StockEntity } from "../entities/stock";
 export class YahooAdapter extends BaseAdapter<StockEntity> {
   static displayName = "YahooAdapter";
 
-  async findOne(args: FindOneArgs<StockEntity>): Promise<StockEntity | null> {
-    const { ticker } = args.where;
+  async findMany(args: FindManyArgs<StockEntity>): Promise<StockEntity[]> {
+    const where = args.where;
+    
+    if (!where?.ticker) {
+      throw new URPCError(ErrorCodes.BAD_REQUEST, "ticker is required");
+    }
+
+    const ticker = typeof where.ticker === "string" ? where.ticker : where.ticker.$eq;
+    if (!ticker) {
+      throw new URPCError(ErrorCodes.BAD_REQUEST, "ticker is required");
+    }
 
     if (!process.env.RAPID_API_KEY) {
       throw new URPCError(ErrorCodes.BAD_REQUEST, "RAPID_API_KEY is not set");
-    }
-
-    if (!ticker) {
-      throw new URPCError(ErrorCodes.BAD_REQUEST, "ticker is required");
     }
 
     const [realTimeQuote, snapshotsQuote] = await Promise.all([
@@ -45,7 +50,7 @@ export class YahooAdapter extends BaseAdapter<StockEntity> {
       throw new URPCError(ErrorCodes.BAD_REQUEST, "No data found");
     }
     const [data] = snapshotsQuote?.body;
-    return {
+    return [{
       ticker,
       price: primaryData.lastSalePrice.toString(),
       open: data.regularMarketOpen.toString(),
@@ -54,6 +59,6 @@ export class YahooAdapter extends BaseAdapter<StockEntity> {
       lastTradingTime: data?.regularMarketTime,
       previousClose: data?.regularMarketPreviousClose.toString(),
       marketCap: data?.marketCap.toString(),
-    };
+    }];
   }
 }
