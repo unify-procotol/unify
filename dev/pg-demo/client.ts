@@ -6,23 +6,23 @@ URPC.init({
 });
 
 const demo = async () => {
-  const user = await repo({
-    entity: "user",
-    source: "pg",
-  }).findOne({
-    where: {
-      id: "7TauFwKdrOWNrErouqzalMcJaPuAkDyh",
-    },
-  });
-  console.log("user=>", user);
-
-  // const likeCount = await repo({
-  //   entity: "likeCount",
+  // const user = await repo({
+  //   entity: "user",
   //   source: "pg",
-  // }).findMany({
-  //   limit: 2,
+  // }).findOne({
+  //   where: {
+  //     id: "7TauFwKdrOWNrErouqzalMcJaPuAkDyh",
+  //   },
   // });
-  // console.log("likeCount=>", likeCount);
+  // console.log("user=>", user);
+
+  const likeCount = await repo({
+    entity: "likeCount",
+    source: "pg",
+  }).findMany({
+    limit: 2,
+  });
+  console.log("likeCount=>", likeCount);
 };
 
 demo();

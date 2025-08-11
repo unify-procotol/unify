@@ -1,8 +1,10 @@
 import {
   BaseAdapter,
+  ErrorCodes,
   FindManyArgs,
   FindOneArgs,
   OperationContext,
+  URPCError,
 } from "@unilab/urpc-core";
 import { PostEntity } from "../entities/post";
 
@@ -44,6 +46,9 @@ export class GhostAdapter extends BaseAdapter<PostEntity> {
   async call(args: any, ctx?: OperationContext): Promise<any> {
     console.log("args=>", args);
     console.log("ctx?.user=>", ctx?.user);
+    if (!ctx?.user) {
+      throw new URPCError(ErrorCodes.UNAUTHORIZED, "Unauthorized");
+    }
     return "Hello World";
   }
 }

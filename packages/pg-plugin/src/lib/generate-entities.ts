@@ -34,6 +34,32 @@ async function getTableColumns(
   return result.rows;
 }
 
+interface DatabaseView {
+  table_schema: string;
+  table_name: string;
+}
+
+async function getAllViews(poolManager: PoolManager): Promise<DatabaseView[]> {
+  const query = `
+    SELECT 
+      table_schema,
+      table_name
+    FROM information_schema.views
+    WHERE table_schema NOT IN ('information_schema', 'pg_catalog')
+    ORDER BY table_schema, table_name;
+  `;
+
+  const result = await poolManager.query(query);
+  return result.rows;
+}
+
+function toCamelCase(str: string): string {
+  return str
+    .toLowerCase()
+    .replace(/_([a-z])/g, (_, letter) => letter.toUpperCase())
+    .replace(/^[a-z]/, (letter) => letter.toUpperCase());
+}
+
 async function generateEntityFile({
   entityName,
   entityClassName,
@@ -53,6 +79,7 @@ async function generateEntityFile({
     fs.mkdirSync(entitiesDir, { recursive: true });
   }
 
+  entityName = entityName.charAt(0).toLowerCase() + entityName.slice(1);
   const filePath = path.join(
     entitiesDir,
     `${entityName.replace(/([A-Z])/g, "-$1").toLowerCase()}.ts`
@@ -161,7 +188,7 @@ export const connect = async ({
   needGenerateEntityFile = false,
 }: {
   poolConfig: PoolManagerConfig;
-  entity: EntityConfig;
+  entity?: EntityConfig;
   needGenerateEntityFile?: boolean;
 }) => {
   // Initialize the global pool manager
@@ -184,22 +211,48 @@ export const connect = async ({
 
   const entities: string[] = [];
 
-  // Process each entity configuration
-  for (const [entityName, config] of Object.entries(entity)) {
-    try {
-      // Get table structure from database
-      const columns = await getTableColumns(
-        poolManager,
-        config.schema,
-        config.table
-      );
+  let entityConfig = entity;
 
+  // If no entity configuration is provided, automatically use all database views
+  if (!entityConfig || Object.keys(entityConfig).length === 0) {
+    console.log(
+      "No entity configuration provided, auto-generating from database views..."
+    );
+    const views = await getAllViews(poolManager);
+
+    entityConfig = views.reduce((acc, view) => {
+      const entityName = toCamelCase(
+        view.table_name.toLowerCase().replace("_view", "")
+      );
+      acc[entityName] = {
+        schema: view.table_schema,
+        table: view.table_name,
+      };
+      return acc;
+    }, {} as EntityConfig);
+
+    console.log(
+      `Found ${views.length} views, generating entities: ${Object.keys(
+        entityConfig
+      ).join(", ")}`
+    );
+  }
+
+  // Process each entity configuration
+  for (const [entityName, config] of Object.entries(entityConfig)) {
+    try {
       const entityClassName = `${entityName.charAt(0).toUpperCase()}${entityName
         .replace("Entity", "")
         .slice(1)}Entity`;
 
       // Generate entity class file only if needGenerateEntityFile is true
       if (needGenerateEntityFile) {
+        const columns = await getTableColumns(
+          poolManager,
+          config.schema,
+          config.table
+        );
+
         await generateEntityFile({
           entityName,
           entityClassName,
@@ -218,8 +271,8 @@ export const connect = async ({
 
   // Factory function to return adapter instances
   const factory = (entityClassName: string) => {
-    const _entity = Object.keys(entity).reduce((acc, key) => {
-      acc[simplifyEntityName(key)] = entity[key];
+    const _entity = Object.keys(entityConfig).reduce((acc, key) => {
+      acc[simplifyEntityName(key)] = entityConfig[key];
       return acc;
     }, {} as Record<string, any>);
     const entityName = simplifyEntityName(entityClassName);

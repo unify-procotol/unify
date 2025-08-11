@@ -15,6 +15,7 @@ const app = URPC.init({
         // enableMonitoring: true,
         // logLevel: "debug",
       },
+      // If no entity configuration is provided, automatically use all database views
       entity: {
         user: {
           schema: "public",
@@ -25,7 +26,7 @@ const app = URPC.init({
           table: "like_count_view",
         },
       },
-      // needGenerateEntityFile: true,
+      // needGenerateEntityFile: true, // Generate entity class file only if needGenerateEntityFile is true
     }),
   ],
   middlewares: [logging()],

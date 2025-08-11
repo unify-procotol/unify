@@ -8,7 +8,7 @@ export const PGPlugin = async ({
   needGenerateEntityFile = false,
 }: {
   poolConfig: PoolManagerConfig;
-  entity: EntityConfig;
+  entity?: EntityConfig;
   needGenerateEntityFile?: boolean;
 }): Promise<Plugin> => {
   const { entities, factory } = await connect({
