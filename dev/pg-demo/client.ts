@@ -6,15 +6,15 @@ URPC.init({
 });
 
 const demo = async () => {
-  // const user = await repo({
-  //   entity: "user",
-  //   source: "pg",
-  // }).findOne({
-  //   where: {
-  //     id: "7TauFwKdrOWNrErouqzalMcJaPuAkDyh",
-  //   },
-  // });
-  // console.log("user=>", user);
+  const user = await repo({
+    entity: "user",
+    source: "pg",
+  }).findOne({
+    where: {
+      id: "7TauFwKdrOWNrErouqzalMcJaPuAkDyh",
+    },
+  });
+  console.log("user=>", user);
 
   // const likeCount = await repo({
   //   entity: "LikeCountView",
@@ -33,11 +33,11 @@ const demo = async () => {
   // });
   // console.log("likeCount=>", likeCount);
 
-  const tables = await repo({
-    entity: "_tables",
-    source: "pg",
-  }).tables({});
-  console.log("tables=>", tables);
+  // const tables = await repo({
+  //   entity: "_tables",
+  //   source: "pg",
+  // }).tables({});
+  // console.log("tables=>", tables);
 };
 
 demo();

@@ -67,12 +67,10 @@ export class MastraAdapter extends BaseAdapter<ChatEntity> {
     const agent = this.getAgent(agentName);
 
     if (!ctx.stream) {
-      if (proxy) {
-        if (entitySchemas && entitySources && entityConfigs) {
-          this.runtimeContext.set("entity-schemas", entitySchemas);
-          this.runtimeContext.set("entity-sources", entitySources);
-          this.runtimeContext.set("entity-configs", entityConfigs);
-        }
+      if (entitySchemas && entitySources && entityConfigs) {
+        this.runtimeContext.set("entity-schemas", entitySchemas);
+        this.runtimeContext.set("entity-sources", entitySources);
+        this.runtimeContext.set("entity-configs", entityConfigs);
       } else {
         const entityInfo = getEntityInfo(entities);
         this.runtimeContext.set("entity-schemas", entityInfo.entitySchemas);

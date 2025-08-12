@@ -169,15 +169,8 @@ export class PgAdapter<T extends Record<string, any>> extends BaseAdapter<T> {
       let paramCount = 0;
 
       for (const [key, value] of Object.entries(args.where)) {
-        if (typeof value === "object" && value !== null) {
-          if (value.$eq !== undefined) {
-            conditions.push(`${key} = $${++paramCount}`);
-            values.push(value.$eq);
-          }
-        } else {
-          conditions.push(`${key} = $${++paramCount}`);
-          values.push(value);
-        }
+        conditions.push(`"${key}" = $${++paramCount}`);
+        values.push(value);
       }
 
       if (conditions.length === 0) {
