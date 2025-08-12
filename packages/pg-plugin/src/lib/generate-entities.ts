@@ -64,14 +64,10 @@ function toCamelCase(str: string): string {
 
 async function generateEntityFile({
   entityName,
-  entityClassName,
   columns,
-  requestedFields,
 }: {
   entityName: string;
-  entityClassName: string;
   columns: TableColumn[];
-  requestedFields?: string[];
 }): Promise<void> {
   // Write entity file to entities directory
   const entitiesDir = path.join(process.cwd(), "entities");
@@ -92,6 +88,10 @@ async function generateEntityFile({
     console.log(`Entity file ${filePath} already exists, skipping generation.`);
     return;
   }
+
+  const entityClassName = `${entityName.charAt(0).toUpperCase()}${entityName
+    .replace("Entity", "")
+    .slice(1)}Entity`;
 
   let entityContent = `import { Fields } from "@unilab/urpc-core";
   
@@ -240,7 +240,10 @@ export const connect = async ({
     } else {
       const tables = await getAllTables(poolManager);
       entityConfig = tables.reduce((acc, table) => {
-        const entityName = toCamelCase(table.table_name.toLowerCase());
+        let entityName = toCamelCase(table.table_name.toLowerCase());
+        if (entityName === "Entity") {
+          entityName = "_Entity";
+        }
         acc[entityName] = {
           schema: table.table_schema,
           table: table.table_name,
@@ -255,10 +258,6 @@ export const connect = async ({
   // Process each entity configuration
   for (const [entityName, config] of Object.entries(entityConfig)) {
     try {
-      const entityClassName = `${entityName.charAt(0).toUpperCase()}${entityName
-        .replace("Entity", "")
-        .slice(1)}Entity`;
-
       // Generate entity class file only if needGenerateEntityFile is true
       if (needGenerateEntityFile) {
         const columns = await getTableColumns(
@@ -269,12 +268,11 @@ export const connect = async ({
 
         await generateEntityFile({
           entityName,
-          entityClassName,
           columns,
         });
       }
 
-      entities.push(entityClassName);
+      entities.push(entityName);
     } catch (error) {
       console.error(`Error processing entity ${entityName}:`, error);
       // Close the pool manager on error
@@ -284,16 +282,16 @@ export const connect = async ({
   }
 
   // Factory function to return adapter instances
-  const factory = (entityClassName: string) => {
+  const factory = (entityName: string) => {
     const _entity = Object.keys(entityConfig).reduce((acc, key) => {
       acc[simplifyEntityName(key)] = entityConfig[key];
       return acc;
     }, {} as Record<string, any>);
-    const entityName = simplifyEntityName(entityClassName);
+    const _entityName = simplifyEntityName(entityName);
     return new PgAdapter(
       poolManager,
-      _entity[entityName].table,
-      _entity[entityName].schema
+      _entity[_entityName].table,
+      _entity[_entityName].schema
     );
   };
 

@@ -15,12 +15,12 @@ const app = URPC.init({
         // enableMonitoring: true,
         // logLevel: "debug",
       },
-      whitelist: [
-        {
-          schema: "public",
-          tables: ["user", "like_count_view"],
-        },
-      ],
+      // whitelist: [
+      //   {
+      //     schema: "public",
+      //     tables: ["user", "like_count_view"],
+      //   },
+      // ],
       // If no entity configuration is provided, automatically use all database tables
       // entity: {
       //   user: {
