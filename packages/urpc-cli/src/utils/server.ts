@@ -180,7 +180,7 @@ async function checkServerHealth(port: number): Promise<boolean> {
       timeout: 5000,
     });
     const allEntities = await repo({
-      entity: "schema",
+      entity: "_schema",
       source: "_global",
     }).findMany();
     return Array.isArray(allEntities);

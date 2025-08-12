@@ -82,7 +82,7 @@ export function StudioHome({ isConnected, baseUrl }: StudioHomeProps) {
 
       // Use the same API call as examples/global/client.ts
       const entitiesInfo = await repo<Schema>({
-        entity: "schema",
+        entity: "_schema",
         source: "_global",
       }).findMany();
 
