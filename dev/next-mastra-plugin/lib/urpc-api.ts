@@ -6,7 +6,7 @@ import { UserEntity } from "./entities/user";
 import { PostEntity } from "./entities/post";
 import { MockAdapter } from "@unilab/urpc-adapters";
 import { WalletPlugin } from "@unilab/uniweb3";
-import { URPCSimpleAgent } from "@unilab/mastra-plugin/agents";
+import { getMastraInstance } from "@unilab/mastra-plugin/agents";
 
 let api: URPCAPI;
 export function getAPI() {
@@ -20,15 +20,12 @@ export function getAPI() {
         DataPlugin,
         WalletPlugin,
         MastraPlugin({
-          agents: {
-            l1: new URPCSimpleAgent({
-              URPC,
-              defaultModel: "google/gemini-2.0-flash-001",
-              openrouterApiKey: process.env.OPENROUTER_API_KEY,
-              // debug: true,
-            }),
-          },
-          defaultAgent: "l1",
+          mastraInstance: getMastraInstance({
+            URPC,
+            openrouterApiKey: process.env.OPENROUTER_API_KEY!,
+            // debug: true,
+          }),
+          defaultAgent: "urpcSimpleAgent",
         }),
       ],
       // middlewares: [logging()],

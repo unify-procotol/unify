@@ -79,7 +79,8 @@ function isChatConfigError(error: Error): boolean {
 // Configuration code snippet for server setup
 const SERVER_CONFIG_CODE = `// Add MastraPlugin to your server.ts
 import { URPC } from "@unilab/urpc-hono";
-import { MastraPlugin } from "@unilab/mastra-plugin/hono";
+import { MastraPlugin } from "@unilab/mastra-plugin";
+import { getMastraInstance } from "@unilab/mastra-plugin/agents";
 import { MockAdapter } from "@unilab/urpc-adapters";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
@@ -92,9 +93,12 @@ URPC.init({
   plugins: [
     // Add MastraPlugin for AI chat functionality
     MastraPlugin({
-      defaultModel: "openai/gpt-4o-mini", // or "google/gemini-2.0-flash-001"
-      openrouterApiKey: process.env.OPENROUTER_API_KEY,
-      debug: true,
+      mastraInstance: getMastraInstance({
+        URPC,
+        openrouterApiKey: process.env.OPENROUTER_API_KEY!,
+        debug: true,
+      }),
+      defaultAgent: "urpcSimpleAgent",
     }),
   ],
   entityConfigs: {

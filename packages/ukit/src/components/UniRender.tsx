@@ -238,7 +238,7 @@ export const UniRender = forwardRef<UniRenderRef, UniRenderProps>(
 
       try {
         const schemaResponse = await repo({
-          entity: "schema",
+          entity: "_schema",
           source: "_global",
         }).findOne({
           where: {

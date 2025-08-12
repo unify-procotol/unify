@@ -1,0 +1,40 @@
+{
+  "name": "@unilab/pg-plugin",
+  "version": "0.0.2",
+  "description": "A URPC plugin for PostgreSQL",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "prepublishOnly": "bun run build"
+  },
+  "keywords": [
+    "PostgreSQL",
+    "plugin",
+    "urpc"
+  ],
+  "dependencies": {
+    "@unilab/urpc-core": "^0.0.17",
+    "pg": "^8.16.3"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.15.5",
+    "typescript": "^5.6.2"
+  },
+  "peerDependencies": {},
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/unifi-lab/unify.git"
+  },
+  "license": "MIT"
+}

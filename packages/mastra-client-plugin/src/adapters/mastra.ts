@@ -1,6 +1,7 @@
 import {
   BaseAdapter,
   ErrorCodes,
+  OperationContext,
   simplifyEntityName,
   URPCError,
 } from "@unilab/urpc-core";
@@ -56,7 +57,10 @@ export class MastraClientAdapter extends BaseAdapter<ChatEntity> {
     };
   }
 
-  async call(args: Partial<ChatEntity>): Promise<ChatEntity> {
+  async call(
+    args: Partial<ChatEntity>,
+    ctx: OperationContext
+  ): Promise<ChatEntity> {
     const { input, model, agent: agentName, entities } = args;
     if (!input) {
       throw new URPCError(ErrorCodes.BAD_REQUEST, "input is required");

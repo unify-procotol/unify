@@ -44,12 +44,7 @@ export function parseQueryParams(c: Context) {
 
 export function handleError(error: any, c: Context) {
   if (error instanceof URPCError) {
-    return c.json(
-      {
-        error: error.message,
-      },
-      error.code as any
-    );
+    return c.json({ error: error.message }, error.code as any);
   }
   return c.json(
     { error: error instanceof Error ? error.message : "Unknown error" },

@@ -39,7 +39,7 @@ const app = URPC.init({
     cache({
       bentocache,
     }),
-    logging(),
+    // logging(),
   ],
   entityConfigs: {
     user: {
@@ -57,8 +57,8 @@ const app = URPC.init({
       // allowApiDelete: ["admin", "manager"], // Only users with 'admin' or 'manager' roles can delete,
       // allowApiCrud: (user: AuthUser | null) => user?.name == "Jane", // Only the user 'Jane' can read
       allowApiRead: (user, entityData) => {
-        // console.log("entityData=>", entityData);
-        // console.log("user=>", user);
+        console.log("entityData=>", entityData);
+        console.log("user=>", user);
         if (Array.isArray(entityData)) {
           return true;
         }

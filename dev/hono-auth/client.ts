@@ -26,21 +26,21 @@ URPC.setHeaders({
 
 const demo = async () => {
   try {
-    // const res = await repo<PostEntity>({
-    //   entity: "post",
-    //   source: "ghost",
-    // }).findOne({
-    //   where: {
-    //     slug: "hello-world",
-    //   },
-    // });
-
-    const res = await repo({
+    const res = await repo<PostEntity>({
       entity: "post",
       source: "ghost",
-    }).call({
-      slug: "hello-world",
+    }).findOne({
+      where: {
+        slug: "hello-world",
+      },
     });
+
+    // const res = await repo({
+    //   entity: "post",
+    //   source: "ghost",
+    // }).call({
+    //   slug: "hello-world",
+    // });
 
     console.log("Unexpected success:", res);
   } catch (error: any) {

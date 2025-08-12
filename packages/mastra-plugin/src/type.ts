@@ -1,3 +1,4 @@
+import { Mastra } from "@mastra/core";
 import { EntityConfigs, SchemaObject } from "@unilab/urpc-core";
 
 export interface URPC {
@@ -7,32 +8,17 @@ export interface URPC {
   repo(options: { entity: string; source: string }): any;
 }
 
-export interface AgentInterface {
-  setProxyConfig?(config: {
-    entitySchemas: Record<string, SchemaObject>;
-    entitySources: Record<string, string[]>;
-    entityConfigs: EntityConfigs;
-  }): void;
-
-  processRequest(params: {
-    input: string;
-    model?: string;
-    proxy?: boolean;
-    entities?: string[];
-  }): Promise<PlanOutput>;
-
-  streamResponse?(params: {
-    input: string;
-    model?: string;
-    proxy?: boolean;
-    entities?: string[];
-  }): Promise<any>;
-}
-
 export interface MastraPluginOptions {
-  agents: Record<string, AgentInterface>;
+  mastraInstance: Mastra;
   defaultAgent?: string;
 }
+
+export type URPCAgentRuntimeContext = {
+  "entity-schemas": Record<string, SchemaObject>;
+  "entity-sources": Record<string, string[]>;
+  "entity-configs": EntityConfigs;
+  "model": string;
+};
 
 export interface StepOutput {
   operation: string;

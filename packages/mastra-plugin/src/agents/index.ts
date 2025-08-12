@@ -1,1 +1,1 @@
-export { URPCSimpleAgent } from "./urpc-simple-agent";
+export { getMastraInstance } from "./mastra";
