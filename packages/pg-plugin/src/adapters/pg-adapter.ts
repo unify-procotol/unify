@@ -38,12 +38,82 @@ export class PgAdapter<T extends Record<string, any>> extends BaseAdapter<T> {
           if (typeof value === "object" && value !== null) {
             // Handle operators like $eq, $ne, etc.
             if (value.$eq !== undefined) {
-              conditions.push(`${key} = $${++paramCount}`);
+              conditions.push(`"${key}" = $${++paramCount}`);
               values.push(value.$eq);
             }
-            // Add more operators as needed
+            if (value.$ne !== undefined) {
+              conditions.push(`"${key}" != $${++paramCount}`);
+              values.push(value.$ne);
+            }
+            if (value.$gt !== undefined) {
+              conditions.push(`"${key}" > $${++paramCount}`);
+              values.push(value.$gt);
+            }
+            if (value.$gte !== undefined) {
+              conditions.push(`"${key}" >= $${++paramCount}`);
+              values.push(value.$gte);
+            }
+            if (value.$lt !== undefined) {
+              conditions.push(`"${key}" < $${++paramCount}`);
+              values.push(value.$lt);
+            }
+            if (value.$lte !== undefined) {
+              conditions.push(`"${key}" <= $${++paramCount}`);
+              values.push(value.$lte);
+            }
+            if (value.$in !== undefined) {
+              conditions.push(
+                `"${key}" IN (${value.$in
+                  .map((_: any, i: number) => `$${++paramCount}`)
+                  .join(", ")})`
+              );
+              values.push(...value.$in);
+            }
+            if (value.$nin !== undefined) {
+              conditions.push(
+                `"${key}" NOT IN (${value.$nin
+                  .map((_: any, i: number) => `$${++paramCount}`)
+                  .join(", ")})`
+              );
+              values.push(...value.$nin);
+            }
+            if (value.$contains !== undefined) {
+              if (value.$mode === "insensitive") {
+                conditions.push(`LOWER("${key}") LIKE LOWER($${++paramCount})`);
+                values.push(`%${value.$contains}%`);
+              } else {
+                conditions.push(`"${key}" LIKE $${++paramCount}`);
+                values.push(`%${value.$contains}%`);
+              }
+            }
+            if (value.$startsWith !== undefined) {
+              if (value.$mode === "insensitive") {
+                conditions.push(`LOWER("${key}") LIKE LOWER($${++paramCount})`);
+                values.push(`${value.$startsWith}%`);
+              } else {
+                conditions.push(`"${key}" LIKE $${++paramCount}`);
+                values.push(`${value.$startsWith}%`);
+              }
+            }
+            if (value.$endsWith !== undefined) {
+              if (value.$mode === "insensitive") {
+                conditions.push(`LOWER("${key}") LIKE LOWER($${++paramCount})`);
+                values.push(`%${value.$endsWith}`);
+              } else {
+                conditions.push(`"${key}" LIKE $${++paramCount}`);
+                values.push(`%${value.$endsWith}`);
+              }
+            }
+            if (value.$not !== undefined) {
+              if (value.$not === null) {
+                conditions.push(`"${key}" IS NOT NULL`);
+              } else {
+                conditions.push(`"${key}" != $${++paramCount}`);
+                values.push(value.$not);
+              }
+            }
           } else {
-            conditions.push(`${key} = $${++paramCount}`);
+            conditions.push(`"${key}" = $${++paramCount}`);
             values.push(value);
           }
         }
@@ -69,16 +139,12 @@ export class PgAdapter<T extends Record<string, any>> extends BaseAdapter<T> {
       if (args?.limit != null) {
         query += ` LIMIT $${++paramCount}`;
         values.push(args.limit);
-      } else {
-        query += ` LIMIT 10`;
       }
 
       // Add OFFSET if provided
       if (args?.offset != null) {
         query += ` OFFSET $${++paramCount}`;
         values.push(args.offset);
-      } else {
-        query += ` OFFSET 0`;
       }
 
       const result = await this.poolManager.query(query, values);

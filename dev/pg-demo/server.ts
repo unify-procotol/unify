@@ -15,17 +15,23 @@ const app = URPC.init({
         // enableMonitoring: true,
         // logLevel: "debug",
       },
-      // If no entity configuration is provided, automatically use all database views
-      entity: {
-        user: {
+      whitelist: [
+        {
           schema: "public",
-          table: "user",
+          tables: ["user", "like_count_view"],
         },
-        likeCount: {
-          schema: "public",
-          table: "like_count_view",
-        },
-      },
+      ],
+      // If no entity configuration is provided, automatically use all database tables
+      // entity: {
+      //   user: {
+      //     schema: "public",
+      //     table: "user",
+      //   },
+      //   likeCount: {
+      //     schema: "public",
+      //     table: "like_count_view",
+      //   },
+      // },
       // needGenerateEntityFile: true, // Generate entity class file only if needGenerateEntityFile is true
     }),
   ],

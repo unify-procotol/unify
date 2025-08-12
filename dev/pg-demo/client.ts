@@ -16,13 +16,28 @@ const demo = async () => {
   // });
   // console.log("user=>", user);
 
-  const likeCount = await repo({
-    entity: "likeCount",
+  // const likeCount = await repo({
+  //   entity: "LikeCountView",
+  //   source: "pg",
+  // }).findMany({
+  //   // limit: 2,
+  //   where: {
+  //     targetId: {
+  //       // $startsWith: "c3fuit827",
+  //       // $endsWith: "c3fuit827",
+  //       // $contains: "c3fuit827",
+  //       // $mode: "insensitive",
+  //       $not: null,
+  //     },
+  //   },
+  // });
+  // console.log("likeCount=>", likeCount);
+
+  const tables = await repo({
+    entity: "_tables",
     source: "pg",
-  }).findMany({
-    limit: 2,
-  });
-  console.log("likeCount=>", likeCount);
+  }).tables({});
+  console.log("tables=>", tables);
 };
 
 demo();

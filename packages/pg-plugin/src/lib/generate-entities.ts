@@ -34,24 +34,26 @@ async function getTableColumns(
   return result.rows;
 }
 
-interface DatabaseView {
+export interface DatabaseTable {
   table_schema: string;
   table_name: string;
 }
 
-async function getAllViews(poolManager: PoolManager): Promise<DatabaseView[]> {
+export const getAllTables = async (
+  poolManager: PoolManager
+): Promise<DatabaseTable[]> => {
   const query = `
     SELECT 
       table_schema,
       table_name
-    FROM information_schema.views
+    FROM information_schema.tables
     WHERE table_schema NOT IN ('information_schema', 'pg_catalog')
     ORDER BY table_schema, table_name;
   `;
 
   const result = await poolManager.query(query);
   return result.rows;
-}
+};
 
 function toCamelCase(str: string): string {
   return str
@@ -184,10 +186,15 @@ function getDefaultValue(column: TableColumn, fieldType: string): string {
 
 export const connect = async ({
   poolConfig,
+  whitelist,
   entity,
   needGenerateEntityFile = false,
 }: {
   poolConfig: PoolManagerConfig;
+  whitelist?: {
+    schema: string;
+    tables: string[];
+  }[];
   entity?: EntityConfig;
   needGenerateEntityFile?: boolean;
 }) => {
@@ -216,26 +223,33 @@ export const connect = async ({
   // If no entity configuration is provided, automatically use all database views
   if (!entityConfig || Object.keys(entityConfig).length === 0) {
     console.log(
-      "No entity configuration provided, auto-generating from database views..."
+      "No entity configuration provided, auto-generating from database tables..."
     );
-    const views = await getAllViews(poolManager);
 
-    entityConfig = views.reduce((acc, view) => {
-      const entityName = toCamelCase(
-        view.table_name.toLowerCase().replace("_view", "")
-      );
-      acc[entityName] = {
-        schema: view.table_schema,
-        table: view.table_name,
-      };
-      return acc;
-    }, {} as EntityConfig);
+    if (whitelist) {
+      entityConfig = whitelist.reduce((acc, whitelistItem) => {
+        whitelistItem.tables.forEach((table) => {
+          const entityName = toCamelCase(table.toLowerCase());
+          acc[entityName] = {
+            schema: whitelistItem.schema,
+            table: table,
+          };
+        });
+        return acc;
+      }, {} as EntityConfig);
+    } else {
+      const tables = await getAllTables(poolManager);
+      entityConfig = tables.reduce((acc, table) => {
+        const entityName = toCamelCase(table.table_name.toLowerCase());
+        acc[entityName] = {
+          schema: table.table_schema,
+          table: table.table_name,
+        };
+        return acc;
+      }, {} as EntityConfig);
+    }
 
-    console.log(
-      `Found ${views.length} views, generating entities: ${Object.keys(
-        entityConfig
-      ).join(", ")}`
-    );
+    console.log(`Entities: ${Object.keys(entityConfig).join(", ")}`);
   }
 
   // Process each entity configuration
