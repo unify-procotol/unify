@@ -19,7 +19,7 @@ export class GlobalDataAdapter extends BaseAdapter<_DataEntity> {
   async findMany(args?: FindManyArgs<_DataEntity>): Promise<_DataEntity[]> {
     const where = args?.where || {};
     const _key = where.key;
-    const key = typeof _key === "string" ? _key : _key?.$eq;
+    const key = typeof _key === "string" ? _key : _key?.eq;
     if (!key) {
       return this.data;
     }

@@ -12,12 +12,13 @@ export class SeekingAlphaAdapter extends BaseAdapter<StockEntity> {
 
   async findMany(args: FindManyArgs<StockEntity>): Promise<StockEntity[]> {
     const where = args.where;
-    
+
     if (!where?.ticker) {
       throw new URPCError(ErrorCodes.BAD_REQUEST, "ticker is required");
     }
 
-    const ticker = typeof where.ticker === "string" ? where.ticker : where.ticker.$eq;
+    const ticker =
+      typeof where.ticker === "string" ? where.ticker : where.ticker.eq;
     if (!ticker) {
       throw new URPCError(ErrorCodes.BAD_REQUEST, "ticker is required");
     }

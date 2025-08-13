@@ -23,7 +23,7 @@ export class GhostAdapter extends BaseAdapter<PostEntity> {
     ctx?: OperationContext
   ): Promise<PostEntity[]> {
     const _slug = args.where?.slug;
-    const slug = typeof _slug === "string" ? _slug : _slug?.$eq;
+    const slug = typeof _slug === "string" ? _slug : _slug?.eq;
     if (slug) {
       return mockData.filter((post) => post.slug === slug);
     }

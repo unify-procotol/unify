@@ -6,6 +6,7 @@ import type {
   WhereCondition,
   WhereConditionWithOperators,
   UpsertArgs,
+  OrderByValue,
 } from "@unilab/urpc-core";
 
 /**
@@ -25,14 +26,14 @@ export function matchesWhere<T extends Record<string, any>>(
   return Object.entries(where).every(([key, value]) => {
     if (typeof value === "object" && value !== null) {
       // Handle query operators
-      if ("$eq" in value) return item[key] === value.$eq;
-      if ("$ne" in value) return item[key] !== value.$ne;
-      if ("$gt" in value) return item[key] > value.$gt;
-      if ("$gte" in value) return item[key] >= value.$gte;
-      if ("$lt" in value) return item[key] < value.$lt;
-      if ("$lte" in value) return item[key] <= value.$lte;
-      if ("$in" in value) return value.$in.includes(item[key]);
-      if ("$nin" in value) return !value.$nin.includes(item[key]);
+      if ("eq" in value) return item[key] === value.eq;
+      if ("ne" in value) return item[key] !== value.ne;
+      if ("gt" in value) return item[key] > value.gt;
+      if ("gte" in value) return item[key] >= value.gte;
+      if ("lt" in value) return item[key] < value.lt;
+      if ("lte" in value) return item[key] <= value.lte;
+      if ("in" in value) return value.in.includes(item[key]);
+      if ("nin" in value) return !value.nin.includes(item[key]);
 
       // Handle string query operators first
       const itemValue = item[key];
@@ -93,19 +94,35 @@ export function matchesWhere<T extends Record<string, any>>(
  */
 export function applySorting<T extends Record<string, any>>(
   items: T[],
-  orderBy: Partial<Record<keyof T, "asc" | "desc">>
+  orderBy: Partial<Record<keyof T, OrderByValue>>
 ): T[] {
   return items.sort((a, b) => {
     for (const [field, direction] of Object.entries(orderBy)) {
-      const aVal = a[field as keyof T];
-      const bVal = b[field as keyof T];
+      let aVal = a[field as keyof T];
+      let bVal = b[field as keyof T];
+      let sortOrder: "asc" | "desc" = "asc";
+
+      // Handle different OrderByValue formats
+      if (typeof direction === "string") {
+        // Simple "asc" | "desc" format
+        sortOrder = direction;
+      } else if (typeof direction === "object" && direction.path && direction.sortOrder) {
+        // Object format with path navigation
+        sortOrder = direction.sortOrder;
+        
+        // Navigate through the path to get the actual values
+        for (const pathSegment of direction.path) {
+          aVal = aVal?.[pathSegment];
+          bVal = bVal?.[pathSegment];
+        }
+      }
 
       let comparison = 0;
       if (aVal < bVal) comparison = -1;
       else if (aVal > bVal) comparison = 1;
 
       if (comparison !== 0) {
-        return direction === "desc" ? -comparison : comparison;
+        return sortOrder === "desc" ? -comparison : comparison;
       }
     }
     return 0;

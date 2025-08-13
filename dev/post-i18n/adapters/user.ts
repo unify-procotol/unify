@@ -13,12 +13,12 @@ const mockData = [
 export class UserAdapter extends BaseAdapter<UserEntity> {
   async findMany(args: FindManyArgs<UserEntity>): Promise<UserEntity[]> {
     const _id = args.where?.id;
-    const id = typeof _id === "string" ? _id : _id?.$eq;
+    const id = typeof _id === "string" ? _id : _id?.eq;
     if (id) {
       return mockData.filter((user) => user.id === id);
     }
 
-    const ids = typeof _id === "string" ? undefined : _id?.$in;
+    const ids = typeof _id === "string" ? undefined : _id?.in;
     if (ids) {
       return mockData.filter((user) => ids.includes(user.id));
     }

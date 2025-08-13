@@ -22,7 +22,7 @@ export class GlobalSchemaAdapter extends BaseAdapter<_SchemaEntity> {
     const schemas = this.URPC.getEntitySchemas();
     const entity = where.name;
     if (entity) {
-      const actualEntityName = typeof entity === "string" ? entity : entity.$eq;
+      const actualEntityName = typeof entity === "string" ? entity : entity.eq;
       if (actualEntityName) {
         const schema = schemas[actualEntityName];
         if (schema) {

@@ -5,6 +5,7 @@ import {
   OperationContext,
   URPCError,
   ErrorCodes,
+  WhereConditionWithOperators,
 } from "@unilab/urpc-core";
 import { PoolManager } from "../lib/pool-manager";
 
@@ -30,95 +31,16 @@ export class PgAdapter<T extends Record<string, any>> extends BaseAdapter<T> {
     try {
       let query = `SELECT * FROM ${this.schemaName}.${this.tableName}`;
       const values: any[] = [];
-      let paramCount = 0;
+      let paramCount = { count: 0 };
 
       if (args?.where) {
-        const conditions: string[] = [];
-        for (const [key, value] of Object.entries(args.where)) {
-          if (typeof value === "object" && value !== null) {
-            // Handle operators like $eq, $ne, etc.
-            if (value.$eq !== undefined) {
-              conditions.push(`"${key}" = $${++paramCount}`);
-              values.push(value.$eq);
-            }
-            if (value.$ne !== undefined) {
-              conditions.push(`"${key}" != $${++paramCount}`);
-              values.push(value.$ne);
-            }
-            if (value.$gt !== undefined) {
-              conditions.push(`"${key}" > $${++paramCount}`);
-              values.push(value.$gt);
-            }
-            if (value.$gte !== undefined) {
-              conditions.push(`"${key}" >= $${++paramCount}`);
-              values.push(value.$gte);
-            }
-            if (value.$lt !== undefined) {
-              conditions.push(`"${key}" < $${++paramCount}`);
-              values.push(value.$lt);
-            }
-            if (value.$lte !== undefined) {
-              conditions.push(`"${key}" <= $${++paramCount}`);
-              values.push(value.$lte);
-            }
-            if (value.$in !== undefined) {
-              conditions.push(
-                `"${key}" IN (${value.$in
-                  .map((_: any, i: number) => `$${++paramCount}`)
-                  .join(", ")})`
-              );
-              values.push(...value.$in);
-            }
-            if (value.$nin !== undefined) {
-              conditions.push(
-                `"${key}" NOT IN (${value.$nin
-                  .map((_: any, i: number) => `$${++paramCount}`)
-                  .join(", ")})`
-              );
-              values.push(...value.$nin);
-            }
-            if (value.$contains !== undefined) {
-              if (value.$mode === "insensitive") {
-                conditions.push(`LOWER("${key}") LIKE LOWER($${++paramCount})`);
-                values.push(`%${value.$contains}%`);
-              } else {
-                conditions.push(`"${key}" LIKE $${++paramCount}`);
-                values.push(`%${value.$contains}%`);
-              }
-            }
-            if (value.$startsWith !== undefined) {
-              if (value.$mode === "insensitive") {
-                conditions.push(`LOWER("${key}") LIKE LOWER($${++paramCount})`);
-                values.push(`${value.$startsWith}%`);
-              } else {
-                conditions.push(`"${key}" LIKE $${++paramCount}`);
-                values.push(`${value.$startsWith}%`);
-              }
-            }
-            if (value.$endsWith !== undefined) {
-              if (value.$mode === "insensitive") {
-                conditions.push(`LOWER("${key}") LIKE LOWER($${++paramCount})`);
-                values.push(`%${value.$endsWith}`);
-              } else {
-                conditions.push(`"${key}" LIKE $${++paramCount}`);
-                values.push(`%${value.$endsWith}`);
-              }
-            }
-            if (value.$not !== undefined) {
-              if (value.$not === null) {
-                conditions.push(`"${key}" IS NOT NULL`);
-              } else {
-                conditions.push(`"${key}" != $${++paramCount}`);
-                values.push(value.$not);
-              }
-            }
-          } else {
-            conditions.push(`"${key}" = $${++paramCount}`);
-            values.push(value);
-          }
-        }
-        if (conditions.length > 0) {
-          query += ` WHERE ${conditions.join(" AND ")}`;
+        const whereCondition = buildWhereConditions(
+          args.where,
+          values,
+          paramCount
+        );
+        if (whereCondition.length > 0) {
+          query += ` WHERE ${whereCondition}`;
         }
       }
 
@@ -127,7 +49,20 @@ export class PgAdapter<T extends Record<string, any>> extends BaseAdapter<T> {
         const orderClauses: string[] = [];
         for (const [key, direction] of Object.entries(args.order_by)) {
           if (direction) {
-            orderClauses.push(`${key} ${direction.toUpperCase()}`);
+            if (typeof direction === "string") {
+              // Simple field sorting
+              orderClauses.push(`"${key}" ${direction.toUpperCase()}`);
+            } else if (
+              typeof direction === "object" &&
+              direction.path &&
+              direction.sortOrder
+            ) {
+              // JSON path sorting
+              const pathString = direction.path.map((p) => `"${p}"`).join(",");
+              orderClauses.push(
+                `("${key}"#>'{${pathString}}') ${direction.sortOrder.toUpperCase()}`
+              );
+            }
           }
         }
         if (orderClauses.length > 0) {
@@ -137,13 +72,13 @@ export class PgAdapter<T extends Record<string, any>> extends BaseAdapter<T> {
 
       // Add LIMIT if provided
       if (args?.limit != null) {
-        query += ` LIMIT $${++paramCount}`;
+        query += ` LIMIT $${++paramCount.count}`;
         values.push(args.limit);
       }
 
       // Add OFFSET if provided
       if (args?.offset != null) {
-        query += ` OFFSET $${++paramCount}`;
+        query += ` OFFSET $${++paramCount.count}`;
         values.push(args.offset);
       }
 
@@ -198,4 +133,201 @@ export class PgAdapter<T extends Record<string, any>> extends BaseAdapter<T> {
       );
     }
   }
+}
+
+function buildWhereConditions(
+  whereClause: WhereConditionWithOperators<any>,
+  values: any[],
+  paramCount: { count: number }
+): string {
+  if (!whereClause || typeof whereClause !== "object") {
+    return "";
+  }
+
+  const conditions: string[] = [];
+
+  // Handle OR operator
+  if (whereClause.OR && Array.isArray(whereClause.OR)) {
+    const orConditions = whereClause.OR.map((orClause: any) =>
+      buildWhereConditions(orClause, values, paramCount)
+    ).filter((condition: string) => condition.length > 0);
+
+    if (orConditions.length > 0) {
+      conditions.push(`(${orConditions.join(" OR ")})`);
+    }
+  }
+
+  // Handle AND operator
+  if (whereClause.AND && Array.isArray(whereClause.AND)) {
+    const andConditions = whereClause.AND.map((andClause: any) =>
+      buildWhereConditions(andClause, values, paramCount)
+    ).filter((condition: string) => condition.length > 0);
+
+    if (andConditions.length > 0) {
+      conditions.push(`(${andConditions.join(" AND ")})`);
+    }
+  }
+
+  // Helper function to build column reference (either direct column or JSON path)
+  const buildColumnRef = (key: string, path?: any[]): string => {
+    if (path && Array.isArray(path)) {
+      const pathString = path.map((p: any) => `"${p}"`).join(",");
+      return `("${key}"#>'{${pathString}}')`;
+    }
+    return `"${key}"`;
+  };
+
+  // Helper function to handle JSON path casting for numeric comparisons
+  const buildTypedColumnRef = (
+    key: string,
+    path?: any[],
+    value?: any
+  ): string => {
+    if (path && Array.isArray(path)) {
+      const pathString = path.map((p: any) => `"${p}"`).join(",");
+      // Cast to appropriate type based on value type
+      if (typeof value === "number") {
+        return `("${key}"#>>'{${pathString}}')::numeric`;
+      }
+      return `("${key}"#>>'{${pathString}}')`;
+    }
+    return `"${key}"`;
+  };
+
+  // Handle field conditions
+  for (const [key, value] of Object.entries(whereClause)) {
+    if (key === "OR" || key === "AND") {
+      continue; // Skip logical operators, already handled above
+    }
+
+    if (typeof value === "object" && value !== null) {
+      // Handle operators like eq, ne, etc.
+      const operators = value;
+
+      if (operators.eq !== undefined) {
+        const columnRef = buildTypedColumnRef(
+          key,
+          operators.path,
+          operators.eq
+        );
+        conditions.push(`${columnRef} = $${++paramCount.count}`);
+        values.push(operators.eq);
+      }
+      if (operators.ne !== undefined) {
+        const columnRef = buildTypedColumnRef(
+          key,
+          operators.path,
+          operators.ne
+        );
+        conditions.push(`${columnRef} != $${++paramCount.count}`);
+        values.push(operators.ne);
+      }
+      if (operators.gt !== undefined) {
+        const columnRef = buildTypedColumnRef(
+          key,
+          operators.path,
+          operators.gt
+        );
+        conditions.push(`${columnRef} > $${++paramCount.count}`);
+        values.push(operators.gt);
+      }
+      if (operators.gte !== undefined) {
+        const columnRef = buildTypedColumnRef(
+          key,
+          operators.path,
+          operators.gte
+        );
+        conditions.push(`${columnRef} >= $${++paramCount.count}`);
+        values.push(operators.gte);
+      }
+      if (operators.lt !== undefined) {
+        const columnRef = buildTypedColumnRef(
+          key,
+          operators.path,
+          operators.lt
+        );
+        conditions.push(`${columnRef} < $${++paramCount.count}`);
+        values.push(operators.lt);
+      }
+      if (operators.lte !== undefined) {
+        const columnRef = buildTypedColumnRef(
+          key,
+          operators.path,
+          operators.lte
+        );
+        conditions.push(`${columnRef} <= $${++paramCount.count}`);
+        values.push(operators.lte);
+      }
+      if (operators.in !== undefined) {
+        const columnRef = buildTypedColumnRef(
+          key,
+          operators.path,
+          operators.in[0]
+        );
+        conditions.push(
+          `${columnRef} IN (${operators.in
+            .map((_: any) => `$${++paramCount.count}`)
+            .join(", ")})`
+        );
+        values.push(...operators.in);
+      }
+      if (operators.nin !== undefined) {
+        const columnRef = buildTypedColumnRef(
+          key,
+          operators.path,
+          operators.nin[0]
+        );
+        conditions.push(
+          `${columnRef} NOT IN (${operators.nin
+            .map((_: any) => `$${++paramCount.count}`)
+            .join(", ")})`
+        );
+        values.push(...operators.nin);
+      }
+      if (operators.contains !== undefined) {
+        const columnRef = buildColumnRef(key, operators.path);
+        if (operators.mode === "insensitive") {
+          conditions.push(`${columnRef} ILIKE $${++paramCount.count}`);
+          values.push(`%${operators.contains}%`);
+        } else {
+          conditions.push(`${columnRef} LIKE $${++paramCount.count}`);
+          values.push(`%${operators.contains}%`);
+        }
+      }
+      if (operators.startsWith !== undefined) {
+        const columnRef = buildColumnRef(key, operators.path);
+        if (operators.mode === "insensitive") {
+          conditions.push(`${columnRef} ILIKE $${++paramCount.count}`);
+          values.push(`${operators.startsWith}%`);
+        } else {
+          conditions.push(`${columnRef} LIKE $${++paramCount.count}`);
+          values.push(`${operators.startsWith}%`);
+        }
+      }
+      if (operators.endsWith !== undefined) {
+        const columnRef = buildColumnRef(key, operators.path);
+        if (operators.mode === "insensitive") {
+          conditions.push(`${columnRef} ILIKE $${++paramCount.count}`);
+          values.push(`%${operators.endsWith}`);
+        } else {
+          conditions.push(`${columnRef} LIKE $${++paramCount.count}`);
+          values.push(`%${operators.endsWith}`);
+        }
+      }
+      if (operators.not !== undefined) {
+        const columnRef = buildColumnRef(key, operators.path);
+        if (operators.not === null) {
+          conditions.push(`${columnRef} IS NOT NULL`);
+        } else {
+          conditions.push(`${columnRef} != $${++paramCount.count}`);
+          values.push(operators.not);
+        }
+      }
+    } else {
+      conditions.push(`"${key}" = $${++paramCount.count}`);
+      values.push(value);
+    }
+  }
+
+  return conditions.join(" AND ");
 }

@@ -1,6 +1,6 @@
 {
   "name": "@unilab/urpc-adapters",
-  "version": "0.0.19",
+  "version": "0.0.20",
   "description": "Common adapters for URPC",
   "main": "dist/index.js",
   "module": "dist/index.js",
@@ -14,7 +14,7 @@
     "prepublishOnly": "bun run build"
   },
   "dependencies": {
-    "@unilab/urpc-core": "^0.0.17"
+    "@unilab/urpc-core": "^0.0.18"
   },
   "devDependencies": {
     "typescript": "^5.0.0",

@@ -7,11 +7,12 @@ import {
   DeletionArgs,
   URPCError,
   ErrorCodes,
+  OrderByValue,
 } from "@unilab/urpc-core";
 import postgres from "postgres";
 
 export interface PostgresAdapterConfig {
-  tableName: string; 
+  tableName: string;
   connectionString?: string;
   host?: string;
   port?: number;
@@ -24,7 +25,9 @@ export interface PostgresAdapterConfig {
   connect_timeout?: number;
 }
 
-export class PostgresAdapter<T extends Record<string, any>> extends BaseAdapter<T> {
+export class PostgresAdapter<
+  T extends Record<string, any>
+> extends BaseAdapter<T> {
   private sql: postgres.Sql;
   private tableName: string;
 
@@ -33,13 +36,19 @@ export class PostgresAdapter<T extends Record<string, any>> extends BaseAdapter<
 
     this.tableName = config.tableName;
 
-    const connectionString = config.connectionString || process.env.DATABASE_URL;
+    const connectionString =
+      config.connectionString || process.env.DATABASE_URL;
 
     if (connectionString) {
       this.sql = postgres(connectionString, {
-        max: config.max || parseInt(process.env.POSTGRES_MAX_CONNECTIONS || "20"),
-        idle_timeout: config.idle_timeout || parseInt(process.env.POSTGRES_IDLE_TIMEOUT || "20"),
-        connect_timeout: config.connect_timeout || parseInt(process.env.POSTGRES_CONNECT_TIMEOUT || "10"),
+        max:
+          config.max || parseInt(process.env.POSTGRES_MAX_CONNECTIONS || "20"),
+        idle_timeout:
+          config.idle_timeout ||
+          parseInt(process.env.POSTGRES_IDLE_TIMEOUT || "20"),
+        connect_timeout:
+          config.connect_timeout ||
+          parseInt(process.env.POSTGRES_CONNECT_TIMEOUT || "10"),
       });
     } else {
       const host = config.host || process.env.POSTGRES_HOST;
@@ -61,10 +70,15 @@ export class PostgresAdapter<T extends Record<string, any>> extends BaseAdapter<
         database,
         username,
         password: password || "",
-        ssl: config.ssl ?? (process.env.POSTGRES_SSL === "true"),
-        max: config.max || parseInt(process.env.POSTGRES_MAX_CONNECTIONS || "20"),
-        idle_timeout: config.idle_timeout || parseInt(process.env.POSTGRES_IDLE_TIMEOUT || "20"),
-        connect_timeout: config.connect_timeout || parseInt(process.env.POSTGRES_CONNECT_TIMEOUT || "10"),
+        ssl: config.ssl ?? process.env.POSTGRES_SSL === "true",
+        max:
+          config.max || parseInt(process.env.POSTGRES_MAX_CONNECTIONS || "20"),
+        idle_timeout:
+          config.idle_timeout ||
+          parseInt(process.env.POSTGRES_IDLE_TIMEOUT || "20"),
+        connect_timeout:
+          config.connect_timeout ||
+          parseInt(process.env.POSTGRES_CONNECT_TIMEOUT || "10"),
       });
     }
   }
@@ -86,38 +100,45 @@ export class PostgresAdapter<T extends Record<string, any>> extends BaseAdapter<
       if (typeof value === "object" && value !== null) {
         // Handle query operators
         const operators = value as any;
-        if (operators.$eq !== undefined) {
+        if (operators.eq !== undefined) {
           conditions.push(`${key} = $${paramIndex}`);
-          values.push(operators.$eq);
+          values.push(operators.eq);
           paramIndex++;
-        } else if (operators.$ne !== undefined) {
+        } else if (operators.ne !== undefined) {
           conditions.push(`${key} != $${paramIndex}`);
-          values.push(operators.$ne);
+          values.push(operators.ne);
           paramIndex++;
-        } else if (operators.$gt !== undefined) {
+        } else if (operators.gt !== undefined) {
           conditions.push(`${key} > $${paramIndex}`);
-          values.push(operators.$gt);
+          values.push(operators.gt);
           paramIndex++;
-        } else if (operators.$gte !== undefined) {
+        } else if (operators.gte !== undefined) {
           conditions.push(`${key} >= $${paramIndex}`);
-          values.push(operators.$gte);
+          values.push(operators.gte);
           paramIndex++;
-        } else if (operators.$lt !== undefined) {
+        } else if (operators.lt !== undefined) {
           conditions.push(`${key} < $${paramIndex}`);
-          values.push(operators.$lt);
+          values.push(operators.lt);
           paramIndex++;
-        } else if (operators.$lte !== undefined) {
+        } else if (operators.lte !== undefined) {
           conditions.push(`${key} <= $${paramIndex}`);
-          values.push(operators.$lte);
+          values.push(operators.lte);
           paramIndex++;
-        } else if (operators.$in !== undefined && Array.isArray(operators.$in)) {
-          const placeholders = operators.$in.map(() => `$${paramIndex++}`).join(", ");
+        } else if (operators.in !== undefined && Array.isArray(operators.in)) {
+          const placeholders = operators.in
+            .map(() => `$${paramIndex++}`)
+            .join(", ");
           conditions.push(`${key} IN (${placeholders})`);
-          values.push(...operators.$in);
-        } else if (operators.$nin !== undefined && Array.isArray(operators.$nin)) {
-          const placeholders = operators.$nin.map(() => `$${paramIndex++}`).join(", ");
+          values.push(...operators.in);
+        } else if (
+          operators.nin !== undefined &&
+          Array.isArray(operators.nin)
+        ) {
+          const placeholders = operators.nin
+            .map(() => `$${paramIndex++}`)
+            .join(", ");
           conditions.push(`${key} NOT IN (${placeholders})`);
-          values.push(...operators.$nin);
+          values.push(...operators.nin);
         }
       } else {
         // Direct value comparison
@@ -127,17 +148,31 @@ export class PostgresAdapter<T extends Record<string, any>> extends BaseAdapter<
       }
     }
 
-    const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
+    const whereClause =
+      conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
     return { whereClause, values };
   }
 
-  private buildOrderByClause(orderBy?: Partial<Record<keyof T, "asc" | "desc">>): string {
+  private buildOrderByClause(
+    orderBy?: Partial<Record<keyof T, OrderByValue>>
+  ): string {
     if (!orderBy || Object.keys(orderBy).length === 0) {
       return "";
     }
 
     const orderClauses = Object.entries(orderBy).map(([key, direction]) => {
-      return `${key} ${direction?.toUpperCase() || "ASC"}`;
+      if (typeof direction === "string") {
+        return `${key} ${direction?.toUpperCase() || "ASC"}`;
+      } else if (
+        typeof direction === "object" &&
+        direction.path &&
+        direction.sortOrder
+      ) {
+        return `(${direction.path
+          .map((p) => `"${p}"`)
+          .join(",")}) ${direction.sortOrder.toUpperCase()}`;
+      }
+      return "";
     });
 
     return `ORDER BY ${orderClauses.join(", ")}`;
@@ -167,11 +202,13 @@ export class PostgresAdapter<T extends Record<string, any>> extends BaseAdapter<
       }
 
       const result = await this.sql.unsafe(query, values as any[]);
-      return result.map(row => this.mapRowToEntity(row));
+      return result.map((row) => this.mapRowToEntity(row));
     } catch (error) {
       throw new URPCError(
         ErrorCodes.INTERNAL_SERVER_ERROR,
-        `Failed to find records: ${error instanceof Error ? error.message : "Unknown error"}`
+        `Failed to find records: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
       );
     }
   }
@@ -181,7 +218,10 @@ export class PostgresAdapter<T extends Record<string, any>> extends BaseAdapter<
       const { whereClause, values } = this.buildWhereClause(args.where);
 
       if (!whereClause) {
-        throw new URPCError(ErrorCodes.BAD_REQUEST, "Where clause is required for findOne");
+        throw new URPCError(
+          ErrorCodes.BAD_REQUEST,
+          "Where clause is required for findOne"
+        );
       }
 
       const query = `SELECT * FROM ${this.tableName} ${whereClause} LIMIT 1`;
@@ -198,7 +238,9 @@ export class PostgresAdapter<T extends Record<string, any>> extends BaseAdapter<
       }
       throw new URPCError(
         ErrorCodes.INTERNAL_SERVER_ERROR,
-        `Failed to find record: ${error instanceof Error ? error.message : "Unknown error"}`
+        `Failed to find record: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
       );
     }
   }
@@ -209,10 +251,10 @@ export class PostgresAdapter<T extends Record<string, any>> extends BaseAdapter<
 
       // Set timestamps if the entity has these fields
       const now = new Date().toISOString();
-      if ('created_at' in data || !data.created_at) {
+      if ("created_at" in data || !data.created_at) {
         (data as any).created_at = now;
       }
-      if ('updated_at' in data || !data.updated_at) {
+      if ("updated_at" in data || !data.updated_at) {
         (data as any).updated_at = now;
       }
 
@@ -229,7 +271,10 @@ export class PostgresAdapter<T extends Record<string, any>> extends BaseAdapter<
       const result = await this.sql.unsafe(query, values as any[]);
 
       if (result.length === 0) {
-        throw new URPCError(ErrorCodes.INTERNAL_SERVER_ERROR, "Failed to create record");
+        throw new URPCError(
+          ErrorCodes.INTERNAL_SERVER_ERROR,
+          "Failed to create record"
+        );
       }
 
       return this.mapRowToEntity(result[0]);
@@ -239,22 +284,29 @@ export class PostgresAdapter<T extends Record<string, any>> extends BaseAdapter<
       }
       throw new URPCError(
         ErrorCodes.INTERNAL_SERVER_ERROR,
-        `Failed to create record: ${error instanceof Error ? error.message : "Unknown error"}`
+        `Failed to create record: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
       );
     }
   }
 
   async update(args: UpdateArgs<T>): Promise<T> {
     try {
-      const { whereClause, values: whereValues } = this.buildWhereClause(args.where);
+      const { whereClause, values: whereValues } = this.buildWhereClause(
+        args.where
+      );
 
       if (!whereClause) {
-        throw new URPCError(ErrorCodes.BAD_REQUEST, "Where clause is required for update");
+        throw new URPCError(
+          ErrorCodes.BAD_REQUEST,
+          "Where clause is required for update"
+        );
       }
 
       const updateData = { ...args.data };
       // Set updated timestamp if the entity has this field
-      if ('updated_at' in updateData || updateData.updated_at !== undefined) {
+      if ("updated_at" in updateData || updateData.updated_at !== undefined) {
         (updateData as any).updated_at = new Date().toISOString();
       }
 
@@ -291,7 +343,9 @@ export class PostgresAdapter<T extends Record<string, any>> extends BaseAdapter<
       }
       throw new URPCError(
         ErrorCodes.INTERNAL_SERVER_ERROR,
-        `Failed to update record: ${error instanceof Error ? error.message : "Unknown error"}`
+        `Failed to update record: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
       );
     }
   }
@@ -301,7 +355,10 @@ export class PostgresAdapter<T extends Record<string, any>> extends BaseAdapter<
       const { whereClause, values } = this.buildWhereClause(args.where);
 
       if (!whereClause) {
-        throw new URPCError(ErrorCodes.BAD_REQUEST, "Where clause is required for delete");
+        throw new URPCError(
+          ErrorCodes.BAD_REQUEST,
+          "Where clause is required for delete"
+        );
       }
 
       const query = `DELETE FROM ${this.tableName} ${whereClause}`;
@@ -314,7 +371,9 @@ export class PostgresAdapter<T extends Record<string, any>> extends BaseAdapter<
       }
       throw new URPCError(
         ErrorCodes.INTERNAL_SERVER_ERROR,
-        `Failed to delete record: ${error instanceof Error ? error.message : "Unknown error"}`
+        `Failed to delete record: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
       );
     }
   }
@@ -327,5 +386,3 @@ export class PostgresAdapter<T extends Record<string, any>> extends BaseAdapter<
     await this.sql.end();
   }
 }
-
-

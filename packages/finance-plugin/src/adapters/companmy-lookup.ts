@@ -2,7 +2,6 @@ import {
   BaseAdapter,
   ErrorCodes,
   FindManyArgs,
-  FindOneArgs,
   URPCError,
 } from "@unilab/urpc-core";
 import { CompanyEntity } from "../entities/company";
@@ -16,9 +15,13 @@ export class CompanyLookupAdapter extends BaseAdapter<CompanyEntity> {
       throw new URPCError(ErrorCodes.BAD_REQUEST, "name is required");
     }
 
-    const name = typeof where.name === "string" ? where.name : where.name.$eq;
-    const limit = typeof where.limit === "number" ? where.limit : where.limit?.$eq || 5;
-    const similarity = typeof where.similarity === "number" ? where.similarity : where.similarity?.$eq || 0.7;
+    const name = typeof where.name === "string" ? where.name : where.name.eq;
+    const limit =
+      typeof where.limit === "number" ? where.limit : where.limit?.eq || 5;
+    const similarity =
+      typeof where.similarity === "number"
+        ? where.similarity
+        : where.similarity?.eq || 0.7;
 
     if (!name) {
       throw new URPCError(ErrorCodes.BAD_REQUEST, "name is required");

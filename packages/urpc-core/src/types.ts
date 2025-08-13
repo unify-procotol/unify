@@ -1,17 +1,18 @@
 export type QueryOperators<T> = {
-  $gt?: T;
-  $gte?: T;
-  $lt?: T;
-  $lte?: T;
-  $eq?: T;
-  $ne?: T;
-  $in?: T[];
-  $nin?: T[];
+  gt?: T;
+  gte?: T;
+  lt?: T;
+  lte?: T;
+  eq?: T;
+  ne?: T;
+  in?: T[];
+  nin?: T[];
   contains?: string;
   startsWith?: string;
   endsWith?: string;
   mode?: "sensitive" | "insensitive";
   not?: string | null;
+  path?: string[];
 };
 
 export type WhereCondition<T> = {
@@ -20,7 +21,18 @@ export type WhereCondition<T> = {
 
 export type WhereConditionWithOperators<T> = {
   [K in keyof T]?: T[K] | QueryOperators<T[K]>;
+} & {
+  OR?: WhereConditionWithOperators<T>[];
+  AND?: WhereConditionWithOperators<T>[];
 };
+
+export type OrderByValue =
+  | "asc"
+  | "desc"
+  | {
+      path: string[];
+      sortOrder: "asc" | "desc";
+    };
 
 export type RelationCallbackSingle<
   T extends Record<string, any>,
@@ -36,7 +48,7 @@ export interface FindManyArgs<T extends Record<string, any>> {
   limit?: number;
   offset?: number;
   where?: WhereConditionWithOperators<T>;
-  order_by?: Partial<Record<keyof T, "asc" | "desc">>;
+  order_by?: Partial<Record<keyof T, OrderByValue>>;
   include?: {
     [key: string]: RelationCallbackMany<T, any>;
   };

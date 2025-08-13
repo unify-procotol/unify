@@ -6,15 +6,15 @@ URPC.init({
 });
 
 const demo = async () => {
-  const user = await repo({
-    entity: "user",
-    source: "pg",
-  }).findOne({
-    where: {
-      id: "7TauFwKdrOWNrErouqzalMcJaPuAkDyh",
-    },
-  });
-  console.log("user=>", user);
+  // const user = await repo({
+  //   entity: "user",
+  //   source: "pg",
+  // }).findOne({
+  //   where: {
+  //     id: "7TauFwKdrOWNrErouqzalMcJaPuAkDyh",
+  //   },
+  // });
+  // console.log("user=>", user);
 
   // const likeCount = await repo({
   //   entity: "LikeCountView",
@@ -23,11 +23,11 @@ const demo = async () => {
   //   // limit: 2,
   //   where: {
   //     targetId: {
-  //       // $startsWith: "c3fuit827",
-  //       // $endsWith: "c3fuit827",
-  //       // $contains: "c3fuit827",
-  //       // $mode: "insensitive",
-  //       $not: null,
+  //       // startsWith: "c3fuit827",
+  //       // endsWith: "c3fuit827",
+  //       // contains: "c3fuit827",
+  //       // mode: "insensitive",
+  //       not: null,
   //     },
   //   },
   // });
@@ -38,6 +38,56 @@ const demo = async () => {
   //   source: "pg",
   // }).tables({});
   // console.log("tables=>", tables);
+
+  const tokens = await repo({
+    entity: "tokens",
+    source: "pg",
+  }).findMany({
+    where: {
+      OR: [
+        {
+          symbol: {
+            contains: "IOTX",
+             mode: "insensitive",
+          },
+        },
+        {
+          coingecko_id: {
+            contains: "IOTX",
+            mode: "insensitive",
+          },
+        },
+      ],
+    },
+    limit: 1,
+  });
+
+  // const tokens = await repo({
+  //   entity: "tokens",
+  //   source: "pg",
+  // }).findMany({
+  //   // where: {
+  //   //   info: {
+  //   //     path: ["price_change_percentage_24h"],
+  //   //     gt: 0,
+  //   //   },
+  //   // },
+  //   // order_by: {
+  //   //   info: {
+  //   //     path: ["price_change_percentage_24h"],
+  //   //     sortOrder: "desc",
+  //   //   },
+  //   // },
+  //   where: {
+  //     info: {
+  //       path: ["links", "twitter_screen_name"],
+  //       eq: "iotex_io",
+  //     },
+  //   },
+  //   limit: 1,
+  // });
+
+  console.log("tokens======>", tokens);
 };
 
 demo();

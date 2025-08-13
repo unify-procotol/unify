@@ -70,7 +70,7 @@ const getURPCSimpleAgent = ({
       
       **CRUD Operations:**
       - **Find one data**: repo({entity: "user", source: "[select from supported sources]"}).findOne({where: {name: "jack"} })
-      - **Query multiple data**: repo({entity: "user", source: "[select from supported sources]"}).findMany({where: {age: {$gt: 18}}, limit: 10})
+      - **Query multiple data**: repo({entity: "user", source: "[select from supported sources]"}).findMany({where: {age: {gt: 18}}, limit: 10})
       - **Create one data**: repo({entity: "user", source: "[select from supported sources]"}).create({data: {id: "uuid", name: "jack", email: "jack@example.com"}})
       - **Create multiple data**: repo({entity: "user", source: "[select from supported sources]"}).createMany({data: [{id: "uuid1", name: "jack", email: "jack@example.com"}, {id: "uuid2", name: "jane", email: "jane@example.com"}]})
       - **Update one data**: repo({entity: "user", source: "[select from supported sources]"}).update({where: {id: "user-id"}, data: {name: "New Name"}})
@@ -79,7 +79,7 @@ const getURPCSimpleAgent = ({
       - **Upsert one data**: repo({entity: "user", source: "[select from supported sources]"}).upsert({where: {email: "test@test.com"}, update: {name: "Updated"}, create: {id: "uuid", name: "New", email: "test@test.com"}})
       - **Upsert multiple data**: repo({entity: "user", source: "[select from supported sources]"}).upsertMany({data: [{id: "uuid1", name: "jack", email: "jack@example.com"}, {id: "uuid2", name: "jane", email: "jane@example.com"}], onConflictDoUpdate: {target: "id"}})
       
-      **Query Operators**: $gt, $gte, $lt, $lte, $eq, $ne, $in, $nin, contains, startsWith, endsWith, not, mode
+      **Query Operators**: gt, gte, lt, lte, eq, ne, in, nin, contains, startsWith, endsWith, not, mode
       
       ## Critical Rules
       1. **Source Selection**: Use source marked "(default)" if user doesn't specify; use user-specified source if supported

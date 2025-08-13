@@ -267,9 +267,9 @@ const basicQuery = {
 // Advanced filtering with operators
 const advancedQuery = {
   where: {
-    role: { $in: ["admin", "moderator"] },
-    createdAt: { $gte: "2024-01-01" },
-    name: { $contains: "john" }
+    role: { in: ["admin", "moderator"] },
+    createdAt: { gte: "2024-01-01" },
+    name: { contains: "john" }
   },
   orderBy: { createdAt: "desc" },
   limit: 20,

@@ -63,21 +63,21 @@ export class WeatherAdapter extends BaseAdapter<WeatherEntity> {
 
     const result = await this.findOne({
       where: {
-        name: typeof where.name === "string" ? where.name : where.name?.$eq,
+        name: typeof where.name === "string" ? where.name : where.name?.eq,
         latitude:
           typeof where.latitude === "number"
             ? where.latitude
-            : where.latitude?.$eq,
+            : where.latitude?.eq,
         longitude:
           typeof where.longitude === "number"
             ? where.longitude
-            : where.longitude?.$eq,
+            : where.longitude?.eq,
         current:
           typeof where.current === "string"
             ? where.current
-            : where.current?.$eq,
+            : where.current?.eq,
         hourly:
-          typeof where.hourly === "string" ? where.hourly : where.hourly?.$eq,
+          typeof where.hourly === "string" ? where.hourly : where.hourly?.eq,
       },
     });
 

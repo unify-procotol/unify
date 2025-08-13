@@ -1,6 +1,6 @@
 {
   "name": "@unilab/urpc-cli",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "description": "CLI tool for creating URPC projects",
   "main": "dist/index.cjs",
   "publishConfig": {
@@ -21,7 +21,7 @@
     "templates"
   ],
   "dependencies": {
-    "@unilab/urpc": "^0.0.22",
+    "@unilab/urpc": "^0.0.23",
     "boxen": "^7.1.1",
     "chalk": "^5.3.0",
     "chokidar": "^3.5.3",

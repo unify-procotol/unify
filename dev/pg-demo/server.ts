@@ -35,7 +35,7 @@ const app = URPC.init({
       // needGenerateEntityFile: true, // Generate entity class file only if needGenerateEntityFile is true
     }),
   ],
-  middlewares: [logging()],
+  // middlewares: [logging()],
 });
 
 export default {
