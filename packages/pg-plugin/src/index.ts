@@ -29,7 +29,7 @@ export const PGPlugin = async ({
     adapters: [
       {
         source: "pg",
-        entity: "_tables",
+        entity: "_system",
         adapter: new PgBuiltinAdapter(),
       },
       ...entities.map((entityName) => ({

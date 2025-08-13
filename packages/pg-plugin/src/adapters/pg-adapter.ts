@@ -168,15 +168,6 @@ function buildWhereConditions(
     }
   }
 
-  // Helper function to build column reference (either direct column or JSON path)
-  const buildColumnRef = (key: string, path?: any[]): string => {
-    if (path && Array.isArray(path)) {
-      const pathString = path.map((p: any) => `"${p}"`).join(",");
-      return `("${key}"#>'{${pathString}}')`;
-    }
-    return `"${key}"`;
-  };
-
   // Helper function to handle JSON path casting for numeric comparisons
   const buildTypedColumnRef = (
     key: string,
@@ -285,7 +276,11 @@ function buildWhereConditions(
         values.push(...operators.nin);
       }
       if (operators.contains !== undefined) {
-        const columnRef = buildColumnRef(key, operators.path);
+        const columnRef = buildTypedColumnRef(
+          key,
+          operators.path,
+          operators.contains
+        );
         if (operators.mode === "insensitive") {
           conditions.push(`${columnRef} ILIKE $${++paramCount.count}`);
           values.push(`%${operators.contains}%`);
@@ -295,7 +290,11 @@ function buildWhereConditions(
         }
       }
       if (operators.startsWith !== undefined) {
-        const columnRef = buildColumnRef(key, operators.path);
+        const columnRef = buildTypedColumnRef(
+          key,
+          operators.path,
+          operators.startsWith
+        );
         if (operators.mode === "insensitive") {
           conditions.push(`${columnRef} ILIKE $${++paramCount.count}`);
           values.push(`${operators.startsWith}%`);
@@ -305,7 +304,11 @@ function buildWhereConditions(
         }
       }
       if (operators.endsWith !== undefined) {
-        const columnRef = buildColumnRef(key, operators.path);
+        const columnRef = buildTypedColumnRef(
+          key,
+          operators.path,
+          operators.endsWith
+        );
         if (operators.mode === "insensitive") {
           conditions.push(`${columnRef} ILIKE $${++paramCount.count}`);
           values.push(`%${operators.endsWith}`);
@@ -315,7 +318,11 @@ function buildWhereConditions(
         }
       }
       if (operators.not !== undefined) {
-        const columnRef = buildColumnRef(key, operators.path);
+        const columnRef = buildTypedColumnRef(
+          key,
+          operators.path,
+          operators.not
+        );
         if (operators.not === null) {
           conditions.push(`${columnRef} IS NOT NULL`);
         } else {

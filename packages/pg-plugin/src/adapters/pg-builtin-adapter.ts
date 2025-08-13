@@ -9,4 +9,15 @@ export class PgBuiltinAdapter extends BaseAdapter<any> {
     const poolManager = GlobalPoolManager.getInstance();
     return getAllTables(poolManager);
   }
+
+  async query(
+    args: {
+      queryText: string;
+      values: any[];
+    },
+    ctx?: OperationContext
+  ): Promise<any> {
+    const poolManager = GlobalPoolManager.getInstance();
+    return poolManager.query(args.queryText, args.values);
+  }
 }
