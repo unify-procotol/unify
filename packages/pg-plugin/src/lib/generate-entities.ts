@@ -214,6 +214,7 @@ export const connect = async ({
     healthCheckInterval: poolConfig?.healthCheckInterval || 60000,
     enableMonitoring: poolConfig?.enableMonitoring ?? true,
     logLevel: poolConfig?.logLevel || "info",
+    forceInit: poolConfig?.forceInit ?? false,
   });
 
   const entities: string[] = [];

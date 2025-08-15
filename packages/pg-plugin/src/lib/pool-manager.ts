@@ -268,17 +268,17 @@ export class PoolManager {
 
 class GlobalPoolManager {
   private static instance: PoolManager | null = null;
-  private static config: PoolManagerConfig | null = null;
+  // private static config: PoolManagerConfig | null = null;
 
   static initialize(config: PoolManagerConfig): PoolManager {
-    if (this.instance) {
+    if (this.instance && !config.forceInit) {
       console.error(
         "PoolManager already initialized. Use getInstance() instead."
       );
       return this.instance;
     }
 
-    this.config = config;
+    // this.config = config;
     this.instance = new PoolManager(config);
     return this.instance;
   }
@@ -294,7 +294,7 @@ class GlobalPoolManager {
     if (this.instance) {
       await this.instance.gracefulShutdown();
       this.instance = null;
-      this.config = null;
+      // this.config = null;
     }
   }
 }

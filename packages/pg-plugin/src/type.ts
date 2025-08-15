@@ -24,6 +24,8 @@ export interface PoolManagerConfig extends PoolConfig {
   // Monitoring configuration
   enableMonitoring?: boolean; // Whether to enable monitoring, default true
   logLevel?: "debug" | "info" | "warn" | "error";
+
+  forceInit?: boolean;
 }
 
 export interface EntityConfig {
