@@ -1,12 +1,12 @@
 import { BaseURPC } from "@unilab/urpc-core";
 import type {
   HttpClientConfig,
-  HybridConfig,
   URPCConfig,
   RepoOptions,
   JoinRepoOptions,
   ProxyRepo,
   LocalConfig,
+  HybridConfig,
 } from "./types";
 import { isHttpClientConfig, isLocalConfig, isHybridConfig } from "./utils";
 import {
@@ -38,7 +38,7 @@ export class URPC extends BaseURPC {
   }
 
   static init(config: URPCConfig): void {
-    if (!URPC.globalInstance) {
+    if (!URPC.globalInstance || config.forceInit) {
       URPC.globalInstance = new URPC(config);
     }
   }
@@ -63,6 +63,7 @@ export class URPC extends BaseURPC {
       middlewares: config.middlewares,
       entityConfigs: config.entityConfigs,
       globalAdapters: config.globalAdapters,
+      forceInit: config.forceInit,
     });
     this.httpConfig = {
       baseUrl: config.baseUrl,
@@ -93,6 +94,7 @@ export class URPC extends BaseURPC {
       middlewares: config.middlewares,
       entityConfigs: config.entityConfigs,
       globalAdapters: config.globalAdapters,
+      forceInit: config.forceInit,
     });
   }
 
@@ -160,7 +162,7 @@ export function repo<T extends Record<string, any>>(
 
 export function joinRepo<
   F extends Record<string, any> = Record<string, any>,
-  L extends Record<string, any> = Record<string, any>,
+  L extends Record<string, any> = Record<string, any>
 >(options: JoinRepoOptions<F, L>): ProxyRepo<F> {
   return URPC.joinRepo<F, L>(options);
 }

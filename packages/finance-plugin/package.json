@@ -1,6 +1,6 @@
 {
   "name": "@unilab/finance",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Finance plugin for UniLab",
   "main": "dist/index.js",
   "module": "dist/index.js",
@@ -28,7 +28,7 @@
     "plugin"
   ],
   "dependencies": {
-    "@unilab/urpc-core": "^0.0.18"
+    "@unilab/urpc-core": "^0.0.19"
   },
   "devDependencies": {
     "typescript": "^5.6.2"

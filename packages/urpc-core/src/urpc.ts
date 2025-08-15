@@ -5,7 +5,12 @@ import {
   SchemaObject,
 } from "./decorators";
 import { getMiddlewareManager } from "./middleware-manager";
-import { getRepo, registerAdapter, simplifyEntityName } from "./repo-register";
+import {
+  clearRepoRegistry,
+  getRepo,
+  registerAdapter,
+  simplifyEntityName,
+} from "./repo-register";
 import {
   BaseURPCConfig,
   EntityConfigs,
@@ -21,10 +26,17 @@ export class BaseURPC {
   static entityConfigs: EntityConfigs = {};
 
   static init(config: BaseURPCConfig) {
-    if (this._initialized) {
+    if (this._initialized && !config.forceInit) {
       return;
     }
     this._initialized = true;
+
+    if (config.forceInit) {
+      // Clear all registered repos
+      clearRepoRegistry();
+      // Clear all registered middlewares
+      getMiddlewareManager().clear();
+    }
 
     const plugins = [
       ...(config.plugins || []),
@@ -32,6 +44,7 @@ export class BaseURPC {
         URPC: this,
       }),
     ];
+
     this.registerPluginAdapters(plugins);
     this.registerGlobalAdapters({
       plugins: plugins,

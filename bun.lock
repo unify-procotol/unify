@@ -272,9 +272,9 @@
     },
     "packages/finance-plugin": {
       "name": "@unilab/finance",
-      "version": "0.0.2",
+      "version": "0.0.3",
       "dependencies": {
-        "@unilab/urpc-core": "^0.0.18",
+        "@unilab/urpc-core": "^0.0.19",
       },
       "devDependencies": {
         "typescript": "^5.6.2",
@@ -282,12 +282,12 @@
     },
     "packages/mastra-client-plugin": {
       "name": "@unilab/mastra-client-plugin",
-      "version": "0.0.13",
+      "version": "0.0.14",
       "dependencies": {
         "@mastra/core": "^0.10.12",
         "@openrouter/ai-sdk-provider": "^0.7.2",
-        "@unilab/urpc": "^0.0.23",
-        "@unilab/urpc-core": "^0.0.18",
+        "@unilab/urpc": "^0.0.24",
+        "@unilab/urpc-core": "^0.0.19",
       },
       "devDependencies": {
         "@types/node": "^20.10.0",
@@ -296,11 +296,11 @@
     },
     "packages/mastra-plugin": {
       "name": "@unilab/mastra-plugin",
-      "version": "0.0.19",
+      "version": "0.0.20",
       "dependencies": {
         "@mastra/core": "^0.10.12",
         "@openrouter/ai-sdk-provider": "^0.7.2",
-        "@unilab/urpc-core": "^0.0.18",
+        "@unilab/urpc-core": "^0.0.19",
       },
       "devDependencies": {
         "@types/node": "^20.10.0",
@@ -309,9 +309,9 @@
     },
     "packages/pg-plugin": {
       "name": "@unilab/pg-plugin",
-      "version": "0.0.8",
+      "version": "0.0.10",
       "dependencies": {
-        "@unilab/urpc-core": "^0.0.18",
+        "@unilab/urpc-core": "^0.0.19",
         "pg": "^8.16.3",
       },
       "devDependencies": {
@@ -321,7 +321,7 @@
     },
     "packages/ukit": {
       "name": "@unilab/ukit",
-      "version": "0.0.20",
+      "version": "0.0.21",
       "dependencies": {
         "@radix-ui/react-alert-dialog": "^1.1.1",
         "@radix-ui/react-avatar": "^1.1.0",
@@ -342,8 +342,8 @@
         "@radix-ui/react-toast": "^1.2.1",
         "@radix-ui/react-toggle": "^1.1.0",
         "@radix-ui/react-tooltip": "^1.1.2",
-        "@unilab/urpc": "^0.0.23",
-        "@unilab/urpc-core": "^0.0.18",
+        "@unilab/urpc": "^0.0.24",
+        "@unilab/urpc-core": "^0.0.19",
         "ajv": "^8.17.1",
         "class-variance-authority": "^0.7.0",
         "clsx": "^2.1.1",
@@ -369,11 +369,11 @@
     },
     "packages/uniweb3": {
       "name": "@unilab/uniweb3",
-      "version": "0.0.20",
+      "version": "0.0.21",
       "dependencies": {
         "@solana/web3.js": "^1.95.2",
-        "@unilab/urpc-adapters": "^0.0.19",
-        "@unilab/urpc-core": "^0.0.17",
+        "@unilab/urpc-adapters": "^0.0.21",
+        "@unilab/urpc-core": "^0.0.19",
         "reflect-metadata": "^0.2.2",
         "viem": "^2.33.0",
       },
@@ -383,9 +383,9 @@
     },
     "packages/urpc": {
       "name": "@unilab/urpc",
-      "version": "0.0.23",
+      "version": "0.0.24",
       "dependencies": {
-        "@unilab/urpc-core": "^0.0.18",
+        "@unilab/urpc-core": "^0.0.19",
       },
       "devDependencies": {
         "typescript": "^5.3.0",
@@ -393,9 +393,9 @@
     },
     "packages/urpc-adapters": {
       "name": "@unilab/urpc-adapters",
-      "version": "0.0.20",
+      "version": "0.0.21",
       "dependencies": {
-        "@unilab/urpc-core": "^0.0.17",
+        "@unilab/urpc-core": "^0.0.19",
       },
       "devDependencies": {
         "tsup": "^8.0.0",
@@ -404,12 +404,12 @@
     },
     "packages/urpc-cli": {
       "name": "@unilab/urpc-cli",
-      "version": "0.0.10",
+      "version": "0.0.11",
       "bin": {
         "urpc-cli": "bin/urpc-cli.js"
       },
       "dependencies": {
-        "@unilab/urpc": "^0.0.23",
+        "@unilab/urpc": "^0.0.24",
         "boxen": "^7.1.1",
         "chalk": "^5.3.0",
         "chokidar": "^3.5.3",
@@ -439,7 +439,7 @@
     },
     "packages/urpc-core": {
       "name": "@unilab/urpc-core",
-      "version": "0.0.18",
+      "version": "0.0.19",
       "dependencies": {
         "reflect-metadata": "^0.2.2",
       },
@@ -450,7 +450,7 @@
     },
     "packages/urpc-hono": {
       "name": "@unilab/urpc-hono",
-      "version": "0.0.21",
+      "version": "0.0.22",
       "dependencies": {
         "@hono/node-server": "^1.12.2",
         "@unilab/urpc-core": "^0.0.18",
@@ -463,9 +463,9 @@
     },
     "packages/urpc-next": {
       "name": "@unilab/urpc-next",
-      "version": "0.0.24",
+      "version": "0.0.25",
       "dependencies": {
-        "@unilab/urpc-core": "^0.0.18",
+        "@unilab/urpc-core": "^0.0.19",
         "next": "^14.0.0",
       },
       "devDependencies": {
@@ -2941,10 +2941,6 @@
     "@typescript-eslint/eslint-plugin/ignore": ["ignore@7.0.5", "", {}, "sha512-Hs59xBNfUIunMFgWAbGX5cq6893IbWg4KnrjbYwX3tx0ztorVgTDA6B2sxf8ejHJ4wz8BqGUMYlnzNBer5NvGg=="],
 
     "@typescript-eslint/visitor-keys/eslint-visitor-keys": ["eslint-visitor-keys@4.2.1", "", {}, "sha512-Uhdk5sfqcee/9H/rCOJikYz67o0a2Tw2hGRPOG2Y1R2dg7brRe1uG0yaNQDHu+TO/uQPF/5eCapvYSmHUjt7JQ=="],
-
-    "@unilab/uniweb3/@unilab/urpc-adapters": ["@unilab/urpc-adapters@0.0.19", "", { "dependencies": { "@unilab/urpc-core": "^0.0.17" } }, "sha512-DFazQ9EV206J0VDAUlpOqTaCSN/z4rYcrKVgJU+WD7k3xSpcaDSMqdAkI41pgLAFTSU7w/oRvFusHN35FBqfIA=="],
-
-    "@unilab/uniweb3/@unilab/urpc-core": ["@unilab/urpc-core@0.0.17", "", { "dependencies": { "reflect-metadata": "^0.2.2" } }, "sha512-FJphlgATATCD/LYHgiKqN7O7H3FYjBIt46/sFwJx2V6x0VKJ35aL0UoP32PFGCVPcvAzTz8IJOTXXzPmK0Wayw=="],
 
     "ansi-align/string-width": ["string-width@4.2.3", "", { "dependencies": { "emoji-regex": "^8.0.0", "is-fullwidth-code-point": "^3.0.0", "strip-ansi": "^6.0.1" } }, "sha512-wKyQRQpjJ0sIp62ErSZdGsjMJWsap5oRNihHhu6G7JVO/9jIB6UyevL+tXuOqrng8j/cxKTWyWUwvSTriiZz/g=="],
 

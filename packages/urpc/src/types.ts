@@ -13,12 +13,12 @@ import type {
 export interface RepoOptions<T extends Record<string, any>> {
   entity: string | { new (...args: any[]): T; displayName?: string };
   source?: string;
-  context?: { stream?: boolean; } & Record<string, any>;
+  context?: { stream?: boolean } & Record<string, any>;
 }
 
 export interface RelationMapping<
   T extends Record<string, any>,
-  F extends Record<string, any>,
+  F extends Record<string, any>
 > {
   localField: keyof F;
   foreignField: keyof T;
@@ -26,7 +26,7 @@ export interface RelationMapping<
 
 export type JoinRepoOptions<
   F extends Record<string, any> = Record<string, any>,
-  L extends Record<string, any> = Record<string, any>,
+  L extends Record<string, any> = Record<string, any>
 > = RepoOptions<F> & RelationMapping<F, L>;
 
 export interface ProxyRepo<T extends Record<string, any>> {
@@ -48,6 +48,7 @@ export interface HttpClientConfig {
   baseUrl: string;
   timeout?: number;
   headers?: Record<string, string>;
+  forceInit?: boolean;
 }
 
 export interface HybridConfig extends LocalConfig, HttpClientConfig {}

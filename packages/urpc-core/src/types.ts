@@ -264,6 +264,7 @@ export interface BaseURPCConfig {
   middlewares?: Middleware[];
   entityConfigs?: EntityConfigs;
   globalAdapters?: GlobalAdapterConfig[];
+  forceInit?: boolean;
 }
 
 export interface AuthUser {

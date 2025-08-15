@@ -32,3 +32,7 @@ function getRepoKey(entity: string, source: string) {
 export function simplifyEntityName(entity: string) {
   return entity.replace(/Entity$/i, "").toLowerCase();
 }
+
+export function clearRepoRegistry() {
+  REPO_REGISTRY.clear();
+}
