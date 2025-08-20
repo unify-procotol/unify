@@ -1,12 +1,12 @@
-export type QueryOperators<T> = {
-  gt?: T;
-  gte?: T;
-  lt?: T;
-  lte?: T;
-  eq?: T;
-  ne?: T;
-  in?: T[];
-  nin?: T[];
+export type QueryOperators = {
+  gt?: any;
+  gte?: any;
+  lt?: any;
+  lte?: any;
+  eq?: any;
+  ne?: any;
+  in?: any[];
+  nin?: any[];
   contains?: string;
   startsWith?: string;
   endsWith?: string;
@@ -20,7 +20,7 @@ export type WhereCondition<T> = {
 };
 
 export type WhereConditionWithOperators<T> = {
-  [K in keyof T]?: T[K] | QueryOperators<T[K]>;
+  [K in keyof T]?: T[K] | QueryOperators;
 } & {
   OR?: WhereConditionWithOperators<T>[];
   AND?: WhereConditionWithOperators<T>[];
