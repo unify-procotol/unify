@@ -1,8 +1,12 @@
 {
   "name": "@unilab/pg-plugin",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "description": "A URPC plugin for PostgreSQL",
   "main": "dist/index.js",
+  "exports": {
+    ".": "./dist/index.js",
+    "./lib": "./dist/lib/index.js"
+  },
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "module",
