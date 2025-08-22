@@ -5,14 +5,6 @@ export class PoolManager {
   private pool: Pool;
   private config: PoolManagerConfig;
   private healthCheckTimer?: NodeJS.Timeout;
-  private stats = {
-    totalConnections: 0,
-    activeConnections: 0,
-    totalQueries: 0,
-    totalErrors: 0,
-    lastHealthCheck: new Date(),
-    errors: [] as { timestamp: Date; error: string; context?: string }[],
-  };
 
   constructor(config: PoolManagerConfig) {
     this.config = {
@@ -36,41 +28,9 @@ export class PoolManager {
 
   private setupEventHandlers(): void {
     this.pool.on("connect", (client: PoolClient) => {
-      this.stats.totalConnections++;
-      this.log(
-        "debug",
-        `PostgreSQL client connected. Total: ${this.stats.totalConnections}`
-      );
+      this.log("debug", `PostgreSQL client connected`);
     });
-
-    // Connection acquisition event
-    this.pool.on("acquire", (client: PoolClient) => {
-      this.stats.activeConnections++;
-      this.log(
-        "debug",
-        `Client acquired. Active: ${this.stats.activeConnections}`
-      );
-    });
-
-    // Connection removal event
-    this.pool.on("remove", (client: PoolClient) => {
-      this.stats.totalConnections = Math.max(
-        0,
-        this.stats.totalConnections - 1
-      );
-      this.stats.activeConnections = Math.max(
-        0,
-        this.stats.activeConnections - 1
-      );
-      this.log(
-        "debug",
-        `Client removed. Total: ${this.stats.totalConnections}`
-      );
-    });
-
     this.pool.on("error", (err: Error, client: PoolClient) => {
-      this.stats.totalErrors++;
-      this.recordError(err.message, "pool");
       this.log("error", `PostgreSQL pool error: ${err.message}`);
     });
   }
@@ -83,12 +43,10 @@ export class PoolManager {
     this.healthCheckTimer = setInterval(async () => {
       try {
         await this.healthCheck();
-        this.stats.lastHealthCheck = new Date();
         this.log("debug", "Health check passed");
       } catch (error) {
         const errorMessage =
           error instanceof Error ? error.message : "Unknown error";
-        this.recordError(errorMessage, "health_check");
         this.log("error", `Health check failed: ${errorMessage}`);
       }
     }, this.config.healthCheckInterval);
@@ -105,16 +63,7 @@ export class PoolManager {
   }
 
   async getClient(): Promise<PoolClient> {
-    try {
-      const client = await this.pool.connect();
-      return client;
-    } catch (error) {
-      this.stats.totalErrors++;
-      const errorMessage =
-        error instanceof Error ? error.message : "Unknown error";
-      this.recordError(errorMessage, "get_client");
-      throw error;
-    }
+    return await this.pool.connect();
   }
 
   async query<T = any>(
@@ -123,17 +72,18 @@ export class PoolManager {
   ): Promise<{ rows: T[]; rowCount: number }> {
     const client = await this.getClient();
     try {
-      this.stats.totalQueries++;
       const result = await client.query(text, params);
       return {
         rows: result.rows,
         rowCount: result.rowCount || 0,
       };
     } catch (error) {
-      this.stats.totalErrors++;
-      const errorMessage =
-        error instanceof Error ? error.message : "Unknown error";
-      this.recordError(errorMessage, "query");
+      this.log(
+        "error",
+        `Error querying database: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
       throw error;
     } finally {
       client.release();
@@ -151,42 +101,11 @@ export class PoolManager {
       return result;
     } catch (error) {
       await client.query("ROLLBACK");
-      this.stats.totalErrors++;
-      const errorMessage =
-        error instanceof Error ? error.message : "Unknown error";
-      this.recordError(errorMessage, "transaction");
       throw error;
     } finally {
       client.release();
     }
   }
-
-  getStats() {
-    return {
-      ...this.stats,
-      poolStats: {
-        totalCount: this.pool.totalCount,
-        idleCount: this.pool.idleCount,
-        waitingCount: this.pool.waitingCount,
-        activeCount:
-          this.pool.totalCount - this.pool.idleCount - this.pool.waitingCount,
-      },
-    };
-  }
-
-  private recordError(message: string, context?: string): void {
-    this.stats.errors.push({
-      timestamp: new Date(),
-      error: message,
-      context,
-    });
-
-    // Keep only the latest 100 error records
-    if (this.stats.errors.length > 100) {
-      this.stats.errors = this.stats.errors.slice(-100);
-    }
-  }
-
   private log(level: string, message: string): void {
     if (!this.shouldLog(level)) return;
 
@@ -268,7 +187,6 @@ export class PoolManager {
 
 class GlobalPoolManager {
   private static instance: PoolManager | null = null;
-  // private static config: PoolManagerConfig | null = null;
 
   static initialize(config: PoolManagerConfig): PoolManager {
     if (this.instance && !config.forceInit) {
@@ -278,7 +196,6 @@ class GlobalPoolManager {
       return this.instance;
     }
 
-    // this.config = config;
     this.instance = new PoolManager(config);
     return this.instance;
   }
@@ -294,7 +211,6 @@ class GlobalPoolManager {
     if (this.instance) {
       await this.instance.gracefulShutdown();
       this.instance = null;
-      // this.config = null;
     }
   }
 }

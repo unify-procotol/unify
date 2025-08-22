@@ -1,6 +1,6 @@
 {
   "name": "@unilab/pg-plugin",
-  "version": "0.0.13",
+  "version": "0.0.14",
   "description": "A URPC plugin for PostgreSQL",
   "main": "dist/index.js",
   "exports": {
