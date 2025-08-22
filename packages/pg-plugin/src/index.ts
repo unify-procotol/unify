@@ -8,6 +8,7 @@ export const PGPlugin = async ({
   whitelist,
   entity,
   needGenerateEntityFile = false,
+  customSource = "pg",
 }: {
   poolConfig: PoolManagerConfig;
   whitelist?: {
@@ -16,6 +17,7 @@ export const PGPlugin = async ({
   }[];
   entity?: EntityConfig;
   needGenerateEntityFile?: boolean;
+  customSource?: string;
 }): Promise<Plugin> => {
   const { entities, factory } = await connect({
     poolConfig,
@@ -28,12 +30,12 @@ export const PGPlugin = async ({
     entities: [],
     adapters: [
       {
-        source: "pg",
+        source: customSource,
         entity: "_system",
         adapter: new PgBuiltinAdapter(),
       },
       ...entities.map((entityName) => ({
-        source: "pg",
+        source: customSource,
         entity: entityName,
         adapter: factory(entityName),
       })),
