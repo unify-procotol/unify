@@ -33,11 +33,11 @@ const demo = async () => {
   // });
   // console.log("likeCount=>", likeCount);
 
-  const tables = await repo({
-    entity: "_system",
-    source: "pg",
-  }).tables({});
-  console.log("tables=>", tables);
+  // const tables = await repo({
+  //   entity: "_system",
+  //   source: "pg",
+  // }).tables({});
+  // console.log("tables=>", tables);
 
   const data = await repo({
     entity: "_system",
@@ -46,37 +46,37 @@ const demo = async () => {
     queryText: "SELECT symbol, info FROM tokens WHERE info->>'name' ILIKE $1",
     values: ["%iotex%"],
   });
-  console.log("data======>", data);
+  console.log("data=>", data);
 
-  const tokens = await repo({
-    entity: "tokens",
-    source: "pg",
-  }).findMany({
-    where: {
-      OR: [
-        {
-          symbol: {
-            contains: "IOTX",
-            mode: "insensitive",
-          },
-        },
-        {
-          coingecko_id: {
-            contains: "IOTX",
-            mode: "insensitive",
-          },
-        },
-        {
-          info: {
-            path: ["name"],
-            contains: "IOTX",
-            mode: "insensitive",
-          },
-        },
-      ],
-    },
-    limit: 1,
-  });
+  // const tokens = await repo({
+  //   entity: "tokens",
+  //   source: "pg",
+  // }).findMany({
+  //   where: {
+  //     OR: [
+  //       {
+  //         symbol: {
+  //           contains: "IOTX",
+  //           mode: "insensitive",
+  //         },
+  //       },
+  //       {
+  //         coingecko_id: {
+  //           contains: "IOTX",
+  //           mode: "insensitive",
+  //         },
+  //       },
+  //       {
+  //         info: {
+  //           path: ["name"],
+  //           contains: "IOTX",
+  //           mode: "insensitive",
+  //         },
+  //       },
+  //     ],
+  //   },
+  //   limit: 1,
+  // });
 
   // const tokens = await repo({
   //   entity: "tokens",
@@ -103,7 +103,7 @@ const demo = async () => {
   //   limit: 1,
   // });
 
-  console.log("tokens======>", tokens);
+  // console.log("tokens=>", tokens);
 };
 
 demo();

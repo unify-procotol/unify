@@ -1,6 +1,6 @@
 {
   "name": "@unilab/pg-plugin",
-  "version": "0.0.15",
+  "version": "0.0.16",
   "description": "A URPC plugin for PostgreSQL",
   "main": "dist/index.js",
   "exports": {
@@ -25,6 +25,7 @@
   ],
   "dependencies": {
     "@unilab/urpc-core": "^0.0.20",
+    "node-sql-parser": "^5.3.11",
     "pg": "^8.16.3"
   },
   "devDependencies": {
