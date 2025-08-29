@@ -67,8 +67,8 @@ export function parseContext(
   return undefined;
 }
 
-export function handleError(error: unknown, res: NextApiResponse) {
-  if (error instanceof URPCError) {
+export function handleError(error: any, res: NextApiResponse) {
+  if ("message" in error && "code" in error) {
     return res.status(error.code).json({
       error: error.message,
     });

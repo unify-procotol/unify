@@ -309,7 +309,7 @@
     },
     "packages/pg-plugin": {
       "name": "@unilab/pg-plugin",
-      "version": "0.0.12",
+      "version": "0.0.15",
       "dependencies": {
         "@unilab/urpc-core": "^0.0.19",
         "pg": "^8.16.3",
@@ -383,7 +383,7 @@
     },
     "packages/urpc": {
       "name": "@unilab/urpc",
-      "version": "0.0.24",
+      "version": "0.0.25",
       "dependencies": {
         "@unilab/urpc-core": "^0.0.20",
       },
@@ -450,7 +450,7 @@
     },
     "packages/urpc-hono": {
       "name": "@unilab/urpc-hono",
-      "version": "0.0.22",
+      "version": "0.0.23",
       "dependencies": {
         "@hono/node-server": "^1.12.2",
         "@unilab/urpc-core": "^0.0.19",
@@ -2944,15 +2944,21 @@
 
     "@unilab/finance/@unilab/urpc-core": ["@unilab/urpc-core@0.0.19", "", { "dependencies": { "reflect-metadata": "^0.2.2" } }, "sha512-Wo6trmw4d/CqAHRAPjROD6oXOeIJPeFuLlkeS8Gu3BYYv3LGubqT9YlD4N4Bt1bguWY+HHYsR/ZYobBXERmuhg=="],
 
+    "@unilab/mastra-client-plugin/@unilab/urpc": ["@unilab/urpc@0.0.24", "", { "dependencies": { "@unilab/urpc-core": "^0.0.19" } }, "sha512-cj9yOyb1nTiub1JMAOf8WLH59HhqWs86zuZlvdNhVDqUuhxcXFk7D8O1QohYkdRVpJ0+mfowJi27yGj7VsavAw=="],
+
     "@unilab/mastra-client-plugin/@unilab/urpc-core": ["@unilab/urpc-core@0.0.19", "", { "dependencies": { "reflect-metadata": "^0.2.2" } }, "sha512-Wo6trmw4d/CqAHRAPjROD6oXOeIJPeFuLlkeS8Gu3BYYv3LGubqT9YlD4N4Bt1bguWY+HHYsR/ZYobBXERmuhg=="],
 
     "@unilab/mastra-plugin/@unilab/urpc-core": ["@unilab/urpc-core@0.0.19", "", { "dependencies": { "reflect-metadata": "^0.2.2" } }, "sha512-Wo6trmw4d/CqAHRAPjROD6oXOeIJPeFuLlkeS8Gu3BYYv3LGubqT9YlD4N4Bt1bguWY+HHYsR/ZYobBXERmuhg=="],
+
+    "@unilab/ukit/@unilab/urpc": ["@unilab/urpc@0.0.24", "", { "dependencies": { "@unilab/urpc-core": "^0.0.19" } }, "sha512-cj9yOyb1nTiub1JMAOf8WLH59HhqWs86zuZlvdNhVDqUuhxcXFk7D8O1QohYkdRVpJ0+mfowJi27yGj7VsavAw=="],
 
     "@unilab/ukit/@unilab/urpc-core": ["@unilab/urpc-core@0.0.19", "", { "dependencies": { "reflect-metadata": "^0.2.2" } }, "sha512-Wo6trmw4d/CqAHRAPjROD6oXOeIJPeFuLlkeS8Gu3BYYv3LGubqT9YlD4N4Bt1bguWY+HHYsR/ZYobBXERmuhg=="],
 
     "@unilab/uniweb3/@unilab/urpc-core": ["@unilab/urpc-core@0.0.19", "", { "dependencies": { "reflect-metadata": "^0.2.2" } }, "sha512-Wo6trmw4d/CqAHRAPjROD6oXOeIJPeFuLlkeS8Gu3BYYv3LGubqT9YlD4N4Bt1bguWY+HHYsR/ZYobBXERmuhg=="],
 
     "@unilab/urpc-adapters/@unilab/urpc-core": ["@unilab/urpc-core@0.0.19", "", { "dependencies": { "reflect-metadata": "^0.2.2" } }, "sha512-Wo6trmw4d/CqAHRAPjROD6oXOeIJPeFuLlkeS8Gu3BYYv3LGubqT9YlD4N4Bt1bguWY+HHYsR/ZYobBXERmuhg=="],
+
+    "@unilab/urpc-cli/@unilab/urpc": ["@unilab/urpc@0.0.24", "", { "dependencies": { "@unilab/urpc-core": "^0.0.19" } }, "sha512-cj9yOyb1nTiub1JMAOf8WLH59HhqWs86zuZlvdNhVDqUuhxcXFk7D8O1QohYkdRVpJ0+mfowJi27yGj7VsavAw=="],
 
     "@unilab/urpc-hono/@unilab/urpc-core": ["@unilab/urpc-core@0.0.19", "", { "dependencies": { "reflect-metadata": "^0.2.2" } }, "sha512-Wo6trmw4d/CqAHRAPjROD6oXOeIJPeFuLlkeS8Gu3BYYv3LGubqT9YlD4N4Bt1bguWY+HHYsR/ZYobBXERmuhg=="],
 
@@ -3185,6 +3191,8 @@
     "@tailwindcss/oxide-wasm32-wasi/@napi-rs/wasm-runtime/@tybys/wasm-util": ["@tybys/wasm-util@0.10.0", "", { "dependencies": { "tslib": "^2.4.0" } }, "sha512-VyyPYFlOMNylG45GoAe0xDoLwWuowvf92F9kySqzYh8vmYm7D2u4iUJKa1tOUpS70Ku13ASrOkS4ScXFsTaCNQ=="],
 
     "@tailwindcss/oxide-wasm32-wasi/@tybys/wasm-util/tslib": ["tslib@2.8.1", "", { "bundled": true }, "sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w=="],
+
+    "@unilab/urpc-cli/@unilab/urpc/@unilab/urpc-core": ["@unilab/urpc-core@0.0.19", "", { "dependencies": { "reflect-metadata": "^0.2.2" } }, "sha512-Wo6trmw4d/CqAHRAPjROD6oXOeIJPeFuLlkeS8Gu3BYYv3LGubqT9YlD4N4Bt1bguWY+HHYsR/ZYobBXERmuhg=="],
 
     "ansi-align/string-width/emoji-regex": ["emoji-regex@8.0.0", "", {}, "sha512-MSjYzcWNOA0ewAHpz0MxpYFvwg6yjy1NG3xteoqz644VCo/RPgnr1/GGt+ic3iJTzQ8Eu3TdM14SawnVUmGE6A=="],
 

@@ -1,6 +1,6 @@
 {
   "name": "@unilab/urpc-next",
-  "version": "0.0.25",
+  "version": "0.0.26",
   "description": "URPC Next.js Adapter",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
