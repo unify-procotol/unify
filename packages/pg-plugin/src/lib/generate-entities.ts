@@ -77,6 +77,7 @@ async function generateEntityFile({
     fs.mkdirSync(entitiesDir, { recursive: true });
   }
 
+  entityName = entityName.replace(/\./g, "");
   entityName = entityName.charAt(0).toLowerCase() + entityName.slice(1);
   const filePath = path.join(
     entitiesDir,
@@ -230,7 +231,10 @@ export const connect = async ({
     if (whitelist) {
       entityConfig = whitelist.reduce((acc, whitelistItem) => {
         whitelistItem.tables.forEach((table) => {
-          const entityName = toCamelCase(table.toLowerCase());
+          let entityName = toCamelCase(table.toLowerCase());
+          if (whitelistItem.schema !== "public") {
+            entityName = `${whitelistItem.schema}.${entityName}`;
+          }
           acc[entityName] = {
             schema: whitelistItem.schema,
             table: table,
@@ -244,6 +248,9 @@ export const connect = async ({
         let entityName = toCamelCase(table.table_name.toLowerCase());
         if (entityName === "Entity") {
           entityName = "_Entity";
+        }
+        if (table.table_schema !== "public") {
+          entityName = `${table.table_schema}.${entityName}`;
         }
         acc[entityName] = {
           schema: table.table_schema,

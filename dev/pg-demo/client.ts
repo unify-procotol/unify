@@ -39,14 +39,14 @@ const demo = async () => {
   // }).tables({});
   // console.log("tables=>", tables);
 
-  const data = await repo({
-    entity: "_system",
-    source: "pg",
-  }).query({
-    queryText: "SELECT symbol, info FROM tokens WHERE info->>'name' ILIKE $1",
-    values: ["%iotex%"],
-  });
-  console.log("data=>", data);
+  // const data = await repo({
+  //   entity: "_system",
+  //   source: "pg",
+  // }).query({
+  //   queryText: "SELECT symbol, info FROM tokens WHERE info->>'name' ILIKE $1",
+  //   values: ["%iotex%"],
+  // });
+  // console.log("data=>", data);
 
   // const tokens = await repo({
   //   entity: "tokens",
@@ -104,6 +104,14 @@ const demo = async () => {
   // });
 
   // console.log("tokens=>", tokens);
+
+  const result = await URPC.repo({
+    entity: "metrics.projectView",
+    source: "pg",
+  }).findMany({
+    limit: 2,
+  });
+  console.log("result=>", result);
 };
 
 demo();
