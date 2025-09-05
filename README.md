@@ -1,6 +1,6 @@
 # 🌟 Unify Protocol: Solve Data Heterogeneity
 
-Unify is a protocol focused on entity-first abstraction, aimed at resolving same-domain, cross-source complexity 🧭. Developers define unified entity models to seamlessly abstract over diverse implementations (APIs, protocols, schemas).
+Unify is an entity-first fullstack protocol. Developers define unified entity models to seamlessly abstract over diverse implementations (APIs, protocols, schemas).
 
 ## Get Started
 ```bash
