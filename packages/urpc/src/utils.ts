@@ -114,19 +114,26 @@ export async function makeHttpRequest<T = any>(
 
   clearTimeout(timeoutId);
 
-  if (!response.ok) {
-    throw new Error(
-      `HTTP error! status: ${response.status}, message: ${response.statusText}`
-    );
-  }
-
   // If the raw response is needed (for streaming), return the Response object directly.
   if (returnRawResponse) {
+    if (!response.ok) {
+      throw new Error(
+        `HTTP error! status: ${response.status}, message: ${response.statusText}`
+      );
+    }
     return response as Response;
   }
 
-  //  Otherwise, parse JSON and return the data field.
+  // Parse JSON response
   const result = await response.json();
+
+  if (!response.ok) {
+    // For error responses, throw the error message from server
+    const errorMessage = result?.error || `HTTP error! status: ${response.status}, message: ${response.statusText}`;
+    throw new Error(errorMessage);
+  }
+
+  // Return the data field for successful responses
   return result.data;
 }
 
