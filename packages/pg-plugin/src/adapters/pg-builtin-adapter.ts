@@ -31,6 +31,13 @@ export class PgBuiltinAdapter extends BaseAdapter<any> {
       throw new URPCError(ErrorCodes.BAD_REQUEST, error);
     }
     const poolManager = GlobalPoolManager.getInstance();
-    return poolManager.query(args.queryText, args.values);
+    try {
+      return await poolManager.query(args.queryText, args.values);
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new URPCError(ErrorCodes.INTERNAL_SERVER_ERROR, `Database error: ${error.message}`);
+      }
+      throw new URPCError(ErrorCodes.INTERNAL_SERVER_ERROR, "Unknown database error");
+    }
   }
 }
