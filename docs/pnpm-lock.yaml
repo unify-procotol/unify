@@ -54,7 +54,7 @@ importers:
         specifier: ^0.515.0
         version: 0.515.0(react@19.1.1)
       next:
-        specifier: ^15.3.5
+        specifier: ^15.3.6
         version: 15.4.6(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
       react:
         specifier: ^19.1.0
@@ -3475,6 +3475,7 @@ packages:
   next@15.4.6:
     resolution: {integrity: sha512-us++E/Q80/8+UekzB3SAGs71AlLDsadpFMXVNM/uQ0BMwsh9m3mr0UNQIfjKed8vpWXsASe+Qifrnu1oLIcKEQ==}
     engines: {node: ^18.18.0 || ^19.8.0 || >= 20.0.0}
+    deprecated: This version has a security vulnerability. Please upgrade to a patched version. See https://nextjs.org/blog/CVE-2025-66478 for more details.
     hasBin: true
     peerDependencies:
       '@opentelemetry/api': ^1.1.0

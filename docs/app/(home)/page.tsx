@@ -1,67 +1,73 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, Zap } from "lucide-react";
+import { ArrowRight, Zap, Check } from "lucide-react";
 import { useState } from "react";
 import CodeHighlighter from "./components/code-highlighter";
 
 export default function HomePage() {
   return (
-    <>
-      {/* Full Screen Grid Background */}
-      <div className="bg-grid bg-fullscreen"></div>
-      <section className="relative px-4 py-8 md:py-12 overflow-hidden flex items-center h-full">
-        <div className="relative max-w-7xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-            {/* Left Content */}
-            <div className="text-center lg:text-left relative">
-              {/* Content background decoration */}
-              <div className="absolute -inset-4 bg-gradient-to-r from-gray-200/20 to-gray-300/20 dark:from-gray-800/20 dark:to-gray-900/20 rounded-2xl opacity-60 blur-sm"></div>
-              <div className="relative z-10">
-                <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-gray-100/90 to-gray-200/90 dark:from-gray-800/80 dark:to-gray-900/80 rounded-full text-sm font-medium text-blue-600 dark:text-blue-400 mb-8 shadow-sm border border-gray-300/50 dark:border-gray-700/50 backdrop-blur-sm">
-                  <Zap className="w-4 h-4" />
-                  Entity-First Abstraction Protocol
-                </div>
+    <div className="relative min-h-screen flex flex-col justify-center overflow-hidden bg-background text-foreground selection:bg-blue-500/20">
+      {/* Ambient Background Effects */}
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-blue-500/10 blur-[120px] mix-blend-multiply dark:mix-blend-screen animate-pulse-slow" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-purple-500/10 blur-[120px] mix-blend-multiply dark:mix-blend-screen animate-pulse-slow delay-1000" />
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]"></div>
+      </div>
 
-                <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-cyan-600 dark:from-blue-400 dark:via-purple-400 dark:to-cyan-400 bg-clip-text text-transparent mb-6 leading-tight">
-                  URPC
-                </h1>
-
-                <div className="relative">
-                  <p className="text-xl md:text-2xl lg:text-3xl text-gray-800 dark:text-gray-200 mb-6 leading-relaxed font-medium">
-                    Solve Data Heterogeneity with Entity-First Abstraction
-                  </p>
-                  <div className="absolute -left-4 top-0 w-1 h-full bg-gradient-to-b from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 rounded-full opacity-30"></div>
-                </div>
-
-                <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 mb-10 leading-relaxed max-w-xl mx-auto lg:mx-0 relative">
-                  A protocol focused on entity-first abstraction, aimed at
-                  resolving same-domain, cross-source complexity. Kill
-                  switch-case hell in multi-protocol apps with unified entity
-                  models.
-                </p>
-
-                <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                  <Link
-                    href="/docs/urpc/basic-usage"
-                    className="group relative inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-blue-600 via-purple-600 to-cyan-600 hover:from-blue-700 hover:via-purple-700 hover:to-cyan-700 text-white font-semibold rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl overflow-hidden border border-gray-300/50 dark:border-gray-600/50 hover:border-gray-400/50 dark:hover:border-gray-500/50"
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-r from-blue-400/30 to-cyan-400/30 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
-                    <span className="relative z-10">Get Started</span>
-                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform relative z-10" />
-                  </Link>
-                </div>
-              </div>
+      <section className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-20">
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+          {/* Left Content */}
+          <div className="flex flex-col items-center lg:items-start text-center lg:text-left space-y-8">
+            {/* Badge */}
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-secondary/50 border border-border/50 backdrop-blur-sm shadow-sm transition-transform hover:scale-105 cursor-default">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+              </span>
+              <span className="text-xs font-medium text-muted-foreground">
+                Entity-First Abstraction Protocol
+              </span>
             </div>
 
-            {/* Right Content - Code Example */}
-            <div className="lg:pl-8">
-              <CodeExample />
+            {/* Heading */}
+            <div className="space-y-4">
+              <h1 className="text-5xl sm:text-7xl lg:text-8xl font-bold tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-foreground to-foreground/70">
+                URPC
+              </h1>
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-semibold tracking-tight text-foreground/90 leading-tight">
+                Solve Data Heterogeneity with <br className="hidden sm:block" />
+                <span>Entity-First Abstraction</span>
+              </h2>
             </div>
+
+            {/* Description */}
+            <p className="text-lg text-muted-foreground leading-relaxed max-w-xl">
+              A protocol focused on entity-first abstraction, aimed at resolving
+              same-domain, cross-source complexity. Kill switch-case hell in
+              multi-protocol apps with unified entity models.
+            </p>
+
+            {/* CTA Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto pt-4">
+              <Link
+                href="/docs/urpc/basic-usage"
+                className="group relative inline-flex h-12 items-center justify-center gap-2 overflow-hidden rounded-xl bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 bg-[length:200%_auto] px-8 text-sm font-bold text-white shadow-lg shadow-blue-500/20 transition-all duration-500 hover:bg-[position:right_center] hover:shadow-blue-500/40 hover:-translate-y-0.5"
+              >
+                <span>Get Started</span>
+                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1 group-hover:scale-110" />
+              </Link>
+            </div>
+          </div>
+
+          {/* Right Content - Code Example */}
+          <div className="w-full relative lg:h-[600px] flex items-center justify-center min-w-0">
+            <div className="absolute inset-0 bg-gradient-to-tr from-blue-500/20 via-purple-500/20 to-transparent blur-3xl rounded-full opacity-40"></div>
+            <CodeExample />
           </div>
         </div>
       </section>
-    </>
+    </div>
   );
 }
 
@@ -121,63 +127,69 @@ const aiResult = await repo<ChatEntity>({
 `;
 
   return (
-    <div className="w-full max-w-2xl mx-auto lg:mx-0 relative">
-      {/* Background decoration for code block */}
-      <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-cyan-500/20 rounded-2xl blur-2xl transform scale-105"></div>
-      <div className="absolute inset-0 bg-gradient-to-br from-gray-100/90 to-gray-200/90 dark:from-gray-800/90 dark:to-gray-900/90 rounded-2xl"></div>
+    <div className="relative w-full max-w-[600px] mx-auto perspective-1000">
+      {/* Background glow for better integration */}
+      <div className="absolute -inset-4 bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-pink-500/10 rounded-[2rem] blur-2xl opacity-50 dark:opacity-20 hidden sm:block" />
 
-      <div className="bg-white/95 dark:bg-gray-900/95 rounded-2xl overflow-hidden shadow-2xl border border-gray-300/50 dark:border-gray-600/50 relative z-10">
-        {/* Tab Header */}
-        <div className="flex items-center justify-between border-b border-gray-300/70 dark:border-gray-700/70 bg-gradient-to-r from-gray-100/70 to-gray-100/50 dark:from-gray-800/70 dark:to-gray-800/50 backdrop-blur-sm">
-          <div className="flex items-center gap-2 px-6 py-4">
-            <div className="w-3 h-3 bg-gradient-to-r from-red-500 to-red-600 rounded-full shadow-sm"></div>
-            <div className="w-3 h-3 bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-full shadow-sm"></div>
-            <div className="w-3 h-3 bg-gradient-to-r from-green-500 to-green-600 rounded-full shadow-sm"></div>
+      <div className="relative overflow-hidden rounded-2xl border border-white/20 dark:border-white/10 bg-white/40 dark:bg-black/40 backdrop-blur-md shadow-2xl ring-1 ring-black/5 dark:ring-white/10 transition-all hover:shadow-[0_0_50px_-10px_rgba(0,0,0,0.1)] dark:hover:shadow-[0_0_50px_-10px_rgba(255,255,255,0.05)]">
+        {/* Window Controls & Tabs */}
+        <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 bg-white/5 dark:bg-white/5 backdrop-blur-sm gap-4">
+          <div className="flex items-center gap-2 shrink-0">
+            <div className="w-3 h-3 rounded-full bg-[#FF5F56] shadow-sm"></div>
+            <div className="w-3 h-3 rounded-full bg-[#FFBD2E] shadow-sm"></div>
+            <div className="w-3 h-3 rounded-full bg-[#27C93F] shadow-sm"></div>
           </div>
 
-          <div className="flex rounded-lg overflow-hidden mr-4 border border-gray-400/50 dark:border-gray-600/50">
-            <button
-              onClick={() => setActiveTab("server")}
-              className={`px-4 py-2 text-sm font-medium transition-all duration-200 ${
-                activeTab === "server"
-                  ? "text-green-600 dark:text-green-400 bg-gradient-to-r from-gray-300 to-gray-400 dark:from-gray-700 dark:to-gray-600 shadow-inner"
-                  : "cursor-pointer text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gradient-to-r hover:from-gray-200/50 hover:to-gray-300/50 dark:hover:from-gray-800/50 dark:hover:to-gray-700/50"
-              }`}
-            >
-              server.ts
-            </button>
-            <button
-              onClick={() => setActiveTab("client")}
-              className={`px-4 py-2 text-sm font-medium transition-all duration-200 ${
-                activeTab === "client"
-                  ? "text-green-600 dark:text-green-400 bg-gradient-to-r from-gray-300 to-gray-400 dark:from-gray-700 dark:to-gray-600 shadow-inner"
-                  : "cursor-pointer text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gradient-to-r hover:from-gray-200/50 hover:to-gray-300/50 dark:hover:from-gray-800/50 dark:hover:to-gray-700/50"
-              }`}
-            >
-              client.ts
-            </button>
+          <div className="flex p-0.5 bg-black/5 dark:bg-white/5 rounded-lg backdrop-blur-md overflow-x-auto scrollbar-none">
+            {["server", "client"].map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab as "server" | "client")}
+                className={`relative px-3 py-1 text-xs font-medium rounded-md transition-all duration-300 whitespace-nowrap ${
+                  activeTab === tab
+                    ? "bg-white dark:bg-white/10 text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground hover:bg-white/50 dark:hover:bg-white/5 cursor-pointer"
+                }`}
+              >
+                {tab}.ts
+              </button>
+            ))}
           </div>
         </div>
 
-        {activeTab === "server" && (
-          <CodeHighlighter
-            code={serverCode}
-            language="typescript"
-            classNames={{
-              code: "h-[540px]",
-            }}
-          />
-        )}
+        {/* Code Area */}
+        <div className="relative group">
+          <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+            <div className="text-xs text-muted-foreground/70 font-mono tracking-wider">
+              TypeScript
+            </div>
+          </div>
 
-        {activeTab === "client" && (
-          <CodeHighlighter
-            code={clientCode}
-            language="typescript"
-            classNames={{
-              code: "h-[500px]",
-            }}
-          />
-        )}
+          {activeTab === "server" && (
+            <CodeHighlighter
+              code={serverCode}
+              language="typescript"
+              classNames={{
+                code: "text-sm leading-relaxed !bg-transparent font-medium",
+                pre: "!bg-transparent !m-0 !p-6",
+              }}
+            />
+          )}
+
+          {activeTab === "client" && (
+            <CodeHighlighter
+              code={clientCode}
+              language="typescript"
+              classNames={{
+                code: "text-sm leading-relaxed !bg-transparent font-medium",
+                pre: "!bg-transparent !m-0 !p-6",
+              }}
+            />
+          )}
+
+          {/* Bottom gradient fade for seamless integration */}
+          <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-background/10 to-transparent pointer-events-none" />
+        </div>
       </div>
     </div>
   );
